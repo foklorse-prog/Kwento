@@ -194,6 +194,7 @@ const LIBRARY = {
     {title:"Kita Kita",tags:["Filipino","romantic","comedy","heartwarming","feel-good","cozy","sweet"],genre:"Romance",ph:true},
     {title:"Hintayan ng Langit",tags:["Filipino","drama","fantasy","romantic","emotional","heartwarming","quiet"],genre:"Fantasy Drama",ph:true},
     {title:"Patay na si Hesus",tags:["Filipino","comedy","road-trip","family","fun","lighthearted","heartwarming"],genre:"Comedy",ph:true},
+    {title:"Hello, Love, Again",tags:["Filipino","romance","sequel","emotional","heartwarming","contemporary"],genre:"Romance",ph:true},
     {title:"Past Lives",tags:["romantic","reflective","cozy","slow","emotional","nostalgic","intimate"],genre:"Romance",ph:false},
     {title:"Everything Everywhere All at Once",tags:["surreal","family","sci-fi","emotional","fun","epic","creative"],genre:"Sci-Fi",ph:false},
     {title:"Spirited Away",tags:["fantasy","cozy","animated","magical","Japanese","family","peaceful"],genre:"Fantasy",ph:false},
@@ -210,6 +211,146 @@ const LIBRARY = {
     {title:"Forrest Gump",tags:["nostalgic","emotional","inspiring","drama","cozy","heartwarming","classic"],genre:"Drama",ph:false},
     {title:"Inception",tags:["sci-fi","intense","thriller","epic","mind-bending","stylish","cinematic"],genre:"Sci-Fi",ph:false},
     {title:"Oppenheimer",tags:["historical","intense","biographical","epic","dramatic","reflective","cinematic"],genre:"Historical",ph:false},
+    {title:"Scream",tags:["horror","thriller","slasher","meta","fun","intense","iconic"],genre:"Horror",ph:false},
+    {title:"Kinds of Kindness",tags:["surreal","dark","anthology","Yorgos Lanthimos","arthouse","disturbing","slow"],genre:"Drama",ph:false},
+    {title:"Fruitcake",tags:["drama","short","quiet","indie"],genre:"Drama",ph:false},
+    {title:"The Only Living Boy in New York",tags:["drama","romantic","coming-of-age","literary","reflective","new york","quiet"],genre:"Drama",ph:false},
+    {title:"My Policeman",tags:["romantic","LGBTQ+","historical","emotional","slow","British","period"],genre:"Romance",ph:false},
+    {title:"Interview with the Vampire",tags:["horror","gothic","vampire","drama","dark","classic","atmospheric"],genre:"Horror",ph:false},
+    {title:"Challengers",tags:["romantic","drama","tension","stylish","sports","complex","contemporary"],genre:"Drama",ph:false},
+    {title:"Deep Water",tags:["thriller","dark","romantic","suspense","erotic","slow","disturbing"],genre:"Thriller",ph:false},
+    {title:"The Lord of the Rings: The Fellowship of the Ring",tags:["fantasy","epic","adventure","classic","ensemble","emotional","cinematic"],genre:"Fantasy",ph:false},
+    {title:"The Lord of the Rings: The Two Towers",tags:["fantasy","epic","action","adventure","cinematic","classic","intense"],genre:"Fantasy",ph:false},
+    {title:"Birds of Paradise",tags:["drama","ballet","competition","dark","coming-of-age","intense","stylish"],genre:"Drama",ph:false},
+    {title:"Expats",tags:["drama","expat","emotional","slow","Asian","literary","quiet"],genre:"Drama",ph:false},
+    {title:"The Hobbit: An Unexpected Journey",tags:["fantasy","adventure","fun","epic","journey","cozy","classic"],genre:"Fantasy",ph:false},
+    {title:"Suspiria",tags:["horror","arthouse","atmospheric","dark","dance","disturbing","slow"],genre:"Horror",ph:false},
+    {title:"The Hobbit: The Desolation of Smaug",tags:["fantasy","adventure","action","epic","fun","journey","cinematic"],genre:"Fantasy",ph:false},
+    {title:"The Hobbit: The Battle of the Five Armies",tags:["fantasy","action","epic","adventure","intense","cinematic","classic"],genre:"Fantasy",ph:false},
+    {title:"Sharper",tags:["thriller","con-artist","stylish","twist","drama","smart","contemporary"],genre:"Thriller",ph:false},
+    {title:"Cherry",tags:["drama","coming-of-age","war","intense","addiction","raw","biographical"],genre:"Drama",ph:false},
+    {title:"Tiny Beautiful Things",tags:["drama","emotional","heartwarming","reflective","literary","slow","quiet"],genre:"Drama",ph:false},
+    {title:"Disclaimer",tags:["thriller","psychological","drama","slow","mystery","suspense","literary"],genre:"Thriller",ph:false},
+    {title:"We Live in Time",tags:["romantic","emotional","drama","slow","heartwarming","beautiful","contemporary"],genre:"Romance",ph:false},
+    {title:"A Bigger Splash",tags:["drama","erotic","tension","stylish","Italian","slow","dark"],genre:"Drama",ph:false},
+    {title:"Love Actually",tags:["romantic","Christmas","comedy","heartwarming","ensemble","classic","feel-good"],genre:"Romance",ph:false},
+    {title:"Oblivion",tags:["sci-fi","action","epic","cinematic","space","Tom Cruise","atmospheric"],genre:"Sci-Fi",ph:false},
+    {title:"Die Hard",tags:["action","classic","fun","Christmas","iconic","intense","thriller"],genre:"Action",ph:false},
+    {title:"A Rainy Day in New York",tags:["romantic","Woody Allen","cozy","New York","stylish","dreamy","intimate"],genre:"Romance",ph:false},
+    {title:"The Holiday",tags:["romantic","Christmas","cozy","feel-good","heartwarming","fun","classic"],genre:"Romance",ph:false},
+    {title:"The Sky Is Everywhere",tags:["romantic","coming-of-age","grief","emotional","YA","colorful","drama"],genre:"Romance",ph:false},
+    {title:"Brewing Love",tags:["romantic","Asian","drama","cozy","contemporary","heartwarming","feel-good"],genre:"Romance",ph:false},
+    {title:"A Change of Heart",tags:["drama","romantic","quiet","reflective"],genre:"Drama",ph:false},
+    {title:"Babygirl",tags:["erotic","thriller","drama","dark","intense","contemporary","provocative"],genre:"Thriller",ph:false},
+    {title:"The Judge from Hell",tags:["Korean","action","fantasy","dark","thriller","fun","stylish"],genre:"Action",ph:false},
+    {title:"Red, White & Royal Blue",tags:["romantic","LGBTQ+","fun","feel-good","contemporary","comedy","heartwarming"],genre:"Romance",ph:false},
+    {title:"Love Scout",tags:["romantic","comedy","fun","feel-good","contemporary"],genre:"Romance",ph:false},
+    {title:"Melo Movie",tags:["Korean","romantic","drama","emotional","contemporary"],genre:"Romance",ph:false},
+    {title:"Companion",tags:["sci-fi","thriller","dark","twist","contemporary","intense","smart"],genre:"Sci-Fi",ph:false},
+    {title:"Big Little Lies",tags:["drama","thriller","mystery","intense","female-led","dark","stylish"],genre:"Thriller",ph:false},
+    {title:"About Time",tags:["romantic","time-travel","emotional","heartwarming","cozy","British","beautiful"],genre:"Romance",ph:false},
+    {title:"When the Stars Gossip",tags:["Korean","romantic","comedy","space","fun","contemporary","feel-good"],genre:"Romance",ph:false},
+    {title:"Le Bonheur",tags:["French","drama","arthouse","quiet","slow","disturbing","beautiful"],genre:"Drama",ph:false},
+    {title:"The Gorge",tags:["action","romantic","thriller","sci-fi","fun","contemporary","stylish"],genre:"Action",ph:false},
+    {title:"When Life Gives You Tangerines",tags:["Korean","drama","slow","emotional","family","beautiful","quiet"],genre:"Drama",ph:false},
+    {title:"Queer",tags:["LGBTQ+","drama","Luca Guadagnino","slow","atmospheric","literary","arthouse"],genre:"Drama",ph:false},
+    {title:"The Life List",tags:["romantic","drama","heartwarming","contemporary","feel-good"],genre:"Romance",ph:false},
+    {title:"My Dearest Nemesis",tags:["Korean","romantic","comedy","fun","enemies-to-lovers","contemporary"],genre:"Romance",ph:false},
+    {title:"The Map of Tiny Perfect Things",tags:["romantic","sci-fi","time-loop","YA","sweet","fun","feel-good"],genre:"Romance",ph:false},
+    {title:"Blue Period",tags:["animated","art","coming-of-age","Japanese","emotional","inspiring","beautiful"],genre:"Animation",ph:false},
+    {title:"Am I OK?",tags:["LGBTQ+","comedy","drama","coming-of-age","heartwarming","contemporary","quiet"],genre:"Comedy",ph:false},
+    {title:"No Reservations",tags:["romantic","food","cozy","heartwarming","drama","feel-good","classic"],genre:"Romance",ph:false},
+    {title:"Cruel Intentions",tags:["drama","dark","erotic","teen","classic","stylish","provocative"],genre:"Drama",ph:false},
+    {title:"A Lot Like Love",tags:["romantic","comedy","nostalgic","slow-burn","fun","classic","heartwarming"],genre:"Romance",ph:false},
+    {title:"Final Destination 3",tags:["horror","thriller","slasher","fun","intense","death","classic"],genre:"Horror",ph:false},
+    {title:"The Final Destination",tags:["horror","thriller","slasher","fun","intense","death"],genre:"Horror",ph:false},
+    {title:"Final Destination 5",tags:["horror","thriller","slasher","fun","intense","death","twist"],genre:"Horror",ph:false},
+    {title:"Final Destination 2",tags:["horror","thriller","slasher","fun","intense","death","classic"],genre:"Horror",ph:false},
+    {title:"Happy Death Day",tags:["horror","comedy","time-loop","fun","slasher","clever","upbeat"],genre:"Horror Comedy",ph:false},
+    {title:"Happy Death Day 2U",tags:["horror","comedy","time-loop","fun","sci-fi","clever","sequel"],genre:"Horror Comedy",ph:false},
+    {title:"The Age of Adaline",tags:["romantic","fantasy","slow","emotional","beautiful","drama","classic"],genre:"Romance",ph:false},
+    {title:"Final Destination Bloodlines",tags:["horror","thriller","slasher","fun","intense","death","contemporary"],genre:"Horror",ph:false},
+    {title:"Heart Eyes",tags:["romantic","horror","comedy","Valentine's Day","fun","contemporary"],genre:"Romance",ph:false},
+    {title:"Beach Rats",tags:["drama","LGBTQ+","coming-of-age","dark","slow","reflective","quiet"],genre:"Drama",ph:false},
+    {title:"That Awkward Moment",tags:["romantic","comedy","fun","bro","contemporary","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Black Bag",tags:["thriller","spy","drama","intense","stylish","dark","contemporary"],genre:"Thriller",ph:false},
+    {title:"Materialists",tags:["romantic","drama","contemporary","slow","quiet","stylish","New York"],genre:"Romance",ph:false},
+    {title:"KPop Demon Hunters",tags:["animated","K-pop","action","fun","colorful","quirky"],genre:"Animation",ph:false},
+    {title:"Saving Face",tags:["romantic","LGBTQ+","comedy","Asian-American","heartwarming","fun","beautiful"],genre:"Romance",ph:false},
+    {title:"Fleishman Is in Trouble",tags:["drama","dark","marriage","contemporary","reflective","intense","literary"],genre:"Drama",ph:false},
+    {title:"She's Out of My League",tags:["romantic","comedy","fun","lighthearted","classic","feel-good"],genre:"Comedy",ph:false},
+    {title:"Before We Go",tags:["romantic","drama","slow","quiet","intimate","one-night","cozy"],genre:"Romance",ph:false},
+    {title:"Friends with Benefits",tags:["romantic","comedy","fun","New York","contemporary","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Imagine Me & You",tags:["romantic","LGBTQ+","comedy","heartwarming","British","feel-good"],genre:"Romance",ph:false},
+    {title:"Going the Distance",tags:["romantic","comedy","fun","long-distance","contemporary","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Drag Me to Hell",tags:["horror","comedy","fun","intense","Sam Raimi","classic","campy"],genre:"Horror",ph:false},
+    {title:"Nights and Weekends",tags:["drama","romantic","indie","slow","long-distance","intimate","quiet"],genre:"Drama",ph:false},
+    {title:"Happiest Season",tags:["romantic","LGBTQ+","Christmas","comedy","drama","contemporary","heartwarming"],genre:"Romance",ph:false},
+    {title:"Watching the Detectives",tags:["romantic","comedy","quirky","indie","fun","lighthearted"],genre:"Comedy",ph:false},
+    {title:"HAIKYU!! The Dumpster Battle",tags:["animated","sports","Japanese","intense","emotional","rivalry","epic"],genre:"Animation",ph:false},
+    {title:"27 Dresses",tags:["romantic","comedy","fun","classic","heartwarming","feel-good","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Life As We Know It",tags:["romantic","comedy","drama","heartwarming","family","fun","classic"],genre:"Comedy",ph:false},
+    {title:"The Parent Trap",tags:["family","comedy","classic","fun","heartwarming","nostalgic","feel-good"],genre:"Comedy",ph:false},
+    {title:"Bring It On",tags:["comedy","teen","fun","cheerleading","classic","lighthearted","nostalgic"],genre:"Comedy",ph:false},
+    {title:"Café Society",tags:["romantic","Woody Allen","New York","stylish","nostalgic","drama","beautiful"],genre:"Romance",ph:false},
+    {title:"Vicky Cristina Barcelona",tags:["romantic","Woody Allen","drama","erotic","Barcelona","intense","stylish"],genre:"Romance",ph:false},
+    {title:"Un/Happy for You",tags:["romantic","drama","contemporary","slow","quiet"],genre:"Romance",ph:false},
+    {title:"The Girlfriend",tags:["drama","thriller","dark","contemporary"],genre:"Thriller",ph:false},
+    {title:"Closer",tags:["romantic","drama","dark","intense","literary","raw","adult"],genre:"Drama",ph:false},
+    {title:"Blue Jasmine",tags:["drama","Woody Allen","dark","intense","reflective","psychological","literary"],genre:"Drama",ph:false},
+    {title:"Where'd You Go, Bernadette",tags:["comedy","drama","heartwarming","quirky","family","feel-good","contemporary"],genre:"Comedy",ph:false},
+    {title:"Ted",tags:["comedy","crude","fun","adult","pop-culture","silly","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Splitsville",tags:["comedy","romantic","contemporary","fun","lighthearted"],genre:"Comedy",ph:false},
+    {title:"The Proposal",tags:["romantic","comedy","fun","classic","heartwarming","feel-good","Sandra Bullock"],genre:"Comedy",ph:false},
+    {title:"Two Weeks Notice",tags:["romantic","comedy","fun","classic","heartwarming","feel-good","Sandra Bullock"],genre:"Comedy",ph:false},
+    {title:"The Family Stone",tags:["Christmas","drama","family","emotional","dark","ensemble","holiday"],genre:"Drama",ph:false},
+    {title:"Under the Silver Lake",tags:["thriller","mystery","dark","surreal","LA","quirky","noir"],genre:"Thriller",ph:false},
+    {title:"The Thursday Murder Club",tags:["mystery","comedy","British","fun","ensemble","lighthearted","contemporary"],genre:"Mystery",ph:false},
+    {title:"Last Night",tags:["romantic","drama","slow","quiet","temptation","intimate","reflective"],genre:"Romance",ph:false},
+    {title:"Boyhood",tags:["drama","coming-of-age","slow","reflective","beautiful","quiet","epic"],genre:"Drama",ph:false},
+    {title:"Elizabethtown",tags:["romantic","drama","road-trip","quirky","indie","cozy","feel-good"],genre:"Drama",ph:false},
+    {title:"Kick-Ass",tags:["action","comedy","superhero","fun","dark","stylish","contemporary"],genre:"Action",ph:false},
+    {title:"Kick-Ass 2",tags:["action","comedy","superhero","fun","dark","stylish","sequel"],genre:"Action",ph:false},
+    {title:"Together",tags:["romantic","drama","contemporary","slow","quiet","intimate","British"],genre:"Romance",ph:false},
+    {title:"Serendipity",tags:["romantic","comedy","fun","classic","New York","heartwarming","nostalgic"],genre:"Romance",ph:false},
+    {title:"Everybody's Fine",tags:["drama","family","emotional","slow","reflective","heartwarming","quiet"],genre:"Drama",ph:false},
+    {title:"Fresh",tags:["thriller","dark","horror","disturbing","contemporary","intense","feminist"],genre:"Thriller",ph:false},
+    {title:"Eternity",tags:["romantic","drama","quiet","slow","beautiful","emotional"],genre:"Romance",ph:false},
+    {title:"People We Meet on Vacation",tags:["romantic","road-trip","friendship","fun","heartwarming","contemporary","feel-good"],genre:"Romance",ph:false},
+    {title:"When Harry Met Sally...",tags:["romantic","comedy","classic","New York","fun","heartwarming","iconic"],genre:"Romance",ph:false},
+    {title:"In the Land of Women",tags:["drama","romantic","coming-of-age","quiet","reflective","suburban","slow"],genre:"Drama",ph:false},
+    {title:"The Worst Person in the World",tags:["romantic","drama","Norwegian","slow","coming-of-age","reflective","arthouse"],genre:"Drama",ph:false},
+    {title:"Can This Love Be Translated?",tags:["romantic","drama","Japanese","quiet","slow","intimate","contemporary"],genre:"Romance",ph:false},
+    {title:"Rental Family",tags:["Japanese","drama","heartwarming","quiet","emotional","slow","beautiful"],genre:"Drama",ph:false},
+    {title:"It Boy",tags:["romantic","comedy","French","fun","lighthearted","feel-good","contemporary"],genre:"Comedy",ph:false},
+    {title:"Two Night Stand",tags:["romantic","comedy","fun","one-night","contemporary","lighthearted"],genre:"Comedy",ph:false},
+    {title:"Fountain of Youth",tags:["adventure","comedy","fun","action","contemporary"],genre:"Comedy",ph:false},
+    {title:"Cruella",tags:["action","comedy","stylish","dark","fashion","origin-story","fun"],genre:"Comedy",ph:false},
+    {title:"Four Weddings and a Funeral",tags:["romantic","comedy","British","classic","heartwarming","fun","iconic"],genre:"Comedy",ph:false},
+    {title:"Come See Me in the Good Light",tags:["documentary","music","emotional","quiet","beautiful","contemporary"],genre:"Documentary",ph:false},
+    {title:"18x2 Beyond Youthful Days",tags:["romantic","drama","Japanese","slow","beautiful","emotional","nostalgic"],genre:"Romance",ph:false},
+    {title:"Anna",tags:["action","thriller","spy","stylish","intense","dark","contemporary"],genre:"Thriller",ph:false},
+    {title:"Hanna",tags:["action","thriller","coming-of-age","intense","stylish","dark","female-led"],genre:"Action",ph:false},
+    {title:"Bye Bye Morons",tags:["French","comedy","dark","quirky","fun","stylish","contemporary"],genre:"Comedy",ph:false},
+    {title:"The Housemaid",tags:["Korean","thriller","dark","erotic","disturbing","stylish","intense"],genre:"Thriller",ph:false},
+    {title:"The Devil Wears Prada",tags:["comedy","drama","fashion","fun","classic","iconic","stylish"],genre:"Comedy",ph:false},
+    {title:"100 Songs for Stella",tags:["romantic","drama","quiet","music","emotional","contemporary"],genre:"Romance",ph:false},
+    {title:"How She Left Me",tags:["romantic","drama","quiet","slow","emotional","intimate","Filipino"],genre:"Romance",ph:true},
+    {title:"Basic Instinct",tags:["thriller","erotic","dark","classic","intense","mystery","provocative"],genre:"Thriller",ph:false},
+    {title:"I'm Drunk, I Love You",tags:["Filipino","romantic","drama","slow","quiet","emotional","indie"],genre:"Romance",ph:true},
+    {title:"Burnt",tags:["drama","food","intense","ambition","redemption","stylish","cozy"],genre:"Drama",ph:false},
+    {title:"Five Breakups and a Romance",tags:["Filipino","romantic","comedy","fun","contemporary","feel-good"],genre:"Romance",ph:true},
+    {title:"Mr & Mme Adelman",tags:["French","romantic","drama","slow","beautiful","reflective","literary"],genre:"Romance",ph:false},
+    {title:"Ella McCay",tags:["drama","quiet","slow","contemporary","romantic"],genre:"Drama",ph:false},
+    {title:"Meet, Greet & Bye",tags:["romantic","drama","quiet","Japanese","slow","emotional","beautiful"],genre:"Romance",ph:false},
+    {title:"F Valentine's Day",tags:["romantic","comedy","fun","lighthearted","Filipino","contemporary"],genre:"Comedy",ph:true},
+    {title:"Palm Springs",tags:["romantic","comedy","time-loop","fun","sci-fi","feel-good","clever"],genre:"Comedy",ph:false},
+    {title:"TÁR",tags:["drama","dark","psychological","slow","arthouse","intense","musical"],genre:"Drama",ph:false},
+    {title:"Birdman or (The Unexpected Virtue of Ignorance)",tags:["drama","dark","comedy","surreal","theatrical","intense","arthouse"],genre:"Drama",ph:false},
+    {title:"I Origins",tags:["sci-fi","romantic","drama","philosophical","slow","emotional","beautiful"],genre:"Sci-Fi",ph:false},
+    {title:"Heretic",tags:["thriller","dark","psychological","intense","contemporary","slow","disturbing"],genre:"Thriller",ph:false},
+    {title:"Bon Appétit, Your Majesty",tags:["drama","food","slow","quiet","historical","Japanese","beautiful"],genre:"Drama",ph:false},
+    {title:"One Tree Hill: Always & Forever",tags:["drama","TV","nostalgic","emotional","feel-good","teen"],genre:"Drama",ph:false},
   ],
   music:[
     {title:"Araw-Araw — IV of Spades",tags:["OPM","upbeat","indie","Filipino","fun","feel-good","guitar"],genre:"OPM Indie",ph:true},
@@ -608,7 +749,7 @@ function buildTasteProfile(logs, feedback) {
   // ── Week activity ──
   const weekCut = Date.now()-7*24*60*60*1000;
   const weekLogs = logs.filter(l=>new Date(l.date).getTime()>weekCut);
-  const daysActive = new Set(logs.map(l=>l.date?.split("T")[0])).size;
+  const daysActive = new Set(logs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size;
 
   // ── NARRATIVE — mix of stats + poetic observation ──
   const moodDescriptions = {
@@ -661,6 +802,13 @@ function loadData(){
       if(!parsed.onboarded){
         const bk=localStorage.getItem(SK+"_bk");
         if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
+      }
+      // Scrub old "Letterboxd rating: X★" notes left from earlier import version
+      if(parsed.logs){
+        parsed.logs=parsed.logs.map(l=>
+          l.fromLetterboxd&&l.note&&l.note.startsWith("Letterboxd rating:")
+            ?{...l,note:""}:l
+        );
       }
       return parsed;
     }
@@ -1249,7 +1397,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [filterCat,setFilterCat]=useState("all");
-  const [showAll,setShowAll]=useState(false);
+  const [weeksShown,setWeeksShown]=useState(1);
 
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
   const sorted=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1260,13 +1408,26 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const filteredWeek=applyFilter(thisWeek);
   const filteredOlder=applyFilter(older);
 
+  // Slice older into weekly pages
+  const getWeekBucket=(log,weeksAgo)=>{
+    const ws=new Date(weekStart);ws.setDate(ws.getDate()-weeksAgo*7);
+    const we=new Date(weekStart);we.setDate(we.getDate()-(weeksAgo-1)*7);
+    const d=new Date(log.date);return d>=ws&&d<we;
+  };
+  const visibleOlder=filteredOlder.filter(l=>{
+    const diffMs=weekStart-new Date(l.date);
+    const weeksAgo=Math.ceil(diffMs/(7*24*60*60*1000));
+    return weeksAgo<=weeksShown;
+  });
+  const hasMore=filteredOlder.length>visibleOlder.length;
+
   const makeGroups=logs=>{
     const g={};
     logs.forEach(l=>{const d=l.date?.split("T")[0]||"Unknown";if(!g[d])g[d]=[];g[d].push(l);});
     return g;
   };
   const weekGroups=makeGroups(filteredWeek);
-  const olderGroups=makeGroups(filteredOlder);
+  const olderGroups=makeGroups(visibleOlder);
 
   const renderEntry=(log,i)=>{
     const meta=CAT_MAP[log.category];
@@ -1313,12 +1474,12 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
             </div>
           )}
           {renderGroups(weekGroups)}
-          {filteredOlder.length>0&&!showAll&&(
-            <button onClick={()=>setShowAll(true)} style={{width:"100%",padding:"12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,color:th.accent,fontWeight:600,fontSize:14,marginTop:8}}>
-              {lang==="fil"?`Ipakita ang ${filteredOlder.length} nakaraang entr${filteredOlder.length===1?"y":"ies"}`:`Load ${filteredOlder.length} older entr${filteredOlder.length===1?"y":"ies"}`} ↓
+          {visibleOlder.length>0&&renderGroups(olderGroups)}
+          {hasMore&&(
+            <button onClick={()=>setWeeksShown(w=>w+1)} style={{width:"100%",padding:"12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,color:th.accent,fontWeight:600,fontSize:14,marginTop:8}}>
+              {lang==="fil"?"Ipakita ang nakaraang linggo ↓":"Load previous week ↓"}
             </button>
           )}
-          {showAll&&renderGroups(olderGroups)}
         </>
       )}
     </div>
@@ -1878,7 +2039,7 @@ function ProfilePage({data,onChange}){
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
             ["📝",t.total_logs,data.logs.length],
-            ["🗓",t.days_active,new Set(data.logs.map(l=>l.date?.split("T")[0])).size],
+            ["🗓",t.days_active,new Set(data.logs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size],
             ["✨",t.this_week,weekLogs.length],
             ["👍",lang==="fil"?"Na-like":"Liked",swipedRight.length],
           ].map(([emoji,label,val],i)=>(
@@ -1952,6 +2113,7 @@ function SettingsPage({data,onChange,onReset,onImport}){
   const [suggText,setSuggText]=useState("");
   const [msg,setMsg]=useState("");
   const [importMsg,setImportMsg]=useState("");
+  const [lbMsg,setLbMsg]=useState("");
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -2055,6 +2217,98 @@ function SettingsPage({data,onChange,onReset,onImport}){
           </label>
         </div>
         {importMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:importMsg.startsWith("✅")?th.accent:"#ef4444"}}>{importMsg}</p>}
+      </div>
+
+      {/* Letterboxd Import */}
+      <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
+        <div style={{fontSize:22,marginBottom:6}}>🎬</div>
+        <h3 style={{fontWeight:700,color:th.text,marginBottom:4}}>Letterboxd</h3>
+        <p style={{fontSize:12,color:th.sub,marginBottom:4,lineHeight:1.5}}>
+          {lang==="fil"
+            ?"I-import ang iyong film diary mula sa Letterboxd. Pumunta sa Letterboxd → Settings → Import & Export → Export your data. I-unzip ang file at i-upload ang diary.csv dito."
+            :"Import your film diary from Letterboxd. Go to Letterboxd → Settings → Import & Export → Export your data. Unzip the file and upload diary.csv here."}
+        </p>
+        <p style={{fontSize:11,color:th.sub,marginBottom:14,lineHeight:1.5,opacity:0.75}}>
+          {lang==="fil"?"Ang mga duplicate na entry ay awtomatikong malalaktawan.":"Duplicate entries are skipped automatically."}
+        </p>
+        <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:"pointer"}}>
+          📥 {lang==="fil"?"I-import ang diary.csv":"Import diary.csv"}
+          <input type="file" accept=".csv" onChange={e=>{
+            const f=e.target.files[0]; if(!f)return;
+            const reader=new FileReader();
+            reader.onload=ev=>{
+              try{
+                const text=ev.target.result;
+                const lines=text.trim().split("\n");
+                const headers=lines[0].split(",").map(h=>h.trim().replace(/^"|"$/g,"").toLowerCase());
+                // Map Letterboxd diary.csv columns — flexible header matching
+                const col=name=>headers.indexOf(name);
+                const nameIdx=col("name");
+                const yearIdx=col("year");
+                const ratingIdx=col("rating");
+                const watchedIdx=col("watched date");
+                const rewatchIdx=col("rewatch");
+                const tagIdx=col("tags");
+                if(nameIdx===-1){setLbMsg("❌ "+(lang==="fil"?"Hindi ito diary.csv ng Letterboxd.":"This doesn't look like a Letterboxd diary.csv."));return;}
+                // Parse CSV rows respecting quoted commas
+                const parseRow=row=>{
+                  const cols=[]; let cur=""; let inQ=false;
+                  for(let i=0;i<row.length;i++){
+                    const ch=row[i];
+                    if(ch==='"'){inQ=!inQ;}
+                    else if(ch===","&&!inQ){cols.push(cur.trim());cur="";}
+                    else cur+=ch;
+                  }
+                  cols.push(cur.trim());
+                  return cols;
+                };
+                const existingTitles=new Set((data.logs||[]).filter(l=>l.category==="movies").map(l=>l.title.toLowerCase().trim()));
+                const newEntries=[];
+                for(let i=1;i<lines.length;i++){
+                  if(!lines[i].trim())continue;
+                  const cols=parseRow(lines[i]);
+                  const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
+                  if(!title)continue;
+                  if(existingTitles.has(title.toLowerCase()))continue;
+                  const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
+                  const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
+                  const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
+                  const rewatch=((cols[rewatchIdx]||"").replace(/^"|"$/g,"").toLowerCase()==="yes");
+                  const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
+                  const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
+                  if(year)tags.push(year);
+                  if(rewatch)tags.push("rewatch");
+                  // Convert Letterboxd 0.5–5 rating to our 1–10 scale
+                  const rating=!isNaN(ratingRaw)?Math.round(ratingRaw*2):null;
+                  const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
+                  newEntries.push({
+                    id:Date.now()+i,
+                    title,
+                    category:"movies",
+                    tags,
+                    genre:"Film",
+                    note:"",
+                    mood:null,
+                    date,
+                    customDate:watchedDate||null,
+                    fromLetterboxd:true,
+                    lbRating:!isNaN(ratingRaw)?ratingRaw:null,
+                  });
+                  existingTitles.add(title.toLowerCase());
+                }
+                if(!newEntries.length){
+                  setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
+                  return;
+                }
+                onChange("logs",[...(data.logs||[]),...newEntries]);
+                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" na film ang na-import mula sa Letterboxd!":" films imported from Letterboxd!"));
+              }catch(err){setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file. Make sure it's diary.csv."));}
+            };
+            reader.readAsText(f);
+            e.target.value="";
+          }} style={{display:"none"}}/>
+        </label>
+        {lbMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:lbMsg.startsWith("✅")?th.accent:lbMsg.startsWith("⚠️")?"#f59e0b":"#ef4444"}}>{lbMsg}</p>}
       </div>
 
       {/* Reset */}
