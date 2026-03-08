@@ -139,7 +139,7 @@ const T = {
     suggestion_saved:"Saved to Taste Seeds 🌱",next:"Next →",begin:"Let's begin →",
     pick_vibe:"Pick a theme that matches your energy.",start_kwento:"Start my Kwento ✨",
     pick_avatar:"Choose your avatar",your_name:"What should we call you?",name_placeholder:"Your name...",
-    welcome_back:"Welcome back",taste_seeds:"Taste Seeds",no_suggestions:"Log more to unlock suggestions!",
+    welcome_back:"This is your story, you're the star",taste_seeds:"Taste Seeds",no_suggestions:"Log more to unlock suggestions!",
     offensive_blocked:"That word can't be sent. 🌌",change_avatar:"Change Avatar",
     timeline:"Timeline",my_story:"My Story",edit_entry:"Edit entry ✍️",log_entry:"Log something ✍️",
     suggest_feature:"Suggest a Feature",send:"Send",support:"Support Kwento",collaborate:"Contribute to Kwento",
@@ -168,7 +168,7 @@ const T = {
     suggestion_saved:"Na-save sa Taste Seeds 🌱",next:"Susunod →",begin:"Simulan na →",
     pick_vibe:"Piliin ang temang akma sa iyong mood.",start_kwento:"Simulan ang aking Kwento ✨",
     pick_avatar:"Piliin ang iyong avatar",your_name:"Ano ang itatawag namin sa iyo?",name_placeholder:"Pangalan mo...",
-    welcome_back:"Maligayang pagbabalik",taste_seeds:"Mga Binhi ng Panlasa",no_suggestions:"Mag-log pa para ma-unlock ang mga mungkahi!",
+    welcome_back:"Kwento mo 'to, ikaw ang bida",taste_seeds:"Mga Binhi ng Panlasa",no_suggestions:"Mag-log pa para ma-unlock ang mga mungkahi!",
     offensive_blocked:"Hindi pwedeng ipadala ang salitang iyon. 🌌",change_avatar:"Palitan ang Avatar",
     timeline:"Talaarawan",my_story:"Kwento Ko",edit_entry:"I-edit ang entry ✍️",log_entry:"Mag-log ng bagay ✍️",
     suggest_feature:"Magmungkahi ng Feature",send:"Ipadala",support:"Suportahan ang Kwento",collaborate:"Mag-ambag sa Kwento",
@@ -693,7 +693,7 @@ function defaultData(){
 const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body,#root{height:100%;}
+html,body,#root{height:100%;overflow:hidden;}
 html{background:#000;}
 body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{display:none;}
@@ -918,8 +918,8 @@ function Onboarding({onComplete}){
   };
 
   return(
-    <div style={{background:th.grad,minHeight:"100vh",color:th.text,transition:"background 0.4s",overflowY:step===2?"auto":"hidden",height:step===2?undefined:"100vh"}}>
-      <div style={{maxWidth:440,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"20px 16px"}}>
+    <div style={{background:th.grad,color:th.text,transition:"background 0.4s",height:"100vh",overflowY:step===2?"auto":"hidden",overflowX:"hidden"}}>
+      <div style={{maxWidth:440,margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",justifyContent:"center",padding:"20px 16px"}}>
         <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:28}}>
           {[0,1,2].map(i=><div key={i} style={{width:i===step?28:8,height:8,borderRadius:4,background:i<=step?th.accent:th.border,transition:"all 0.3s"}}/>)}
         </div>
@@ -1666,20 +1666,34 @@ function ProfilePage({data,onChange}){
   const [nameVal,setNameVal]=useState(data.userName);
   const [showCropper,setShowCropper]=useState(false);
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
+  // local pending state for avatar picker — only saves on Done
+  const [pickerOpen,setPickerOpen]=useState(false);
+  const [pendingAvatar,setPendingAvatar]=useState(data.avatar);
+  const [pendingPhoto,setPendingPhoto]=useState(data.customPhoto||null);
   const archetype=getArchetype(data.logs);
   const weekLogs=getWeekLogs(data.logs);
   const curAv=AVATARS.find(a=>a.id===data.avatar);
   const swipedRight=Object.entries(data.feedback||{}).filter(([,v])=>v==="right").map(([k])=>k);
   const swipedLeft=Object.entries(data.feedback||{}).filter(([,v])=>v==="left").map(([k])=>k);
 
+  const openPicker=()=>{
+    setPendingAvatar(data.avatar);
+    setPendingPhoto(data.customPhoto||null);
+    setPickerOpen(true);
+  };
+  const donePicker=()=>{
+    onChange("avatar",pendingAvatar);
+    onChange("customPhoto",pendingPhoto);
+    if(!pendingPhoto) onChange("photoPos",{x:50,y:50,scale:1});
+    setPickerOpen(false);
+  };
+  const cancelPicker=()=>setPickerOpen(false);
+
   const openCropper=()=>{
     setCropPos(data.photoPos||{x:50,y:50,scale:1});
     setShowCropper(true);
   };
-  const doneCropper=()=>{
-    onChange("photoPos",cropPos);
-    setShowCropper(false);
-  };
+  const doneCropper=()=>{ onChange("photoPos",cropPos); setShowCropper(false); };
 
   const sc=data.photoPos?.scale||1;
   const px=data.photoPos?.x||50;
@@ -1698,28 +1712,30 @@ function ProfilePage({data,onChange}){
       {/* Avatar + name */}
       <div style={{textAlign:"center",marginBottom:24}}>
         <div style={{width:88,height:88,borderRadius:28,fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative",overflow:"hidden"}}
-          onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)}>
+          onClick={openPicker}>
           {data.customPhoto
             ?<img src={data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
             :curAv?.emoji}
         </div>
-        <button onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:8}}>Edit avatar</button>
-        {data.__showAvatarPicker&&(
+        {pickerOpen&&(
           <div className="fade-in" style={{marginBottom:16}}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8,marginBottom:8}}>
               {AVATARS.map(av=>(
-                <div key={av.id} onClick={()=>{onChange("avatar",av.id);onChange("customPhoto",null);}} style={{padding:"10px 4px",borderRadius:12,textAlign:"center",cursor:"pointer",background:data.avatar===av.id&&!data.customPhoto?th.accent+"22":th.card,border:"2px solid "+(data.avatar===av.id&&!data.customPhoto?th.accent:th.border),transition:"all 0.15s"}}>
+                <div key={av.id} onClick={()=>{setPendingAvatar(av.id);setPendingPhoto(null);}} style={{padding:"10px 4px",borderRadius:12,textAlign:"center",cursor:"pointer",background:pendingAvatar===av.id&&!pendingPhoto?th.accent+"22":th.card,border:"2px solid "+(pendingAvatar===av.id&&!pendingPhoto?th.accent:th.border),transition:"all 0.15s"}}>
                   <div style={{fontSize:24}}>{av.emoji}</div>
                 </div>
               ))}
             </div>
-            <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:data.customPhoto?th.accent+"22":th.card,border:"1px solid "+(data.customPhoto?th.accent:th.border),cursor:"pointer",fontSize:13,color:data.customPhoto?th.accent:th.sub,marginBottom:4}}>
-              📷 {data.customPhoto?"Change photo":"Use your photo"}
-              <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{onChange("customPhoto",ev.target.result);onChange("avatar","custom");onChange("photoPos",{x:50,y:50,scale:1});};r.readAsDataURL(f);}} style={{display:"none"}}/>
+            <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:pendingPhoto?th.accent+"22":th.card,border:"1px solid "+(pendingPhoto?th.accent:th.border),cursor:"pointer",fontSize:13,color:pendingPhoto?th.accent:th.sub,marginBottom:4}}>
+              📷 {pendingPhoto?"Change photo":"Use your photo"}
+              <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{setPendingPhoto(ev.target.result);setPendingAvatar("custom");};r.readAsDataURL(f);}} style={{display:"none"}}/>
             </label>
-            {data.customPhoto&&<><br/><button onClick={()=>{onChange("__showAvatarPicker",false);openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
+            {data.customPhoto&&<><br/><button onClick={()=>{donePicker();openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
             <br/>
-            <button onClick={()=>onChange("__showAvatarPicker",false)} style={{fontSize:12,color:th.sub,textDecoration:"underline"}}>Done</button>
+            <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:8}}>
+              <button onClick={cancelPicker} style={{fontSize:13,color:th.sub,padding:"6px 16px",borderRadius:10,border:"1px solid "+th.border}}>Cancel</button>
+              <button onClick={donePicker} style={{fontSize:13,color:"#fff",fontWeight:700,padding:"6px 20px",borderRadius:10,background:th.accent}}>Done</button>
+            </div>
           </div>
         )}
         {editName?(
@@ -1951,8 +1967,8 @@ function App(){
   return(
     <>
       <style>{CSS}</style>
-      <div style={{background:th.grad,color:th.text,minHeight:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border}}>
-        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative",overflowY:"auto",overflowX:"hidden"}}>
+      <div style={{background:th.grad,color:th.text,height:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflowY:"auto",overflowX:"hidden"}}>
+        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
           ):(
