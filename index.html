@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#060d1a"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
   <title>Kwento</title>
@@ -28,11 +28,11 @@ function isOffensive(t){ return OFFENSIVE.some(w=>t.toLowerCase().replace(/[^a-z
 // ─── THEMES ──────────────────────────────────────────────────────────────────
 const THEMES = {
   jeepney:{name:"Jeepney",emoji:"🚌",dark:true,bg:"#1a0a2e",card:"#2d1057",accent:"#ff6b35",accent2:"#ffd23f",text:"#fff8f0",sub:"#d4a0ff",border:"#5a2d82",grad:"linear-gradient(135deg,#1a0a2e 0%,#2d1057 50%,#3d0066 100%)"},
-  tsinelas:{name:"Tsinelas",emoji:"🩴",dark:false,bg:"#f5f0e8",card:"#ffffff",accent:"#4a90a4",accent2:"#e8a44a",text:"#2c2c2c",sub:"#6b6b6b",border:"#ddd5c8",grad:"linear-gradient(135deg,#2a4a52 0%,#f5f0e8 30%,#ede4d3 100%)"},
+  tsinelas:{name:"Tsinelas",emoji:"🩴",dark:false,bg:"#f5f0e8",card:"#ffffff",accent:"#4a90a4",accent2:"#e8a44a",text:"#2c2c2c",sub:"#6b6b6b",border:"#ddd5c8",grad:"linear-gradient(135deg,#f5f0e8 0%,#ede4d3 100%)"},
   bahay_kubo:{name:"Bahay Kubo",emoji:"🏡",dark:true,bg:"#0f1a08",card:"#1a2e0d",accent:"#7ec850",accent2:"#d4a843",text:"#e8f5d0",sub:"#9dc874",border:"#2d4a1a",grad:"linear-gradient(160deg,#0f1a08 0%,#1a2e0d 50%,#0d1f05 100%)"},
   manila_nights:{name:"Manila Nights",emoji:"🌃",dark:true,bg:"#060d1a",card:"#0d1f35",accent:"#00cfff",accent2:"#ff3e9d",text:"#e0f4ff",sub:"#7ba8cc",border:"#1a3a5c",grad:"linear-gradient(135deg,#060d1a 0%,#0d1f35 50%,#0a0a1a 100%)"},
-  fiesta:{name:"Fiesta",emoji:"🎊",dark:false,bg:"#fff8f0",card:"#ffffff",accent:"#e63946",accent2:"#f4a261",text:"#1d1d1d",sub:"#666666",border:"#ffd0b0",grad:"linear-gradient(135deg,#8b1a22 0%,#fff8f0 30%,#ffe4cc 100%)"},
-  hapon:{name:"Hapon",emoji:"🌅",dark:false,bg:"#fff0e8",card:"#ffffff",accent:"#e8502a",accent2:"#f4a0c0",text:"#2a1a10",sub:"#8a5a4a",border:"#f0c8b0",grad:"linear-gradient(180deg,#7a2010 0%,#c86080 30%,#ff8fa0 60%,#ffb8a0 80%,#ffe4d0 100%)"},
+  fiesta:{name:"Fiesta",emoji:"🎊",dark:false,bg:"#fff8f0",card:"#ffffff",accent:"#e63946",accent2:"#f4a261",text:"#1d1d1d",sub:"#666666",border:"#ffd0b0",grad:"linear-gradient(135deg,#fff8f0 0%,#ffe4cc 100%)"},
+  hapon:{name:"Hapon",emoji:"🌅",dark:false,bg:"#fff0e8",card:"#ffffff",accent:"#e8502a",accent2:"#f4a0c0",text:"#2a1a10",sub:"#8a5a4a",border:"#f0c8b0",grad:"linear-gradient(180deg,#ffe4d0 0%,#ffb8a0 30%,#ff8fa0 60%,#c86080 100%)"},
 };
 
 // ─── CATEGORIES ───────────────────────────────────────────────────────────────
@@ -1419,9 +1419,12 @@ function ShareCardModal({archetype,data,av,onClose}){
     ctx.fillText("THIS WEEK I AM",W/2,295);
     ctx.letterSpacing="0px";
 
-    // Archetype name
-    ctx.font="bold 38px 'Playfair Display', Georgia, serif";
+    // Archetype name — centered, auto-shrink if long
+    ctx.textAlign="center";
     ctx.fillStyle=th.text;
+    let fontSize=38;
+    ctx.font=`bold ${fontSize}px 'Playfair Display', Georgia, serif`;
+    while(ctx.measureText(archetype.name).width>W-100&&fontSize>20){fontSize--;ctx.font=`bold ${fontSize}px 'Playfair Display', Georgia, serif`;}
     ctx.fillText(archetype.name,W/2,348);
 
     // Description — word-wrapped
