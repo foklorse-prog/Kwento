@@ -844,19 +844,20 @@ function PhotoCropper({photo,pos,setPos,size=100,accent}){
   const onEnd=()=>{ last.current.drag=null; };
 
   const sc=pos.scale||1;
+  const px=pos.x||50;
+  const py=pos.y||50;
   return(
     <div ref={ref}
       onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",cursor:"move",position:"relative",userSelect:"none",touchAction:"none",border:`3px solid ${accent}`,flexShrink:0}}>
+      style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",cursor:"move",position:"relative",userSelect:"none",touchAction:"none",border:"3px solid "+accent,flexShrink:0}}>
       <img src={photo} draggable={false} style={{
-        width:`${100*sc}%`,height:`${100*sc}%`,
-        objectFit:"cover",
+        width:(100*sc)+"%",
+        height:(100*sc)+"%",
         position:"absolute",
-        left:`${(1-sc)*50+(pos.x||50)*(sc-1)/1}%`,
-        top:`${(1-sc)*50+(pos.y||50)*(sc-1)/1}%`,
-        transform:`translate(-${pos.x||50}%,-${pos.y||50}%)`,
-        transformOrigin:"center",
+        left:((1-sc)*px)+"%",
+        top:((1-sc)*py)+"%",
+        objectFit:"cover",
         pointerEvents:"none"
       }}/>
     </div>
@@ -870,7 +871,8 @@ function Onboarding({onComplete}){
   const [theme,setTheme]=useState("manila_nights");
   const [avatar,setAvatar]=useState("a4");
   const [customPhoto,setCustomPhoto]=useState(null);
-  const [photoPos,setPhotoPos]=useState({x:50,y:50});
+  const [photoPos,setPhotoPos]=useState({x:50,y:50,scale:1});
+  const [showCropper,setShowCropper]=useState(false);
   const [name,setName]=useState("");
   const t=T[lang]||T.en;
   const th=THEMES[theme];
@@ -926,15 +928,26 @@ function Onboarding({onComplete}){
                 </div>
               ))}
             </div>
-            <label style={{display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderRadius:12,background:customPhoto?th.accent+"22":th.card,border:`2px solid ${customPhoto?th.accent:th.border}`,cursor:"pointer",marginBottom:customPhoto?12:18,transition:"all 0.2s"}}>
-              <span style={{fontSize:24}}>📷</span>
+            <label style={{display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderRadius:12,background:customPhoto?th.accent+"22":th.card,border:`2px solid ${customPhoto?th.accent:th.border}`,cursor:"pointer",marginBottom:18,transition:"all 0.2s"}}>
+              {customPhoto
+                ?<div style={{width:36,height:36,borderRadius:"50%",overflow:"hidden",flexShrink:0,border:"2px solid "+th.accent}}>
+                    <img src={customPhoto} style={{width:(100*(photoPos.scale||1))+"%",height:(100*(photoPos.scale||1))+"%",objectFit:"cover",position:"relative",left:((1-(photoPos.scale||1))*(photoPos.x||50)/100*36)+"px",top:((1-(photoPos.scale||1))*(photoPos.y||50)/100*36)+"px"}}/>
+                  </div>
+                :<span style={{fontSize:24}}>📷</span>}
               <span style={{fontSize:14,color:customPhoto?th.accent:th.sub,fontWeight:500}}>{customPhoto?"Tap to change photo":"Use your own photo"}</span>
               <input type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
             </label>
             {customPhoto&&(
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:18,gap:8}}>
-                <PhotoCropper photo={customPhoto} pos={photoPos} setPos={setPhotoPos} size={100} accent={th.accent}/>
-                <p style={{fontSize:11,color:th.sub}}>Drag to reposition · Pinch to zoom</p>
+              <button onClick={()=>setShowCropper(true)} style={{width:"100%",padding:"11px",borderRadius:12,background:th.accent+"22",border:"1px solid "+th.accent,color:th.accent,fontWeight:600,fontSize:14,marginBottom:18}}>
+                ✂️ Reposition photo
+              </button>
+            )}
+            {showCropper&&(
+              <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
+                <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
+                <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
+                <PhotoCropper photo={customPhoto} pos={photoPos} setPos={setPhotoPos} size={260} accent={th.accent}/>
+                <button onClick={()=>setShowCropper(false)} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
               </div>
             )}
             <button onClick={()=>setStep(2)} disabled={!name.trim()} style={{width:"100%",padding:"14px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16,opacity:name.trim()?1:0.4}}>{t.next}</button>
@@ -1050,7 +1063,7 @@ function TabBar({tab,setTab,data}){
   const th=THEMES[data.theme];
   const avEmoji=AVATARS.find(a=>a.id===data.avatar)?.emoji||"⭐";
   const avDisplay=data.customPhoto
-    ?<img src={data.customPhoto} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",objectPosition:`${(data.photoPos||{x:50,y:50}).x}% ${(data.photoPos||{x:50,y:50}).y}%`}}/>
+    ?<img src={data.customPhoto} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%"}}/>
     :<span style={{fontSize:20}}>{avEmoji}</span>;
   const HomeIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>);
   const TimelineIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/></svg>);
@@ -1630,6 +1643,7 @@ function ProfilePage({data,onChange}){
   const lang=data.language;
   const [editName,setEditName]=useState(false);
   const [nameVal,setNameVal]=useState(data.userName);
+  const [showCropper,setShowCropper]=useState(false);
   const archetype=getArchetype(data.logs);
   const weekLogs=getWeekLogs(data.logs);
   const curAv=AVATARS.find(a=>a.id===data.avatar);
@@ -1641,29 +1655,38 @@ function ProfilePage({data,onChange}){
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
+      {showCropper&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
+          <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
+          <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
+          <PhotoCropper photo={data.customPhoto} pos={data.photoPos||{x:50,y:50,scale:1}} setPos={p=>onChange("photoPos",p)} size={260} accent={th.accent}/>
+          <button onClick={()=>setShowCropper(false)} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
+        </div>
+      )}
       {/* Avatar + name */}
       <div style={{textAlign:"center",marginBottom:24}}>
-        <div style={{width:88,height:88,borderRadius:28,fontSize:50,background:th.accent+"22",border:`2px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative",overflow:"hidden"}}
-          onClick={()=>!data.customPhoto&&onChange("__showAvatarPicker",!data.__showAvatarPicker)}>
+        <div style={{width:88,height:88,borderRadius:28,fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative",overflow:"hidden"}}
+          onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)}>
           {data.customPhoto
-            ?<PhotoCropper photo={data.customPhoto} pos={data.photoPos||{x:50,y:50,scale:1}} setPos={p=>onChange("photoPos",p)} size={88} accent={th.accent}/>
+            ?<img src={data.customPhoto} style={{width:(100*(data.photoPos?.scale||1))+"%",height:(100*(data.photoPos?.scale||1))+"%",objectFit:"cover",position:"absolute",left:((1-(data.photoPos?.scale||1))*(data.photoPos?.x||50)/100*88)+"px",top:((1-(data.photoPos?.scale||1))*(data.photoPos?.y||50)/100*88)+"px",pointerEvents:"none"}}/>
             :curAv?.emoji}
-          {!data.customPhoto&&<div style={{position:"absolute",bottom:-4,right:-4,width:22,height:22,borderRadius:8,background:th.accent,border:`2px solid ${th.bg}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>✏️</div>}
+          <div style={{position:"absolute",bottom:-4,right:-4,width:22,height:22,borderRadius:8,background:th.accent,border:"2px solid "+th.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>✏️</div>
         </div>
         <button onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:8}}>✏️ Edit avatar</button>
         {data.__showAvatarPicker&&(
           <div className="fade-in" style={{marginBottom:16}}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8,marginBottom:8}}>
               {AVATARS.map(av=>(
-                <div key={av.id} onClick={()=>{onChange("avatar",av.id);onChange("customPhoto",null);}} style={{padding:"10px 4px",borderRadius:12,textAlign:"center",cursor:"pointer",background:data.avatar===av.id&&!data.customPhoto?th.accent+"22":th.card,border:`2px solid ${data.avatar===av.id&&!data.customPhoto?th.accent:th.border}`,transition:"all 0.15s"}}>
+                <div key={av.id} onClick={()=>{onChange("avatar",av.id);onChange("customPhoto",null);}} style={{padding:"10px 4px",borderRadius:12,textAlign:"center",cursor:"pointer",background:data.avatar===av.id&&!data.customPhoto?th.accent+"22":th.card,border:"2px solid "+(data.avatar===av.id&&!data.customPhoto?th.accent:th.border),transition:"all 0.15s"}}>
                   <div style={{fontSize:24}}>{av.emoji}</div>
                 </div>
               ))}
             </div>
-            <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:data.customPhoto?th.accent+"22":th.card,border:`1px solid ${data.customPhoto?th.accent:th.border}`,cursor:"pointer",fontSize:13,color:data.customPhoto?th.accent:th.sub,marginBottom:8}}>
+            <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:data.customPhoto?th.accent+"22":th.card,border:"1px solid "+(data.customPhoto?th.accent:th.border),cursor:"pointer",fontSize:13,color:data.customPhoto?th.accent:th.sub,marginBottom:4}}>
               📷 {data.customPhoto?"Change photo":"Use your photo"}
               <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{onChange("customPhoto",ev.target.result);onChange("avatar","custom");onChange("photoPos",{x:50,y:50,scale:1});};r.readAsDataURL(f);}} style={{display:"none"}}/>
             </label>
+            {data.customPhoto&&<><br/><button onClick={()=>{onChange("__showAvatarPicker",false);setShowCropper(true);}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>✂️ Reposition photo</button><br/></>}
             <br/>
             <button onClick={()=>onChange("__showAvatarPicker",false)} style={{fontSize:12,color:th.sub,textDecoration:"underline"}}>Done</button>
           </div>
@@ -1901,7 +1924,7 @@ function App(){
     <>
       <style>{CSS}</style>
       <div style={{background:th.grad,color:th.text,minHeight:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border}}>
-        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative"}}>
+        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative",overflowY:"auto",overflowX:"hidden"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
           ):(
