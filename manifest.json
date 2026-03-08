@@ -1,0 +1,13 @@
+{
+  "name": "Kwento",
+  "short_name": "Kwento",
+  "description": "Your personal story journal.",
+  "start_url": "/Kwento/",
+  "display": "standalone",
+  "background_color": "#060d1a",
+  "theme_color": "#060d1a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
