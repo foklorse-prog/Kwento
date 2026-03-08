@@ -1762,7 +1762,7 @@ function ProfilePage({data,onChange}){
               📷 {pendingPhoto?"Change photo":"Use your photo"}
               <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{setPendingPhoto(ev.target.result);setPendingAvatar("custom");};r.readAsDataURL(f);}} style={{display:"none"}}/>
             </label>
-            {data.customPhoto&&<><br/><button onClick={()=>{donePicker();openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
+            {pendingPhoto&&<><br/><button onClick={()=>{donePicker();openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
             <br/>
             <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:8}}>
               <button onClick={cancelPicker} style={{fontSize:13,color:th.sub,padding:"6px 16px",borderRadius:10,border:"1px solid "+th.border}}>Cancel</button>
