@@ -1912,4 +1912,19 @@ function App(){
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
-              {sh
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);}} onSave={handleLog} editEntry={editEntry}/>}
+              <ThemeAnimations theme={data.theme}/>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
