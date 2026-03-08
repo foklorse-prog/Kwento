@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
-  <title>KWENTO TEST</title>
+  <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 </head>
 <body>
@@ -1498,7 +1498,7 @@ function ShareCardModal({archetype,data,av,onClose}){
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"20px 20px 40px",overflowY:"auto"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"60px 20px 40px",overflowY:"auto"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="card-reveal" style={{width:"100%",maxWidth:380,display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
 
         {/* Hidden canvas — used to generate image */}
@@ -1797,6 +1797,7 @@ function App(){
     <>
       <style>{CSS}</style>
       <div style={{background:th.grad,color:th.text,minHeight:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,height:50,background:"#000",zIndex:999}}/>
         <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
