@@ -652,23 +652,32 @@ function buildTasteProfile(logs, feedback) {
 const SK = "kwento_v5";
 function loadData(){
   try{
-    // Try v5 first
     const r=localStorage.getItem(SK);
-    if(r) return JSON.parse(r);
+    if(r){
+      const parsed=JSON.parse(r);
+      // Primary key exists but onboarded got lost — try backup
+      if(!parsed.onboarded){
+        const bk=localStorage.getItem(SK+"_bk");
+        if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
+      }
+      return parsed;
+    }
+    // Primary key missing — try backup before anything else
+    const bk=localStorage.getItem(SK+"_bk");
+    if(bk){const bp=JSON.parse(bk);if(bp.onboarded){localStorage.setItem(SK,bk);return bp;}}
     // Migrate from v4 if it exists
     const r4=localStorage.getItem("kwento_v4");
     if(r4){
       const d4=JSON.parse(r4);
-      // v4 used suggState/barkadaState — map to v5 shape
       const migrated={
         ...d4,
-        suggQueue: d4.suggState?.queue || null,
-        suggIndex: d4.suggState?.index || 0,
-        suggDate: d4.suggState?.date || null,
-        barkadaQueue: d4.barkadaState?.queue || null,
-        barkadaIndex: d4.barkadaState?.index || 0,
-        barkadaDate: d4.barkadaState?.date || null,
-        __showAvatarPicker: false,
+        suggQueue:d4.suggState?.queue||null,
+        suggIndex:d4.suggState?.index||0,
+        suggDate:d4.suggState?.date||null,
+        barkadaQueue:d4.barkadaState?.queue||null,
+        barkadaIndex:d4.barkadaState?.index||0,
+        barkadaDate:d4.barkadaState?.date||null,
+        __showAvatarPicker:false,
       };
       delete migrated.suggState;
       delete migrated.barkadaState;
@@ -677,7 +686,14 @@ function loadData(){
     return null;
   }catch{return null;}
 }
-function saveData(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch{}}
+function saveData(d){
+  try{
+    const s=JSON.stringify(d);
+    localStorage.setItem(SK,s);
+    // Write backup whenever user is onboarded — survives accidental primary key wipe
+    if(d.onboarded) localStorage.setItem(SK+"_bk",s);
+  }catch{}
+}
 function defaultData(){
   return{
     onboarded:false,language:"en",theme:"manila_nights",
@@ -1743,11 +1759,12 @@ function ProfilePage({data,onChange}){
       )}
       {/* Avatar + name */}
       <div style={{textAlign:"center",marginBottom:24}}>
+        {/* Avatar circle — shows pending state as live preview when picker is open */}
         <div style={{width:88,height:88,borderRadius:"50%",fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative",overflow:"hidden"}}
           onClick={openPicker}>
-          {data.customPhoto
-            ?<img src={data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
-            :curAv?.emoji}
+          {(pickerOpen?pendingPhoto:data.customPhoto)
+            ?<img src={pickerOpen?pendingPhoto:data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
+            :(pickerOpen?AVATARS.find(a=>a.id===pendingAvatar)?.emoji:curAv?.emoji)}
         </div>
         {pickerOpen&&(
           <div className="fade-in" style={{marginBottom:16}}>
@@ -1868,13 +1885,14 @@ function ProfilePage({data,onChange}){
 }
 
 // ─── SETTINGS PAGE ────────────────────────────────────────────────────────────
-function SettingsPage({data,onChange,onReset}){
+function SettingsPage({data,onChange,onReset,onImport}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [confirmReset,setConfirmReset]=useState(false);
   const [suggText,setSuggText]=useState("");
   const [msg,setMsg]=useState("");
+  const [importMsg,setImportMsg]=useState("");
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -1936,6 +1954,48 @@ function SettingsPage({data,onChange,onReset}){
         <textarea value={suggText} onChange={e=>setSuggText(e.target.value)} placeholder={lang==="fil"?"I-type ang iyong mungkahi...":"Type your suggestion..."} style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"10px 12px",fontSize:13,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:10,marginTop:8}}/>
         <button onClick={handleSuggestion} style={{padding:"10px 20px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:14}}>{t.send}</button>
         {msg&&<div style={{marginTop:10,fontSize:13,color:msg.includes("🌌")?"#ef4444":th.accent,fontWeight:500}}>{msg}</div>}
+      </div>
+
+      {/* Export / Import */}
+      <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
+        <div style={{fontSize:22,marginBottom:6}}>💾</div>
+        <h3 style={{fontWeight:700,color:th.text,marginBottom:4}}>{lang==="fil"?"I-backup ang iyong data":"Back up your data"}</h3>
+        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>{lang==="fil"?"I-export ang lahat ng iyong entries at settings bilang isang file. I-import ito kahit kailan para maibalik ang lahat.":"Export all your entries and settings as a file. Import it any time — even on a fresh install — to restore everything."}</p>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button onClick={()=>{
+            const exportData={...data,__exportedAt:new Date().toISOString(),__version:"kwento_v5"};
+            const blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement("a");
+            a.href=url;
+            a.download="kwento-backup-"+new Date().toISOString().split("T")[0]+".json";
+            a.click();
+            URL.revokeObjectURL(url);
+          }} style={{padding:"10px 18px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13}}>
+            {lang==="fil"?"⬇️ I-export":"⬇️ Export"}
+          </button>
+          <label style={{padding:"10px 18px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,color:th.text,fontWeight:600,fontSize:13,cursor:"pointer"}}>
+            {lang==="fil"?"⬆️ Mag-import":"⬆️ Import"}
+            <input type="file" accept=".json" onChange={e=>{
+              const f=e.target.files[0];if(!f)return;
+              const r=new FileReader();
+              r.onload=ev=>{
+                try{
+                  const parsed=JSON.parse(ev.target.result);
+                  if(!parsed.logs||!parsed.onboarded){setImportMsg("❌ "+(lang==="fil"?"Hindi valid ang file.":"Invalid backup file."));return;}
+                  // Strip export metadata before importing
+                  delete parsed.__exportedAt;
+                  delete parsed.__version;
+                  onImport(parsed);
+                  setImportMsg("✅ "+(lang==="fil"?"Naibalik na ang iyong data!":"Data restored successfully!"));
+                }catch{setImportMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read file."));}
+              };
+              r.readAsText(f);
+              e.target.value="";
+            }} style={{display:"none"}}/>
+          </label>
+        </div>
+        {importMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:importMsg.startsWith("✅")?th.accent:"#ef4444"}}>{importMsg}</p>}
       </div>
 
       {/* Reset */}
@@ -2016,7 +2076,7 @@ function App(){
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset}/>}
+              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
