@@ -806,59 +806,80 @@ function ThemeAnimations({theme}){
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
 function PhotoCropper({photo,pos,setPos,size=100,accent}){
   const ref=useRef(null);
-  const last=useRef({});
+  // working copy lives purely in a ref - never read pos prop mid-gesture
+  const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
+  const gesture=useRef({mode:null,drag:null,pinch0:0,scale0:1});
 
-  const getPoint=(e)=>{
-    if(e.touches&&e.touches.length>0)return{x:e.touches[0].clientX,y:e.touches[0].clientY};
-    return{x:e.clientX,y:e.clientY};
-  };
+  // sync work ref when pos prop changes from outside (e.g. reset)
+  useEffect(()=>{
+    work.current={x:pos.x||50,y:pos.y||50,scale:pos.scale||1};
+  },[pos.x,pos.y,pos.scale]);
+
+  const commit=()=>setPos({...work.current});
 
   const onStart=(e)=>{
-    e.preventDefault();
-    if(e.touches&&e.touches.length===2){
-      last.current.pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      last.current.scale=pos.scale||1;
+    e.preventDefault();e.stopPropagation();
+    if(e.touches&&e.touches.length>=2){
+      gesture.current.mode="pinch";
+      gesture.current.pinch0=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      gesture.current.scale0=work.current.scale;
     } else {
-      last.current.drag=getPoint(e);
+      gesture.current.mode="drag";
+      const t=e.touches?e.touches[0]:e;
+      gesture.current.drag={x:t.clientX,y:t.clientY};
     }
   };
 
   const onMove=(e)=>{
-    e.preventDefault();
-    if(e.touches&&e.touches.length===2){
-      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      const newScale=Math.max(0.5,Math.min(3,(last.current.scale||1)*(dist/last.current.pinch)));
-      setPos(p=>({...p,scale:newScale}));
-    } else if(last.current.drag){
-      const pt=getPoint(e);
-      const dx=pt.x-last.current.drag.x;
-      const dy=pt.y-last.current.drag.y;
-      last.current.drag=pt;
-      setPos(p=>({
-        x:Math.max(0,Math.min(100,p.x-dx/size*100)),
-        y:Math.max(0,Math.min(100,p.y-dy/size*100))
-      }));
+    e.preventDefault();e.stopPropagation();
+    if(e.touches&&e.touches.length>=2){
+      gesture.current.mode="pinch";
+      const dist=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      work.current.scale=Math.max(0.5,Math.min(4,gesture.current.scale0*(dist/gesture.current.pinch0)));
+      commit();
+    } else if(gesture.current.mode==="drag"&&gesture.current.drag){
+      const t=e.touches?e.touches[0]:e;
+      const dx=t.clientX-gesture.current.drag.x;
+      const dy=t.clientY-gesture.current.drag.y;
+      gesture.current.drag={x:t.clientX,y:t.clientY};
+      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/size*100));
+      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/size*100));
+      commit();
     }
   };
 
-  const onEnd=()=>{ last.current.drag=null; };
+  const onEnd=(e)=>{
+    if(!e.touches||e.touches.length===0){
+      gesture.current.mode=null;
+      gesture.current.drag=null;
+    } else if(e.touches.length===1){
+      // finger lifted from pinch — switch to drag without resetting position
+      gesture.current.mode="drag";
+      gesture.current.drag={x:e.touches[0].clientX,y:e.touches[0].clientY};
+    }
+  };
 
   const sc=pos.scale||1;
   const px=pos.x||50;
   const py=pos.y||50;
   return(
     <div ref={ref}
-      onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd}
+      onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",cursor:"move",position:"relative",userSelect:"none",touchAction:"none",border:"3px solid "+accent,flexShrink:0}}>
+      style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",cursor:"move",
+              position:"relative",userSelect:"none",touchAction:"none",
+              border:"3px solid "+accent,flexShrink:0}}>
       <img src={photo} draggable={false} style={{
-        width:(100*sc)+"%",
-        height:(100*sc)+"%",
+        width:(100*sc)+"%",height:(100*sc)+"%",
         position:"absolute",
-        left:((1-sc)*px)+"%",
-        top:((1-sc)*py)+"%",
-        objectFit:"cover",
-        pointerEvents:"none"
+        left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",
+        objectFit:"cover",pointerEvents:"none"
       }}/>
     </div>
   );
@@ -897,7 +918,7 @@ function Onboarding({onComplete}){
   };
 
   return(
-    <div style={{background:th.grad,minHeight:"100vh",color:th.text,transition:"background 0.4s",overflowY:"auto"}}>
+    <div style={{background:th.grad,minHeight:"100vh",color:th.text,transition:"background 0.4s",overflowY:step===2?"auto":"hidden",height:step===2?undefined:"100vh"}}>
       <div style={{maxWidth:440,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"20px 16px"}}>
         <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:28}}>
           {[0,1,2].map(i=><div key={i} style={{width:i===step?28:8,height:8,borderRadius:4,background:i<=step?th.accent:th.border,transition:"all 0.3s"}}/>)}
@@ -1644,14 +1665,25 @@ function ProfilePage({data,onChange}){
   const [editName,setEditName]=useState(false);
   const [nameVal,setNameVal]=useState(data.userName);
   const [showCropper,setShowCropper]=useState(false);
+  const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   const archetype=getArchetype(data.logs);
   const weekLogs=getWeekLogs(data.logs);
   const curAv=AVATARS.find(a=>a.id===data.avatar);
-
-  // Swipe-right titles only
   const swipedRight=Object.entries(data.feedback||{}).filter(([,v])=>v==="right").map(([k])=>k);
-  // Swipe-left titles only
   const swipedLeft=Object.entries(data.feedback||{}).filter(([,v])=>v==="left").map(([k])=>k);
+
+  const openCropper=()=>{
+    setCropPos(data.photoPos||{x:50,y:50,scale:1});
+    setShowCropper(true);
+  };
+  const doneCropper=()=>{
+    onChange("photoPos",cropPos);
+    setShowCropper(false);
+  };
+
+  const sc=data.photoPos?.scale||1;
+  const px=data.photoPos?.x||50;
+  const py=data.photoPos?.y||50;
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
@@ -1659,8 +1691,8 @@ function ProfilePage({data,onChange}){
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
-          <PhotoCropper photo={data.customPhoto} pos={data.photoPos||{x:50,y:50,scale:1}} setPos={p=>onChange("photoPos",p)} size={260} accent={th.accent}/>
-          <button onClick={()=>setShowCropper(false)} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
+          <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent}/>
+          <button onClick={doneCropper} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
         </div>
       )}
       {/* Avatar + name */}
@@ -1668,11 +1700,10 @@ function ProfilePage({data,onChange}){
         <div style={{width:88,height:88,borderRadius:28,fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative",overflow:"hidden"}}
           onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)}>
           {data.customPhoto
-            ?<img src={data.customPhoto} style={{width:(100*(data.photoPos?.scale||1))+"%",height:(100*(data.photoPos?.scale||1))+"%",objectFit:"cover",position:"absolute",left:((1-(data.photoPos?.scale||1))*(data.photoPos?.x||50)/100*88)+"px",top:((1-(data.photoPos?.scale||1))*(data.photoPos?.y||50)/100*88)+"px",pointerEvents:"none"}}/>
+            ?<img src={data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
             :curAv?.emoji}
-          <div style={{position:"absolute",bottom:-4,right:-4,width:22,height:22,borderRadius:8,background:th.accent,border:"2px solid "+th.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>✏️</div>
         </div>
-        <button onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:8}}>✏️ Edit avatar</button>
+        <button onClick={()=>onChange("__showAvatarPicker",!data.__showAvatarPicker)} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:8}}>Edit avatar</button>
         {data.__showAvatarPicker&&(
           <div className="fade-in" style={{marginBottom:16}}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8,marginBottom:8}}>
@@ -1686,22 +1717,19 @@ function ProfilePage({data,onChange}){
               📷 {data.customPhoto?"Change photo":"Use your photo"}
               <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{onChange("customPhoto",ev.target.result);onChange("avatar","custom");onChange("photoPos",{x:50,y:50,scale:1});};r.readAsDataURL(f);}} style={{display:"none"}}/>
             </label>
-            {data.customPhoto&&<><br/><button onClick={()=>{onChange("__showAvatarPicker",false);setShowCropper(true);}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>✂️ Reposition photo</button><br/></>}
+            {data.customPhoto&&<><br/><button onClick={()=>{onChange("__showAvatarPicker",false);openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
             <br/>
             <button onClick={()=>onChange("__showAvatarPicker",false)} style={{fontSize:12,color:th.sub,textDecoration:"underline"}}>Done</button>
           </div>
         )}
         {editName?(
           <div style={{display:"flex",gap:8,justifyContent:"center",alignItems:"center",marginBottom:6}}>
-            <input value={nameVal} onChange={e=>setNameVal(e.target.value)} style={{padding:"8px 14px",borderRadius:10,fontSize:16,color:th.text,background:th.card,border:`1px solid ${th.border}`,textAlign:"center"}}/>
+            <input value={nameVal} onChange={e=>setNameVal(e.target.value)} style={{padding:"8px 14px",borderRadius:10,fontSize:16,color:th.text,background:th.card,border:"1px solid "+th.border,textAlign:"center"}}/>
             <button onClick={()=>{onChange("userName",nameVal);setEditName(false);}} style={{padding:"8px 14px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13}}>Save</button>
             <button onClick={()=>setEditName(false)} style={{fontSize:20,color:th.sub}}>×</button>
           </div>
         ):(
-          <div style={{display:"flex",alignItems:"center",gap:8,justifyContent:"center",marginBottom:4}}>
-            <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{data.userName}</h1>
-            <button onClick={()=>setEditName(true)} style={{fontSize:16,opacity:0.5}}>✏️</button>
-          </div>
+          <h1 onClick={()=>setEditName(true)} style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text,marginBottom:4,cursor:"pointer"}}>{data.userName}</h1>
         )}
         <p style={{color:th.sub,fontSize:13}}>{t.welcome_back} 🌟</p>
       </div>
