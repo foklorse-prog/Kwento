@@ -987,7 +987,7 @@ function HomePage({data,onOpenLog}){
   const recent=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
   return(
-    <div className="fade-in" style={{paddingTop:"60px",paddingLeft:"20px",paddingRight:"20px",paddingBottom:"100px",position:"relative",zIndex:2}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
       <div style={{marginBottom:22}}>
         <p style={{color:th.sub,fontSize:12,marginBottom:4}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName} 👋</h1>
@@ -1048,7 +1048,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const groups={};
   filtered.forEach(l=>{const d=l.date?.split("T")[0]||"Unknown";if(!groups[d])groups[d]=[];groups[d].push(l);});
   return(
-    <div className="fade-in" style={{paddingTop:"60px",paddingLeft:"20px",paddingRight:"20px",paddingBottom:"100px",position:"relative",zIndex:2}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{t.timeline}</h1>
         <button onClick={onOpenLog} style={{background:th.accent,color:"#fff",padding:"8px 18px",borderRadius:20,fontWeight:700,fontSize:13}}>+ {lang==="fil"?"Mag-log":"Log"}</button>
@@ -1283,7 +1283,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
   const av=AVATARS.find(a=>a.id===data.avatar);
 
   return(
-    <div className="fade-in" style={{paddingTop:"60px",paddingLeft:"20px",paddingRight:"20px",paddingBottom:"100px",position:"relative",zIndex:2}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
       <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
 
@@ -1543,7 +1543,7 @@ function ProfilePage({data,onChange}){
   const swipedLeft=Object.entries(data.feedback||{}).filter(([,v])=>v==="left").map(([k])=>k);
 
   return(
-    <div className="fade-in" style={{paddingTop:"60px",paddingLeft:"20px",paddingRight:"20px",paddingBottom:"100px",position:"relative",zIndex:2}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
       {/* Avatar + name */}
       <div style={{textAlign:"center",marginBottom:24}}>
         <div style={{width:88,height:88,borderRadius:28,fontSize:50,background:th.accent+"22",border:`2px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",cursor:"pointer",position:"relative"}}
@@ -1679,7 +1679,7 @@ function SettingsPage({data,onChange,onReset}){
   };
 
   return(
-    <div className="fade-in" style={{paddingTop:"60px",paddingLeft:"20px",paddingRight:"20px",paddingBottom:"100px",position:"relative",zIndex:2}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:22}}>{t.settings_title}</h1>
 
       {/* Theme */}
@@ -1798,7 +1798,7 @@ function App(){
       <style>{CSS}</style>
       <div style={{background:th.grad,color:th.text,minHeight:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border}}>
         <div style={{position:"fixed",top:0,left:0,right:0,height:50,background:"#000",zIndex:999}}/>
-        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative"}}>
+        <div style={{maxWidth:500,margin:"0 auto",minHeight:"100vh",position:"relative",paddingTop:"50px"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
           ):(
