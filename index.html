@@ -2383,12 +2383,11 @@ function PullToRefresh({tab}){
     };
   }, [tab, pullY, phase]);
 
-  if(phase === "idle" && pullY < 1) return null;
-
   const progress = Math.min(pullY / THRESHOLD, 1);
   const isRefreshing = phase === "refreshing";
   const isReady = phase === "ready";
-  const height = isRefreshing ? THRESHOLD : pullY;
+  const isIdle = phase === "idle" && pullY < 1;
+  const height = isIdle ? 0 : (isRefreshing ? THRESHOLD : pullY);
 
   return(
     <div style={{
