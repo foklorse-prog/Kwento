@@ -804,11 +804,26 @@ function loadData(){
         if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
       }
       // Scrub old "Letterboxd rating: X★" notes left from earlier import version
+      // Also fix genre:"Film" on old imports — look up real genre from library
+      // Also backfill year from tags if missing
       if(parsed.logs){
-        parsed.logs=parsed.logs.map(l=>
-          l.fromLetterboxd&&l.note&&l.note.startsWith("Letterboxd rating:")
-            ?{...l,note:""}:l
-        );
+        parsed.logs=parsed.logs.map(l=>{
+          if(!l.fromLetterboxd)return l;
+          let updated={...l};
+          // Fix note
+          if(updated.note&&updated.note.startsWith("Letterboxd rating:"))updated.note="";
+          // Fix genre
+          if(!updated.genre||updated.genre==="Film"){
+            const lib=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
+            if(lib?.genre)updated.genre=lib.genre;
+          }
+          // Backfill year from tags (old import pushed year into tags)
+          if(!updated.year&&updated.tags){
+            const yearTag=updated.tags.find(tag=>/^\d{4}$/.test(tag));
+            if(yearTag){updated.year=yearTag;updated.tags=updated.tags.filter(tag=>tag!==yearTag);}
+          }
+          return updated;
+        });
       }
       return parsed;
     }
@@ -1222,6 +1237,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
+  const isEdit=!!editEntry;
+  const isMultiMode=!isEdit&&!initialCat;
   const [cat,setCat]=useState(editEntry?.category||(initialCat||"movies"));
   const [query,setQuery]=useState(editEntry?.title||"");
   const [note,setNote]=useState(editEntry?.note||"");
@@ -1229,74 +1246,224 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
+  const [queue,setQueue]=useState([]);
+  const [catFilter,setCatFilter]=useState(false);
+  const inputRef=React.useRef(null);
+
+  // Word-start matching: "sh" matches "She's the Man" but not "Whiplash"
+  const wordMatch=(title,q)=>{
+    const tl=title.toLowerCase();
+    const ql=q.toLowerCase();
+    // Match start of title OR start of any word in title
+    return tl.startsWith(ql)||tl.split(/\s+/).some(w=>w.startsWith(ql));
+  };
 
   useEffect(()=>{
-    if(query.length>0&&!selected){
-      const lq=query.toLowerCase();
-      setResults((LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,8));
-    } else setResults([]);
-  },[query,cat,selected]);
+    if(query.length<2){setResults([]);return;}
+    if(!isMultiMode&&selected){setResults([]);return;}
+    if(isMultiMode){
+      if(catFilter&&cat){
+        setResults((LIBRARY[cat]||[]).filter(i=>wordMatch(i.title,query)).slice(0,8).map(i=>({...i,_cat:cat})));
+      } else {
+        const all=[];
+        CATEGORIES.forEach(c=>{
+          (LIBRARY[c.id]||[]).filter(i=>wordMatch(i.title,query)).slice(0,3).forEach(i=>all.push({...i,_cat:c.id}));
+        });
+        setResults(all.slice(0,12));
+      }
+    } else {
+      setResults((LIBRARY[cat]||[]).filter(i=>wordMatch(i.title,query)).slice(0,8));
+    }
+  },[query,cat,catFilter,selected,isMultiMode]);
+
+  const addToQueue=(item)=>{
+    setQueue(q=>[...q,{...item,category:item._cat||cat,_qid:Date.now()+Math.random()}]);
+    setQuery("");setSelected(null);setResults([]);
+    setTimeout(()=>inputRef.current?.focus(),50);
+  };
 
   const handleSave=()=>{
-    if(!selected&&!query.trim())return;
-    const base=selected||{title:query.trim(),tags:[],genre:"Custom",ph:false};
-    const mood=ITEM_MOOD[base.title]||null;
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
+    if(isMultiMode){
+      // Build final list — queue + any current typed/selected item
+      const toSave=[...queue];
+      if(selected){
+        toSave.push({...selected,category:selected._cat||cat});
+      } else if(query.trim()&&!selected){
+        // Manual typed — try to find in library for metadata
+        let found=null;
+        for(const c of CATEGORIES){
+          const match=(LIBRARY[c.id]||[]).find(i=>i.title.toLowerCase()===query.trim().toLowerCase());
+          if(match){found={...match,_cat:c.id,category:c.id};break;}
+        }
+        if(found)toSave.push(found);
+        else toSave.push({title:query.trim(),tags:[],genre:"Custom",category:"movies",_cat:"movies"});
+      }
+      if(!toSave.length)return;
+      const base=Date.now();
+      toSave.forEach((item,idx)=>{
+        const mood=ITEM_MOOD[item.title]||null;
+        onSave({...item,category:item.category||item._cat||"movies",note:"",mood,date,customDate:useCustomDate?customDate:null,id:base+idx*7});
+      });
+      onClose();return;
+    }
+    if(!selected&&!query.trim())return;
+    const base=selected||(()=>{
+      // Try library lookup before falling back to custom
+      const match=(LIBRARY[cat]||[]).find(i=>i.title.toLowerCase()===query.trim().toLowerCase());
+      return match||{title:query.trim(),tags:[],genre:"Custom",ph:false};
+    })();
+    const mood=ITEM_MOOD[base.title]||null;
     onSave({...base,category:cat,note,mood,date,customDate:useCustomDate?customDate:null,id:editEntry?.id||Date.now()});
     onClose();
   };
 
+  const canSave=(isMultiMode&&(queue.length>0||query.trim().length>0))||(!isMultiMode&&(selected||query.trim()));
+
+  // Design tokens — 3 sizes only
+  const fs={title:20,body:14,meta:12};
+  const gap=16;
+
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:24,paddingBottom:44,maxHeight:"90vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{editEntry?t.edit_entry:t.log_entry}</h3>
-          <button onClick={onClose} style={{fontSize:24,color:th.sub}}>×</button>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,paddingBottom:44,maxHeight:"92vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
+
+        {/* Header */}
+        <div style={{padding:"20px 20px 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontFamily:"'Playfair Display',serif",fontSize:fs.title,fontWeight:700,color:th.text}}>{isEdit?t.edit_entry:t.log_entry}</span>
+          <button onClick={onClose} style={{width:32,height:32,borderRadius:"50%",background:th.card,border:`1px solid ${th.border}`,fontSize:18,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>×</button>
         </div>
-        <div style={{display:"flex",gap:7,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
-          {CATEGORIES.map(c=>(
-            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}} style={{padding:"7px 13px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,background:cat===c.id?c.color:th.card,color:cat===c.id?"#fff":th.sub,border:`1px solid ${cat===c.id?c.color:th.border}`,transition:"all 0.2s"}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>
-          ))}
-        </div>
-        {!editEntry&&(()=>{
-          const past=data.logs.filter(l=>l.category===cat).slice(0,4);
-          if(!past.length)return null;
-          return(<div style={{marginBottom:14}}>
-            <div style={{fontSize:11,color:th.sub,fontWeight:600,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>{t.quick_logs}</div>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {past.map((l,i)=>(
-                <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}} style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
-              ))}
+
+        <div style={{padding:`${gap}px 20px 0`}}>
+
+          {/* Category tabs — filter search results, no lock in multi-mode */}
+          <div style={{display:"flex",gap:6,marginBottom:gap,overflowX:"auto",paddingBottom:2}}>
+            {CATEGORIES.map(c=>{
+              const active=cat===c.id&&(!isMultiMode||catFilter);
+              return(<button key={c.id} onClick={()=>{
+                if(isMultiMode){
+                  if(cat===c.id&&catFilter){setCatFilter(false);}
+                  else{setCat(c.id);setCatFilter(true);}
+                } else {
+                  setCat(c.id);setSelected(null);setQuery("");
+                }
+              }} style={{padding:"6px 12px",borderRadius:20,whiteSpace:"nowrap",fontSize:fs.meta,fontWeight:600,background:active?c.color:th.card,color:active?"#fff":th.sub,border:`1px solid ${active?c.color:th.border}`,flexShrink:0}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>);
+            })}
+          </div>
+
+          {/* Queue — multi mode */}
+          {isMultiMode&&queue.length>0&&(
+            <div style={{marginBottom:gap}}>
+              {queue.map(item=>{
+                const meta=CAT_MAP[item.category];
+                return(
+                  <div key={item._qid} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
+                    <span style={{fontSize:16,flexShrink:0}}>{meta?.emoji}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:fs.body,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
+                      <div style={{fontSize:fs.meta,color:th.sub,marginTop:2}}>{item.genre&&item.genre!=="Film"&&item.genre!=="Custom"?item.genre:meta?.labelEn}</div>
+                    </div>
+                    <button onClick={()=>setQueue(q=>q.filter(x=>x._qid!==item._qid))} style={{color:th.sub,fontSize:20,flexShrink:0,lineHeight:1}}>×</button>
+                  </div>
+                );
+              })}
             </div>
-          </div>);
-        })()}
-        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-          <span>🔍</span>
-          <input value={query} onChange={e=>{setQuery(e.target.value);setSelected(null);}} placeholder={t.search_placeholder} style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}/>
-          {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
-        </div>
-        {results.length>0&&!selected&&(
-          <div style={{marginBottom:12}}>
-            {results.map((item,i)=>(
-              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}} style={{padding:"9px 13px",borderRadius:10,cursor:"pointer",marginBottom:5,background:th.card,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{CAT_MAP[cat]?.emoji}</span>
-                <div><div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div><div style={{fontSize:11,color:th.sub}}>{item.genre}</div></div>
+          )}
+
+          {/* Quick logs — single mode only, shows recent entries for selected category */}
+          {!isMultiMode&&!selected&&!query&&(()=>{
+            const past=data.logs.filter(l=>l.category===cat).slice(0,4);
+            if(!past.length)return null;
+            return(
+              <div style={{marginBottom:gap}}>
+                <div style={{fontSize:fs.meta,color:th.sub,fontWeight:600,marginBottom:8}}>{t.quick_logs}</div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  {past.map((l,i)=>(
+                    <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}}
+                      style={{padding:"6px 12px",borderRadius:20,fontSize:fs.meta,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
+                  ))}
+                </div>
               </div>
-            ))}
+            );
+          })()}
+
+          {/* Search bar */}
+          <div style={{background:th.card,border:`1px solid ${selected?th.accent:th.border}`,borderRadius:12,padding:"11px 14px",display:"flex",alignItems:"center",gap:10,marginBottom:results.length>0?0:gap}}>
+            <span style={{fontSize:16,opacity:0.4,flexShrink:0}}>🔍</span>
+            <input
+              ref={inputRef}
+              autoFocus
+              value={query}
+              onChange={e=>{setQuery(e.target.value);setSelected(null);}}
+              placeholder={isMultiMode?"Search anything…":t.search_placeholder}
+              style={{flex:1,fontSize:fs.body,color:th.text,background:"transparent",caretColor:th.accent}}
+            />
+            {query&&<button onClick={()=>{setQuery("");setSelected(null);setResults([]);setTimeout(()=>inputRef.current?.focus(),50);}} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>}
           </div>
-        )}
-        {selected&&(
-          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"22",border:`1px solid ${th.accent}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div><div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div><div style={{fontSize:11,color:th.sub}}>{selected.genre}</div></div>
-            <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
+
+          {/* Search results */}
+          {results.length>0&&!selected&&(
+            <div style={{borderRadius:"0 0 12px 12px",overflow:"hidden",border:`1px solid ${th.border}`,borderTop:"none",marginBottom:gap}}>
+              {results.map((item,i)=>{
+                const meta=CAT_MAP[item._cat||cat];
+                const inQueue=isMultiMode&&queue.some(q=>q.title===item.title&&q.category===(item._cat||cat));
+                return(
+                  <div key={i}
+                    onClick={()=>{
+                      if(inQueue)return;
+                      if(isMultiMode){addToQueue(item);}
+                      else{setSelected(item);setQuery(item.title);setResults([]);}
+                    }}
+                    style={{padding:"10px 14px",cursor:inQueue?"default":"pointer",background:inQueue?th.accent+"0d":th.card,display:"flex",alignItems:"center",gap:10,borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",opacity:inQueue?0.5:1}}>
+                    <span style={{fontSize:18,flexShrink:0}}>{meta?.emoji}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:fs.body,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
+                      <div style={{fontSize:fs.meta,color:th.sub,marginTop:1}}>{item.genre&&item.genre!=="Film"?item.genre:meta?.labelEn}</div>
+                    </div>
+                    {isMultiMode&&<span style={{fontSize:fs.meta,color:inQueue?th.sub:th.accent,fontWeight:700,flexShrink:0}}>{inQueue?"✓":"+Add"}</span>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Selected item — single mode */}
+          {!isMultiMode&&selected&&(
+            <div style={{padding:"10px 14px",borderRadius:12,marginBottom:gap,background:th.accent+"15",border:`1px solid ${th.accent}33`,display:"flex",alignItems:"center",gap:10}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:fs.body,fontWeight:600,color:th.text}}>{selected.title}</div>
+                <div style={{fontSize:fs.meta,color:th.sub,marginTop:2}}>{selected.genre&&selected.genre!=="Film"?selected.genre:""}</div>
+              </div>
+              <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20,flexShrink:0}}>×</button>
+            </div>
+          )}
+
+          {/* Note — single mode only */}
+          {!isMultiMode&&(
+            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection}
+              style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:fs.body,color:th.text,minHeight:64,resize:"none",lineHeight:1.6,marginBottom:gap}}/>
+          )}
+
+          {/* Date row */}
+          <div style={{marginBottom:gap}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,cursor:"pointer"}} onClick={()=>setUseCustomDate(v=>!v)}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:16}}>📅</span>
+                <span style={{fontSize:fs.body,color:th.text}}>{useCustomDate?customDate:lang==="fil"?"Ngayon":"Today"}</span>
+              </div>
+              <span style={{fontSize:fs.meta,color:th.accent,fontWeight:700}}>{useCustomDate?"Reset":"Change"}</span>
+            </div>
+            {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]}
+              style={{display:"block",width:"100%",padding:"11px 14px",borderRadius:12,fontSize:fs.body,background:th.card,border:`1px solid ${th.border}`,color:th.text,marginTop:6}}/>}
           </div>
-        )}
-        <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection} style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:12}}/>
-        <div style={{marginBottom:16}}>
-          <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:8}}>{useCustomDate?"Use today":"Log for a different date"}</button>
-          {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:10,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text}}/>}
+
+          {/* Save */}
+          <button onClick={handleSave} disabled={!canSave}
+            style={{width:"100%",padding:"14px",borderRadius:14,background:canSave?th.accent:"#88888833",color:canSave?"#fff":"#88888888",fontWeight:700,fontSize:fs.body,marginBottom:4,transition:"all 0.2s"}}>
+            {isMultiMode&&queue.length>1?`Log ${queue.length} entries`:t.log_it}
+          </button>
+
         </div>
-        <button onClick={handleSave} disabled={!selected&&!query.trim()} style={{width:"100%",padding:"14px",borderRadius:14,background:selected||query.trim()?th.accent:"gray",color:"#fff",fontWeight:700,fontSize:16,opacity:selected||query.trim()?1:0.4}}>{t.log_it}</button>
       </div>
     </div>
   );
@@ -1347,7 +1514,7 @@ function HomePage({data,onOpenLog}){
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName}</h1>
         <p style={{color:th.sub,fontSize:14,marginTop:5,fontStyle:"italic"}}>{t.tagline}</p>
       </div>
-      <button onClick={onOpenLog} style={{width:"100%",padding:"17px 20px",borderRadius:18,marginBottom:20,background:`linear-gradient(135deg,${th.accent},${th.accent2})`,color:"#fff",fontWeight:700,fontSize:16,display:"flex",alignItems:"center",gap:12,boxShadow:`0 8px 28px ${th.accent}44`,border:"none",cursor:"pointer"}}>
+      <button onClick={()=>onOpenLog()} style={{width:"100%",padding:"17px 20px",borderRadius:18,marginBottom:20,background:`linear-gradient(135deg,${th.accent},${th.accent2})`,color:"#fff",fontWeight:700,fontSize:16,display:"flex",alignItems:"center",gap:12,boxShadow:`0 8px 28px ${th.accent}44`,border:"none",cursor:"pointer"}}>
         <span style={{fontSize:24}}>+</span><span>{t.log_something}</span>
         <span style={{marginLeft:"auto",opacity:0.75,fontSize:13,fontWeight:400}}>{data.logs.length} {t.entries}</span>
       </button>
@@ -1431,12 +1598,15 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
 
   const renderEntry=(log,i)=>{
     const meta=CAT_MAP[log.category];
-    return(<div key={i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
+    const isMovie=log.category==="movies";
+    const displayGenre=(!log.genre||log.genre==="Film"||log.genre==="Custom")?null:log.genre;
+    const titleLine=isMovie&&log.year?`${log.title} (${log.year})`:log.title;
+    return(<div key={log.id||i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}</div>
-        <div style={{fontSize:11,color:th.sub}}>{log.genre||""}</div>
-        {log.note&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>}
+        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{titleLine}</div>
+        {displayGenre?<div style={{fontSize:11,color:th.sub}}>{displayGenre}</div>:null}
+        {log.note?<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>:null}
       </div>
       <div style={{display:"flex",gap:6,flexShrink:0}}>
         <button onClick={()=>onEdit(log)} style={{width:32,height:32,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✏️</button>
@@ -2262,31 +2432,31 @@ function SettingsPage({data,onChange,onReset,onImport}){
                   cols.push(cur.trim());
                   return cols;
                 };
-                const existingTitles=new Set((data.logs||[]).filter(l=>l.category==="movies").map(l=>l.title.toLowerCase().trim()));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
                   const cols=parseRow(lines[i]);
                   const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
                   if(!title)continue;
-                  if(existingTitles.has(title.toLowerCase()))continue;
                   const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
                   const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
                   const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
                   const rewatch=((cols[rewatchIdx]||"").replace(/^"|"$/g,"").toLowerCase()==="yes");
                   const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
-                  const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
-                  if(year)tags.push(year);
+                  const tags=tagsRaw?tagsRaw.split(",").map(tag=>tag.trim()).filter(Boolean):[];
                   if(rewatch)tags.push("rewatch");
-                  // Convert Letterboxd 0.5–5 rating to our 1–10 scale
-                  const rating=!isNaN(ratingRaw)?Math.round(ratingRaw*2):null;
+                  // Look up genre + tags from library
+                  const libMatch=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===title.toLowerCase());
+                  const genre=libMatch?.genre||"Film";
+                  if(libMatch?.tags)libMatch.tags.forEach(tag=>{if(!tags.includes(tag))tags.push(tag);});
                   const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
                   newEntries.push({
-                    id:Date.now()+i,
+                    id:Date.now()+Math.random(),
                     title,
+                    year:year||null,
                     category:"movies",
                     tags,
-                    genre:"Film",
+                    genre,
                     note:"",
                     mood:null,
                     date,
@@ -2294,10 +2464,9 @@ function SettingsPage({data,onChange,onReset,onImport}){
                     fromLetterboxd:true,
                     lbRating:!isNaN(ratingRaw)?ratingRaw:null,
                   });
-                  existingTitles.add(title.toLowerCase());
                 }
                 if(!newEntries.length){
-                  setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
+                  setLbMsg("⚠️ "+(lang==="fil"?"Walang entries sa file.":"No entries found in file."));
                   return;
                 }
                 onChange("logs",[...(data.logs||[]),...newEntries]);
@@ -2350,7 +2519,7 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entry=>{
     if(editEntry) update({logs:data.logs.map(l=>l.id===entry.id?entry:l)});
-    else update({logs:[entry,...data.logs]});
+    else setData(d=>({...d,logs:[entry,...d.logs]}));
     setEditEntry(null);
   };
   const handleDelete=id=>update({logs:data.logs.filter(l=>l.id!==id)});
