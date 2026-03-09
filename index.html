@@ -85,9 +85,12 @@ const MOOD_TAGS = {
 
 // ─── MOVIE YEARS LOOKUP ───────────────────────────────────────────────────────
 const MOVIE_YEARS = {
+  // Filipino
   "Heneral Luna":2015,"Gomburza":2023,"Fan Girl":2020,"Ang Babae sa Septic Tank":2011,
   "Magnifico":2003,"Anak":2000,"On the Job":2013,"Birdshot":2016,"Kita Kita":2017,
   "Hintayan ng Langit":2022,"Patay na si Hesus":2016,"Hello, Love, Again":2024,
+  "How She Left Me":2024,
+  // International
   "Past Lives":2023,"Everything Everywhere All at Once":2022,"Spirited Away":2001,
   "Parasite":2019,"Interstellar":2014,"Coco":2017,"Soul":2020,"La La Land":2016,
   "Whiplash":2014,"Moonlight":2016,"The Farewell":2019,"Minari":2020,"Aftersun":2022,
@@ -106,7 +109,11 @@ const MOVIE_YEARS = {
   "A Change of Heart":2023,"Babygirl":2024,"The Judge from Hell":2024,
   "Red, White & Royal Blue":2023,"Love Scout":2024,
   "Heretic":2024,"She's the Man":2006,"10 Things I Hate About You":1999,
+  "Heart Eyes":2025,"Watching the Detectives":2007,
+  // Additional films
+  "Melo Movie":2024,  "Companion":2025,  "Big Little Lies":2017,  "About Time":2013,  "When the Stars Gossip":2024,  "Le Bonheur":1965,  "The Gorge":2025,  "When Life Gives You Tangerines":2025,  "Queer":2024,  "The Life List":2025,  "My Dearest Nemesis":2024,  "The Map of Tiny Perfect Things":2021,  "Blue Period":2021,  "Am I OK?":2023,  "No Reservations":2007,  "Cruel Intentions":1999,  "A Lot Like Love":2005,  "Final Destination 3":2006,  "The Final Destination":2009,  "Final Destination 5":2011,  "Final Destination 2":2003,  "Happy Death Day":2017,  "Happy Death Day 2U":2019,  "The Age of Adaline":2015,  "Final Destination Bloodlines":2025,  "Beach Rats":2017,  "That Awkward Moment":2014,  "Black Bag":2025,  "Materialists":2025,  "KPop Demon Hunters":2025,  "Saving Face":2004,  "Fleishman Is in Trouble":2022,  "She's Out of My League":2010,  "Before We Go":2014,  "Friends with Benefits":2011,  "Imagine Me & You":2005,  "Going the Distance":2010,  "Drag Me to Hell":2009,  "Nights and Weekends":2008,  "Happiest Season":2020,  "HAIKYU!! The Dumpster Battle":2024,  "27 Dresses":2008,  "Life As We Know It":2010,  "The Parent Trap":1998,  "Bring It On":2000,  "Café Society":2016,  "Vicky Cristina Barcelona":2008,  "Un/Happy for You":2024,  "The Girlfriend":2010,  "Closer":2004,  "Blue Jasmine":2013,  "Where'd You Go, Bernadette":2019,  "Ted":2012,  "Splitsville":2023,  "The Proposal":2009,  "Two Weeks Notice":2002,  "The Family Stone":2005,  "Under the Silver Lake":2018,  "The Thursday Murder Club":2025,  "Last Night":2010,  "Boyhood":2014,  "Elizabethtown":2005,  "Kick-Ass":2010,  "Kick-Ass 2":2013,  "Together":2021,  "Serendipity":2001,  "Everybody's Fine":2009,  "Fresh":2022,  "Eternity":2010,  "People We Meet on Vacation":2021,  "When Harry Met Sally...":1989,  "In the Land of Women":2007,  "The Worst Person in the World":2021,  "Can This Love Be Translated?":2014,  "Rental Family":2023,  "It Boy":2013,  "Two Night Stand":2014,  "Fountain of Youth":2025,  "Cruella":2021,  "Four Weddings and a Funeral":1994,  "Come See Me in the Good Light":2024,  "18x2 Beyond Youthful Days":2024,  "Anna":2019,  "Hanna":2011,  "Bye Bye Morons":2021,  "The Housemaid":2024,  "The Devil Wears Prada":2006,  "100 Songs for Stella":2024,  "Basic Instinct":1992,  "I'm Drunk, I Love You":2017,  "Burnt":2015,  "Five Breakups and a Romance":2024,  "Mr & Mme Adelman":2017,  "Ella McCay":2024,  "Meet, Greet & Bye":2023,  "F Valentine's Day":2024,  "Palm Springs":2020,  "TÁR":2022,  "Birdman or (The Unexpected Virtue of Ignorance)":2014,  "I Origins":2014,  "Bon Appétit, Your Majesty":2022,  "One Tree Hill: Always & Forever":2025,
 };
+
 
 
 const ITEM_MOOD = {
@@ -1284,17 +1291,36 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   useEffect(()=>{
     if(query.length>=2&&!selected){
       const lq=query.toLowerCase();
-      // starts-with match only; search current cat or all cats if none selected
-      const pool=cat?(LIBRARY[cat]||[]):Object.values(LIBRARY).flat();
-      const sw=pool.filter(i=>i.title.toLowerCase().startsWith(lq)).slice(0,8);
-      setResults(sw);
+      if(cat){
+        // Category selected: search only that category, attach cat
+        const sw=(LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().startsWith(lq)).slice(0,8).map(i=>({...i,_cat:cat}));
+        setResults(sw);
+      } else {
+        // No category: search all, attach their category
+        const sw=[];
+        for(const [cid,items] of Object.entries(LIBRARY)){
+          for(const item of items){
+            if(item.title.toLowerCase().startsWith(lq)) sw.push({...item,_cat:cid});
+            if(sw.length>=8)break;
+          }
+          if(sw.length>=8)break;
+        }
+        setResults(sw);
+      }
     } else setResults([]);
   },[query,cat,selected]);
 
   const getGenreForCat=(item,category)=>{
-    // Always return meaningful genre, never "Film"
+    // Real genre from library item — use it
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
-    return CAT_MAP[category]?.labelEn||category;
+    // No genre or explicitly Custom — check if it's actually in the library
+    const inLib=(LIBRARY[category]||[]).some(i=>i.title.toLowerCase()===item.title.toLowerCase());
+    if(inLib){
+      const libItem=(LIBRARY[category]||[]).find(i=>i.title.toLowerCase()===item.title.toLowerCase());
+      return libItem?.genre||CAT_MAP[category]?.labelEn||category;
+    }
+    // Not in library — mark as Custom so display knows
+    return "Custom";
   };
 
   const addToQueue=()=>{
@@ -1308,7 +1334,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     setSelected(null);
     setQuery("");
     setResults([]);
-    // Keep focus for fast multi-entry
+    // Reset category after each add so next entry starts fresh
+    if(!initialCat) setCat(null);
     setTimeout(()=>inputRef.current?.focus(),50);
   };
 
@@ -1335,9 +1362,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:yr2});
     }
     if(!finalQueue.length)return;
-    finalQueue.forEach((item,i)=>{
-      onSave({...item,note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i});
-    });
+    const toSave=finalQueue.map((item,i)=>({...item,note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i}));
+    onSave(toSave);
     onClose();
   };
 
@@ -1381,22 +1407,18 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
           {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
         </div>
 
-        {/* Category required hint */}
-        {!cat&&query.length>=2&&results.length>0&&(
-          <div style={{padding:"8px 14px",borderRadius:10,background:th.accent+"18",border:`1px solid ${th.accent}44`,marginBottom:10,fontSize:12,color:th.accent,fontWeight:500}}>Select a category above to log this entry</div>
-        )}
         {/* Suggestions — starts-with only */}
         {results.length>0&&!selected&&(
           <div style={{marginBottom:12,borderRadius:12,overflow:"hidden",border:`1px solid ${th.border}`}}>
             {results.map((item,i)=>(
-              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}}
+              <div key={i} onClick={()=>{const c=item._cat||cat;setCat(c);setSelected(item);setQuery(item.title);}}
                 style={{padding:"10px 14px",cursor:"pointer",background:th.card,
                   borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                   display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{CAT_MAP[cat]?.emoji}</span>
+                <span style={{fontSize:18}}>{CAT_MAP[item._cat||cat]?.emoji}</span>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div>
-                  <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(item,cat)}{(item.year||(cat==="movies"?MOVIE_YEARS[item.title]:null))?` · ${item.year||MOVIE_YEARS[item.title]}`:""}</div>
+                  <div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:12,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}</div>
+                  <div style={{fontSize:11,color:th.sub}}>{CAT_MAP[item._cat||cat]?.emoji} {CAT_MAP[item._cat||cat]?.labelEn||""}</div>
                 </div>
               </div>
             ))}
@@ -1407,11 +1429,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
         {selected&&(
           <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"18",border:`1px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div>
-              <div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div>
-              <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(selected,cat||"movies")}{(()=>{const y=selected.year||(cat==="movies"?MOVIE_YEARS[selected.title]:null);return y?` · ${y}`:"";})()}</div>
+              <div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}{(()=>{const y=selected.year||((cat||selected._cat)==="movies"?MOVIE_YEARS[selected.title]:null);return y?<span style={{fontWeight:400,color:th.sub,fontSize:12}}> ({y})</span>:null;})()}</div>
+              <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(selected,cat||"movies")}{(()=>{const y=selected.year||((cat||selected._cat)==="movies"?MOVIE_YEARS[selected.title]:null);return y?` · ${y}`:"";})()}</div>
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              {!isEdit&&<button onClick={addToQueue} style={{padding:"6px 14px",borderRadius:20,background:cat?th.accent:"gray",color:"#fff",fontSize:13,fontWeight:600,opacity:cat?1:0.4}} disabled={!cat}>Add{!cat?" (pick category)":""}</button>}
+              {!isEdit&&<button onClick={addToQueue} style={{padding:"6px 14px",borderRadius:20,background:cat?th.accent:"gray",color:"#fff",fontSize:13,fontWeight:600,opacity:cat?1:0.4}} disabled={!cat}>Add</button>}
               <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
             </div>
           </div>
@@ -1425,7 +1447,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 13px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
                 <span style={{fontSize:16}}>{CAT_MAP[item.category]?.emoji}</span>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}{item.year?<span style={{fontWeight:400,color:th.sub}}> ({item.year})</span>:null}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}{(()=>{const y=item.year||(item.category==="movies"?MOVIE_YEARS[item.title]:null);return y?<span style={{fontWeight:400,color:th.sub}}> ({y})</span>:null;})()}</div>
                   <div style={{fontSize:11,color:th.sub}}>{item.genre}</div>
                 </div>
                 <button onClick={()=>removeFromQueue(i)} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>
@@ -1447,13 +1469,12 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
         </div>
 
         {/* Save button */}
-        {!cat&&!isEdit&&<p style={{fontSize:12,color:th.sub,textAlign:"center",marginBottom:8,opacity:0.7}}>Pick a category to start logging</p>}
         <button onClick={handleSave}
-          disabled={!cat&&!isEdit||totalToSave===0&&!(isEdit&&(selected||query.trim()))}
+          disabled={isEdit?((!selected&&!query.trim())):(totalToSave===0)}
           style={{width:"100%",padding:"14px",borderRadius:14,
-            background:(cat&&(totalToSave>0||(selected||query.trim())))||(isEdit&&(selected||query.trim()))?th.accent:"gray",
+            background:isEdit?(selected||query.trim())?th.accent:"gray":totalToSave>0?th.accent:"gray",
             color:"#fff",fontWeight:700,fontSize:16,
-            opacity:(cat&&(totalToSave>0||(selected||query.trim())))||(isEdit&&(selected||query.trim()))?1:0.35}}>
+            opacity:isEdit?(selected||query.trim())?1:0.35:totalToSave>0?1:0.35}}>
           {isEdit?"Save changes":totalToSave>1?`Log ${totalToSave} entries`:t.log_it}
         </button>
       </div>
@@ -1569,7 +1590,7 @@ function HomePage({data,onOpenLog}){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:14,fontWeight:600,color:th.text,
                     overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                    {log.title}{(()=>{const y=log.year||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}
+                    {log.title}{(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}
                   </div>
                   <div style={{fontSize:11,color:th.sub,marginTop:1}}>{genre} · {formatDate(log.date)}</div>
                 </div>
@@ -1634,14 +1655,19 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     return(<div key={i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}{(()=>{const y=log.year||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}</div>
+        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}{(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}</div>
         {(()=>{
-          // For Letterboxd imports: try to find genre from library by title+category
           const lib=(LIBRARY[log.category]||[]);
           const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-          const resolvedGenre=libMatch?.genre||(log.genre&&log.genre!=="Film"&&log.genre!=="Custom"&&log.genre!==CAT_MAP[log.category]?.labelEn?log.genre:null);
-          const display=resolvedGenre||CAT_MAP[log.category]?.labelEn||"";
-          return <div style={{fontSize:11,color:th.sub}}>{display}</div>;
+          // Library match: use its genre
+          if(libMatch?.genre) return <div style={{fontSize:11,color:th.sub}}>{libMatch.genre}</div>;
+          // Has a real stored genre (not fallback words)
+          const skip=["Film","Custom","Movies","Music","Books","Food","Games","Activities"];
+          if(log.genre&&!skip.includes(log.genre)) return <div style={{fontSize:11,color:th.sub}}>{log.genre}</div>;
+          // Custom entry: show Custom tag
+          if(log.genre==="Custom"||(!log.genre&&!libMatch)) return <div style={{fontSize:11,color:th.sub,opacity:0.6}}>Custom · {CAT_MAP[log.category]?.labelEn||""}</div>;
+          // Fallback: category name
+          return <div style={{fontSize:11,color:th.sub}}>{CAT_MAP[log.category]?.labelEn||""}</div>;
         })()}
         {log.note&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>}
       </div>
@@ -1744,7 +1770,7 @@ function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada}){
               <span style={{fontSize:11,fontWeight:700,color:cat?.color||accentColor,textTransform:"uppercase",letterSpacing:1.2}}>{cat?.emoji} {cat?.labelEn}</span>
             </div>
             <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:"var(--text)",lineHeight:1.3,marginBottom:20}}>
-              {item.title}
+              {item.title}{item.category==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:14,fontWeight:400,opacity:0.6}}> ({y})</span>:null;})():null}
             </div>
             <div style={{padding:"14px 16px",borderRadius:16,background:isBarkada?`${th.accent2}12`:`${th.accent}12`,borderLeft:`3px solid ${accentColor}`}}>
               <div style={{fontSize:10,fontWeight:700,color:accentColor,textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>
@@ -2689,9 +2715,14 @@ function App(){
 
   const update=patch=>setData(d=>({...d,...patch}));
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
-  const handleLog=entry=>{
-    if(editEntry) update({logs:data.logs.map(l=>l.id===entry.id?entry:l)});
-    else update({logs:[entry,...data.logs]});
+  const handleLog=entries=>{
+    const arr=Array.isArray(entries)?entries:[entries];
+    if(editEntry&&arr.length===1){
+      update({logs:data.logs.map(l=>l.id===arr[0].id?arr[0]:l)});
+    } else {
+      // Use functional update so all entries are prepended at once
+      setData(d=>({...d,logs:[...arr,...d.logs]}));
+    }
     setEditEntry(null);
   };
   const handleDelete=id=>update({logs:data.logs.filter(l=>l.id!==id)});
