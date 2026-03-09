@@ -1,3 +1,19 @@
+<!--
+================================================================
+  KWENTO PATCH NOTES (dev only)
+================================================================
+
+v5.1 — 2026-03-09
+  - Home: Quick log section — top 5 most-logged entries,
+    tap + to relog with today's date instantly
+  - LogModal: sheet animates on save, shrinks toward timeline tab
+  - Timeline tab: +N badge after logging, clears on tab visit
+  - PTR: re-reads localStorage on pull (picks up deletions)
+  - Update toast floats as pill, no longer collides with content
+  - Patch notes added: HTML comment (here) + in-app Settings
+
+================================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -920,6 +936,16 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(100%);}}
+@keyframes suckToIcon{
+  0%  {transform-origin:30% 100%;transform:translateY(0) scale(1);opacity:1;border-radius:24px 24px 0 0;}
+  30% {transform-origin:30% 100%;transform:translateY(0) scale(0.7);opacity:1;border-radius:16px;}
+  100%{transform-origin:30% 100%;transform:translateY(60%) scale(0.03);opacity:0;border-radius:3px;}
+}
+@keyframes badgePop{
+  0%  {opacity:0;transform:scale(0.4);}
+  60% {transform:scale(1.2);}
+  100%{opacity:1;transform:scale(1);}
+}
 @keyframes cardReveal{from{opacity:0;transform:scale(0.92) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
 @keyframes swipeLeft{to{transform:translateX(-140%) rotate(-14deg);opacity:0;}}
 @keyframes swipeRight{to{transform:translateX(140%) rotate(14deg);opacity:0;}}
@@ -1277,7 +1303,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [closing,setClosing]=useState(false);
 
   const closeWithAnim=()=>{
-    setClosing(true);
+    setClosing("close");
     setTimeout(onClose,260);
   };
 
@@ -1354,7 +1380,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
       onSave({...base,genre,category:cat,note,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr});
-      onClose();
+      setClosing("suck");
+      setTimeout(onClose,420);
       return;
     }
     // Add whatever is typed as custom if cat selected
@@ -1367,14 +1394,15 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     if(!finalQueue.length)return;
     const toSave=finalQueue.map((item,i)=>({...item,note:initialCat?note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i}));
     onSave(toSave);
-    onClose();
+    setClosing("suck");
+    setTimeout(onClose,420);
   };
 
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
-      <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"20px 20px 40px",maxHeight:"88vh",display:"flex",flexDirection:"column",border:`1px solid ${th.border}`,borderBottom:"none",animation:closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)"}}>
+      <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"20px 20px 40px",maxHeight:"88vh",display:"flex",flexDirection:"column",border:`1px solid ${th.border}`,borderBottom:"none",animation:closing==="suck"?"suckToIcon 0.42s cubic-bezier(0.4,0,1,1) forwards":closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)"}}>
 
         {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexShrink:0}}>
@@ -1492,19 +1520,35 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
 
 
 // ─── TAB BAR ─────────────────────────────────────────────────────────────────
-function TabBar({tab,setTab,data}){
+function TabBar({tab,setTab,data,flash=0,animKey=0}){
   const th=THEMES[data.theme];
   const avEmoji=AVATARS.find(a=>a.id===data.avatar)?.emoji||"⭐";
   const avDisplay=data.customPhoto
     ?<img src={data.customPhoto} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%"}}/>
     :<span style={{fontSize:20}}>{avEmoji}</span>;
   const HomeIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>);
-  const TimelineIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/></svg>);
+  const TimelineIcon=({a,flash,animKey})=>(<div style={{position:"relative",display:"inline-flex"}}>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke={flash?th.accent:a?th.accent:th.sub} strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round"
+      style={{transition:"transform 0.2s, stroke 0.2s",transform:flash?"scale(1.2)":"scale(1)"}}>
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/>
+    </svg>
+    {flash>0&&<span style={{
+      position:"absolute",top:-9,right:-11,
+      background:th.accent,color:"#fff",
+      fontSize:9,fontWeight:800,lineHeight:1,
+      padding:"2px 5px",borderRadius:10,
+      pointerEvents:"none",whiteSpace:"nowrap",
+      boxShadow:"0 1px 6px rgba(0,0,0,0.25)"
+    }}>+{flash}</span>}
+  </div>);
   const StoryIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.4 2.4-7.4L2 9.4h7.6L12 2z"/></svg>);
   const SettingsIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>);
   const tabs=[
     {id:"home",icon:<HomeIcon a={tab==="home"}/>},
-    {id:"timeline",icon:<TimelineIcon a={tab==="timeline"}/>},
+    {id:"timeline",icon:<TimelineIcon a={tab==="timeline"} flash={flash} animKey={animKey}/>},
     {id:"mystory",icon:<StoryIcon a={tab==="mystory"}/>},
     {id:"profile",icon:<span style={{fontSize:20,lineHeight:1,opacity:tab==="profile"?1:0.55}}>{avDisplay}</span>},
     {id:"settings",icon:<SettingsIcon a={tab==="settings"}/>},
@@ -2363,6 +2407,7 @@ function SettingsPage({data,onChange,onReset,onImport}){
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [confirmReset,setConfirmReset]=useState(false);
+  const [showPatchNotes,setShowPatchNotes]=useState(false);
   const [suggText,setSuggText]=useState("");
   const [msg,setMsg]=useState("");
   const [importMsg,setImportMsg]=useState("");
@@ -2576,7 +2621,42 @@ function SettingsPage({data,onChange,onReset,onImport}){
         )}
       </div>
 
-      <div style={{textAlign:"center",color:th.sub,fontSize:11,paddingBottom:8}}>{t.made_with} · v5</div>
+      {/* Patch notes */}
+      {showPatchNotes&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:200,display:"flex",alignItems:"flex-end"}} onClick={()=>setShowPatchNotes(false)}>
+          <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 20px 44px",maxHeight:"75vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+              <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>What's new</h3>
+              <button onClick={()=>setShowPatchNotes(false)} style={{fontSize:24,color:th.sub,lineHeight:1}}>×</button>
+            </div>
+            {[
+              {v:"v5.1",date:"Mar 9, 2026",notes:[
+                "Quick log on home — tap + to relog your top entries instantly",
+                "Logging now animates — sheet folds into the timeline tab",
+                "Timeline icon shows +N badge after logging",
+                "Pull-to-refresh now syncs deletions to home",
+                "Update toast no longer overlaps page content",
+              ]},
+            ].map(({v,date,notes})=>(
+              <div key={v} style={{marginBottom:20}}>
+                <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:10}}>
+                  <span style={{fontSize:14,fontWeight:700,color:th.accent}}>{v}</span>
+                  <span style={{fontSize:11,color:th.sub}}>{date}</span>
+                </div>
+                {notes.map((n,i)=>(
+                  <div key={i} style={{display:"flex",gap:8,marginBottom:6}}>
+                    <span style={{color:th.accent,flexShrink:0}}>·</span>
+                    <span style={{fontSize:13,color:th.sub,lineHeight:1.5}}>{n}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div style={{textAlign:"center",paddingBottom:8}}>
+        <button onClick={()=>setShowPatchNotes(true)} style={{fontSize:11,color:th.sub,textDecoration:"underline",background:"none",border:"none",cursor:"pointer"}}>{t.made_with} · v5.1</button>
+      </div>
     </div>
   );
 }
@@ -2588,8 +2668,12 @@ function SettingsPage({data,onChange,onReset,onImport}){
 function App(){
   const [data,setData]=useState(()=>loadData()||defaultData());
   const [tab,setTab]=useState(()=>{ const r=localStorage.getItem("kwento_restore_tab"); if(r){localStorage.removeItem("kwento_restore_tab"); return r;} return "home"; });
+  const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
+  const [timelineUnread,setTimelineUnread]=useState(0);
+  const [badgeAnimKey,setBadgeAnimKey]=useState(0);
+  const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
 
   useEffect(()=>saveData(data),[data]);
@@ -2815,15 +2899,15 @@ function App(){
               )}
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2}}>
-              {tab==="home"&&<HomePage onRelog={handleLog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
+              {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               </div>
-              <TabBar tab={tab} setTab={setTab} data={data}/>
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
+              <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
             </>
           )}
