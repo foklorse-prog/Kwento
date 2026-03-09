@@ -1006,37 +1006,41 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .fiesta-blob4{width:180px;height:180px;background:#c4b5fd;top:55%;left:-30px;animation:blobDrift2 8s ease-in-out infinite;}
 /* jelly tab bar for fiesta */
 .fiesta-tabbar{
-  background:rgba(255,240,255,0.55)!important;
-  backdrop-filter:blur(20px) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(20px) saturate(160%)!important;
-  border-top:1.5px solid rgba(255,255,255,0.75)!important;
+  /* liquid glass base */
+  background:rgba(255,232,250,0.22)!important;
+  backdrop-filter:blur(30px) saturate(210%) brightness(1.1)!important;
+  -webkit-backdrop-filter:blur(30px) saturate(210%) brightness(1.1)!important;
+  border-top:none!important;
+  border-radius:26px 26px 0 0!important;
+  /* jelly texture via SVG turbulence noise overlay */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='80'%3E%3Cfilter id='j'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeBlend in='SourceGraphic' mode='soft-light'/%3E%3C/filter%3E%3Crect width='300' height='80' filter='url(%23j)' opacity='0.12'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,220,248,0.06) 60%, rgba(220,180,255,0.04) 100%)!important;
+  background-blend-mode:overlay, normal!important;
+  /* specular + depth shadows */
   box-shadow:
-    0 -6px 32px rgba(244,162,225,0.25),
-    0 -1px 0 rgba(255,255,255,0.9),
-    inset 0 2px 8px rgba(255,255,255,0.6),
-    inset 0 -1px 4px rgba(200,150,255,0.15)!important;
-  border-radius:24px 24px 0 0!important;
-  /* subtle jelly wobble on load */
-  animation:jellyIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both!important;
+    0 -1px 0 rgba(255,255,255,1),
+    0 -3px 0 rgba(255,255,255,0.3),
+    0 -14px 40px rgba(238,150,228,0.16),
+    inset 0 4px 14px rgba(255,255,255,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -6px 18px rgba(210,130,255,0.14),
+    inset 0 0 30px rgba(255,200,250,0.10)!important;
+  outline:1.5px solid rgba(255,255,255,0.65)!important;
+  outline-offset:-1px!important;
+  animation:jellyIn 0.55s cubic-bezier(0.34,1.45,0.64,1) both!important;
 }
 @keyframes jellyIn{
-  0%{transform:scaleY(0.85) scaleX(1.03);opacity:0.6;}
-  60%{transform:scaleY(1.04) scaleX(0.99);}
-  80%{transform:scaleY(0.98) scaleX(1.01);}
+  0%{transform:scaleY(0.82) scaleX(1.04);opacity:0.5;}
+  55%{transform:scaleY(1.05) scaleX(0.98);}
+  75%{transform:scaleY(0.97) scaleX(1.015);}
+  90%{transform:scaleY(1.015);}
   100%{transform:scaleY(1) scaleX(1);opacity:1;}
 }
-@keyframes jellyTap{
-  0%  {transform:scale(1);}
-  20% {transform:scale(0.82) rotate(-2deg);}
-  50% {transform:scale(1.12) rotate(1.5deg);}
-  70% {transform:scale(0.95) rotate(-1deg);}
-  85% {transform:scale(1.04);}
-  100%{transform:scale(1) rotate(0deg);}
-}
-/* jelly press on tab buttons inside fiesta */
+/* icon press: squish like real gel */
 .fiesta-tabbar button:active{
-  transform:scale(0.88) !important;
-  transition:transform 0.08s !important;
+  transform:scaleY(0.80) scaleX(1.12) !important;
+  transition:transform 0.06s !important;
 }
 
 /* ── Hapon ── */
@@ -1085,13 +1089,15 @@ function UlanRain(){
     const TAB_H=80; // tab bar height in px
 
     // Each drop tracks whether it already triggered a ripple this pass
-    const drops=Array.from({length:22},()=>({
-      x:Math.random(),
+    // Space drops evenly across X with small jitter so ripples spread naturally
+    const DROP_COUNT=28;
+    const drops=Array.from({length:DROP_COUNT},(_,i)=>({
+      x:(i+0.5)/DROP_COUNT + (Math.random()-0.5)*0.06, // evenly spaced + tiny jitter
       y:Math.random()*1.2-0.2,
-      len:12+Math.random()*16,       // short, barely-there streaks
-      speed:200+Math.random()*80,    // slow and gentle
-      opacity:0.05+Math.random()*0.08, // very faint
-      width:0.5+Math.random()*0.4,   // thin
+      len:22+Math.random()*26,
+      speed:260+Math.random()*100,
+      opacity:0.18+Math.random()*0.18,
+      width:0.6+Math.random()*0.5,
       triggered:false,
     }));
 
@@ -1119,44 +1125,45 @@ function UlanRain(){
       ctx.clearRect(0,0,W,H);
 
       // ── rain streaks + impact detection ──
+      // Drops only move vertically — angle is purely visual (draw offset),
+      // never applied to position. This prevents drift, wrapping, wrong-direction streaks.
+      const sinA=Math.sin(ANGLE), cosA=Math.cos(ANGLE);
       drops.forEach(d=>{
-        d.y+=d.speed*dt/H;
-        d.x+=Math.tan(ANGLE)*d.speed*dt/W;
+        d.y+=d.speed*dt/H; // only vertical movement
 
-        // tip of the streak (the leading bright end)
-        const tipY=d.y*H + Math.cos(ANGLE)*d.len;
-        const tipX=d.x*W + Math.sin(ANGLE)*d.len;
+        // tip position (leading end of streak) — angle is draw-only
+        const px=d.x*W;
+        const py=d.y*H;
+        const tipX=px + sinA*d.len;
+        const tipY=py + cosA*d.len;
 
-        // When tip crosses into tab bar, spawn ripple at that exact point
+        // Trigger ripple exactly when tip hits tab bar surface
         if(!d.triggered && tipY>=tabTop){
           d.triggered=true;
-          // clamp x to tab bar width so ripple stays inside
           const rx=Math.max(8,Math.min(W-8,tipX));
-          // y: pin to a natural depth inside the tab bar
-          const ry=tabTop+12+Math.random()*24;
+          const ry=tabTop+8+Math.random()*20;
           spawnRippleAt(rx,ry,ts);
         }
 
-        // Once the whole streak has passed bottom, reset and allow next ripple
-        if(d.y>1.1){
-          d.y=-d.len/H-Math.random()*0.3;
-          d.x=Math.random();
-          d.triggered=false; // reset so it can trigger again next fall
+        // Reset when fully past bottom — restore to evenly spaced X
+        if(py>H+d.len){
+          d.y=-d.len/H-Math.random()*0.4;
+          // nudge x slightly so it doesn't always land same spot, but stay near original band
+          d.x=Math.max(0,Math.min(1, d.x+(Math.random()-0.5)*0.04));
+          d.triggered=false;
         }
-        if(d.x>1.05) d.x=-0.05;
 
-        // Draw streak — clip to above tab bar so it "stops" at the surface
-        const px=d.x*W, py=d.y*H;
-        const ex=tipX, ey=Math.min(tipY, tabTop+2); // stop at tab bar surface
-        if(ey<py) return; // fully above, skip
+        // Draw — stop streak at tab bar surface
+        const ey=Math.min(tipY, tabTop+1);
+        if(ey<=py) return;
 
-        const g=ctx.createLinearGradient(px,py,ex,ey);
+        const g=ctx.createLinearGradient(px,py,tipX,ey);
         g.addColorStop(0,"rgba(162,210,235,0)");
         g.addColorStop(0.5,`rgba(162,210,235,${d.opacity*0.4})`);
         g.addColorStop(1,`rgba(192,226,245,${d.opacity})`);
         ctx.beginPath();
         ctx.moveTo(px,py);
-        ctx.lineTo(ex,ey);
+        ctx.lineTo(tipX,ey);
         ctx.strokeStyle=g;
         ctx.lineWidth=d.width;
         ctx.lineCap="round";
@@ -1784,38 +1791,26 @@ function HomePage({data,onOpenLog,onRelog}){
       {/* This week */}
       <div style={{marginBottom:32}}>
         <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:12}}>{t.this_week}</p>
-        {(()=>{
-          const [bounceCat,setBounceCat]=useState(null);
-          const handleCatTap=(id)=>{
-            if(data.theme==="fiesta"){setBounceCat(id);setTimeout(()=>setBounceCat(null),500);}
-            onOpenLog(id);
-          };
-          return(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-              {CATEGORIES.map(c=>{
-                const cnt=catCounts[c.id]||0;
-                const active=cnt>0;
-                const bouncing=bounceCat===c.id;
-                return(
-                  <div key={c.id} onClick={()=>handleCatTap(c.id)}
-                    style={{background:active?c.color+"15":th.card,
-                      border:`1.5px solid ${active?c.color+"35":th.border}`,
-                      borderRadius:14,padding:"14px 6px 12px",textAlign:"center",cursor:"pointer",
-                      transition:"opacity 0.15s",
-                      opacity:active?1:0.45,
-                      animation:bouncing?"jellyTap 0.5s cubic-bezier(0.34,1.56,0.64,1) both":"none",
-                    }}>
-                    <div style={{fontSize:22,marginBottom:6,lineHeight:1}}>{c.emoji}</div>
-                    <div style={{fontSize:20,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
-                    <div style={{fontSize:10,fontWeight:600,color:active?c.color:th.sub,letterSpacing:0.3,textTransform:"uppercase",opacity:active?0.9:0.6}}>
-                      {data.language==="fil"?c.label:c.labelEn}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+          {CATEGORIES.map(c=>{
+            const cnt=catCounts[c.id]||0;
+            const active=cnt>0;
+            return(
+              <div key={c.id} onClick={()=>onOpenLog(c.id)}
+                style={{background:active?c.color+"15":th.card,
+                  border:`1.5px solid ${active?c.color+"35":th.border}`,
+                  borderRadius:14,padding:"14px 6px 12px",textAlign:"center",cursor:"pointer",
+                  transition:"opacity 0.15s",
+                  opacity:active?1:0.45}}>
+                <div style={{fontSize:22,marginBottom:6,lineHeight:1}}>{c.emoji}</div>
+                <div style={{fontSize:20,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
+                <div style={{fontSize:10,fontWeight:600,color:active?c.color:th.sub,letterSpacing:0.3,textTransform:"uppercase",opacity:active?0.9:0.6}}>
+                  {data.language==="fil"?c.label:c.labelEn}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Quick logs — top 5 most logged, one-tap relog */}
