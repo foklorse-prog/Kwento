@@ -13,28 +13,9 @@
 </head>
 <body>
 <div id="root"></div>
-<div id="err" style="display:none;position:fixed;inset:0;background:#1a1a2e;color:#ff6b6b;padding:20px;font-family:monospace;font-size:12px;overflow:auto;z-index:9999;white-space:pre-wrap"></div>
-<script>
-window.onerror=function(msg,src,line,col,err){
-  var d=document.getElementById('err');
-  d.style.display='block';
-  d.textContent='ERROR: '+msg+'
-Line: '+line+'
-File: '+src+'
-
-'+(err&&err.stack||'');
-  document.getElementById('root').style.display='none';
-};
-window.addEventListener('unhandledrejection',function(e){
-  var d=document.getElementById('err');
-  d.style.display='block';
-  d.textContent='PROMISE ERROR: '+(e.reason&&e.reason.stack||e.reason||e);
-  document.getElementById('root').style.display='none';
-});
-</script>
-<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
@@ -145,7 +126,7 @@ const T = {
     log_something:"Log something",entries:"entries",this_week:"This week",recent_entries:"Recent entries",
     archetype:"Your Archetype",empty_state:"Your journal is empty.",empty_sub:"Start by logging a movie, meal, or moment.",
     search_placeholder:"Search or type anything...",add_reflection:"Add a reflection note... (optional)",
-    log_it:"Log it",quick_logs:"Quick log from past entries",
+    log_it:"Log it ✓",quick_logs:"Quick log from past entries",
     suggestions:"Suggested for You",barkada_picks:"Barkada Picks",
     save:"Save",cancel:"Cancel",your_story:"My Story",last_7_days:"Last 7 days",share_card:"Share My Story",
     collaborator_title:"Contribute to Kwento",
@@ -174,7 +155,7 @@ const T = {
     log_something:"Mag-log ng bagay",entries:"entry",this_week:"Ngayong linggo",recent_entries:"Mga nakaraang entry",
     archetype:"Ang Iyong Arketipo",empty_state:"Walang laman ang iyong talaarawan.",empty_sub:"Magsimula sa pag-log ng pelikula, pagkain, o sandali.",
     search_placeholder:"Maghanap o mag-type ng kahit ano...",add_reflection:"Magdagdag ng tala... (opsyonal)",
-    log_it:"I-log",quick_logs:"Mabilis na log mula sa nakaraang entry",
+    log_it:"I-log ✓",quick_logs:"Mabilis na log mula sa nakaraang entry",
     suggestions:"Para Sa Iyo",barkada_picks:"Mga Piling Barkada",
     save:"I-save",cancel:"Kanselahin",your_story:"Kwento Ko",last_7_days:"Nakaraang 7 araw",share_card:"I-share ang Kwento Ko",
     collaborator_title:"Mag-ambag sa Kwento",
@@ -386,7 +367,6 @@ const LIBRARY = {
     {title:"Binibini — Zack Tabudlo",tags:["OPM","romantic","upbeat","Filipino","contemporary","fun","feel-good"],genre:"OPM R&B",ph:true},
     {title:"Sa Susunod na Habambuhay — Arthur Nery",tags:["OPM","romantic","emotional","Filipino","soulful","contemporary","melancholic"],genre:"OPM Soul",ph:true},
     {title:"Golden Hour — JVKE",tags:["global","romantic","upbeat","pop","feel-good","summer","bright"],genre:"Pop",ph:false},
-    {title:"Harry Styles",tags:["global","pop","indie-pop","soft-rock","upbeat","romantic","feel-good","bright"],genre:"Pop",ph:false},
     {title:"As It Was — Harry Styles",tags:["global","upbeat","chill","pop","feel-good","indie","bright"],genre:"Pop",ph:false},
     {title:"Cruel Summer — Taylor Swift",tags:["global","pop","upbeat","summer","fun","romantic","bright"],genre:"Pop",ph:false},
     {title:"All Too Well — Taylor Swift",tags:["global","emotional","nostalgic","reflective","romantic","intense","literary"],genre:"Pop",ph:false},
@@ -1238,182 +1218,85 @@ function Onboarding({onComplete}){
 }
 
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
-function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=null}){
+function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
-  const isEdit=!!editEntry;
-
-  const [cat,setCat]=useState(editEntry?.category||(initialCat||prefill?.category||"movies"));
-  const [query,setQuery]=useState(editEntry?.title||prefill?.title||"");
+  const [cat,setCat]=useState(editEntry?.category||(initialCat||"movies"));
+  const [query,setQuery]=useState(editEntry?.title||"");
   const [note,setNote]=useState(editEntry?.note||"");
-  const [selected,setSelected]=useState(editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:prefill?{title:prefill.title,tags:prefill.tags||[],genre:prefill.genre||""}:null);
+  const [selected,setSelected]=useState(editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:null);
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
 
-  // Multi-entry queue — only when opened from + Log button (no initialCat, not editing)
-  const isMultiMode=!isEdit&&!initialCat;
-  const [queue,setQueue]=useState([]);
-
   useEffect(()=>{
-    if(query.length<2||selected)return setResults([]);
-    const lq=query.toLowerCase();
-    if(isMultiMode){
-      const all=[];
-      CATEGORIES.forEach(c=>{
-        (LIBRARY[c.id]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,4).forEach(i=>all.push({...i,category:c.id}));
-      });
-      setResults(all.slice(0,12));
-    } else {
-      setResults((LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,8).map(i=>({...i,category:cat})));
-    }
-  },[query,cat,selected,isMultiMode]);
-
-  const addToQueue=item=>{
-    setQueue(q=>[...q,{...item,qid:Date.now()+Math.random()}]);
-    setQuery("");setSelected(null);setResults([]);
-  };
-  const removeFromQueue=qid=>setQueue(q=>q.filter(i=>i.qid!==qid));
+    if(query.length>0&&!selected){
+      const lq=query.toLowerCase();
+      setResults((LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,8));
+    } else setResults([]);
+  },[query,cat,selected]);
 
   const handleSave=()=>{
-    const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
-    if(isMultiMode&&queue.length>0){
-      const toSave=[...queue];
-      if(selected||(query.trim()&&!selected)){
-        const base=selected||{title:query.trim(),tags:[],genre:"Custom",category:cat};
-        toSave.push(base);
-      }
-      toSave.forEach((item,idx)=>{
-        const mood=ITEM_MOOD[item.title]||null;
-        onSave({...item,category:item.category||cat,note:"",mood,date,customDate:useCustomDate?customDate:null,id:Date.now()+idx});
-      });
-      onClose();return;
-    }
     if(!selected&&!query.trim())return;
     const base=selected||{title:query.trim(),tags:[],genre:"Custom",ph:false};
     const mood=ITEM_MOOD[base.title]||null;
+    const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     onSave({...base,category:cat,note,mood,date,customDate:useCustomDate?customDate:null,id:editEntry?.id||Date.now()});
     onClose();
   };
 
-  const canSave=(isMultiMode&&queue.length>0)||selected||(!isMultiMode&&query.trim());
-
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,paddingBottom:44,maxHeight:"92vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
-
-        {/* Header */}
-        <div style={{padding:"20px 20px 0",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{isEdit?t.edit_entry:t.log_entry}</h3>
-          <button onClick={onClose} style={{width:32,height:32,borderRadius:50,background:th.card,border:`1px solid ${th.border}`,fontSize:18,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:24,paddingBottom:44,maxHeight:"90vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{editEntry?t.edit_entry:t.log_entry}</h3>
+          <button onClick={onClose} style={{fontSize:24,color:th.sub}}>×</button>
         </div>
-
-        <div style={{padding:"0 20px"}}>
-          {/* Category tabs — hidden in multi mode */}
-          {!isMultiMode&&(
-            <div style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
-              {CATEGORIES.map(c=>(
-                <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}} style={{padding:"6px 12px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,background:cat===c.id?c.color:th.card,color:cat===c.id?"#fff":th.sub,border:`1px solid ${cat===c.id?c.color:th.border}`,flexShrink:0}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>
+        <div style={{display:"flex",gap:7,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
+          {CATEGORIES.map(c=>(
+            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}} style={{padding:"7px 13px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,background:cat===c.id?c.color:th.card,color:cat===c.id?"#fff":th.sub,border:`1px solid ${cat===c.id?c.color:th.border}`,transition:"all 0.2s"}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>
+          ))}
+        </div>
+        {!editEntry&&(()=>{
+          const past=data.logs.filter(l=>l.category===cat).slice(0,4);
+          if(!past.length)return null;
+          return(<div style={{marginBottom:14}}>
+            <div style={{fontSize:11,color:th.sub,fontWeight:600,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>{t.quick_logs}</div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {past.map((l,i)=>(
+                <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}} style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
               ))}
             </div>
-          )}
-
-          {/* Quick logs — single category mode only */}
-          {!isMultiMode&&!isEdit&&(()=>{
-            const past=data.logs.filter(l=>l.category===cat).slice(0,4);
-            if(!past.length)return null;
-            return(<div style={{marginBottom:14}}>
-              <div style={{fontSize:11,color:th.sub,fontWeight:600,marginBottom:7}}>{t.quick_logs}</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                {past.map((l,i)=>(
-                  <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}} style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
-                ))}
-              </div>
-            </div>);
-          })()}
-
-          {/* Queue */}
-          {isMultiMode&&queue.length>0&&(
-            <div style={{marginBottom:16}}>
-              {queue.map(item=>{
-                const meta=CAT_MAP[item.category];
-                return(
-                  <div key={item.qid} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
-                    <span style={{fontSize:16}}>{meta?.emoji}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
-                      <div style={{fontSize:11,color:th.sub}}>{item.genre}</div>
-                    </div>
-                    <button onClick={()=>removeFromQueue(item.qid)} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Search */}
-          <div style={{background:th.card,border:`1px solid ${selected?th.accent:th.border}`,borderRadius:12,padding:"11px 14px",display:"flex",alignItems:"center",gap:10,marginBottom:8,transition:"border-color 0.2s"}}>
-            <span style={{fontSize:16,opacity:0.6}}>🔍</span>
-            <input value={query} onChange={e=>{setQuery(e.target.value);setSelected(null);}} placeholder={isMultiMode?"Search movies, music, books, food…":t.search_placeholder} style={{flex:1,fontSize:14,color:th.text,background:"transparent"}}/>
-            {query&&<button onClick={()=>{setQuery("");setSelected(null);setResults([]);}} style={{color:th.sub,fontSize:18}}>×</button>}
-          </div>
-
-          {/* Results */}
-          {results.length>0&&!selected&&(
-            <div style={{marginBottom:12,borderRadius:12,overflow:"hidden",border:`1px solid ${th.border}`}}>
-              {results.map((item,i)=>{
-                const meta=CAT_MAP[item.category];
-                const inQueue=isMultiMode&&queue.some(q=>q.title===item.title&&q.category===item.category);
-                return(
-                  <div key={i} onClick={()=>isMultiMode?(!inQueue&&addToQueue(item)):(setSelected(item);setQuery(item.title);setResults([]);)}
-                    style={{padding:"10px 14px",cursor:inQueue?"default":"pointer",background:inQueue?th.accent+"11":th.card,display:"flex",alignItems:"center",gap:10,borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",opacity:inQueue?0.5:1}}>
-                    <span style={{fontSize:18,flexShrink:0}}>{meta?.emoji}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
-                      <div style={{fontSize:11,color:th.sub}}>{item.genre}</div>
-                    </div>
-                    {isMultiMode&&!inQueue&&<span style={{fontSize:11,color:th.accent,fontWeight:600,flexShrink:0}}>+ Add</span>}
-                    {inQueue&&<span style={{fontSize:11,color:th.sub,flexShrink:0}}>Added</span>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Selected (single mode) */}
-          {!isMultiMode&&selected&&(
-            <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"18",border:`1px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div>
-                <div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div>
-                <div style={{fontSize:11,color:th.sub,marginTop:2}}>{selected.genre}</div>
-              </div>
-              <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
-            </div>
-          )}
-
-          {/* Note — single mode only */}
-          {!isMultiMode&&(
-            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection} style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:64,resize:"none",lineHeight:1.5,marginBottom:14}}/>
-          )}
-
-          {/* Date */}
-          <div style={{marginBottom:18}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,cursor:"pointer"}} onClick={()=>setUseCustomDate(v=>!v)}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:14}}>📅</span>
-                <span style={{fontSize:13,color:th.text}}>{useCustomDate?customDate:lang==="fil"?"Ngayon":"Today"}</span>
-              </div>
-              <span style={{fontSize:11,color:th.accent,fontWeight:600}}>{useCustomDate?lang==="fil"?"I-reset":"Reset":lang==="fil"?"Baguhin":"Change"}</span>
-            </div>
-            {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:12,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text,marginTop:6}}/>}
-          </div>
-
-          {/* Save */}
-          <button onClick={handleSave} disabled={!canSave} style={{width:"100%",padding:"14px",borderRadius:14,background:canSave?th.accent:"#88888844",color:"#fff",fontWeight:700,fontSize:15,marginBottom:4,opacity:canSave?1:0.5}}>
-            {isMultiMode&&queue.length>1?`${lang==="fil"?"I-log ang":"Log"} ${queue.length} entries`:t.log_it}
-          </button>
+          </div>);
+        })()}
+        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+          <span>🔍</span>
+          <input value={query} onChange={e=>{setQuery(e.target.value);setSelected(null);}} placeholder={t.search_placeholder} style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}/>
+          {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
         </div>
+        {results.length>0&&!selected&&(
+          <div style={{marginBottom:12}}>
+            {results.map((item,i)=>(
+              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}} style={{padding:"9px 13px",borderRadius:10,cursor:"pointer",marginBottom:5,background:th.card,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18}}>{CAT_MAP[cat]?.emoji}</span>
+                <div><div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div><div style={{fontSize:11,color:th.sub}}>{item.genre}</div></div>
+              </div>
+            ))}
+          </div>
+        )}
+        {selected&&(
+          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"22",border:`1px solid ${th.accent}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div><div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div><div style={{fontSize:11,color:th.sub}}>{selected.genre}</div></div>
+            <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
+          </div>
+        )}
+        <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection} style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:12}}/>
+        <div style={{marginBottom:16}}>
+          <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:8}}>{useCustomDate?"Use today":"Log for a different date"}</button>
+          {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:10,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text}}/>}
+        </div>
+        <button onClick={handleSave} disabled={!selected&&!query.trim()} style={{width:"100%",padding:"14px",borderRadius:14,background:selected||query.trim()?th.accent:"gray",color:"#fff",fontWeight:700,fontSize:16,opacity:selected||query.trim()?1:0.4}}>{t.log_it}</button>
       </div>
     </div>
   );
@@ -1486,13 +1369,13 @@ function HomePage({data,onOpenLog}){
           <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.recent_entries}</h2>
           {recent.map((log,i)=>{
             const meta=CAT_MAP[log.category];
-            return(<div key={i} className="fade-in" onClick={()=>onOpenLog(log.category,log)} style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`,cursor:"pointer"}}>
+            return(<div key={i} className="fade-in" style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`}}>
               <div style={{width:38,height:38,borderRadius:10,flexShrink:0,fontSize:20,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{log.title}</div>
                 <div style={{fontSize:11,color:th.sub}}>{formatDate(log.date)}</div>
               </div>
-              <span style={{fontSize:12,color:th.accent,fontWeight:600,flexShrink:0}}>+ Log</span>
+              {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
             </div>);
           })}
         </div>
@@ -1548,15 +1431,12 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
 
   const renderEntry=(log,i)=>{
     const meta=CAT_MAP[log.category];
-    const isMovie=log.category==="movies";
-    const displayGenre=log.genre&&log.genre!=="Film"&&log.genre!=="Custom"?log.genre:meta?.labelEn||"";
-    const titleLine=isMovie&&log.year?`${log.title} (${log.year})`:log.title;
-    return(<div key={log.id||i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
+    return(<div key={i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{titleLine}</div>
-        {displayGenre?<div style={{fontSize:11,color:th.sub}}>{displayGenre}</div>:null}
-        {log.note?<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>:null}
+        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}</div>
+        <div style={{fontSize:11,color:th.sub}}>{log.genre||""}</div>
+        {log.note&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>}
       </div>
       <div style={{display:"flex",gap:6,flexShrink:0}}>
         <button onClick={()=>onEdit(log)} style={{width:32,height:32,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✏️</button>
@@ -2382,12 +2262,14 @@ function SettingsPage({data,onChange,onReset,onImport}){
                   cols.push(cur.trim());
                   return cols;
                 };
+                const existingTitles=new Set((data.logs||[]).filter(l=>l.category==="movies").map(l=>l.title.toLowerCase().trim()));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
                   const cols=parseRow(lines[i]);
                   const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
                   if(!title)continue;
+                  if(existingTitles.has(title.toLowerCase()))continue;
                   const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
                   const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
                   const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
@@ -2412,6 +2294,7 @@ function SettingsPage({data,onChange,onReset,onImport}){
                     fromLetterboxd:true,
                     lbRating:!isNaN(ratingRaw)?ratingRaw:null,
                   });
+                  existingTitles.add(title.toLowerCase());
                 }
                 if(!newEntries.length){
                   setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
@@ -2455,7 +2338,6 @@ function App(){
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [logCat,setLogCat]=useState(null);
-  const [logPrefill,setLogPrefill]=useState(null);
 
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
@@ -2468,7 +2350,7 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entry=>{
     if(editEntry) update({logs:data.logs.map(l=>l.id===entry.id?entry:l)});
-    else setData(d=>({...d,logs:[entry,...d.logs]}));
+    else update({logs:[entry,...data.logs]});
     setEditEntry(null);
   };
   const handleDelete=id=>update({logs:data.logs.filter(l=>l.id!==id)});
@@ -2503,13 +2385,13 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}}/>}
+              {tab==="home"&&<HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat} prefill={logPrefill}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
             </>
           )}
