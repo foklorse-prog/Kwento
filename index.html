@@ -126,7 +126,7 @@ const T = {
     log_something:"Log something",entries:"entries",this_week:"This week",recent_entries:"Recent entries",
     archetype:"Your Archetype",empty_state:"Your journal is empty.",empty_sub:"Start by logging a movie, meal, or moment.",
     search_placeholder:"Search or type anything...",add_reflection:"Add a reflection note... (optional)",
-    log_it:"Log it ✓",quick_logs:"Quick log from past entries",
+    log_it:"Log it",quick_logs:"Quick log from past entries",
     suggestions:"Suggested for You",barkada_picks:"Barkada Picks",
     save:"Save",cancel:"Cancel",your_story:"My Story",last_7_days:"Last 7 days",share_card:"Share My Story",
     collaborator_title:"Contribute to Kwento",
@@ -155,7 +155,7 @@ const T = {
     log_something:"Mag-log ng bagay",entries:"entry",this_week:"Ngayong linggo",recent_entries:"Mga nakaraang entry",
     archetype:"Ang Iyong Arketipo",empty_state:"Walang laman ang iyong talaarawan.",empty_sub:"Magsimula sa pag-log ng pelikula, pagkain, o sandali.",
     search_placeholder:"Maghanap o mag-type ng kahit ano...",add_reflection:"Magdagdag ng tala... (opsyonal)",
-    log_it:"I-log ✓",quick_logs:"Mabilis na log mula sa nakaraang entry",
+    log_it:"I-log",quick_logs:"Mabilis na log mula sa nakaraang entry",
     suggestions:"Para Sa Iyo",barkada_picks:"Mga Piling Barkada",
     save:"I-save",cancel:"Kanselahin",your_story:"Kwento Ko",last_7_days:"Nakaraang 7 araw",share_card:"I-share ang Kwento Ko",
     collaborator_title:"Mag-ambag sa Kwento",
@@ -367,6 +367,7 @@ const LIBRARY = {
     {title:"Binibini — Zack Tabudlo",tags:["OPM","romantic","upbeat","Filipino","contemporary","fun","feel-good"],genre:"OPM R&B",ph:true},
     {title:"Sa Susunod na Habambuhay — Arthur Nery",tags:["OPM","romantic","emotional","Filipino","soulful","contemporary","melancholic"],genre:"OPM Soul",ph:true},
     {title:"Golden Hour — JVKE",tags:["global","romantic","upbeat","pop","feel-good","summer","bright"],genre:"Pop",ph:false},
+    {title:"Harry Styles",tags:["global","pop","indie-pop","soft-rock","upbeat","romantic","feel-good","bright","English"],genre:"Pop",ph:false},
     {title:"As It Was — Harry Styles",tags:["global","upbeat","chill","pop","feel-good","indie","bright"],genre:"Pop",ph:false},
     {title:"Cruel Summer — Taylor Swift",tags:["global","pop","upbeat","summer","fun","romantic","bright"],genre:"Pop",ph:false},
     {title:"All Too Well — Taylor Swift",tags:["global","emotional","nostalgic","reflective","romantic","intense","literary"],genre:"Pop",ph:false},
@@ -803,24 +804,30 @@ function loadData(){
         const bk=localStorage.getItem(SK+"_bk");
         if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
       }
-      // Scrub old "Letterboxd rating: X★" notes left from earlier import version
-      // Also fix genre:"Film" on old imports — look up real genre from library
-      // Also backfill year from tags if missing
+      // Scrub old "Letterboxd rating: X★" notes, fix genre:"Film", backfill year
+      // Also: auto-enrich ANY entry with genre:"Custom" if library now has it
       if(parsed.logs){
         parsed.logs=parsed.logs.map(l=>{
-          if(!l.fromLetterboxd)return l;
           let updated={...l};
-          // Fix note
-          if(updated.note&&updated.note.startsWith("Letterboxd rating:"))updated.note="";
-          // Fix genre
-          if(!updated.genre||updated.genre==="Film"){
-            const lib=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
-            if(lib?.genre)updated.genre=lib.genre;
+          // Letterboxd-specific fixes
+          if(updated.fromLetterboxd){
+            if(updated.note&&updated.note.startsWith("Letterboxd rating:"))updated.note="";
+            if(!updated.genre||updated.genre==="Film"){
+              const lib=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
+              if(lib?.genre)updated.genre=lib.genre;
+            }
+            if(!updated.year&&updated.tags){
+              const yearTag=updated.tags.find(tag=>/^\d{4}$/.test(tag));
+              if(yearTag){updated.year=yearTag;updated.tags=updated.tags.filter(tag=>tag!==yearTag);}
+            }
           }
-          // Backfill year from tags (old import pushed year into tags)
-          if(!updated.year&&updated.tags){
-            const yearTag=updated.tags.find(tag=>/^\d{4}$/.test(tag));
-            if(yearTag){updated.year=yearTag;updated.tags=updated.tags.filter(tag=>tag!==yearTag);}
+          // Auto-enrich custom entries from any category when library has them now
+          if(updated.genre==="Custom"&&updated.category){
+            const lib=(LIBRARY[updated.category]||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
+            if(lib){
+              updated.genre=lib.genre||updated.genre;
+              if(lib.tags)updated.tags=[...new Set([...(updated.tags||[]),...lib.tags])];
+            }
           }
           return updated;
         });
@@ -884,6 +891,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes cardReveal{from{opacity:0;transform:scale(0.92) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
 @keyframes swipeLeft{to{transform:translateX(-140%) rotate(-14deg);opacity:0;}}
 @keyframes swipeRight{to{transform:translateX(140%) rotate(14deg);opacity:0;}}
@@ -1300,7 +1308,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=nu
           if(match){found={...match,_cat:c.id,category:c.id};break;}
         }
         if(found)toSave.push(found);
-        else toSave.push({title:query.trim(),tags:[],genre:"Custom",category:"movies",_cat:"movies"});
+        else toSave.push({title:query.trim(),tags:[],genre:"Custom",category:cat,_cat:cat});
       }
       if(!toSave.length)return;
       const base=Date.now();
@@ -1321,7 +1329,9 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=nu
     onClose();
   };
 
-  const canSave=(isMultiMode&&(queue.length>0||query.trim().length>0))||(!isMultiMode&&(selected||query.trim()));
+  // Can save if: queue has items, OR something selected, OR typed something with a valid category context
+  const typedIsValid=query.trim().length>0&&(!isMultiMode||(catFilter&&cat));
+  const canSave=(isMultiMode&&queue.length>0)||(selected)||typedIsValid;
 
   // Design tokens — 3 sizes only
   const fs={title:20,body:14,meta:12};
@@ -1501,16 +1511,40 @@ function TabBar({tab,setTab,data}){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({data,onOpenLog}){
+function HomePage({data,onOpenLog,onRefresh,refreshing}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
+  const lang=data.language;
   const h=new Date().getHours();
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
   const weekLogs=getWeekLogs(data.logs);
   const recent=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
+
+  const scrollRef=React.useRef(null);
+  const touchStartY=React.useRef(0);
+  const [pullDist,setPullDist]=React.useState(0);
+  const isPulling=React.useRef(false);
+
+  const onTouchStart=e=>{if(scrollRef.current?.scrollTop===0)touchStartY.current=e.touches[0].clientY;};
+  const onTouchMove=e=>{
+    if(scrollRef.current?.scrollTop>0)return;
+    const dist=e.touches[0].clientY-touchStartY.current;
+    if(dist>0){isPulling.current=true;setPullDist(Math.min(dist*0.4,60));}
+  };
+  const onTouchEnd=()=>{
+    if(pullDist>40&&onRefresh)onRefresh();
+    setPullDist(0);isPulling.current=false;
+  };
+
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div ref={scrollRef} className="fade-in"
+      onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+      style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+      {/* Pull-to-refresh indicator */}
+      <div style={{height:refreshing?40:pullDist,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",transition:isPulling.current?"none":"height 0.25s ease",marginTop:-8,marginBottom:4}}>
+        {(pullDist>15||refreshing)&&<span style={{fontSize:16,opacity:Math.min(pullDist/40,1),display:"inline-block",animation:refreshing?"spin 0.7s linear infinite":pullDist>40?"none":"none",transform:!refreshing?`rotate(${pullDist*3}deg)`:""}}>↻</span>}
+      </div>
       <div style={{marginBottom:22}}>
         <p style={{color:th.sub,fontSize:12,marginBottom:4}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName}</h1>
@@ -1601,7 +1635,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const renderEntry=(log,i)=>{
     const meta=CAT_MAP[log.category];
     const isMovie=log.category==="movies";
-    const displayGenre=(!log.genre||log.genre==="Film"||log.genre==="Custom")?null:log.genre;
+    const displayGenre=(!log.genre||log.genre==="Film")?null:log.genre==="Custom"?(meta?.labelEn||null):log.genre;
     const titleLine=isMovie&&log.year?`${log.title} (${log.year})`:log.title;
     return(<div key={log.id||i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
@@ -2510,6 +2544,17 @@ function App(){
   const [editEntry,setEditEntry]=useState(null);
   const [logCat,setLogCat]=useState(null);
   const [logPrefill,setLogPrefill]=useState(null);
+  const [refreshing,setRefreshing]=useState(false);
+
+  const hardRefresh=()=>{
+    setRefreshing(true);
+    setTimeout(()=>{
+      // Re-run loadData which applies all migrations (library enrichment etc.)
+      const fresh=loadData();
+      if(fresh)setData(fresh);
+      setRefreshing(false);
+    },600);
+  };
 
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
@@ -2557,7 +2602,7 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}}/>}
+              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}} onRefresh={hardRefresh} refreshing={refreshing}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
