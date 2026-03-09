@@ -937,9 +937,9 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(100%);}}
 @keyframes suckToIcon{
-  0%  {transform-origin:30% 100%;transform:translateY(0) scale(1);opacity:1;border-radius:24px 24px 0 0;}
-  30% {transform-origin:30% 100%;transform:translateY(0) scale(0.7);opacity:1;border-radius:16px;}
-  100%{transform-origin:30% 100%;transform:translateY(60%) scale(0.03);opacity:0;border-radius:3px;}
+  0%  {transform-origin:50% 100%;transform:translateY(0) scale(1);opacity:1;border-radius:24px 24px 0 0;}
+  35% {transform-origin:50% 100%;transform:translateY(0) scale(0.55);opacity:1;border-radius:14px;}
+  100%{transform-origin:50% 100%;transform:translateY(65%) scale(0.04);opacity:0;border-radius:3px;}
 }
 @keyframes badgePop{
   0%  {opacity:0;transform:scale(0.4);}
@@ -2402,12 +2402,11 @@ function ProfilePage({data,onChange}){
 }
 
 // ─── SETTINGS PAGE ────────────────────────────────────────────────────────────
-function SettingsPage({data,onChange,onReset,onImport}){
+function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [confirmReset,setConfirmReset]=useState(false);
-  const [showPatchNotes,setShowPatchNotes]=useState(false);
   const [suggText,setSuggText]=useState("");
   const [msg,setMsg]=useState("");
   const [importMsg,setImportMsg]=useState("");
@@ -2621,14 +2620,11 @@ function SettingsPage({data,onChange,onReset,onImport}){
         )}
       </div>
 
-      {/* Patch notes */}
-      {showPatchNotes&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:200,display:"flex",alignItems:"flex-end"}} onClick={()=>setShowPatchNotes(false)}>
-          <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 20px 44px",maxHeight:"75vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}} onClick={e=>e.stopPropagation()}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-              <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>What's new</h3>
-              <button onClick={()=>setShowPatchNotes(false)} style={{fontSize:24,color:th.sub,lineHeight:1}}>×</button>
-            </div>
+      {/* Patch notes modal — rendered at app level via prop */}
+      <div style={{display:"none"}}/>
+      {/* placeholder — modal is in App */}
+      {false&&(
+        <div>
             {[
               {v:"v5.1",date:"Mar 9, 2026",notes:[
                 "Quick log on home — tap + to relog your top entries instantly",
@@ -2651,11 +2647,10 @@ function SettingsPage({data,onChange,onReset,onImport}){
                 ))}
               </div>
             ))}
-          </div>
-        </div>
+      </div>
       )}
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <button onClick={()=>setShowPatchNotes(true)} style={{fontSize:11,color:th.sub,textDecoration:"underline",background:"none",border:"none",cursor:"pointer"}}>{t.made_with} · v5.1</button>
+        <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.sub,textDecoration:"underline",background:"none",border:"none",cursor:"pointer"}}>{t.made_with} · v5.1</button>
       </div>
     </div>
   );
@@ -2672,6 +2667,7 @@ function App(){
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [timelineUnread,setTimelineUnread]=useState(0);
+  const [showPatch,setShowPatch]=useState(false);
   const [badgeAnimKey,setBadgeAnimKey]=useState(0);
   const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
@@ -2903,10 +2899,34 @@ function App(){
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
+              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)}/>}
+              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
+              {showPatch&&(
+                <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"flex-end"}} onClick={()=>setShowPatch(false)}>
+                  <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:THEMES[data.theme].bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 20px 44px",maxHeight:"75vh",overflowY:"auto",border:`1px solid ${THEMES[data.theme].border}`,borderBottom:"none"}} onClick={e=>e.stopPropagation()}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:THEMES[data.theme].text}}>What's new in v5.1</h3>
+                      <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
+                    </div>
+                    <div style={{fontSize:11,color:THEMES[data.theme].sub,marginBottom:16}}>Mar 9, 2026</div>
+                    {[
+                      "Quick log on home — tap + to relog your top entries instantly",
+                      "Logging now animates — sheet folds into the timeline tab icon",
+                      "Timeline icon shows +N badge after logging, clears on visit",
+                      "Pull-to-refresh now syncs deletions from timeline to home",
+                      "Update toast no longer overlaps page content",
+                      "Patch notes — tap the version number in Settings to see this",
+                    ].map((n,i)=>(
+                      <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
+                        <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
+                        <span style={{fontSize:13,color:THEMES[data.theme].sub,lineHeight:1.5}}>{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
             </>
