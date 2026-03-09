@@ -1272,11 +1272,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
-
-  // If editing, single-entry mode
   const isEdit=!!editEntry;
 
-  // Category — null means none selected (for multi-log); initialCat only pre-selects if editing or cat-click
   const [cat,setCat]=useState(isEdit?editEntry.category:(initialCat||null));
   const [query,setQuery]=useState(isEdit?editEntry.title:"");
   const [note,setNote]=useState(isEdit?editEntry.note:"");
@@ -1284,59 +1281,60 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
-  // Multi-entry queue
   const [queue,setQueue]=useState([]);
   const inputRef=useRef(null);
+  const catRowRef=useRef(null);
+
+  // Scroll active category pill into view
+  useEffect(()=>{
+    if(!cat||!catRowRef.current)return;
+    setTimeout(()=>{
+      const btn=catRowRef.current?.querySelector(`[data-cat="${cat}"]`);
+      if(btn) btn.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+    },80);
+  },[cat]);
 
   useEffect(()=>{
-    if(query.length>=2&&!selected){
+    if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
-      if(cat){
-        // Category selected: search only that category, attach cat
-        const sw=(LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().startsWith(lq)).slice(0,8).map(i=>({...i,_cat:cat}));
-        setResults(sw);
-      } else {
-        // No category: search all, attach their category
-        const sw=[];
-        for(const [cid,items] of Object.entries(LIBRARY)){
-          for(const item of items){
-            if(item.title.toLowerCase().startsWith(lq)) sw.push({...item,_cat:cid});
-            if(sw.length>=8)break;
-          }
-          if(sw.length>=8)break;
-        }
-        setResults(sw);
-      }
+      const pool=cat?(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})):
+        Object.entries(LIBRARY).flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
+      // starts-with first, then contains — dedupe
+      const sw=pool.filter(i=>i.title.toLowerCase().startsWith(lq));
+      const co=pool.filter(i=>!i.title.toLowerCase().startsWith(lq)&&i.title.toLowerCase().includes(lq));
+      setResults([...sw,...co].slice(0,5));
     } else setResults([]);
-  },[query,cat,selected]);
+  },[query,cat]);
 
   const getGenreForCat=(item,category)=>{
-    // Real genre from library item — use it
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
-    // No genre or explicitly Custom — check if it's actually in the library
     const inLib=(LIBRARY[category]||[]).some(i=>i.title.toLowerCase()===item.title.toLowerCase());
     if(inLib){
       const libItem=(LIBRARY[category]||[]).find(i=>i.title.toLowerCase()===item.title.toLowerCase());
       return libItem?.genre||CAT_MAP[category]?.labelEn||category;
     }
-    // Not in library — mark as Custom so display knows
     return "Custom";
   };
 
-  const addToQueue=()=>{
-    if(!selected&&!query.trim())return;
-    if(!cat)return;
-    const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
-    const mood=ITEM_MOOD[base.title]||null;
-    const genre=getGenreForCat(base,cat);
-    const yr=base.year||(cat==="movies"?MOVIE_YEARS[base.title]:null)||null;
-    setQueue(q=>[...q,{...base,genre,category:cat,mood,year:yr}]);
-    setSelected(null);
+  // Clicking a suggestion immediately adds it to queue
+  const addItem=(item)=>{
+    const c=item._cat||cat;
+    if(!c)return;
+    const genre=getGenreForCat(item,c);
+    const yr=item.year||(c==="movies"?MOVIE_YEARS[item.title]:null)||null;
+    setQueue(q=>[...q,{...item,genre,category:c,mood:ITEM_MOOD[item.title]||null,year:yr}]);
     setQuery("");
     setResults([]);
-    // Reset category after each add so next entry starts fresh
     if(!initialCat) setCat(null);
-    setTimeout(()=>inputRef.current?.focus(),50);
+    // Keep keyboard open
+    requestAnimationFrame(()=>inputRef.current?.focus());
+  };
+
+  // Typing something not in library and pressing Enter or tapping Log
+  const addCustom=()=>{
+    if(!query.trim()||!cat)return;
+    const item={title:query.trim(),tags:[],genre:"Custom",year:null,_cat:cat};
+    addItem(item);
   };
 
   const removeFromQueue=idx=>setQueue(q=>q.filter((_,i)=>i!==idx));
@@ -1344,7 +1342,6 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const handleSave=()=>{
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     if(isEdit){
-      // Single edit save
       if(!selected&&!query.trim())return;
       const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat||"movies");
@@ -1353,125 +1350,129 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       onClose();
       return;
     }
-    // Multi: add current if any, then save all
+    // Add whatever is typed as custom if cat selected
     let finalQueue=[...queue];
-    if((selected||query.trim())&&cat){
-      const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
+    if(query.trim()&&cat){
+      const base={title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat);
-      const yr2=base.year||(cat==="movies"?MOVIE_YEARS[base.title]:null)||null;
-      finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:yr2});
+      finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:null});
     }
     if(!finalQueue.length)return;
-    const toSave=finalQueue.map((item,i)=>({...item,note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i}));
+    const toSave=finalQueue.map((item,i)=>({...item,note:initialCat?note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i}));
     onSave(toSave);
     onClose();
   };
 
-  const totalToSave=queue.length+((selected||query.trim())&&cat?1:0);
+  const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 24px 44px",maxHeight:"92vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"20px 20px 40px",maxHeight:"88vh",display:"flex",flexDirection:"column",border:`1px solid ${th.border}`,borderBottom:"none"}}>
 
         {/* Header */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexShrink:0}}>
           <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{isEdit?t.edit_entry:t.log_entry}</h3>
           <button onClick={onClose} style={{fontSize:24,color:th.sub,lineHeight:1}}>×</button>
         </div>
 
         {/* Category pills */}
-        <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
+        <div ref={catRowRef} style={{display:"flex",gap:7,marginBottom:14,overflowX:"auto",paddingBottom:4,flexShrink:0}}>
           {CATEGORIES.map(c=>(
-            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}}
-              style={{padding:"7px 14px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,
+            <button key={c.id} data-cat={c.id}
+              onClick={()=>{setCat(c.id);requestAnimationFrame(()=>inputRef.current?.focus());}}
+              style={{padding:"7px 14px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:600,
                 background:cat===c.id?c.color:th.card,
                 color:cat===c.id?"#fff":th.sub,
-                border:`1px solid ${cat===c.id?c.color:th.border}`,
+                border:`2px solid ${cat===c.id?c.color:th.border}`,
+                flexShrink:0,
                 transition:"all 0.15s"}}>
               {c.emoji} {lang==="fil"?c.label:c.labelEn}
             </button>
           ))}
         </div>
 
-        {/* Search input — readOnly until category selected */}
-        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-          <span style={{color:th.sub}}>🔍</span>
+        {/* Search input */}
+        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:8,flexShrink:0}}>
+          <span style={{color:th.sub,fontSize:15}}>🔍</span>
           <input
             ref={inputRef}
             value={query}
+            autoFocus={false}
             onChange={e=>{setQuery(e.target.value);setSelected(null);}}
-            onKeyDown={e=>{if(e.key==="Enter"&&(selected||query.trim())&&cat)addToQueue();}}
+            onKeyDown={e=>{
+              if(e.key==="Enter"){
+                if(results.length>0) addItem(results[0]);
+                else if(query.trim()&&cat) addCustom();
+              }
+            }}
             placeholder={t.search_placeholder}
             style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}
           />
-          {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
+          {query&&<button onMouseDown={e=>e.preventDefault()} onClick={()=>{setQuery("");setResults([]);}} style={{color:th.sub,fontSize:18}}>×</button>}
         </div>
 
-        {/* Suggestions — starts-with only */}
-        {results.length>0&&!selected&&(
-          <div style={{marginBottom:12,borderRadius:12,overflow:"hidden",border:`1px solid ${th.border}`}}>
+        {/* Suggestions — max 5, scrollable, starts-with ranked first */}
+        {results.length>0&&(
+          <div style={{marginBottom:8,borderRadius:12,overflow:"hidden",border:`1px solid ${th.border}`,maxHeight:220,overflowY:"auto",flexShrink:0}}>
             {results.map((item,i)=>(
-              <div key={i} onClick={()=>{const c=item._cat||cat;setCat(c);setSelected(item);setQuery(item.title);}}
+              <div key={i}
+                onMouseDown={e=>e.preventDefault()}
+                onClick={()=>addItem(item)}
                 style={{padding:"10px 14px",cursor:"pointer",background:th.card,
                   borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                   display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{CAT_MAP[item._cat||cat]?.emoji}</span>
+                <span style={{fontSize:18,flexShrink:0}}>{CAT_MAP[item._cat||cat]?.emoji}</span>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:12,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}</div>
-                  <div style={{fontSize:11,color:th.sub}}>{CAT_MAP[item._cat||cat]?.emoji} {CAT_MAP[item._cat||cat]?.labelEn||""}</div>
+                  <div style={{fontSize:14,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:12,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}
+                  </div>
+                  <div style={{fontSize:11,color:th.sub}}>{CAT_MAP[item._cat||cat]?.labelEn||""}</div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Selected item preview */}
-        {selected&&(
-          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"18",border:`1px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div>
-              <div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}{(()=>{const y=selected.year||((cat||selected._cat)==="movies"?MOVIE_YEARS[selected.title]:null);return y?<span style={{fontWeight:400,color:th.sub,fontSize:12}}> ({y})</span>:null;})()}</div>
-              <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(selected,cat||"movies")}{(()=>{const y=selected.year||((cat||selected._cat)==="movies"?MOVIE_YEARS[selected.title]:null);return y?` · ${y}`:"";})()}</div>
-            </div>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              {!isEdit&&<button onClick={addToQueue} style={{padding:"6px 14px",borderRadius:20,background:cat?th.accent:"gray",color:"#fff",fontSize:13,fontWeight:600,opacity:cat?1:0.4}} disabled={!cat}>Add</button>}
-              <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
-            </div>
-          </div>
-        )}
-
-        {/* Queue — items staged for multi-log */}
+        {/* Queue */}
         {queue.length>0&&(
-          <div style={{marginBottom:14}}>
-            <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Logging {queue.length} item{queue.length>1?"s":""}</div>
+          <div style={{marginBottom:8,flexShrink:0}}>
+            <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>
+              Logging {queue.length} item{queue.length>1?"s":""}
+            </div>
             {queue.map((item,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 13px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
-                <span style={{fontSize:16}}>{CAT_MAP[item.category]?.emoji}</span>
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,marginBottom:5}}>
+                <span style={{fontSize:15}}>{CAT_MAP[item.category]?.emoji}</span>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}{(()=>{const y=item.year||(item.category==="movies"?MOVIE_YEARS[item.title]:null);return y?<span style={{fontWeight:400,color:th.sub}}> ({y})</span>:null;})()}</div>
-                  <div style={{fontSize:11,color:th.sub}}>{item.genre}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {item.title}{(()=>{const y=item.year||(item.category==="movies"?MOVIE_YEARS[item.title]:null);return y?<span style={{fontWeight:400,color:th.sub}}> ({y})</span>:null;})()}
+                  </div>
+                  <div style={{fontSize:11,color:th.sub}}>{item.genre==="Custom"?"Custom · "+(CAT_MAP[item.category]?.labelEn||""):item.genre}</div>
                 </div>
-                <button onClick={()=>removeFromQueue(i)} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>
+                <button onMouseDown={e=>e.preventDefault()} onClick={()=>removeFromQueue(i)} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>
               </div>
             ))}
           </div>
         )}
 
-        {/* Note — only for single/edit mode */}
-        {(isEdit||(!isEdit&&queue.length===0))&&(
+        {/* Spacer pushes controls to bottom */}
+        <div style={{flex:1}}/>
+
+        {/* Note — edit mode or single-category log */}
+        {(isEdit||initialCat)&&(
           <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection}
-            style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:14}}/>
+            style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:60,resize:"none",lineHeight:1.5,marginBottom:12,flexShrink:0}}/>
         )}
 
         {/* Date */}
-        <div style={{marginBottom:18}}>
-          <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:8}}>{useCustomDate?"Use today":"Log for a different date"}</button>
+        <div style={{marginBottom:14,flexShrink:0}}>
+          <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:6}}>{useCustomDate?"Use today":"Log for a different date"}</button>
           {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:10,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text}}/>}
         </div>
 
-        {/* Save button */}
+        {/* Save */}
         <button onClick={handleSave}
-          disabled={isEdit?((!selected&&!query.trim())):(totalToSave===0)}
-          style={{width:"100%",padding:"14px",borderRadius:14,
+          disabled={isEdit?(!selected&&!query.trim()):totalToSave===0}
+          style={{width:"100%",padding:"14px",borderRadius:14,flexShrink:0,
             background:isEdit?(selected||query.trim())?th.accent:"gray":totalToSave>0?th.accent:"gray",
             color:"#fff",fontWeight:700,fontSize:16,
             opacity:isEdit?(selected||query.trim())?1:0.35:totalToSave>0?1:0.35}}>
@@ -1481,6 +1482,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     </div>
   );
 }
+
 
 // ─── TAB BAR ─────────────────────────────────────────────────────────────────
 function TabBar({tab,setTab,data}){
@@ -1512,7 +1514,7 @@ function TabBar({tab,setTab,data}){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({data,onOpenLog}){
+function HomePage({data,onOpenLog,onRelog}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const h=new Date().getHours();
@@ -1569,37 +1571,48 @@ function HomePage({data,onOpenLog}){
         </div>
       </div>
 
-      {/* Recent entries */}
-      {recent.length>0&&(
-        <div>
-          <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:14}}>{t.recent_entries}</p>
-          {recent.map((log,i)=>{
-            const meta=CAT_MAP[log.category];
-            const genre=log.genre&&log.genre!=="Film"?log.genre:meta?.labelEn||"";
-            return(
-              <div key={i} className="fade-in"
-                style={{padding:"13px 16px",borderRadius:14,marginBottom:8,
-                  background:th.card,border:`1px solid ${th.border}`,
-                  display:"flex",gap:12,alignItems:"center",
-                  animationDelay:`${i*0.06}s`}}>
-                <div style={{width:40,height:40,borderRadius:10,flexShrink:0,
-                  background:(meta?.color||"#888")+"22",
-                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>
-                  {meta?.emoji}
-                </div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:14,fontWeight:600,color:th.text,
-                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                    {log.title}{(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}
+      {/* Quick logs — top 5 most logged, one-tap relog */}
+      {data.logs.length>0&&(()=>{
+        // Count frequency per unique title+category
+        const freq={};
+        data.logs.forEach(l=>{const k=l.title+"||"+l.category;freq[k]=(freq[k]||{count:0,log:l});freq[k].count++;freq[k].log=l;});
+        const top=Object.values(freq).sort((a,b)=>b.count-a.count).slice(0,5);
+        if(!top.length)return null;
+        return(
+          <div>
+            <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>Quick log</p>
+            <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {top.map(({log,count},i)=>{
+              const meta=CAT_MAP[log.category];
+              const skipG=["Film","Custom","Movies","Music","Books","Food","Games","Activities"];
+              const libM=(LIBRARY[log.category]||[]).find(x=>x.title.toLowerCase()===log.title.toLowerCase());
+              const genre=libM?.genre||(log.genre&&!skipG.includes(log.genre)?log.genre:null)||(log.genre==="Custom"?"Custom · "+(meta?.labelEn||""):null)||meta?.labelEn||"";
+              const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
+              return(
+                <div key={i} style={{padding:"10px 14px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center"}}>
+                  <div style={{width:34,height:34,borderRadius:9,flexShrink:0,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17}}>
+                    {meta?.emoji}
                   </div>
-                  <div style={{fontSize:11,color:th.sub,marginTop:1}}>{genre} · {formatDate(log.date)}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {log.title}{yr?<span style={{fontSize:11,fontWeight:400,color:th.sub,marginLeft:4}}>({yr})</span>:null}
+                    </div>
+                    <div style={{fontSize:11,color:th.sub,marginTop:1}}>{genre} · {count}×</div>
+                  </div>
+                  <button
+                    onClick={()=>onRelog({...log,id:Date.now(),date:new Date().toISOString(),customDate:null,note:""})}
+                    style={{width:32,height:32,borderRadius:10,fontSize:18,fontWeight:700,
+                      background:th.accent,color:"#fff",flexShrink:0,border:"none",cursor:"pointer",
+                      display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>
+                    +
+                  </button>
                 </div>
-                {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+            </div>
+          </div>
+        );
+      })()}
 
       {!data.logs.length&&(
         <div style={{textAlign:"center",padding:"50px 20px",color:th.sub}}>
@@ -2675,14 +2688,18 @@ function App(){
       if(ptrY >= PTR_THRESHOLD){
         setPtrPhase("refreshing");
         setPtrY(PTR_THRESHOLD);
+        // Re-read latest data from storage (picks up deletions, edits from other views)
+        try{
+          const fresh=localStorage.getItem("kwento_v5");
+          if(fresh){const parsed=JSON.parse(fresh);setData(d=>({...d,...parsed}));}
+        }catch(e){}
         localStorage.setItem("kwento_restore_tab", tab);
         // Ask service worker to check for update silently
         if(navigator.serviceWorker && navigator.serviceWorker.controller){
           navigator.serviceWorker.controller.postMessage("CHECK_UPDATE");
         } else {
-          // No SW yet — just reset
-          setPtrPhase("idle");
-          setPtrY(0);
+          // No SW — just snap back after refresh
+          setTimeout(()=>{setPtrPhase("done");setPtrY(0);},600);
         }
       } else {
         setPtrPhase("idle");
@@ -2780,7 +2797,7 @@ function App(){
               )}
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2}}>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
+              {tab==="home"&&<HomePage onRelog={handleLog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
