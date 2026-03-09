@@ -2424,11 +2424,8 @@ function App(){
         setPtrPhase("refreshing");
         setPtrY(PTR_THRESHOLD);
         localStorage.setItem("kwento_restore_tab", tab);
-        // Cover page with theme bg before reload to avoid white flash
-        const th=THEMES[data.theme];
-        const cover=document.createElement("div");
-        cover.style.cssText=`position:fixed;inset:0;background:${th.bg};z-index:99999;`;
-        document.body.appendChild(cover);
+        // Save theme so html bg can be set before React loads
+        localStorage.setItem("kwento_restore_theme", data.theme);
         setTimeout(()=>window.location.reload(true), 750);
       } else {
         setPtrPhase("idle");
