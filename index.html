@@ -1,23 +1,13 @@
 <!--
 ================================================================
-  KWENTO PATCH NOTES (dev only)
+  KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
-v5.2 — 2026-03-10
-  - Home: category grid redesign — better spacing, weight,
-    visual balance; count/label hierarchy cleaner
-  - Quick log + button: removed heavy accent fill, now a
-    subtle ghost/outline style so it doesn't fight content
-  - Badge animation: fixed root cause of tab-switch replay
-    (TimelineTabIcon moved outside TabBar as top-level fn)
-  - Suck animation removed (too distracting)
-  - Patch notes: in-app modal + HTML comment both updated
-    each release; only current version shown in-app
-
-v5.1 — 2026-03-09
-  - Home: Quick log section, one-tap relog
-  - Timeline badge +N, clears on tab visit
-  - PTR re-reads localStorage (picks up deletions)
+v5.3 — 2026-03-10
+  - Ulan: removed water fill (insensitive flooding metaphor)
+    replaced with cozy puddle ripples on pavement
+  - Fiesta: jelly tab bar with pastel blob background
+  - Patch notes: HTML comment + in-app modal both kept in sync
   - Update toast no longer collides with content
   - Patch notes added (in-app + HTML comment)
 
@@ -1014,13 +1004,39 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .fiesta-blob2{width:200px;height:200px;background:#a5f3fc;top:30%;right:-50px;animation:blobDrift2 9s ease-in-out infinite;}
 .fiesta-blob3{width:220px;height:220px;background:#fde68a;bottom:10%;left:20%;animation:blobDrift 11s ease-in-out infinite reverse;}
 .fiesta-blob4{width:180px;height:180px;background:#c4b5fd;top:55%;left:-30px;animation:blobDrift2 8s ease-in-out infinite;}
-/* liquid glass tab bar override for fiesta */
+/* jelly tab bar for fiesta */
 .fiesta-tabbar{
-  background:rgba(255,255,255,0.35)!important;
-  backdrop-filter:blur(24px) saturate(180%)!important;
-  -webkit-backdrop-filter:blur(24px) saturate(180%)!important;
-  border-top:1px solid rgba(255,255,255,0.6)!important;
-  box-shadow:0 -4px 24px rgba(200,160,255,0.15),inset 0 1px 0 rgba(255,255,255,0.8)!important;
+  background:rgba(255,240,255,0.55)!important;
+  backdrop-filter:blur(20px) saturate(160%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(160%)!important;
+  border-top:1.5px solid rgba(255,255,255,0.75)!important;
+  box-shadow:
+    0 -6px 32px rgba(244,162,225,0.25),
+    0 -1px 0 rgba(255,255,255,0.9),
+    inset 0 2px 8px rgba(255,255,255,0.6),
+    inset 0 -1px 4px rgba(200,150,255,0.15)!important;
+  border-radius:24px 24px 0 0!important;
+  /* subtle jelly wobble on load */
+  animation:jellyIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both!important;
+}
+@keyframes jellyIn{
+  0%{transform:scaleY(0.85) scaleX(1.03);opacity:0.6;}
+  60%{transform:scaleY(1.04) scaleX(0.99);}
+  80%{transform:scaleY(0.98) scaleX(1.01);}
+  100%{transform:scaleY(1) scaleX(1);opacity:1;}
+}
+@keyframes jellyTap{
+  0%  {transform:scale(1);}
+  20% {transform:scale(0.82) rotate(-2deg);}
+  50% {transform:scale(1.12) rotate(1.5deg);}
+  70% {transform:scale(0.95) rotate(-1deg);}
+  85% {transform:scale(1.04);}
+  100%{transform:scale(1) rotate(0deg);}
+}
+/* jelly press on tab buttons inside fiesta */
+.fiesta-tabbar button:active{
+  transform:scale(0.88) !important;
+  transition:transform 0.08s !important;
 }
 
 /* ── Hapon ── */
@@ -1031,12 +1047,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .cloud-streak{position:absolute;border-radius:40px;animation:sunsetCloud ease-in-out infinite;}
 
 /* ── Ulan ── */
-@keyframes rainFall{0%{transform:translateY(-40px) translateX(0px);opacity:0;}8%{opacity:0.55;}85%{opacity:0.35;}100%{transform:translateY(100vh) translateX(-18px);opacity:0;}}
-@keyframes rainSplash{0%{transform:scale(0);opacity:0.6;}100%{transform:scale(1.8);opacity:0;}}
-.ulan-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
-.rain-drop{position:absolute;top:-40px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,transparent,#8ecae6cc);animation:rainFall linear infinite;}
-.rain-splash{position:absolute;bottom:0;width:6px;height:3px;border-radius:50%;background:#5ba8d444;animation:rainSplash ease-out infinite;}
-#ulan-water-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.ulan-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:51;}
 
 /* ── Taho ── */
 @keyframes steamRise{
@@ -1057,157 +1068,137 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 `;
 
 
-// ─── ULAN RAIN + WATER FILL ──────────────────────────────────────────────────
+// ─── ULAN RAIN + PUDDLE RIPPLES ─────────────────────────────────────────────
 function UlanRain(){
-  const canvasRef=React.useRef(null);
-  const stateRef=React.useRef({
-    // water physics
-    fillLevel:0,       // 0..1, current water height fraction of tab bar
-    fillTarget:0,      // target fill level (accumulates from rain)
-    tiltX:0,           // device tilt angle (gamma), radians
-    tiltSmooth:0,      // smoothed tilt for water surface
-    // wave simulation — simple sine sum
-    waveTime:0,
-    // rain drops for canvas
-    drops:[],
-    splashes:[],
-    // drain timer
-    draining:false,
-    drainStart:0,
-  });
+  const fullRef=React.useRef(null);
 
   React.useEffect(()=>{
-    const canvas=canvasRef.current;
+    const canvas=fullRef.current;
     if(!canvas)return;
     let raf;
-    const s=stateRef.current;
 
-    // Init rain drops
-    s.drops=Array.from({length:28},(_,i)=>({
+    const resize=()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;};
+    resize();
+    window.addEventListener("resize",resize);
+
+    const ANGLE=0.10;
+    const TAB_H=80; // tab bar height in px
+
+    // Each drop tracks whether it already triggered a ripple this pass
+    const drops=Array.from({length:22},()=>({
       x:Math.random(),
-      y:Math.random(),
-      h:14+Math.random()*14,
-      speed:0.28+Math.random()*0.22,
-      delay:Math.random()*2,
-      t:Math.random()*2,
+      y:Math.random()*1.2-0.2,
+      len:12+Math.random()*16,       // short, barely-there streaks
+      speed:200+Math.random()*80,    // slow and gentle
+      opacity:0.05+Math.random()*0.08, // very faint
+      width:0.5+Math.random()*0.4,   // thin
+      triggered:false,
     }));
-    s.splashes=[];
 
-    // Device tilt
-    const onTilt=e=>{
-      // gamma = left/right tilt in degrees, clamp to ±30
-      const g=Math.max(-30,Math.min(30,e.gamma||0));
-      s.tiltX=g*(Math.PI/180);
-    };
-    window.addEventListener("deviceorientation",onTilt,{passive:true});
-
-    // Rain accumulation: add small fill every 900ms
-    const rainInterval=setInterval(()=>{
-      if(!s.draining){
-        s.fillTarget=Math.min(0.82,s.fillTarget+0.055+Math.random()*0.03);
-      }
-    },900);
-
-    // Drain cycle: when fill reaches ~0.78, start draining
+    const ripples=[];
     let lastTime=0;
+
+    function spawnRippleAt(x,y,ts){
+      ripples.push({
+        x, y,
+        born:ts,
+        dur:900+Math.random()*500,
+        maxR:10+Math.random()*14,
+        maxOpacity:0.22+Math.random()*0.14,
+      });
+      if(ripples.length>40) ripples.splice(0,1);
+    }
+
     function frame(ts){
       const dt=Math.min((ts-lastTime)/1000,0.05);
       lastTime=ts;
-      s.waveTime+=dt;
 
-      // smooth tilt
-      s.tiltSmooth+=(s.tiltX-s.tiltSmooth)*0.08;
-
-      // fill physics
-      if(!s.draining){
-        s.fillLevel+=(s.fillTarget-s.fillLevel)*0.04;
-        if(s.fillLevel>0.78){
-          s.draining=true;
-          s.drainStart=ts;
-        }
-      } else {
-        s.fillLevel=Math.max(0,s.fillLevel-0.0018);
-        s.fillTarget=Math.max(0,s.fillTarget-0.002);
-        if(s.fillLevel<=0.001){
-          s.draining=false;
-          s.fillLevel=0;
-          s.fillTarget=0;
-        }
-      }
-
-      const W=canvas.width;
-      const H=canvas.height;
+      const W=canvas.width, H=canvas.height;
+      const tabTop=H-TAB_H; // y-coordinate where tab bar begins
       const ctx=canvas.getContext("2d");
       ctx.clearRect(0,0,W,H);
 
-      // ── draw rain drops ──
-      s.drops.forEach(d=>{
-        d.t+=dt;
-        const y=((d.t-d.delay)*d.speed)%1.2-0.1;
-        if(y<0)return;
-        const px=d.x*W;
-        const py=y*H;
-        const grad=ctx.createLinearGradient(px,py,px,py+d.h);
-        grad.addColorStop(0,"rgba(142,202,230,0)");
-        grad.addColorStop(1,"rgba(142,202,230,0.55)");
+      // ── rain streaks + impact detection ──
+      drops.forEach(d=>{
+        d.y+=d.speed*dt/H;
+        d.x+=Math.tan(ANGLE)*d.speed*dt/W;
+
+        // tip of the streak (the leading bright end)
+        const tipY=d.y*H + Math.cos(ANGLE)*d.len;
+        const tipX=d.x*W + Math.sin(ANGLE)*d.len;
+
+        // When tip crosses into tab bar, spawn ripple at that exact point
+        if(!d.triggered && tipY>=tabTop){
+          d.triggered=true;
+          // clamp x to tab bar width so ripple stays inside
+          const rx=Math.max(8,Math.min(W-8,tipX));
+          // y: pin to a natural depth inside the tab bar
+          const ry=tabTop+12+Math.random()*24;
+          spawnRippleAt(rx,ry,ts);
+        }
+
+        // Once the whole streak has passed bottom, reset and allow next ripple
+        if(d.y>1.1){
+          d.y=-d.len/H-Math.random()*0.3;
+          d.x=Math.random();
+          d.triggered=false; // reset so it can trigger again next fall
+        }
+        if(d.x>1.05) d.x=-0.05;
+
+        // Draw streak — clip to above tab bar so it "stops" at the surface
+        const px=d.x*W, py=d.y*H;
+        const ex=tipX, ey=Math.min(tipY, tabTop+2); // stop at tab bar surface
+        if(ey<py) return; // fully above, skip
+
+        const g=ctx.createLinearGradient(px,py,ex,ey);
+        g.addColorStop(0,"rgba(162,210,235,0)");
+        g.addColorStop(0.5,`rgba(162,210,235,${d.opacity*0.4})`);
+        g.addColorStop(1,`rgba(192,226,245,${d.opacity})`);
         ctx.beginPath();
         ctx.moveTo(px,py);
-        ctx.lineTo(px-1,py+d.h);
-        ctx.strokeStyle=grad;
-        ctx.lineWidth=1.5;
+        ctx.lineTo(ex,ey);
+        ctx.strokeStyle=g;
+        ctx.lineWidth=d.width;
+        ctx.lineCap="round";
         ctx.stroke();
       });
 
-      // ── draw water fill in tab bar area ──
-      if(s.fillLevel>0.001){
-        const barH=H; // canvas covers just the tab bar
-        const waterH=s.fillLevel*barH;
-        const baseY=barH-waterH;
+      // ── subtle puddle tint in tab bar ──
+      const pg=ctx.createLinearGradient(0,tabTop,0,H);
+      pg.addColorStop(0,"rgba(91,168,212,0)");
+      pg.addColorStop(0.5,"rgba(91,168,212,0.07)");
+      pg.addColorStop(1,"rgba(91,168,212,0.13)");
+      ctx.fillStyle=pg;
+      ctx.fillRect(0,tabTop,W,TAB_H);
 
-        // tilt shifts the water surface: surface is a line, not flat
-        // tilt shifts left/right surface height by tiltSmooth * waterH * 0.3
-        const tiltShift=s.tiltSmooth*waterH*0.5;
+      // ── ripples ──
+      ripples.forEach(r=>{
+        const age=ts-r.born;
+        if(age>r.dur) return;
+        const t=age/r.dur;
+        const radius=r.maxR*t;
+        const opacity=r.maxOpacity*Math.sin(t*Math.PI);
 
-        // Build wave path
+        ctx.save();
+        ctx.translate(r.x,r.y);
+        ctx.scale(1,0.32); // flat ellipse = pavement perspective
+
         ctx.beginPath();
-        const segments=60;
-        for(let i=0;i<=segments;i++){
-          const px=(i/segments)*W;
-          // tilt contribution: linear slope across width
-          const tiltY=(i/segments-0.5)*2*tiltShift;
-          // wave: sum of 2 sines for natural look
-          const wave=
-            Math.sin(s.waveTime*1.8+i*0.4)*3.5+
-            Math.sin(s.waveTime*3.1+i*0.7)*1.8;
-          const py=baseY+tiltY+wave;
-          if(i===0) ctx.moveTo(px,py);
-          else ctx.lineTo(px,py);
-        }
-        ctx.lineTo(W,barH);
-        ctx.lineTo(0,barH);
-        ctx.closePath();
-
-        // Water gradient — translucent blue
-        const wg=ctx.createLinearGradient(0,baseY,0,barH);
-        wg.addColorStop(0,"rgba(91,168,212,0.22)");
-        wg.addColorStop(0.4,"rgba(91,168,212,0.30)");
-        wg.addColorStop(1,"rgba(22,32,48,0.10)");
-        ctx.fillStyle=wg;
-        ctx.fill();
-
-        // Surface shimmer line
-        ctx.beginPath();
-        for(let i=0;i<=segments;i++){
-          const px=(i/segments)*W;
-          const tiltY=(i/segments-0.5)*2*tiltShift;
-          const wave=Math.sin(s.waveTime*1.8+i*0.4)*3.5+Math.sin(s.waveTime*3.1+i*0.7)*1.8;
-          const py=baseY+tiltY+wave;
-          if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);
-        }
-        ctx.strokeStyle="rgba(142,202,230,0.45)";
-        ctx.lineWidth=1;
+        ctx.arc(0,0,radius,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(162,210,238,${opacity})`;
+        ctx.lineWidth=0.9;
         ctx.stroke();
-      }
+
+        if(radius>5){
+          ctx.beginPath();
+          ctx.arc(0,0,radius*0.52,0,Math.PI*2);
+          ctx.strokeStyle=`rgba(182,220,242,${opacity*0.45})`;
+          ctx.lineWidth=0.6;
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      });
 
       raf=requestAnimationFrame(frame);
     }
@@ -1215,38 +1206,13 @@ function UlanRain(){
 
     return()=>{
       cancelAnimationFrame(raf);
-      clearInterval(rainInterval);
-      window.removeEventListener("deviceorientation",onTilt);
+      window.removeEventListener("resize",resize);
     };
   },[]);
 
-  // Canvas covers the tab bar — position fixed bottom
-  // We also keep the CSS rain drops for atmosphere
-  const drops=[
-    {l:"4%",h:22,d:0,dur:1.4},{l:"9%",h:18,d:0.7,dur:1.7},{l:"15%",h:25,d:0.2,dur:1.3},
-    {l:"21%",h:20,d:1.1,dur:1.6},{l:"27%",h:16,d:0.5,dur:1.9},{l:"33%",h:23,d:1.4,dur:1.2},
-    {l:"39%",h:19,d:0.3,dur:1.8},{l:"45%",h:26,d:0.9,dur:1.4},{l:"51%",h:17,d:1.6,dur:1.7},
-    {l:"57%",h:24,d:0.1,dur:1.3},{l:"63%",h:21,d:1.2,dur:1.5},{l:"69%",h:18,d:0.6,dur:1.9},
-    {l:"75%",h:22,d:1.8,dur:1.2},{l:"81%",h:15,d:0.4,dur:1.6},{l:"87%",h:24,d:1.0,dur:1.4},
-    {l:"92%",h:20,d:0.8,dur:1.8},{l:"97%",h:17,d:1.5,dur:1.3},
-  ];
-  const splashes=[
-    {l:"6%",d:1.3,dur:1.4},{l:"14%",d:0.6,dur:1.7},{l:"23%",d:1.0,dur:1.3},
-    {l:"36%",d:0.2,dur:1.6},{l:"48%",d:1.5,dur:1.4},{l:"59%",d:0.8,dur:1.9},
-    {l:"71%",d:0.4,dur:1.5},{l:"83%",d:1.2,dur:1.2},{l:"93%",d:0.9,dur:1.8},
-  ];
-
   return(
     <div className="ulan-wrap">
-      {drops.map((dr,i)=><div key={i} className="rain-drop" style={{left:dr.l,height:dr.h,animationDelay:`${dr.d}s`,animationDuration:`${dr.dur}s`}}/>)}
-      {splashes.map((sp,i)=><div key={i} className="rain-splash" style={{left:sp.l,animationDelay:`${sp.d}s`,animationDuration:`${sp.dur}s`}}/>)}
-      {/* Water fill canvas — sits over the tab bar */}
-      <canvas ref={canvasRef}
-        style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",
-          width:"min(500px,100vw)",height:"80px",
-          pointerEvents:"none",zIndex:49}}
-        width={500} height={80}
-      />
+      <canvas ref={fullRef} style={{position:"fixed",inset:0,width:"100%",height:"100%",pointerEvents:"none"}}/>
     </div>
   );
 }
@@ -1762,7 +1728,15 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
     {id:"settings",icon:<SettingsIcon a={tab==="settings"}/>},
   ];
   return(
-    <div className={data.theme==="fiesta"?"fiesta-tabbar":""} style={{position:"fixed",bottom:0,left:0,right:0,background:th.bg,borderTop:`1px solid ${th.border}`,display:"flex",padding:"10px 0 22px",zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",backdropFilter:"blur(12px)"}}>
+    <div
+      className={data.theme==="fiesta"?"fiesta-tabbar":""}
+      style={{position:"fixed",bottom:0,left:0,right:0,
+        background:th.bg,
+        borderTop:`1px solid ${th.border}`,display:"flex",padding:"10px 0 22px",
+        zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",backdropFilter:"blur(12px)",
+        overflow:"hidden",
+      }}>
+
       {tabs.map(tb=>(
         <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",transform:tab===tb.id?"translateY(-2px)":"none"}}>
           <div style={{padding:"6px 14px",borderRadius:14,background:tab===tb.id?th.accent+"22":"transparent",transition:"background 0.2s"}}>{tb.icon}</div>
@@ -1810,26 +1784,38 @@ function HomePage({data,onOpenLog,onRelog}){
       {/* This week */}
       <div style={{marginBottom:32}}>
         <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:12}}>{t.this_week}</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-          {CATEGORIES.map(c=>{
-            const cnt=catCounts[c.id]||0;
-            const active=cnt>0;
-            return(
-              <div key={c.id} onClick={()=>onOpenLog(c.id)}
-                style={{background:active?c.color+"15":th.card,
-                  border:`1.5px solid ${active?c.color+"35":th.border}`,
-                  borderRadius:14,padding:"14px 6px 12px",textAlign:"center",cursor:"pointer",
-                  transition:"opacity 0.15s",
-                  opacity:active?1:0.45}}>
-                <div style={{fontSize:22,marginBottom:6,lineHeight:1}}>{c.emoji}</div>
-                <div style={{fontSize:20,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
-                <div style={{fontSize:10,fontWeight:600,color:active?c.color:th.sub,letterSpacing:0.3,textTransform:"uppercase",opacity:active?0.9:0.6}}>
-                  {data.language==="fil"?c.label:c.labelEn}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {(()=>{
+          const [bounceCat,setBounceCat]=useState(null);
+          const handleCatTap=(id)=>{
+            if(data.theme==="fiesta"){setBounceCat(id);setTimeout(()=>setBounceCat(null),500);}
+            onOpenLog(id);
+          };
+          return(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+              {CATEGORIES.map(c=>{
+                const cnt=catCounts[c.id]||0;
+                const active=cnt>0;
+                const bouncing=bounceCat===c.id;
+                return(
+                  <div key={c.id} onClick={()=>handleCatTap(c.id)}
+                    style={{background:active?c.color+"15":th.card,
+                      border:`1.5px solid ${active?c.color+"35":th.border}`,
+                      borderRadius:14,padding:"14px 6px 12px",textAlign:"center",cursor:"pointer",
+                      transition:"opacity 0.15s",
+                      opacity:active?1:0.45,
+                      animation:bouncing?"jellyTap 0.5s cubic-bezier(0.34,1.56,0.64,1) both":"none",
+                    }}>
+                    <div style={{fontSize:22,marginBottom:6,lineHeight:1}}>{c.emoji}</div>
+                    <div style={{fontSize:20,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
+                    <div style={{fontSize:10,fontWeight:600,color:active?c.color:th.sub,letterSpacing:0.3,textTransform:"uppercase",opacity:active?0.9:0.6}}>
+                      {data.language==="fil"?c.label:c.labelEn}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Quick logs — top 5 most logged, one-tap relog */}
@@ -2862,7 +2848,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
       </div>
       )}
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.2</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.3</button></span>
       </div>
     </div>
   );
@@ -3123,14 +3109,13 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.2</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.3</span>
                       <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 10, 2026</span>
                     </div>
                     {[
-                      "Home category grid — tighter cards, balanced visual weight",
-                      "Quick log + button is now subtle so it doesn't fight the content",
-                      "Badge animation fixed — no longer replays on every tab switch",
-                      "Log save animation removed (was distracting)",
+                      "Ulan: rain now makes cozy puddle ripples on pavement",
+                      "Fiesta: jelly tab bar with frosted pastel gel texture",
+                      "Fiesta: animated pastel color blobs drift in the background",
                     ].map((n,i)=>(
                       <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
                         <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
