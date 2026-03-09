@@ -2481,10 +2481,17 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<div className="kwento-page-home" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="home"/><HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/></div>}
-              {tab==="timeline"&&<div className="kwento-page-timeline" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="timeline"/><TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/></div>}
-              {tab==="mystory"&&<div className="kwento-page-mystory" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="mystory"/><MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/></div>}
-              {tab==="profile"&&<div className="kwento-page-profile" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="profile"/><ProfilePage data={data} onChange={handleSetting}/></div>}
+                {(()=>{
+                const pageRef = React.useRef(null);
+                const ptrTab = tab==="settings" ? null : tab;
+                const inner =
+                  tab==="home" ? <HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/> :
+                  tab==="timeline" ? <TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/> :
+                  tab==="mystory" ? <MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/> :
+                  tab==="profile" ? <ProfilePage data={data} onChange={handleSetting}/> :
+                  tab==="settings" ? <SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/> : null;
+                return <><div ref={pageRef} style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>{inner}</div>{ptrTab&&<PullToRefresh tab={ptrTab} pageRef={pageRef}/>}</>;
+              })()}}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
