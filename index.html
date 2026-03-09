@@ -3,14 +3,23 @@
   KWENTO PATCH NOTES (dev only)
 ================================================================
 
+v5.2 — 2026-03-10
+  - Home: category grid redesign — better spacing, weight,
+    visual balance; count/label hierarchy cleaner
+  - Quick log + button: removed heavy accent fill, now a
+    subtle ghost/outline style so it doesn't fight content
+  - Badge animation: fixed root cause of tab-switch replay
+    (TimelineTabIcon moved outside TabBar as top-level fn)
+  - Suck animation removed (too distracting)
+  - Patch notes: in-app modal + HTML comment both updated
+    each release; only current version shown in-app
+
 v5.1 — 2026-03-09
-  - Home: Quick log section — top 5 most-logged entries,
-    tap + to relog with today's date instantly
-  - LogModal: sheet animates on save, shrinks toward timeline tab
-  - Timeline tab: +N badge after logging, clears on tab visit
-  - PTR: re-reads localStorage on pull (picks up deletions)
-  - Update toast floats as pill, no longer collides with content
-  - Patch notes added: HTML comment (here) + in-app Settings
+  - Home: Quick log section, one-tap relog
+  - Timeline badge +N, clears on tab visit
+  - PTR re-reads localStorage (picks up deletions)
+  - Update toast no longer collides with content
+  - Patch notes added (in-app + HTML comment)
 
 ================================================================
 -->
@@ -942,9 +951,11 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
   100%{transform-origin:50% 100%;transform:translateY(65%) scale(0.04);opacity:0;border-radius:3px;}
 }
 @keyframes badgePop{
-  0%  {opacity:0;transform:scale(0.4);}
-  60% {transform:scale(1.2);}
-  100%{opacity:1;transform:scale(1);}
+  0%  {opacity:0;transform:scale(0) rotate(-15deg);}
+  50% {opacity:1;transform:scale(1.35) rotate(8deg);}
+  70% {transform:scale(0.9) rotate(-4deg);}
+  85% {transform:scale(1.08) rotate(2deg);}
+  100%{opacity:1;transform:scale(1) rotate(0deg);}
 }
 @keyframes cardReveal{from{opacity:0;transform:scale(0.92) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
 @keyframes swipeLeft{to{transform:translateX(-140%) rotate(-14deg);opacity:0;}}
@@ -1380,8 +1391,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
       onSave({...base,genre,category:cat,note,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr});
-      setClosing("suck");
-      setTimeout(onClose,420);
+      onClose();
       return;
     }
     // Add whatever is typed as custom if cat selected
@@ -1394,15 +1404,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     if(!finalQueue.length)return;
     const toSave=finalQueue.map((item,i)=>({...item,note:initialCat?note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i}));
     onSave(toSave);
-    setClosing("suck");
-    setTimeout(onClose,420);
+    onClose();
   };
 
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
-      <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"20px 20px 40px",maxHeight:"88vh",display:"flex",flexDirection:"column",border:`1px solid ${th.border}`,borderBottom:"none",animation:closing==="suck"?"suckToIcon 0.42s cubic-bezier(0.4,0,1,1) forwards":closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)"}}>
+      <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"20px 20px 40px",maxHeight:"88vh",display:"flex",flexDirection:"column",border:`1px solid ${th.border}`,borderBottom:"none",animation:closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)"}}>
 
         {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexShrink:0}}>
@@ -1520,6 +1529,33 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
 
 
 // ─── TAB BAR ─────────────────────────────────────────────────────────────────
+// TimelineIcon lives outside TabBar so it never remounts on tab switch
+function TimelineTabIcon({accent,sub,active,flash,animKey}){
+  const prevKey=React.useRef(animKey);
+  const shouldAnim=animKey!==0&&animKey!==prevKey.current;
+  React.useEffect(()=>{prevKey.current=animKey;},[animKey]);
+  return(
+    <div style={{position:"relative",display:"inline-flex"}}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke={flash?accent:active?accent:sub} strokeWidth="1.8"
+        strokeLinecap="round" strokeLinejoin="round"
+        style={{transition:"transform 0.2s, stroke 0.2s",transform:flash?"scale(1.18)":"scale(1)"}}>
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/>
+      </svg>
+      {flash>0&&<span style={{
+        position:"absolute",top:-9,right:-11,
+        background:accent,color:"#fff",
+        fontSize:9,fontWeight:800,lineHeight:1,
+        padding:"2px 5px",borderRadius:10,
+        animation:shouldAnim?"badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both":"none",
+        pointerEvents:"none",whiteSpace:"nowrap",
+        boxShadow:"0 2px 8px rgba(0,0,0,0.3)"
+      }}>+{flash}</span>}
+    </div>
+  );
+}
+
 function TabBar({tab,setTab,data,flash=0,animKey=0}){
   const th=THEMES[data.theme];
   const avEmoji=AVATARS.find(a=>a.id===data.avatar)?.emoji||"⭐";
@@ -1527,28 +1563,11 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
     ?<img src={data.customPhoto} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%"}}/>
     :<span style={{fontSize:20}}>{avEmoji}</span>;
   const HomeIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>);
-  const TimelineIcon=({a,flash,animKey})=>(<div style={{position:"relative",display:"inline-flex"}}>
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke={flash?th.accent:a?th.accent:th.sub} strokeWidth="1.8"
-      strokeLinecap="round" strokeLinejoin="round"
-      style={{transition:"transform 0.2s, stroke 0.2s",transform:flash?"scale(1.2)":"scale(1)"}}>
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/>
-    </svg>
-    {flash>0&&<span style={{
-      position:"absolute",top:-9,right:-11,
-      background:th.accent,color:"#fff",
-      fontSize:9,fontWeight:800,lineHeight:1,
-      padding:"2px 5px",borderRadius:10,
-      pointerEvents:"none",whiteSpace:"nowrap",
-      boxShadow:"0 1px 6px rgba(0,0,0,0.25)"
-    }}>+{flash}</span>}
-  </div>);
   const StoryIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.4 2.4-7.4L2 9.4h7.6L12 2z"/></svg>);
   const SettingsIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>);
   const tabs=[
     {id:"home",icon:<HomeIcon a={tab==="home"}/>},
-    {id:"timeline",icon:<TimelineIcon a={tab==="timeline"} flash={flash} animKey={animKey}/>},
+    {id:"timeline",icon:<TimelineTabIcon accent={th.accent} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
     {id:"mystory",icon:<StoryIcon a={tab==="mystory"}/>},
     {id:"profile",icon:<span style={{fontSize:20,lineHeight:1,opacity:tab==="profile"?1:0.55}}>{avDisplay}</span>},
     {id:"settings",icon:<SettingsIcon a={tab==="settings"}/>},
@@ -1600,20 +1619,22 @@ function HomePage({data,onOpenLog,onRelog}){
       </button>
 
       {/* This week */}
-      <div style={{marginBottom:28}}>
-        <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:14}}>{t.this_week}</p>
+      <div style={{marginBottom:32}}>
+        <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:12}}>{t.this_week}</p>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
           {CATEGORIES.map(c=>{
             const cnt=catCounts[c.id]||0;
+            const active=cnt>0;
             return(
               <div key={c.id} onClick={()=>onOpenLog(c.id)}
-                style={{background:cnt>0?c.color+"1a":th.card,
-                  border:`1.5px solid ${cnt>0?c.color+"55":th.border}`,
-                  borderRadius:14,padding:"14px 10px",textAlign:"center",cursor:"pointer",
-                  transition:"transform 0.15s",active:{transform:"scale(0.97)"}}}>
-                <div style={{fontSize:24,marginBottom:6}}>{c.emoji}</div>
-                <div style={{fontSize:20,fontWeight:800,color:cnt>0?c.color:th.sub,lineHeight:1,marginBottom:3}}>{cnt}</div>
-                <div style={{fontSize:10,fontWeight:600,color:cnt>0?c.color:th.sub,letterSpacing:0.3}}>
+                style={{background:active?c.color+"15":th.card,
+                  border:`1.5px solid ${active?c.color+"35":th.border}`,
+                  borderRadius:14,padding:"14px 6px 12px",textAlign:"center",cursor:"pointer",
+                  transition:"opacity 0.15s",
+                  opacity:active?1:0.45}}>
+                <div style={{fontSize:22,marginBottom:6,lineHeight:1}}>{c.emoji}</div>
+                <div style={{fontSize:20,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
+                <div style={{fontSize:10,fontWeight:600,color:active?c.color:th.sub,letterSpacing:0.3,textTransform:"uppercase",opacity:active?0.9:0.6}}>
                   {data.language==="fil"?c.label:c.labelEn}
                 </div>
               </div>
@@ -1652,9 +1673,11 @@ function HomePage({data,onOpenLog,onRelog}){
                   </div>
                   <button
                     onClick={()=>onRelog({...log,id:Date.now(),date:new Date().toISOString(),customDate:null,note:""})}
-                    style={{width:32,height:32,borderRadius:10,fontSize:18,fontWeight:700,
-                      background:th.accent,color:"#fff",flexShrink:0,border:"none",cursor:"pointer",
-                      display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>
+                    style={{width:28,height:28,borderRadius:"50%",fontSize:20,fontWeight:300,
+                      background:"transparent",color:th.sub,flexShrink:0,
+                      border:`1.5px solid ${th.border}`,cursor:"pointer",
+                      display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,
+                      transition:"opacity 0.15s",opacity:0.7}}>
                     +
                   </button>
                 </div>
@@ -2650,7 +2673,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
       </div>
       )}
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.sub,textDecoration:"underline",background:"none",border:"none",cursor:"pointer"}}>{t.made_with} · v5.1</button>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.2</button></span>
       </div>
     </div>
   );
@@ -2904,20 +2927,21 @@ function App(){
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
               {showPatch&&(
-                <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"flex-end"}} onClick={()=>setShowPatch(false)}>
-                  <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:THEMES[data.theme].bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 20px 44px",maxHeight:"75vh",overflowY:"auto",border:`1px solid ${THEMES[data.theme].border}`,borderBottom:"none"}} onClick={e=>e.stopPropagation()}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:THEMES[data.theme].text}}>What's new in v5.1</h3>
+                <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"flex-end",touchAction:"none"}} onClick={()=>setShowPatch(false)}>
+                  <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:THEMES[data.theme].bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 20px 48px",maxHeight:"70vh",overflowY:"auto",border:`1px solid ${THEMES[data.theme].border}`,borderBottom:"none"}} onClick={e=>e.stopPropagation()}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:THEMES[data.theme].text}}>What's new</h3>
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
-                    <div style={{fontSize:11,color:THEMES[data.theme].sub,marginBottom:16}}>Mar 9, 2026</div>
+                    <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.2</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 10, 2026</span>
+                    </div>
                     {[
-                      "Quick log on home — tap + to relog your top entries instantly",
-                      "Logging now animates — sheet folds into the timeline tab icon",
-                      "Timeline icon shows +N badge after logging, clears on visit",
-                      "Pull-to-refresh now syncs deletions from timeline to home",
-                      "Update toast no longer overlaps page content",
-                      "Patch notes — tap the version number in Settings to see this",
+                      "Home category grid — tighter cards, balanced visual weight",
+                      "Quick log + button is now subtle so it doesn't fight the content",
+                      "Badge animation fixed — no longer replays on every tab switch",
+                      "Log save animation removed (was distracting)",
                     ].map((n,i)=>(
                       <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
                         <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
