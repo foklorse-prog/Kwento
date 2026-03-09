@@ -19,45 +19,6 @@
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
-/*
- * ╔══════════════════════════════════════════════════════════════════╗
- * ║  KWENTO — Filipino Taste & Lifestyle Journal                     ║
- * ║  Developer Notes                                                 ║
- * ╠══════════════════════════════════════════════════════════════════╣
- * ║                                                                  ║
- * ║  VERSIONING                                                      ║
- * ║  - Bump APP_VERSION below on every meaningful deploy             ║
- * ║  - Format: "5.X" where X increments each update                 ║
- * ║  - App auto-reloads when it detects a version mismatch,          ║
- * ║    so users always get fresh code without closing/reopening      ║
- * ║                                                                  ║
- * ║  LIBRARY EXPANSION                                               ║
- * ║  - Add entries to LIBRARY (movies/music/books/food/games/        ║
- * ║    activities) following the existing shape:                     ║
- * ║    { title, tags:[], genre, ph:bool }                           ║
- * ║  - ph:true = Filipino/local, ph:false = global                  ║
- * ║  - On next load, any user entry with genre:"Custom" that         ║
- * ║    matches a new library title (same category) auto-enriches     ║
- * ║                                                                  ║
- * ║  STORAGE                                                         ║
- * ║  - Primary key: "kwento_v5" in localStorage                     ║
- * ║  - Backup key:  "kwento_v5_bk" (written on every save)          ║
- * ║  - All migrations run in loadData() on every app open           ║
- * ║                                                                  ║
- * ║  THEMES                                                          ║
- * ║  - 8 themes: jeepney, tsinelas, bahay_kubo, manila_nights,      ║
- * ║    fiesta, hapon, ulan, taho                                     ║
- * ║  - Animations in ThemeAnimations component                      ║
- * ║                                                                  ║
- * ║  OWNER: Siarra — no cloud, no tracking, fully offline-first     ║
- * ╚══════════════════════════════════════════════════════════════════╝
- */
-
-// ─── VERSION — bump this on every deploy ─────────────────────────────────────
-// NOTE FOR DEVS: Bump APP_VERSION string on every meaningful deploy.
-// Pull-to-refresh calls window.location.reload(true) to fetch latest code.
-const APP_VERSION = "5.1";
-
 
 
 // ─── OFFENSIVE WORD FILTER ────────────────────────────────────────────────────
@@ -165,7 +126,7 @@ const T = {
     log_something:"Log something",entries:"entries",this_week:"This week",recent_entries:"Recent entries",
     archetype:"Your Archetype",empty_state:"Your journal is empty.",empty_sub:"Start by logging a movie, meal, or moment.",
     search_placeholder:"Search or type anything...",add_reflection:"Add a reflection note... (optional)",
-    log_it:"Log it",quick_logs:"Quick log from past entries",
+    log_it:"Log it ✓",quick_logs:"Quick log from past entries",
     suggestions:"Suggested for You",barkada_picks:"Barkada Picks",
     save:"Save",cancel:"Cancel",your_story:"My Story",last_7_days:"Last 7 days",share_card:"Share My Story",
     collaborator_title:"Contribute to Kwento",
@@ -194,7 +155,7 @@ const T = {
     log_something:"Mag-log ng bagay",entries:"entry",this_week:"Ngayong linggo",recent_entries:"Mga nakaraang entry",
     archetype:"Ang Iyong Arketipo",empty_state:"Walang laman ang iyong talaarawan.",empty_sub:"Magsimula sa pag-log ng pelikula, pagkain, o sandali.",
     search_placeholder:"Maghanap o mag-type ng kahit ano...",add_reflection:"Magdagdag ng tala... (opsyonal)",
-    log_it:"I-log",quick_logs:"Mabilis na log mula sa nakaraang entry",
+    log_it:"I-log ✓",quick_logs:"Mabilis na log mula sa nakaraang entry",
     suggestions:"Para Sa Iyo",barkada_picks:"Mga Piling Barkada",
     save:"I-save",cancel:"Kanselahin",your_story:"Kwento Ko",last_7_days:"Nakaraang 7 araw",share_card:"I-share ang Kwento Ko",
     collaborator_title:"Mag-ambag sa Kwento",
@@ -406,7 +367,6 @@ const LIBRARY = {
     {title:"Binibini — Zack Tabudlo",tags:["OPM","romantic","upbeat","Filipino","contemporary","fun","feel-good"],genre:"OPM R&B",ph:true},
     {title:"Sa Susunod na Habambuhay — Arthur Nery",tags:["OPM","romantic","emotional","Filipino","soulful","contemporary","melancholic"],genre:"OPM Soul",ph:true},
     {title:"Golden Hour — JVKE",tags:["global","romantic","upbeat","pop","feel-good","summer","bright"],genre:"Pop",ph:false},
-    {title:"Harry Styles",tags:["global","pop","indie-pop","soft-rock","upbeat","romantic","feel-good","bright","English"],genre:"Pop",ph:false},
     {title:"As It Was — Harry Styles",tags:["global","upbeat","chill","pop","feel-good","indie","bright"],genre:"Pop",ph:false},
     {title:"Cruel Summer — Taylor Swift",tags:["global","pop","upbeat","summer","fun","romantic","bright"],genre:"Pop",ph:false},
     {title:"All Too Well — Taylor Swift",tags:["global","emotional","nostalgic","reflective","romantic","intense","literary"],genre:"Pop",ph:false},
@@ -843,33 +803,12 @@ function loadData(){
         const bk=localStorage.getItem(SK+"_bk");
         if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
       }
-      // Scrub old "Letterboxd rating: X★" notes, fix genre:"Film", backfill year
-      // Also: auto-enrich ANY entry with genre:"Custom" if library now has it
+      // Scrub old "Letterboxd rating: X★" notes left from earlier import version
       if(parsed.logs){
-        parsed.logs=parsed.logs.map(l=>{
-          let updated={...l};
-          // Letterboxd-specific fixes
-          if(updated.fromLetterboxd){
-            if(updated.note&&updated.note.startsWith("Letterboxd rating:"))updated.note="";
-            if(!updated.genre||updated.genre==="Film"){
-              const lib=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
-              if(lib?.genre)updated.genre=lib.genre;
-            }
-            if(!updated.year&&updated.tags){
-              const yearTag=updated.tags.find(tag=>/^\d{4}$/.test(tag));
-              if(yearTag){updated.year=yearTag;updated.tags=updated.tags.filter(tag=>tag!==yearTag);}
-            }
-          }
-          // Auto-enrich custom entries from any category when library has them now
-          if(updated.genre==="Custom"&&updated.category){
-            const lib=(LIBRARY[updated.category]||[]).find(m=>m.title.toLowerCase()===updated.title.toLowerCase());
-            if(lib){
-              updated.genre=lib.genre||updated.genre;
-              if(lib.tags)updated.tags=[...new Set([...(updated.tags||[]),...lib.tags])];
-            }
-          }
-          return updated;
-        });
+        parsed.logs=parsed.logs.map(l=>
+          l.fromLetterboxd&&l.note&&l.note.startsWith("Letterboxd rating:")
+            ?{...l,note:""}:l
+        );
       }
       return parsed;
     }
@@ -930,7 +869,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes cardReveal{from{opacity:0;transform:scale(0.92) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
 @keyframes swipeLeft{to{transform:translateX(-140%) rotate(-14deg);opacity:0;}}
 @keyframes swipeRight{to{transform:translateX(140%) rotate(14deg);opacity:0;}}
@@ -1280,290 +1218,86 @@ function Onboarding({onComplete}){
 }
 
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
-function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=null}){
+function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
-  const isEdit=!!editEntry;
-  const isMultiMode=!isEdit&&!initialCat;
-  const [cat,setCat]=useState(editEntry?.category||(initialCat||prefill?.category||"movies"));
-  const [query,setQuery]=useState(editEntry?.title||prefill?.title||"");
+  const [cat,setCat]=useState(editEntry?.category||(initialCat||"movies"));
+  const [query,setQuery]=useState(editEntry?.title||"");
   const [note,setNote]=useState(editEntry?.note||"");
-  const [selected,setSelected]=useState(
-    editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:
-    prefill?{title:prefill.title,tags:prefill.tags||[],genre:prefill.genre||""}:null
-  );
+  const [selected,setSelected]=useState(editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:null);
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
-  const [queue,setQueue]=useState([]);
-  const [catFilter,setCatFilter]=useState(false);
-  const inputRef=React.useRef(null);
-
-  // Word-start matching: "sh" matches "She's the Man" but not "Whiplash"
-  const wordMatch=(title,q)=>{
-    const tl=title.toLowerCase();
-    const ql=q.toLowerCase();
-    // Match start of title OR start of any word in title
-    return tl.startsWith(ql)||tl.split(/\s+/).some(w=>w.startsWith(ql));
-  };
 
   useEffect(()=>{
-    if(query.length<2){setResults([]);return;}
-    if(!isMultiMode&&selected){setResults([]);return;}
-    if(isMultiMode){
-      if(catFilter&&cat){
-        setResults((LIBRARY[cat]||[]).filter(i=>wordMatch(i.title,query)).slice(0,8).map(i=>({...i,_cat:cat})));
-      } else {
-        const all=[];
-        CATEGORIES.forEach(c=>{
-          (LIBRARY[c.id]||[]).filter(i=>wordMatch(i.title,query)).slice(0,3).forEach(i=>all.push({...i,_cat:c.id}));
-        });
-        setResults(all.slice(0,12));
-      }
-    } else {
-      setResults((LIBRARY[cat]||[]).filter(i=>wordMatch(i.title,query)).slice(0,8));
-    }
-  },[query,cat,catFilter,selected,isMultiMode]);
-
-  const addToQueue=(item)=>{
-    setQueue(q=>[...q,{...item,category:item._cat||cat,_qid:Date.now()+Math.random()}]);
-    setQuery("");setSelected(null);setResults([]);
-    setTimeout(()=>inputRef.current?.focus(),50);
-  };
+    if(query.length>0&&!selected){
+      const lq=query.toLowerCase();
+      setResults((LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,8));
+    } else setResults([]);
+  },[query,cat,selected]);
 
   const handleSave=()=>{
-    const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
-    if(isMultiMode){
-      // Build final list — queue + any current typed/selected item
-      const toSave=[...queue];
-      if(selected){
-        toSave.push({...selected,category:selected._cat||cat});
-      } else if(query.trim()&&!selected){
-        // Manual typed — try to find in library for metadata
-        let found=null;
-        for(const c of CATEGORIES){
-          const match=(LIBRARY[c.id]||[]).find(i=>i.title.toLowerCase()===query.trim().toLowerCase());
-          if(match){found={...match,_cat:c.id,category:c.id};break;}
-        }
-        if(found)toSave.push(found);
-        else toSave.push({title:query.trim(),tags:[],genre:"Custom",category:cat,_cat:cat});
-      }
-      if(!toSave.length)return;
-      const base=Date.now();
-      toSave.forEach((item,idx)=>{
-        const mood=ITEM_MOOD[item.title]||null;
-        onSave({...item,category:item.category||item._cat||"movies",note:"",mood,date,customDate:useCustomDate?customDate:null,id:base+idx*7});
-      });
-      onClose();return;
-    }
     if(!selected&&!query.trim())return;
-    const base=selected||(()=>{
-      // Try library lookup before falling back to custom
-      const match=(LIBRARY[cat]||[]).find(i=>i.title.toLowerCase()===query.trim().toLowerCase());
-      return match||{title:query.trim(),tags:[],genre:"Custom",ph:false};
-    })();
+    const base=selected||{title:query.trim(),tags:[],genre:"Custom",ph:false};
     const mood=ITEM_MOOD[base.title]||null;
+    const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     onSave({...base,category:cat,note,mood,date,customDate:useCustomDate?customDate:null,id:editEntry?.id||Date.now()});
     onClose();
   };
 
-  // Can save if: queue has items, OR something selected, OR typed something with a valid category context
-  const typedIsValid=query.trim().length>0&&(!isMultiMode||(catFilter&&cat));
-  const canSave=(isMultiMode&&queue.length>0)||(selected)||typedIsValid;
-
-  // Design tokens — 3 sizes only
-  const fs={title:20,body:14,meta:12};
-  const gap=16;
-
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,paddingBottom:44,maxHeight:"92vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
-
-        {/* Header */}
-        <div style={{padding:"20px 20px 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontFamily:"'Playfair Display',serif",fontSize:fs.title,fontWeight:700,color:th.text}}>{isEdit?t.edit_entry:t.log_entry}</span>
-          <button onClick={onClose} style={{width:32,height:32,borderRadius:"50%",background:th.card,border:`1px solid ${th.border}`,fontSize:18,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>×</button>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:24,paddingBottom:44,maxHeight:"90vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{editEntry?t.edit_entry:t.log_entry}</h3>
+          <button onClick={onClose} style={{fontSize:24,color:th.sub}}>×</button>
         </div>
-
-        <div style={{padding:`${gap}px 20px 0`}}>
-
-          {/* Category tabs — filter search results, no lock in multi-mode */}
-          <div style={{display:"flex",gap:6,marginBottom:gap,overflowX:"auto",paddingBottom:2}}>
-            {CATEGORIES.map(c=>{
-              const active=cat===c.id&&(!isMultiMode||catFilter);
-              return(<button key={c.id} onClick={()=>{
-                if(isMultiMode){
-                  if(cat===c.id&&catFilter){setCatFilter(false);}
-                  else{setCat(c.id);setCatFilter(true);}
-                } else {
-                  setCat(c.id);setSelected(null);setQuery("");
-                }
-              }} style={{padding:"6px 12px",borderRadius:20,whiteSpace:"nowrap",fontSize:fs.meta,fontWeight:600,background:active?c.color:th.card,color:active?"#fff":th.sub,border:`1px solid ${active?c.color:th.border}`,flexShrink:0}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>);
-            })}
-          </div>
-
-          {/* Queue — multi mode */}
-          {isMultiMode&&queue.length>0&&(
-            <div style={{marginBottom:gap}}>
-              {queue.map(item=>{
-                const meta=CAT_MAP[item.category];
-                return(
-                  <div key={item._qid} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
-                    <span style={{fontSize:16,flexShrink:0}}>{meta?.emoji}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:fs.body,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
-                      <div style={{fontSize:fs.meta,color:th.sub,marginTop:2}}>{item.genre&&item.genre!=="Film"&&item.genre!=="Custom"?item.genre:meta?.labelEn}</div>
-                    </div>
-                    <button onClick={()=>setQueue(q=>q.filter(x=>x._qid!==item._qid))} style={{color:th.sub,fontSize:20,flexShrink:0,lineHeight:1}}>×</button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Quick logs — single mode only, shows recent entries for selected category */}
-          {!isMultiMode&&!selected&&!query&&(()=>{
-            const past=data.logs.filter(l=>l.category===cat).slice(0,4);
-            if(!past.length)return null;
-            return(
-              <div style={{marginBottom:gap}}>
-                <div style={{fontSize:fs.meta,color:th.sub,fontWeight:600,marginBottom:8}}>{t.quick_logs}</div>
-                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                  {past.map((l,i)=>(
-                    <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}}
-                      style={{padding:"6px 12px",borderRadius:20,fontSize:fs.meta,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Search bar */}
-          <div style={{background:th.card,border:`1px solid ${selected?th.accent:th.border}`,borderRadius:12,padding:"11px 14px",display:"flex",alignItems:"center",gap:10,marginBottom:results.length>0?0:gap}}>
-            <span style={{fontSize:16,opacity:0.4,flexShrink:0}}>🔍</span>
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={e=>{setQuery(e.target.value);setSelected(null);}}
-              placeholder={isMultiMode?"Search anything…":t.search_placeholder}
-              style={{flex:1,fontSize:fs.body,color:th.text,background:"transparent",caretColor:th.accent}}
-            />
-            {query&&<button onClick={()=>{setQuery("");setSelected(null);setResults([]);setTimeout(()=>inputRef.current?.focus(),50);}} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>}
-          </div>
-
-          {/* Search results */}
-          {results.length>0&&!selected&&(
-            <div style={{borderRadius:"0 0 12px 12px",overflow:"hidden",border:`1px solid ${th.border}`,borderTop:"none",marginBottom:gap}}>
-              {results.map((item,i)=>{
-                const meta=CAT_MAP[item._cat||cat];
-                const inQueue=isMultiMode&&queue.some(q=>q.title===item.title&&q.category===(item._cat||cat));
-                return(
-                  <div key={i}
-                    onClick={()=>{
-                      if(inQueue)return;
-                      if(isMultiMode){addToQueue(item);}
-                      else{setSelected(item);setQuery(item.title);setResults([]);}
-                    }}
-                    style={{padding:"10px 14px",cursor:inQueue?"default":"pointer",background:inQueue?th.accent+"0d":th.card,display:"flex",alignItems:"center",gap:10,borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",opacity:inQueue?0.5:1}}>
-                    <span style={{fontSize:18,flexShrink:0}}>{meta?.emoji}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:fs.body,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}</div>
-                      <div style={{fontSize:fs.meta,color:th.sub,marginTop:1}}>{item.genre&&item.genre!=="Film"?item.genre:meta?.labelEn}</div>
-                    </div>
-                    {isMultiMode&&<span style={{fontSize:fs.meta,color:inQueue?th.sub:th.accent,fontWeight:700,flexShrink:0}}>{inQueue?"✓":"+Add"}</span>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Selected item — single mode */}
-          {!isMultiMode&&selected&&(
-            <div style={{padding:"10px 14px",borderRadius:12,marginBottom:gap,background:th.accent+"15",border:`1px solid ${th.accent}33`,display:"flex",alignItems:"center",gap:10}}>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:fs.body,fontWeight:600,color:th.text}}>{selected.title}</div>
-                <div style={{fontSize:fs.meta,color:th.sub,marginTop:2}}>{selected.genre&&selected.genre!=="Film"?selected.genre:""}</div>
-              </div>
-              <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20,flexShrink:0}}>×</button>
-            </div>
-          )}
-
-          {/* Note — single mode only */}
-          {!isMultiMode&&(
-            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection}
-              style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:fs.body,color:th.text,minHeight:64,resize:"none",lineHeight:1.6,marginBottom:gap}}/>
-          )}
-
-          {/* Date row */}
-          <div style={{marginBottom:gap}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,cursor:"pointer"}} onClick={()=>setUseCustomDate(v=>!v)}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:16}}>📅</span>
-                <span style={{fontSize:fs.body,color:th.text}}>{useCustomDate?customDate:lang==="fil"?"Ngayon":"Today"}</span>
-              </div>
-              <span style={{fontSize:fs.meta,color:th.accent,fontWeight:700}}>{useCustomDate?"Reset":"Change"}</span>
-            </div>
-            {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]}
-              style={{display:"block",width:"100%",padding:"11px 14px",borderRadius:12,fontSize:fs.body,background:th.card,border:`1px solid ${th.border}`,color:th.text,marginTop:6}}/>}
-          </div>
-
-          {/* Save */}
-          <button onClick={handleSave} disabled={!canSave}
-            style={{width:"100%",padding:"14px",borderRadius:14,background:canSave?th.accent:"#88888833",color:canSave?"#fff":"#88888888",fontWeight:700,fontSize:fs.body,marginBottom:4,transition:"all 0.2s"}}>
-            {isMultiMode&&queue.length>1?`Log ${queue.length} entries`:t.log_it}
-          </button>
-
+        <div style={{display:"flex",gap:7,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
+          {CATEGORIES.map(c=>(
+            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}} style={{padding:"7px 13px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,background:cat===c.id?c.color:th.card,color:cat===c.id?"#fff":th.sub,border:`1px solid ${cat===c.id?c.color:th.border}`,transition:"all 0.2s"}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>
+          ))}
         </div>
+        {!editEntry&&(()=>{
+          const past=data.logs.filter(l=>l.category===cat).slice(0,4);
+          if(!past.length)return null;
+          return(<div style={{marginBottom:14}}>
+            <div style={{fontSize:11,color:th.sub,fontWeight:600,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>{t.quick_logs}</div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {past.map((l,i)=>(
+                <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}} style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
+              ))}
+            </div>
+          </div>);
+        })()}
+        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+          <span>🔍</span>
+          <input value={query} onChange={e=>{setQuery(e.target.value);setSelected(null);}} placeholder={t.search_placeholder} style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}/>
+          {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
+        </div>
+        {results.length>0&&!selected&&(
+          <div style={{marginBottom:12}}>
+            {results.map((item,i)=>(
+              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}} style={{padding:"9px 13px",borderRadius:10,cursor:"pointer",marginBottom:5,background:th.card,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18}}>{CAT_MAP[cat]?.emoji}</span>
+                <div><div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div><div style={{fontSize:11,color:th.sub}}>{item.genre}</div></div>
+              </div>
+            ))}
+          </div>
+        )}
+        {selected&&(
+          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"22",border:`1px solid ${th.accent}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div><div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div><div style={{fontSize:11,color:th.sub}}>{selected.genre}</div></div>
+            <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
+          </div>
+        )}
+        <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection} style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:12}}/>
+        <div style={{marginBottom:16}}>
+          <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:8}}>{useCustomDate?"Use today":"Log for a different date"}</button>
+          {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:10,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text}}/>}
+        </div>
+        <button onClick={handleSave} disabled={!selected&&!query.trim()} style={{width:"100%",padding:"14px",borderRadius:14,background:selected||query.trim()?th.accent:"gray",color:"#fff",fontWeight:700,fontSize:16,opacity:selected||query.trim()?1:0.4}}>{t.log_it}</button>
       </div>
-    </div>
-  );
-}
-
-// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
-function usePullToRefresh(onRefresh){
-  const scrollRef=React.useRef(null);
-  const startY=React.useRef(0);
-  const [pull,setPull]=React.useState(0);
-  const [refreshing,setRefreshing]=React.useState(false);
-  const active=React.useRef(false);
-
-  const onTouchStart=e=>{
-    if(scrollRef.current?.scrollTop===0)startY.current=e.touches[0].clientY;
-  };
-  const onTouchMove=e=>{
-    if(scrollRef.current?.scrollTop>0){active.current=false;return;}
-    const d=e.touches[0].clientY-startY.current;
-    if(d>0){active.current=true;setPull(Math.min(d*0.38,64));}
-  };
-  const onTouchEnd=()=>{
-    if(pull>42){
-      setRefreshing(true);setPull(0);
-      onRefresh(()=>setRefreshing(false));
-    } else {setPull(0);}
-    active.current=false;
-  };
-  return{scrollRef,pull,refreshing,active,handlers:{onTouchStart,onTouchMove,onTouchEnd}};
-}
-
-function PullIndicator({pull,refreshing,active,theme}){
-  const th=THEMES[theme];
-  const visible=pull>8||refreshing;
-  return(
-    <div style={{
-      position:"absolute",top:0,left:0,right:0,
-      height:44,display:"flex",alignItems:"flex-end",justifyContent:"center",
-      paddingBottom:8,pointerEvents:"none",zIndex:10,
-      transform:`translateY(${refreshing?0:Math.min(pull-44,0)}px)`,
-      transition:active.current?"none":"transform 0.25s ease",
-      opacity:visible?1:0,
-    }}>
-      <span style={{
-        fontSize:18,display:"inline-block",color:th.accent,
-        animation:refreshing?"spin 0.7s linear infinite":"none",
-        transform:!refreshing?`rotate(${pull*4}deg)`:"",
-        transition:active.current?"none":"transform 0.1s",
-      }}>↻</span>
     </div>
   );
 }
@@ -1598,28 +1332,22 @@ function TabBar({tab,setTab,data}){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({data,onOpenLog,onRefresh}){
+function HomePage({data,onOpenLog}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
-  const lang=data.language;
   const h=new Date().getHours();
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
   const weekLogs=getWeekLogs(data.logs);
   const recent=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
-  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
-
   return(
-    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
-      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
-      <div ref={scrollRef} className="fade-in" {...handlers}
-        style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{marginBottom:22}}>
         <p style={{color:th.sub,fontSize:12,marginBottom:4}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName}</h1>
         <p style={{color:th.sub,fontSize:14,marginTop:5,fontStyle:"italic"}}>{t.tagline}</p>
       </div>
-      <button onClick={()=>onOpenLog()} style={{width:"100%",padding:"17px 20px",borderRadius:18,marginBottom:20,background:`linear-gradient(135deg,${th.accent},${th.accent2})`,color:"#fff",fontWeight:700,fontSize:16,display:"flex",alignItems:"center",gap:12,boxShadow:`0 8px 28px ${th.accent}44`,border:"none",cursor:"pointer"}}>
+      <button onClick={onOpenLog} style={{width:"100%",padding:"17px 20px",borderRadius:18,marginBottom:20,background:`linear-gradient(135deg,${th.accent},${th.accent2})`,color:"#fff",fontWeight:700,fontSize:16,display:"flex",alignItems:"center",gap:12,boxShadow:`0 8px 28px ${th.accent}44`,border:"none",cursor:"pointer"}}>
         <span style={{fontSize:24}}>+</span><span>{t.log_something}</span>
         <span style={{marginLeft:"auto",opacity:0.75,fontSize:13,fontWeight:400}}>{data.logs.length} {t.entries}</span>
       </button>
@@ -1641,13 +1369,13 @@ function HomePage({data,onOpenLog,onRefresh}){
           <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.recent_entries}</h2>
           {recent.map((log,i)=>{
             const meta=CAT_MAP[log.category];
-            return(<div key={i} className="fade-in" onClick={()=>onOpenLog(log.category,log)} style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`,cursor:"pointer",WebkitTapHighlightColor:"transparent"}}>
+            return(<div key={i} className="fade-in" style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`}}>
               <div style={{width:38,height:38,borderRadius:10,flexShrink:0,fontSize:20,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{log.title}</div>
                 <div style={{fontSize:11,color:th.sub}}>{formatDate(log.date)}</div>
               </div>
-              <span style={{fontSize:12,color:th.accent,fontWeight:600,flexShrink:0}}>+ Log</span>
+              {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
             </div>);
           })}
         </div>
@@ -1659,19 +1387,17 @@ function HomePage({data,onOpenLog,onRefresh}){
           <p style={{fontSize:13,marginTop:6,fontStyle:"italic",opacity:0.7}}>{t.empty_sub}</p>
         </div>
       )}
-      </div>
     </div>
   );
 }
 
 // ─── TIMELINE PAGE ────────────────────────────────────────────────────────────
-function TimelinePage({data,onOpenLog,onDelete,onEdit,onRefresh}){
+function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [filterCat,setFilterCat]=useState("all");
   const [weeksShown,setWeeksShown]=useState(1);
-  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
   const sorted=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1705,15 +1431,12 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onRefresh}){
 
   const renderEntry=(log,i)=>{
     const meta=CAT_MAP[log.category];
-    const isMovie=log.category==="movies";
-    const displayGenre=(!log.genre||log.genre==="Film")?null:log.genre==="Custom"?(meta?.labelEn||null):log.genre;
-    const titleLine=isMovie&&log.year?`${log.title} (${log.year})`:log.title;
-    return(<div key={log.id||i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
+    return(<div key={i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{titleLine}</div>
-        {displayGenre?<div style={{fontSize:11,color:th.sub}}>{displayGenre}</div>:null}
-        {log.note?<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>:null}
+        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}</div>
+        <div style={{fontSize:11,color:th.sub}}>{log.genre||""}</div>
+        {log.note&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>}
       </div>
       <div style={{display:"flex",gap:6,flexShrink:0}}>
         <button onClick={()=>onEdit(log)} style={{width:32,height:32,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✏️</button>
@@ -1729,9 +1452,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onRefresh}){
     </div>
   ));
   return(
-    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
-      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
-      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{t.timeline}</h1>
         <button onClick={onOpenLog} style={{background:th.accent,color:"#fff",padding:"8px 18px",borderRadius:20,fontWeight:700,fontSize:13}}>+ {lang==="fil"?"Mag-log":"Log"}</button>
@@ -1761,7 +1482,6 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onRefresh}){
           )}
         </>
       )}
-      </div>
     </div>
   );
 }
@@ -1952,7 +1672,7 @@ function BarkadaDeck({data,onUpdateBarkadaState}){
 }
 
 // ─── MY STORY PAGE ────────────────────────────────────────────────────────────
-function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onRefresh}){
+function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -1960,12 +1680,9 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onR
   const archetype=getArchetype(weekLogs.length?weekLogs:data.logs);
   const [showCard,setShowCard]=useState(false);
   const av=AVATARS.find(a=>a.id===data.avatar);
-  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   return(
-    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
-      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
-      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
       <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
 
@@ -2204,13 +1921,12 @@ function ShareCardModal({archetype,data,av,onClose}){
           <button onClick={onClose} style={{width:"100%",padding:"12px",borderRadius:14,background:"transparent",color:"rgba(255,255,255,0.4)",fontSize:13}}>Close</button>
         </div>
       </div>
-      </div>
     </div>
   );
 }
 
 // ─── PROFILE PAGE ────────────────────────────────────────────────────────────
-function ProfilePage({data,onChange,onRefresh}){
+function ProfilePage({data,onChange}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -2250,12 +1966,9 @@ function ProfilePage({data,onChange,onRefresh}){
   const sc=data.photoPos?.scale||1;
   const px=data.photoPos?.x||50;
   const py=data.photoPos?.y||50;
-  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   return(
-    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
-      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
-      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -2387,7 +2100,6 @@ function ProfilePage({data,onChange,onRefresh}){
           <p>Log a few more things to see your profile grow.</p>
         </div>
       )}
-      </div>
     </div>
   );
 }
@@ -2550,31 +2262,31 @@ function SettingsPage({data,onChange,onReset,onImport}){
                   cols.push(cur.trim());
                   return cols;
                 };
+                const existingTitles=new Set((data.logs||[]).filter(l=>l.category==="movies").map(l=>l.title.toLowerCase().trim()));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
                   const cols=parseRow(lines[i]);
                   const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
                   if(!title)continue;
+                  if(existingTitles.has(title.toLowerCase()))continue;
                   const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
                   const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
                   const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
                   const rewatch=((cols[rewatchIdx]||"").replace(/^"|"$/g,"").toLowerCase()==="yes");
                   const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
-                  const tags=tagsRaw?tagsRaw.split(",").map(tag=>tag.trim()).filter(Boolean):[];
+                  const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
+                  if(year)tags.push(year);
                   if(rewatch)tags.push("rewatch");
-                  // Look up genre + tags from library
-                  const libMatch=(LIBRARY.movies||[]).find(m=>m.title.toLowerCase()===title.toLowerCase());
-                  const genre=libMatch?.genre||"Film";
-                  if(libMatch?.tags)libMatch.tags.forEach(tag=>{if(!tags.includes(tag))tags.push(tag);});
+                  // Convert Letterboxd 0.5–5 rating to our 1–10 scale
+                  const rating=!isNaN(ratingRaw)?Math.round(ratingRaw*2):null;
                   const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
                   newEntries.push({
-                    id:Date.now()+Math.random(),
+                    id:Date.now()+i,
                     title,
-                    year:year||null,
                     category:"movies",
                     tags,
-                    genre,
+                    genre:"Film",
                     note:"",
                     mood:null,
                     date,
@@ -2582,9 +2294,10 @@ function SettingsPage({data,onChange,onReset,onImport}){
                     fromLetterboxd:true,
                     lbRating:!isNaN(ratingRaw)?ratingRaw:null,
                   });
+                  existingTitles.add(title.toLowerCase());
                 }
                 if(!newEntries.length){
-                  setLbMsg("⚠️ "+(lang==="fil"?"Walang entries sa file.":"No entries found in file."));
+                  setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
                   return;
                 }
                 onChange("logs",[...(data.logs||[]),...newEntries]);
@@ -2625,13 +2338,6 @@ function App(){
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [logCat,setLogCat]=useState(null);
-  const [logPrefill,setLogPrefill]=useState(null);
-
-  const hardRefresh=(done)=>{
-    saveData(data);
-    // Small delay so save completes, then force fresh fetch from server
-    setTimeout(()=>window.location.reload(true),150);
-  };
 
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
@@ -2644,7 +2350,7 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entry=>{
     if(editEntry) update({logs:data.logs.map(l=>l.id===entry.id?entry:l)});
-    else setData(d=>({...d,logs:[entry,...d.logs]}));
+    else update({logs:[entry,...data.logs]});
     setEditEntry(null);
   };
   const handleDelete=id=>update({logs:data.logs.filter(l=>l.id!==id)});
@@ -2679,13 +2385,13 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}} onRefresh={hardRefresh}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit} onRefresh={hardRefresh}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onRefresh={hardRefresh}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onRefresh={hardRefresh}/>}
+              {tab==="home"&&<HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat} prefill={logPrefill}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
             </>
           )}
