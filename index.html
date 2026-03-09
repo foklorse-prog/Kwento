@@ -10,12 +10,6 @@
   <meta name="description" content="Your personal story journal."/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
-<script>
-    (function(){
-      var bg = localStorage.getItem("kwento_restore_bg");
-      if(bg){ document.documentElement.style.background = bg; document.body.style.background = bg; }
-    })();
-  </script>
 </head>
 <body>
 <div id="root"></div>
@@ -873,7 +867,6 @@ body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
 input,textarea{outline:none;border:none;background:none;font-family:inherit;}
 button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
-@keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
@@ -2342,6 +2335,98 @@ function SettingsPage({data,onChange,onReset,onImport}){
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 
 // ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+function PullToRefresh({tab}){
+  const [pullY, setPullY] = useState(0);
+  const [phase, setPhase] = useState("idle");
+  const startY = useRef(null);
+  const containerRef = useRef(null);
+  const THRESHOLD = 80;
+  // Don't show on settings or onboarding
+  const blocked = !tab || tab === "settings";
+  if(blocked) return null;
+
+  useEffect(()=>{
+    const container = document.querySelector(".kwento-page-"+tab);
+    if(!container) return;
+
+    const onTouchStart = e => {
+      if(container.scrollTop > 2) return;
+      startY.current = e.touches[0].clientY;
+    };
+    const onTouchMove = e => {
+      if(startY.current === null) return;
+      const dy = e.touches[0].clientY - startY.current;
+      if(dy <= 0){ startY.current=null; setPullY(0); setPhase("idle"); return; }
+      const clamped = Math.min(dy * 0.5, THRESHOLD + 24);
+      setPullY(clamped);
+      setPhase(clamped >= THRESHOLD ? "ready" : "pulling");
+    };
+    const onTouchEnd = () => {
+      if(pullY >= THRESHOLD){
+        setPhase("refreshing");
+        setPullY(THRESHOLD);
+        localStorage.setItem("kwento_restore_tab", tab);
+        setTimeout(()=>{ window.location.reload(true); }, 700);
+      } else {
+        setPhase("idle"); setPullY(0);
+      }
+      startY.current = null;
+    };
+
+    container.addEventListener("touchstart", onTouchStart, {passive:true});
+    container.addEventListener("touchmove", onTouchMove, {passive:false});
+    container.addEventListener("touchend", onTouchEnd);
+    return ()=>{
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      container.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [tab, pullY, phase]);
+
+  const progress = Math.min(pullY / THRESHOLD, 1);
+  const isRefreshing = phase === "refreshing";
+  const isReady = phase === "ready";
+  const isIdle = phase === "idle" && pullY < 1;
+  const height = isIdle ? 0 : (isRefreshing ? THRESHOLD : pullY);
+
+  return(
+    <div style={{
+      width:"100%",
+      height: height,
+      background:"transparent",
+      display:"flex", alignItems:"center", justifyContent:"center",
+      flexShrink:0,
+      transition: isRefreshing ? "height 0.2s ease" : "none",
+      overflow:"hidden",
+    }}>
+      <div style={{
+        display:"flex", flexDirection:"column", alignItems:"center", gap:5,
+        opacity: Math.max(progress, 0.4),
+      }}>
+        {isRefreshing ? (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+            style={{animation:"ptr-spin 0.7s linear infinite"}}>
+            <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5"/>
+            <path d="M12 3 a9 9 0 0 1 9 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        ) : (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+            style={{transform:`rotate(${isReady?180:Math.round(progress*150)}deg)`,transition:"transform 0.15s"}}>
+            <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
+            <path d="M12 7v10M7.5 13.5L12 18l4.5-4.5"
+              stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        <span style={{
+          fontSize:11, fontWeight:600, letterSpacing:0.3,
+          color:"rgba(255,255,255,0.65)", fontFamily:"'DM Sans',sans-serif"
+        }}>
+          {isRefreshing?"Updating…":isReady?"Release to update":"Pull to refresh"}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function App(){
   const [data,setData]=useState(()=>loadData()||defaultData());
@@ -2356,97 +2441,6 @@ function App(){
     const id=setInterval(()=>saveData(data),5*60*1000);
     return()=>clearInterval(id);
   },[data]);
-
-
-  // ── Pull to Refresh ──
-  const ptrStartY = useRef(null);
-  const ptrLockedAtTop = useRef(false);
-  const [ptrY, setPtrY] = useState(0);
-  const [ptrPhase, setPtrPhase] = useState("idle"); // idle|pulling|ready|refreshing
-  const PTR_THRESHOLD = 72;
-  const ptrInnerRef = useRef(null);
-  const ptrWrapRef = useRef(null);
-
-  useEffect(()=>{
-    const wrap = ptrWrapRef.current;
-    if(!wrap) return;
-
-    const getScroller = () => {
-      // The active scrollable page is the first overflowY:auto child of inner
-      const inner = ptrInnerRef.current;
-      if(!inner) return null;
-      // Find the scrollable child - each page renders its own scroll container
-      // We check the direct children for scrollTop capability
-      return inner;
-    };
-
-    const onTouchStart = e => {
-      if(tab === "settings") return; // no PTR on settings
-      const inner = ptrInnerRef.current;
-      if(!inner) return;
-      // Find deepest scrollable container that is scrolled
-      // Simple: check if any ancestor up to inner has scrollTop > 0
-      let el = e.target;
-      let scrolled = false;
-      while(el && el !== wrap){
-        if(el.scrollTop > 0){ scrolled = true; break; }
-        el = el.parentElement;
-      }
-      if(scrolled){ ptrLockedAtTop.current = false; return; }
-      ptrLockedAtTop.current = true;
-      ptrStartY.current = e.touches[0].clientY;
-    };
-
-    const onTouchMove = e => {
-      if(!ptrLockedAtTop.current) return;
-      const dy = e.touches[0].clientY - (ptrStartY.current||0);
-      if(dy <= 0){
-        if(ptrY > 0){ setPtrY(0); setPtrPhase("idle"); }
-        return;
-      }
-      // Check again if page has scrolled since start
-      let el = e.target;
-      while(el && el !== wrap){
-        if(el.scrollTop > 0){ ptrLockedAtTop.current=false; setPtrY(0); setPtrPhase("idle"); return; }
-        el = el.parentElement;
-      }
-      e.preventDefault();
-      const clamped = Math.min(dy * 0.4, PTR_THRESHOLD + 24);
-      setPtrY(clamped);
-      setPtrPhase(clamped >= PTR_THRESHOLD ? "ready" : "pulling");
-    };
-
-    const onTouchEnd = () => {
-      if(!ptrLockedAtTop.current) return;
-      ptrLockedAtTop.current = false;
-      ptrStartY.current = null;
-      if(ptrY >= PTR_THRESHOLD){
-        setPtrPhase("refreshing");
-        setPtrY(PTR_THRESHOLD);
-        localStorage.setItem("kwento_restore_tab", tab);
-        // Save theme so html bg can be set before React loads
-        localStorage.setItem("kwento_restore_theme", data.theme);
-        setTimeout(()=>window.location.reload(true), 750);
-      } else {
-        setPtrPhase("idle");
-        setPtrY(0);
-      }
-    };
-
-    wrap.addEventListener("touchstart", onTouchStart, {passive:true});
-    wrap.addEventListener("touchmove", onTouchMove, {passive:false});
-    wrap.addEventListener("touchend", onTouchEnd);
-    return ()=>{
-      wrap.removeEventListener("touchstart", onTouchStart);
-      wrap.removeEventListener("touchmove", onTouchMove);
-      wrap.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [tab, ptrY]);
-
-  const ptrProgress = Math.min(ptrY / PTR_THRESHOLD, 1);
-  const ptrIsRefreshing = ptrPhase === "refreshing";
-  const ptrIsReady = ptrPhase === "ready";
-  const ptrTranslate = ptrIsRefreshing ? PTR_THRESHOLD : ptrY;
 
   const update=patch=>setData(d=>({...d,...patch}));
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
@@ -2482,41 +2476,16 @@ function App(){
     <>
       <style>{CSS}</style>
       <div style={{background:th.grad,color:th.text,height:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflow:"hidden"}}>
-        <div ref={ptrWrapRef} style={{maxWidth:500,margin:"0 auto",height:"100%",position:"relative",overflow:"hidden"}}>
+        <div style={{maxWidth:500,margin:"0 auto",height:"100%",position:"relative"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {/* PTR indicator - fixed behind page */}
-              {(ptrPhase!=="idle"||ptrY>0)&&(
-                <div style={{position:"absolute",top:0,left:0,right:0,height:PTR_THRESHOLD,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",paddingBottom:10,zIndex:1,pointerEvents:"none"}}>
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,opacity:Math.max(ptrProgress,ptrIsRefreshing?1:0.3)}}>
-                    {ptrIsRefreshing?(
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{animation:"ptr-spin 0.7s linear infinite"}}>
-                        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5"/>
-                        <path d="M12 3 a9 9 0 0 1 9 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-                      </svg>
-                    ):(
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{transform:`rotate(${ptrIsReady?180:Math.round(ptrProgress*150)}deg)`,transition:"transform 0.15s"}}>
-                        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
-                        <path d="M12 7v10M7.5 13.5L12 18l4.5-4.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                    <span style={{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.6)",letterSpacing:0.4,fontFamily:"'DM Sans',sans-serif"}}>
-                      {ptrIsRefreshing?"Updating…":ptrIsReady?"Release to update":"Pull to refresh"}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {/* Page content slides down over indicator */}
-              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2}}>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}}
+              {tab==="home"&&<div className="kwento-page-home" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="home"/><HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/></div>}
+              {tab==="timeline"&&<div className="kwento-page-timeline" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="timeline"/><TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/></div>}
+              {tab==="mystory"&&<div className="kwento-page-mystory" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="mystory"/><MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/></div>}
+              {tab==="profile"&&<div className="kwento-page-profile" style={{height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}><PullToRefresh tab="profile"/><ProfilePage data={data} onChange={handleSetting}/></div>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
-              </div>
               <TabBar tab={tab} setTab={setTab} data={data}/>
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
