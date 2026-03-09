@@ -1233,16 +1233,19 @@ function Onboarding({onComplete}){
 }
 
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
-function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
+function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const isEdit=!!editEntry;
   const isMultiMode=!isEdit&&!initialCat;
-  const [cat,setCat]=useState(editEntry?.category||(initialCat||"movies"));
-  const [query,setQuery]=useState(editEntry?.title||"");
+  const [cat,setCat]=useState(editEntry?.category||(initialCat||prefill?.category||"movies"));
+  const [query,setQuery]=useState(editEntry?.title||prefill?.title||"");
   const [note,setNote]=useState(editEntry?.note||"");
-  const [selected,setSelected]=useState(editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:null);
+  const [selected,setSelected]=useState(
+    editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:
+    prefill?{title:prefill.title,tags:prefill.tags||[],genre:prefill.genre||""}:null
+  );
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
@@ -1392,7 +1395,6 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
             <span style={{fontSize:16,opacity:0.4,flexShrink:0}}>🔍</span>
             <input
               ref={inputRef}
-              autoFocus
               value={query}
               onChange={e=>{setQuery(e.target.value);setSelected(null);}}
               placeholder={isMultiMode?"Search anything…":t.search_placeholder}
@@ -1536,13 +1538,13 @@ function HomePage({data,onOpenLog}){
           <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.recent_entries}</h2>
           {recent.map((log,i)=>{
             const meta=CAT_MAP[log.category];
-            return(<div key={i} className="fade-in" style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`}}>
+            return(<div key={i} className="fade-in" onClick={()=>onOpenLog(log.category,log)} style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`,cursor:"pointer",WebkitTapHighlightColor:"transparent"}}>
               <div style={{width:38,height:38,borderRadius:10,flexShrink:0,fontSize:20,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{log.title}</div>
                 <div style={{fontSize:11,color:th.sub}}>{formatDate(log.date)}</div>
               </div>
-              {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
+              <span style={{fontSize:12,color:th.accent,fontWeight:600,flexShrink:0}}>+ Log</span>
             </div>);
           })}
         </div>
@@ -2507,6 +2509,7 @@ function App(){
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [logCat,setLogCat]=useState(null);
+  const [logPrefill,setLogPrefill]=useState(null);
 
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
@@ -2554,13 +2557,13 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
+              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat} prefill={logPrefill}/>}
               <ThemeAnimations theme={data.theme}/>
             </>
           )}
