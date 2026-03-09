@@ -126,7 +126,7 @@ const T = {
     log_something:"Log something",entries:"entries",this_week:"This week",recent_entries:"Recent entries",
     archetype:"Your Archetype",empty_state:"Your journal is empty.",empty_sub:"Start by logging a movie, meal, or moment.",
     search_placeholder:"Search or type anything...",add_reflection:"Add a reflection note... (optional)",
-    log_it:"Log it",quick_logs:"Quick log from past entries",
+    log_it:"Log it ✓",quick_logs:"Quick log from past entries",
     suggestions:"Suggested for You",barkada_picks:"Barkada Picks",
     save:"Save",cancel:"Cancel",your_story:"My Story",last_7_days:"Last 7 days",share_card:"Share My Story",
     collaborator_title:"Contribute to Kwento",
@@ -155,7 +155,7 @@ const T = {
     log_something:"Mag-log ng bagay",entries:"entry",this_week:"Ngayong linggo",recent_entries:"Mga nakaraang entry",
     archetype:"Ang Iyong Arketipo",empty_state:"Walang laman ang iyong talaarawan.",empty_sub:"Magsimula sa pag-log ng pelikula, pagkain, o sandali.",
     search_placeholder:"Maghanap o mag-type ng kahit ano...",add_reflection:"Magdagdag ng tala... (opsyonal)",
-    log_it:"I-log",quick_logs:"Mabilis na log mula sa nakaraang entry",
+    log_it:"I-log ✓",quick_logs:"Mabilis na log mula sa nakaraang entry",
     suggestions:"Para Sa Iyo",barkada_picks:"Mga Piling Barkada",
     save:"I-save",cancel:"Kanselahin",your_story:"Kwento Ko",last_7_days:"Nakaraang 7 araw",share_card:"I-share ang Kwento Ko",
     collaborator_title:"Mag-ambag sa Kwento",
@@ -867,6 +867,7 @@ body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
 input,textarea{outline:none;border:none;background:none;font-family:inherit;}
 button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
+@keyframes ptr-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes cardReveal{from{opacity:0;transform:scale(0.92) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
@@ -2332,6 +2333,106 @@ function SettingsPage({data,onChange,onReset,onImport}){
 }
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
+
+// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+function PullToRefresh(){
+  const [pullY, setPullY] = useState(0);
+  const [phase, setPhase] = useState("idle"); // idle | pulling | ready | refreshing
+  const startY = useRef(null);
+  const THRESHOLD = 72;
+
+  useEffect(()=>{
+    const el = document.querySelector(".kwento-scroll-root");
+    if(!el) return;
+
+    const onTouchStart = e => {
+      if(el.scrollTop > 0) return;
+      startY.current = e.touches[0].clientY;
+      setPhase("pulling");
+    };
+
+    const onTouchMove = e => {
+      if(startY.current === null) return;
+      const dy = e.touches[0].clientY - startY.current;
+      if(dy <= 0){ startY.current = null; setPhase("idle"); setPullY(0); return; }
+      e.preventDefault();
+      const clamped = Math.min(dy * 0.45, THRESHOLD + 20);
+      setPullY(clamped);
+      setPhase(clamped >= THRESHOLD ? "ready" : "pulling");
+    };
+
+    const onTouchEnd = () => {
+      if(phase === "ready" || pullY >= THRESHOLD){
+        setPhase("refreshing");
+        setPullY(THRESHOLD);
+        setTimeout(()=>{
+          window.location.reload(true);
+        }, 800);
+      } else {
+        setPhase("idle");
+        setPullY(0);
+      }
+      startY.current = null;
+    };
+
+    el.addEventListener("touchstart", onTouchStart, {passive:true});
+    el.addEventListener("touchmove", onTouchMove, {passive:false});
+    el.addEventListener("touchend", onTouchEnd);
+    return ()=>{
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [phase, pullY]);
+
+  if(phase === "idle" && pullY === 0) return null;
+
+  const progress = Math.min(pullY / THRESHOLD, 1);
+  const isRefreshing = phase === "refreshing";
+  const isReady = phase === "ready" || isRefreshing;
+
+  return(
+    <div style={{
+      position:"fixed", top:0, left:0, right:0, zIndex:999,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      height: isRefreshing ? 56 : pullY,
+      background:"#000",
+      transition: isRefreshing ? "height 0.2s ease" : "none",
+      overflow:"hidden",
+      pointerEvents:"none",
+    }}>
+      <div style={{
+        display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+        opacity: progress,
+        transform: `translateY(${isRefreshing ? 0 : Math.max(0, pullY - 32)}px)`,
+        transition: isRefreshing ? "transform 0.2s ease" : "none",
+      }}>
+        {isRefreshing ? (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+            style={{animation:"ptr-spin 0.7s linear infinite"}}>
+            <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5"/>
+            <path d="M12 3 a9 9 0 0 1 9 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+            style={{transform:`rotate(${isReady ? 180 : progress*160}deg)`, transition:"transform 0.15s"}}>
+            <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.15)" strokeWidth="2"/>
+            <path d="M12 7 L12 17 M7 13 L12 17 L17 13"
+              stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        <span style={{
+          fontSize:10, fontWeight:600, color:"rgba(255,255,255,0.6)",
+          fontFamily:"'DM Sans',sans-serif", letterSpacing:0.5,
+          opacity: progress,
+        }}>
+          {isRefreshing ? "Updating..." : isReady ? "Release to update" : "Pull to refresh"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function App(){
   const [data,setData]=useState(()=>loadData()||defaultData());
   const [tab,setTab]=useState("home");
@@ -2379,8 +2480,8 @@ function App(){
   return(
     <>
       <style>{CSS}</style>
-      <div style={{background:th.grad,color:th.text,height:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflow:"hidden"}}>
-        <div style={{maxWidth:500,margin:"0 auto",height:"100%",position:"relative"}}>
+      <div style={{background:th.grad,color:th.text,height:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflow:"hidden",position:"relative"}}>
+        <div className="kwento-scroll-root" style={{maxWidth:500,margin:"0 auto",height:"100%",position:"relative",overflowY:"auto"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
           ):(
@@ -2393,6 +2494,7 @@ function App(){
               <TabBar tab={tab} setTab={setTab} data={data}/>
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme}/>
+              <PullToRefresh/>
             </>
           )}
         </div>
