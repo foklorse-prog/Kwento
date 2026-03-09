@@ -19,6 +19,53 @@
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
+/*
+ * ╔══════════════════════════════════════════════════════════════════╗
+ * ║  KWENTO — Filipino Taste & Lifestyle Journal                     ║
+ * ║  Developer Notes                                                 ║
+ * ╠══════════════════════════════════════════════════════════════════╣
+ * ║                                                                  ║
+ * ║  VERSIONING                                                      ║
+ * ║  - Bump APP_VERSION below on every meaningful deploy             ║
+ * ║  - Format: "5.X" where X increments each update                 ║
+ * ║  - App auto-reloads when it detects a version mismatch,          ║
+ * ║    so users always get fresh code without closing/reopening      ║
+ * ║                                                                  ║
+ * ║  LIBRARY EXPANSION                                               ║
+ * ║  - Add entries to LIBRARY (movies/music/books/food/games/        ║
+ * ║    activities) following the existing shape:                     ║
+ * ║    { title, tags:[], genre, ph:bool }                           ║
+ * ║  - ph:true = Filipino/local, ph:false = global                  ║
+ * ║  - On next load, any user entry with genre:"Custom" that         ║
+ * ║    matches a new library title (same category) auto-enriches     ║
+ * ║                                                                  ║
+ * ║  STORAGE                                                         ║
+ * ║  - Primary key: "kwento_v5" in localStorage                     ║
+ * ║  - Backup key:  "kwento_v5_bk" (written on every save)          ║
+ * ║  - All migrations run in loadData() on every app open           ║
+ * ║                                                                  ║
+ * ║  THEMES                                                          ║
+ * ║  - 8 themes: jeepney, tsinelas, bahay_kubo, manila_nights,      ║
+ * ║    fiesta, hapon, ulan, taho                                     ║
+ * ║  - Animations in ThemeAnimations component                      ║
+ * ║                                                                  ║
+ * ║  OWNER: Siarra — no cloud, no tracking, fully offline-first     ║
+ * ╚══════════════════════════════════════════════════════════════════╝
+ */
+
+// ─── VERSION — bump this on every deploy ─────────────────────────────────────
+const APP_VERSION = "5.1";
+const VERSION_KEY = "kwento_app_version";
+(()=>{
+  const stored = localStorage.getItem(VERSION_KEY);
+  if(stored && stored !== APP_VERSION){
+    localStorage.setItem(VERSION_KEY, APP_VERSION);
+    window.location.reload(true);
+  } else {
+    localStorage.setItem(VERSION_KEY, APP_VERSION);
+  }
+})();
+
 
 
 // ─── OFFENSIVE WORD FILTER ────────────────────────────────────────────────────
@@ -1481,6 +1528,54 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,prefill=nu
   );
 }
 
+// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+function usePullToRefresh(onRefresh){
+  const scrollRef=React.useRef(null);
+  const startY=React.useRef(0);
+  const [pull,setPull]=React.useState(0);
+  const [refreshing,setRefreshing]=React.useState(false);
+  const active=React.useRef(false);
+
+  const onTouchStart=e=>{
+    if(scrollRef.current?.scrollTop===0)startY.current=e.touches[0].clientY;
+  };
+  const onTouchMove=e=>{
+    if(scrollRef.current?.scrollTop>0){active.current=false;return;}
+    const d=e.touches[0].clientY-startY.current;
+    if(d>0){active.current=true;setPull(Math.min(d*0.38,64));}
+  };
+  const onTouchEnd=()=>{
+    if(pull>42){
+      setRefreshing(true);setPull(0);
+      onRefresh(()=>setRefreshing(false));
+    } else {setPull(0);}
+    active.current=false;
+  };
+  return{scrollRef,pull,refreshing,active,handlers:{onTouchStart,onTouchMove,onTouchEnd}};
+}
+
+function PullIndicator({pull,refreshing,active,theme}){
+  const th=THEMES[theme];
+  const visible=pull>8||refreshing;
+  return(
+    <div style={{
+      position:"absolute",top:0,left:0,right:0,
+      height:44,display:"flex",alignItems:"flex-end",justifyContent:"center",
+      paddingBottom:8,pointerEvents:"none",zIndex:10,
+      transform:`translateY(${refreshing?0:Math.min(pull-44,0)}px)`,
+      transition:active.current?"none":"transform 0.25s ease",
+      opacity:visible?1:0,
+    }}>
+      <span style={{
+        fontSize:18,display:"inline-block",color:th.accent,
+        animation:refreshing?"spin 0.7s linear infinite":"none",
+        transform:!refreshing?`rotate(${pull*4}deg)`:"",
+        transition:active.current?"none":"transform 0.1s",
+      }}>↻</span>
+    </div>
+  );
+}
+
 // ─── TAB BAR ─────────────────────────────────────────────────────────────────
 function TabBar({tab,setTab,data}){
   const th=THEMES[data.theme];
@@ -1511,7 +1606,7 @@ function TabBar({tab,setTab,data}){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({data,onOpenLog,onRefresh,refreshing}){
+function HomePage({data,onOpenLog,onRefresh}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -1520,31 +1615,13 @@ function HomePage({data,onOpenLog,onRefresh,refreshing}){
   const weekLogs=getWeekLogs(data.logs);
   const recent=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
-
-  const scrollRef=React.useRef(null);
-  const touchStartY=React.useRef(0);
-  const [pullDist,setPullDist]=React.useState(0);
-  const isPulling=React.useRef(false);
-
-  const onTouchStart=e=>{if(scrollRef.current?.scrollTop===0)touchStartY.current=e.touches[0].clientY;};
-  const onTouchMove=e=>{
-    if(scrollRef.current?.scrollTop>0)return;
-    const dist=e.touches[0].clientY-touchStartY.current;
-    if(dist>0){isPulling.current=true;setPullDist(Math.min(dist*0.4,60));}
-  };
-  const onTouchEnd=()=>{
-    if(pullDist>40&&onRefresh)onRefresh();
-    setPullDist(0);isPulling.current=false;
-  };
+  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   return(
-    <div ref={scrollRef} className="fade-in"
-      onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-      style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      {/* Pull-to-refresh indicator */}
-      <div style={{height:refreshing?40:pullDist,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",transition:isPulling.current?"none":"height 0.25s ease",marginTop:-8,marginBottom:4}}>
-        {(pullDist>15||refreshing)&&<span style={{fontSize:16,opacity:Math.min(pullDist/40,1),display:"inline-block",animation:refreshing?"spin 0.7s linear infinite":pullDist>40?"none":"none",transform:!refreshing?`rotate(${pullDist*3}deg)`:""}}>↻</span>}
-      </div>
+    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
+      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
+      <div ref={scrollRef} className="fade-in" {...handlers}
+        style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{marginBottom:22}}>
         <p style={{color:th.sub,fontSize:12,marginBottom:4}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName}</h1>
@@ -1590,17 +1667,19 @@ function HomePage({data,onOpenLog,onRefresh,refreshing}){
           <p style={{fontSize:13,marginTop:6,fontStyle:"italic",opacity:0.7}}>{t.empty_sub}</p>
         </div>
       )}
+      </div>
     </div>
   );
 }
 
 // ─── TIMELINE PAGE ────────────────────────────────────────────────────────────
-function TimelinePage({data,onOpenLog,onDelete,onEdit}){
+function TimelinePage({data,onOpenLog,onDelete,onEdit,onRefresh}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [filterCat,setFilterCat]=useState("all");
   const [weeksShown,setWeeksShown]=useState(1);
+  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
   const sorted=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1658,7 +1737,9 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     </div>
   ));
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
+      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
+      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{t.timeline}</h1>
         <button onClick={onOpenLog} style={{background:th.accent,color:"#fff",padding:"8px 18px",borderRadius:20,fontWeight:700,fontSize:13}}>+ {lang==="fil"?"Mag-log":"Log"}</button>
@@ -1688,6 +1769,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
@@ -1878,7 +1960,7 @@ function BarkadaDeck({data,onUpdateBarkadaState}){
 }
 
 // ─── MY STORY PAGE ────────────────────────────────────────────────────────────
-function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
+function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onRefresh}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -1886,9 +1968,12 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
   const archetype=getArchetype(weekLogs.length?weekLogs:data.logs);
   const [showCard,setShowCard]=useState(false);
   const av=AVATARS.find(a=>a.id===data.avatar);
+  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
+      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
+      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
       <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
 
@@ -2127,12 +2212,13 @@ function ShareCardModal({archetype,data,av,onClose}){
           <button onClick={onClose} style={{width:"100%",padding:"12px",borderRadius:14,background:"transparent",color:"rgba(255,255,255,0.4)",fontSize:13}}>Close</button>
         </div>
       </div>
+      </div>
     </div>
   );
 }
 
 // ─── PROFILE PAGE ────────────────────────────────────────────────────────────
-function ProfilePage({data,onChange}){
+function ProfilePage({data,onChange,onRefresh}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -2172,9 +2258,12 @@ function ProfilePage({data,onChange}){
   const sc=data.photoPos?.scale||1;
   const px=data.photoPos?.x||50;
   const py=data.photoPos?.y||50;
+  const {scrollRef,pull,refreshing,active,handlers}=usePullToRefresh(onRefresh);
 
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div style={{position:"relative",height:"calc(100vh - 68px)"}}>
+      <PullIndicator pull={pull} refreshing={refreshing} active={active} theme={data.theme}/>
+      <div ref={scrollRef} className="fade-in" {...handlers} style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"100%",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -2306,6 +2395,7 @@ function ProfilePage({data,onChange}){
           <p>Log a few more things to see your profile grow.</p>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -2544,16 +2634,13 @@ function App(){
   const [editEntry,setEditEntry]=useState(null);
   const [logCat,setLogCat]=useState(null);
   const [logPrefill,setLogPrefill]=useState(null);
-  const [refreshing,setRefreshing]=useState(false);
 
-  const hardRefresh=()=>{
-    setRefreshing(true);
-    setTimeout(()=>{
-      // Re-run loadData which applies all migrations (library enrichment etc.)
-      const fresh=loadData();
-      if(fresh)setData(fresh);
-      setRefreshing(false);
-    },600);
+  const hardRefresh=(done)=>{
+    // Save current data first, then reload the page.
+    // On reload, the version check at the top will detect any new deployment
+    // and fetch fresh code. loadData() migrations then run automatically.
+    saveData(data);
+    setTimeout(()=>window.location.reload(true),100);
   };
 
   useEffect(()=>saveData(data),[data]);
@@ -2602,10 +2689,10 @@ function App(){
             <Onboarding onComplete={handleOnboard}/>
           ):(
             <>
-              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}} onRefresh={hardRefresh} refreshing={refreshing}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
+              {tab==="home"&&<HomePage data={data} onOpenLog={(cat,prefill)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill(prefill||null);}} onRefresh={hardRefresh}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit} onRefresh={hardRefresh}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onRefresh={hardRefresh}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onRefresh={hardRefresh}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}}/>}
               <TabBar tab={tab} setTab={setTab} data={data}/>
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill(null);}} onSave={handleLog} editEntry={editEntry} initialCat={logCat} prefill={logPrefill}/>}
