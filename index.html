@@ -139,7 +139,7 @@ const T = {
     log_something:"Log something",entries:"entries",this_week:"This week",recent_entries:"Recent entries",
     archetype:"Your Archetype",empty_state:"Your journal is empty.",empty_sub:"Start by logging a movie, meal, or moment.",
     search_placeholder:"Search or type anything...",add_reflection:"Add a reflection note... (optional)",
-    log_it:"Log it ✓",quick_logs:"Quick log from past entries",
+    log_it:"Log it",quick_logs:"Quick log from past entries",
     suggestions:"Suggested for You",barkada_picks:"Barkada Picks",
     save:"Save",cancel:"Cancel",your_story:"My Story",last_7_days:"Last 7 days",share_card:"Share My Story",
     collaborator_title:"Contribute to Kwento",
@@ -168,7 +168,7 @@ const T = {
     log_something:"Mag-log ng bagay",entries:"entry",this_week:"Ngayong linggo",recent_entries:"Mga nakaraang entry",
     archetype:"Ang Iyong Arketipo",empty_state:"Walang laman ang iyong talaarawan.",empty_sub:"Magsimula sa pag-log ng pelikula, pagkain, o sandali.",
     search_placeholder:"Maghanap o mag-type ng kahit ano...",add_reflection:"Magdagdag ng tala... (opsyonal)",
-    log_it:"I-log ✓",quick_logs:"Mabilis na log mula sa nakaraang entry",
+    log_it:"I-log",quick_logs:"Mabilis na log mula sa nakaraang entry",
     suggestions:"Para Sa Iyo",barkada_picks:"Mga Piling Barkada",
     save:"I-save",cancel:"Kanselahin",your_story:"Kwento Ko",last_7_days:"Nakaraang 7 araw",share_card:"I-share ang Kwento Ko",
     collaborator_title:"Mag-ambag sa Kwento",
@@ -1237,81 +1237,188 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
-  const [cat,setCat]=useState(editEntry?.category||(initialCat||"movies"));
-  const [query,setQuery]=useState(editEntry?.title||"");
-  const [note,setNote]=useState(editEntry?.note||"");
-  const [selected,setSelected]=useState(editEntry?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||""}:null);
+
+  // If editing, single-entry mode
+  const isEdit=!!editEntry;
+
+  // Category — null means none selected (for multi-log); initialCat only pre-selects if editing or cat-click
+  const [cat,setCat]=useState(isEdit?editEntry.category:(initialCat||null));
+  const [query,setQuery]=useState(isEdit?editEntry.title:"");
+  const [note,setNote]=useState(isEdit?editEntry.note:"");
+  const [selected,setSelected]=useState(isEdit?{title:editEntry.title,tags:editEntry.tags||[],genre:editEntry.genre||"",year:editEntry.year||null}:null);
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
+  // Multi-entry queue
+  const [queue,setQueue]=useState([]);
+  const inputRef=useRef(null);
 
   useEffect(()=>{
-    if(query.length>0&&!selected){
+    if(query.length>=2&&!selected&&cat){
       const lq=query.toLowerCase();
-      setResults((LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().includes(lq)).slice(0,8));
+      // starts-with match only
+      const sw=(LIBRARY[cat]||[]).filter(i=>i.title.toLowerCase().startsWith(lq)).slice(0,8);
+      setResults(sw);
     } else setResults([]);
   },[query,cat,selected]);
 
-  const handleSave=()=>{
+  const getGenreForCat=(item,category)=>{
+    // Always return meaningful genre, never "Film"
+    if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
+    return CAT_MAP[category]?.labelEn||category;
+  };
+
+  const addToQueue=()=>{
     if(!selected&&!query.trim())return;
-    const base=selected||{title:query.trim(),tags:[],genre:"Custom",ph:false};
+    if(!cat)return;
+    const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
     const mood=ITEM_MOOD[base.title]||null;
+    const genre=getGenreForCat(base,cat);
+    setQueue(q=>[...q,{...base,genre,category:cat,mood,year:base.year||null}]);
+    setSelected(null);
+    setQuery("");
+    setResults([]);
+    // Keep focus for fast multi-entry
+    setTimeout(()=>inputRef.current?.focus(),50);
+  };
+
+  const removeFromQueue=idx=>setQueue(q=>q.filter((_,i)=>i!==idx));
+
+  const handleSave=()=>{
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
-    onSave({...base,category:cat,note,mood,date,customDate:useCustomDate?customDate:null,id:editEntry?.id||Date.now()});
+    if(isEdit){
+      // Single edit save
+      if(!selected&&!query.trim())return;
+      const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
+      const genre=getGenreForCat(base,cat||"movies");
+      onSave({...base,genre,category:cat,note,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id});
+      onClose();
+      return;
+    }
+    // Multi: add current if any, then save all
+    let finalQueue=[...queue];
+    if((selected||query.trim())&&cat){
+      const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
+      const genre=getGenreForCat(base,cat);
+      finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:base.year||null});
+    }
+    if(!finalQueue.length)return;
+    finalQueue.forEach((item,i)=>{
+      onSave({...item,note:"",date,customDate:useCustomDate?customDate:null,id:Date.now()+i});
+    });
     onClose();
   };
 
+  const totalToSave=queue.length+((selected||query.trim())&&cat?1:0);
+
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:24,paddingBottom:44,maxHeight:"90vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{editEntry?t.edit_entry:t.log_entry}</h3>
-          <button onClick={onClose} style={{fontSize:24,color:th.sub}}>×</button>
+      <div className="slide-up" style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.bg,borderTopLeftRadius:24,borderTopRightRadius:24,padding:"24px 24px 44px",maxHeight:"92vh",overflowY:"auto",border:`1px solid ${th.border}`,borderBottom:"none"}}>
+
+        {/* Header */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:th.text}}>{isEdit?t.edit_entry:t.log_entry}</h3>
+          <button onClick={onClose} style={{fontSize:24,color:th.sub,lineHeight:1}}>×</button>
         </div>
-        <div style={{display:"flex",gap:7,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
+
+        {/* Category pills */}
+        <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
           {CATEGORIES.map(c=>(
-            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}} style={{padding:"7px 13px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,background:cat===c.id?c.color:th.card,color:cat===c.id?"#fff":th.sub,border:`1px solid ${cat===c.id?c.color:th.border}`,transition:"all 0.2s"}}>{c.emoji} {lang==="fil"?c.label:c.labelEn}</button>
+            <button key={c.id} onClick={()=>{setCat(c.id);setSelected(null);setQuery("");}}
+              style={{padding:"7px 14px",borderRadius:20,whiteSpace:"nowrap",fontSize:13,fontWeight:500,
+                background:cat===c.id?c.color:th.card,
+                color:cat===c.id?"#fff":th.sub,
+                border:`1px solid ${cat===c.id?c.color:th.border}`,
+                transition:"all 0.15s"}}>
+              {c.emoji} {lang==="fil"?c.label:c.labelEn}
+            </button>
           ))}
         </div>
-        {!editEntry&&(()=>{
-          const past=data.logs.filter(l=>l.category===cat).slice(0,4);
-          if(!past.length)return null;
-          return(<div style={{marginBottom:14}}>
-            <div style={{fontSize:11,color:th.sub,fontWeight:600,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>{t.quick_logs}</div>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {past.map((l,i)=>(
-                <button key={i} onClick={()=>{setSelected({title:l.title,tags:l.tags||[],genre:l.genre||""});setQuery(l.title);}} style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,background:th.card,border:`1px solid ${th.border}`,color:th.text,maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.title}</button>
-              ))}
-            </div>
-          </div>);
-        })()}
-        <div style={{background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-          <span>🔍</span>
-          <input value={query} onChange={e=>{setQuery(e.target.value);setSelected(null);}} placeholder={t.search_placeholder} style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}/>
+
+        {/* Search input — readOnly until category selected */}
+        <div style={{background:th.card,border:`1px solid ${cat?th.border:th.border+"88"}`,borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:10,marginBottom:10,opacity:cat?1:0.5}}>
+          <span style={{color:th.sub}}>🔍</span>
+          <input
+            ref={inputRef}
+            value={query}
+            readOnly={!cat}
+            onChange={e=>{if(cat){setQuery(e.target.value);setSelected(null);}}}
+            onKeyDown={e=>{if(e.key==="Enter"&&(selected||query.trim())&&cat)addToQueue();}}
+            placeholder={cat?t.search_placeholder:"Select a category first"}
+            style={{flex:1,fontSize:15,color:th.text,background:"transparent"}}
+          />
           {query&&<button onClick={()=>{setQuery("");setSelected(null);}} style={{color:th.sub,fontSize:18}}>×</button>}
         </div>
+
+        {/* Suggestions — starts-with only */}
         {results.length>0&&!selected&&(
-          <div style={{marginBottom:12}}>
+          <div style={{marginBottom:12,borderRadius:12,overflow:"hidden",border:`1px solid ${th.border}`}}>
             {results.map((item,i)=>(
-              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}} style={{padding:"9px 13px",borderRadius:10,cursor:"pointer",marginBottom:5,background:th.card,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",gap:10}}>
+              <div key={i} onClick={()=>{setSelected(item);setQuery(item.title);}}
+                style={{padding:"10px 14px",cursor:"pointer",background:th.card,
+                  borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
+                  display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:18}}>{CAT_MAP[cat]?.emoji}</span>
-                <div><div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div><div style={{fontSize:11,color:th.sub}}>{item.genre}</div></div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:500,color:th.text}}>{item.title}</div>
+                  <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(item,cat)}{item.year?` · ${item.year}`:""}</div>
+                </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* Selected item preview */}
         {selected&&(
-          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"22",border:`1px solid ${th.accent}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div><div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div><div style={{fontSize:11,color:th.sub}}>{selected.genre}</div></div>
-            <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
+          <div style={{padding:"10px 14px",borderRadius:12,marginBottom:12,background:th.accent+"18",border:`1px solid ${th.accent}44`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div>
+              <div style={{fontWeight:600,color:th.text,fontSize:14}}>{selected.title}</div>
+              <div style={{fontSize:11,color:th.sub}}>{getGenreForCat(selected,cat||"movies")}{selected.year?` · ${selected.year}`:""}</div>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              {!isEdit&&<button onClick={addToQueue} style={{padding:"6px 14px",borderRadius:20,background:th.accent,color:"#fff",fontSize:13,fontWeight:600}}>Add</button>}
+              <button onClick={()=>{setSelected(null);setQuery("");}} style={{color:th.sub,fontSize:20}}>×</button>
+            </div>
           </div>
         )}
-        <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection} style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:12}}/>
-        <div style={{marginBottom:16}}>
+
+        {/* Queue — items staged for multi-log */}
+        {queue.length>0&&(
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Logging {queue.length} item{queue.length>1?"s":""}</div>
+            {queue.map((item,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 13px",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,marginBottom:6}}>
+                <span style={{fontSize:16}}>{CAT_MAP[item.category]?.emoji}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.title}{item.year?<span style={{fontWeight:400,color:th.sub}}> ({item.year})</span>:null}</div>
+                  <div style={{fontSize:11,color:th.sub}}>{item.genre}</div>
+                </div>
+                <button onClick={()=>removeFromQueue(i)} style={{color:th.sub,fontSize:18,flexShrink:0}}>×</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Note — only for single/edit mode */}
+        {(isEdit||(!isEdit&&queue.length===0))&&(
+          <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={t.add_reflection}
+            style={{width:"100%",background:th.card,border:`1px solid ${th.border}`,borderRadius:12,padding:"11px 14px",fontSize:14,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:14}}/>
+        )}
+
+        {/* Date */}
+        <div style={{marginBottom:18}}>
           <button onClick={()=>setUseCustomDate(v=>!v)} style={{fontSize:13,color:th.accent,fontWeight:500,textDecoration:"underline",marginBottom:8}}>{useCustomDate?"Use today":"Log for a different date"}</button>
           {useCustomDate&&<input type="date" value={customDate} onChange={e=>setCustomDate(e.target.value)} max={new Date().toISOString().split("T")[0]} style={{display:"block",width:"100%",padding:"10px 14px",borderRadius:10,fontSize:14,background:th.card,border:`1px solid ${th.border}`,color:th.text}}/>}
         </div>
-        <button onClick={handleSave} disabled={!selected&&!query.trim()} style={{width:"100%",padding:"14px",borderRadius:14,background:selected||query.trim()?th.accent:"gray",color:"#fff",fontWeight:700,fontSize:16,opacity:selected||query.trim()?1:0.4}}>{t.log_it}</button>
+
+        {/* Save button */}
+        <button onClick={handleSave} disabled={totalToSave===0&&!(isEdit&&(selected||query.trim()))}
+          style={{width:"100%",padding:"14px",borderRadius:14,
+            background:totalToSave>0||(isEdit&&(selected||query.trim()))?th.accent:"gray",
+            color:"#fff",fontWeight:700,fontSize:16,
+            opacity:totalToSave>0||(isEdit&&(selected||query.trim()))?1:0.35}}>
+          {isEdit?"Save changes":totalToSave>1?`Log ${totalToSave} entries`:t.log_it}
+        </button>
       </div>
     </div>
   );
@@ -1355,46 +1462,88 @@ function HomePage({data,onOpenLog}){
   const weekLogs=getWeekLogs(data.logs);
   const recent=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
+
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <div style={{marginBottom:22}}>
-        <p style={{color:th.sub,fontSize:12,marginBottom:4}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
-        <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,lineHeight:1.2,color:th.text}}>{gr}, {data.userName}</h1>
-        <p style={{color:th.sub,fontSize:14,marginTop:5,fontStyle:"italic"}}>{t.tagline}</p>
+    <div className="fade-in" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+
+      {/* Greeting */}
+      <div style={{marginBottom:28}}>
+        <p style={{fontSize:12,fontWeight:500,color:th.sub,letterSpacing:0.5,textTransform:"uppercase",marginBottom:6}}>
+          {new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}
+        </p>
+        <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:30,lineHeight:1.15,color:th.text,marginBottom:4}}>
+          {gr}, {data.userName}
+        </h1>
+        <p style={{color:th.sub,fontSize:14,fontStyle:"italic",opacity:0.8}}>{t.tagline}</p>
       </div>
-      <button onClick={onOpenLog} style={{width:"100%",padding:"17px 20px",borderRadius:18,marginBottom:20,background:`linear-gradient(135deg,${th.accent},${th.accent2})`,color:"#fff",fontWeight:700,fontSize:16,display:"flex",alignItems:"center",gap:12,boxShadow:`0 8px 28px ${th.accent}44`,border:"none",cursor:"pointer"}}>
-        <span style={{fontSize:24}}>+</span><span>{t.log_something}</span>
-        <span style={{marginLeft:"auto",opacity:0.75,fontSize:13,fontWeight:400}}>{data.logs.length} {t.entries}</span>
+
+      {/* Log button */}
+      <button onClick={()=>onOpenLog(null)}
+        style={{width:"100%",padding:"16px 20px",borderRadius:16,marginBottom:28,
+          background:`linear-gradient(135deg,${th.accent},${th.accent2})`,
+          color:"#fff",display:"flex",alignItems:"center",gap:12,
+          boxShadow:`0 6px 24px ${th.accent}40`,border:"none",cursor:"pointer"}}>
+        <span style={{fontSize:22,fontWeight:300,lineHeight:1}}>+</span>
+        <span style={{fontSize:16,fontWeight:700,flex:1,textAlign:"left"}}>{t.log_something}</span>
+        <span style={{fontSize:13,fontWeight:400,opacity:0.75}}>{data.logs.length} {t.entries}</span>
       </button>
-      <div style={{marginBottom:20}}>
-        <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.this_week}</h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+
+      {/* This week */}
+      <div style={{marginBottom:28}}>
+        <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:14}}>{t.this_week}</p>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
           {CATEGORIES.map(c=>{
             const cnt=catCounts[c.id]||0;
-            return(<div key={c.id} onClick={()=>onOpenLog(c.id)} style={{background:cnt>0?c.color+"22":th.card,border:`1px solid ${cnt>0?c.color:th.border}`,borderRadius:14,padding:"12px 10px",textAlign:"center",transition:"all 0.25s",cursor:"pointer"}}>
-              <div style={{fontSize:22}}>{c.emoji}</div>
-              <div style={{fontSize:18,fontWeight:800,color:cnt>0?c.color:th.sub,lineHeight:1}}>{cnt}</div>
-              <div style={{fontSize:10,color:cnt>0?c.color:th.sub,fontWeight:500,marginTop:2}}>{data.language==="fil"?c.label:c.labelEn}</div>
-            </div>);
+            return(
+              <div key={c.id} onClick={()=>onOpenLog(c.id)}
+                style={{background:cnt>0?c.color+"1a":th.card,
+                  border:`1.5px solid ${cnt>0?c.color+"55":th.border}`,
+                  borderRadius:14,padding:"14px 10px",textAlign:"center",cursor:"pointer",
+                  transition:"transform 0.15s",active:{transform:"scale(0.97)"}}}>
+                <div style={{fontSize:24,marginBottom:6}}>{c.emoji}</div>
+                <div style={{fontSize:20,fontWeight:800,color:cnt>0?c.color:th.sub,lineHeight:1,marginBottom:3}}>{cnt}</div>
+                <div style={{fontSize:10,fontWeight:600,color:cnt>0?c.color:th.sub,letterSpacing:0.3}}>
+                  {data.language==="fil"?c.label:c.labelEn}
+                </div>
+              </div>
+            );
           })}
         </div>
       </div>
+
+      {/* Recent entries */}
       {recent.length>0&&(
         <div>
-          <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.recent_entries}</h2>
+          <p style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1.2,marginBottom:14}}>{t.recent_entries}</p>
           {recent.map((log,i)=>{
             const meta=CAT_MAP[log.category];
-            return(<div key={i} className="fade-in" style={{padding:"12px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"center",animationDelay:`${i*0.07}s`}}>
-              <div style={{width:38,height:38,borderRadius:10,flexShrink:0,fontSize:20,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{log.title}</div>
-                <div style={{fontSize:11,color:th.sub}}>{formatDate(log.date)}</div>
+            const genre=log.genre&&log.genre!=="Film"?log.genre:meta?.labelEn||"";
+            return(
+              <div key={i} className="fade-in"
+                style={{padding:"13px 16px",borderRadius:14,marginBottom:8,
+                  background:th.card,border:`1px solid ${th.border}`,
+                  display:"flex",gap:12,alignItems:"center",
+                  animationDelay:`${i*0.06}s`}}>
+                <div style={{width:40,height:40,borderRadius:10,flexShrink:0,
+                  background:(meta?.color||"#888")+"22",
+                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>
+                  {meta?.emoji}
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:600,color:th.text,
+                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {log.title}
+                    {log.category==="movies"&&log.year?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({log.year})</span>:null}
+                  </div>
+                  <div style={{fontSize:11,color:th.sub,marginTop:1}}>{genre} · {formatDate(log.date)}</div>
+                </div>
+                {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
               </div>
-              {log.note&&<span style={{fontSize:14,flexShrink:0}}>✍️</span>}
-            </div>);
+            );
           })}
         </div>
       )}
+
       {!data.logs.length&&(
         <div style={{textAlign:"center",padding:"50px 20px",color:th.sub}}>
           <div style={{fontSize:52,marginBottom:12}}>🌱</div>
@@ -1449,8 +1598,8 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     return(<div key={i} style={{padding:"14px 16px",borderRadius:14,marginBottom:8,background:th.card,border:`1px solid ${th.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
       <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}</div>
-        <div style={{fontSize:11,color:th.sub}}>{log.genre||""}</div>
+        <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>{log.title}{log.category==="movies"&&log.year?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({log.year})</span>:null}</div>
+        <div style={{fontSize:11,color:th.sub}}>{log.genre&&log.genre!=="Film"?log.genre:CAT_MAP[log.category]?.labelEn||""}{log.year?` · ${log.year}`:""}</div>
         {log.note&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic"}}>"{log.note}"</div>}
       </div>
       <div style={{display:"flex",gap:6,flexShrink:0}}>
@@ -2244,7 +2393,7 @@ function SettingsPage({data,onChange,onReset,onImport}){
             :"Import your film diary from Letterboxd. Go to Letterboxd → Settings → Import & Export → Export your data. Unzip the file and upload diary.csv here."}
         </p>
         <p style={{fontSize:11,color:th.sub,marginBottom:14,lineHeight:1.5,opacity:0.75}}>
-          {lang==="fil"?"Ang mga duplicate na entry ay awtomatikong malalaktawan.":"Duplicate entries are skipped automatically."}
+          {lang==="fil"?"Ang mga rewatch ay ilo-log bilang bagong entry para sa mas tumpak na profile.":"Rewatches are logged as new entries to shape your profile and suggestions."}
         </p>
         <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:"pointer"}}>
           📥 {lang==="fil"?"I-import ang diary.csv":"Import diary.csv"}
@@ -2277,21 +2426,18 @@ function SettingsPage({data,onChange,onReset,onImport}){
                   cols.push(cur.trim());
                   return cols;
                 };
-                const existingTitles=new Set((data.logs||[]).filter(l=>l.category==="movies").map(l=>l.title.toLowerCase().trim()));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
                   const cols=parseRow(lines[i]);
                   const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
                   if(!title)continue;
-                  if(existingTitles.has(title.toLowerCase()))continue;
                   const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
                   const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
                   const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
                   const rewatch=((cols[rewatchIdx]||"").replace(/^"|"$/g,"").toLowerCase()==="yes");
                   const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
                   const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
-                  if(year)tags.push(year);
                   if(rewatch)tags.push("rewatch");
                   // Convert Letterboxd 0.5–5 rating to our 1–10 scale
                   const rating=!isNaN(ratingRaw)?Math.round(ratingRaw*2):null;
@@ -2299,9 +2445,10 @@ function SettingsPage({data,onChange,onReset,onImport}){
                   newEntries.push({
                     id:Date.now()+i,
                     title,
+                    year:year||null,
                     category:"movies",
                     tags,
-                    genre:"Film",
+                    genre:"Movies",
                     note:"",
                     mood:null,
                     date,
@@ -2309,14 +2456,13 @@ function SettingsPage({data,onChange,onReset,onImport}){
                     fromLetterboxd:true,
                     lbRating:!isNaN(ratingRaw)?ratingRaw:null,
                   });
-                  existingTitles.add(title.toLowerCase());
                 }
                 if(!newEntries.length){
                   setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
                   return;
                 }
                 onChange("logs",[...(data.logs||[]),...newEntries]);
-                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" na film ang na-import mula sa Letterboxd!":" films imported from Letterboxd!"));
+                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" na pelikula ang na-import mula sa Letterboxd!":" movies imported from Letterboxd!"));
               }catch(err){setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file. Make sure it's diary.csv."));}
             };
             reader.readAsText(f);
