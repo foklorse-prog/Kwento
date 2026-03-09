@@ -2424,22 +2424,13 @@ function App(){
         setPtrPhase("refreshing");
         setPtrY(PTR_THRESHOLD);
         localStorage.setItem("kwento_restore_tab", tab);
-        // Fetch new version silently, swap without any flash
-        setTimeout(()=>{
-          fetch(window.location.href, {cache:"no-store"})
-            .then(r=>r.text())
-            .then(html=>{
-              // Write new HTML directly into the document — no page reload, no flash
-              document.open();
-              document.write(html);
-              document.close();
-            })
-            .catch(()=>{
-              // Offline or fetch failed — just reset the PTR state gracefully
-              setPtrPhase("idle");
-              setPtrY(0);
-            });
-        }, 750);
+        // Fade out the whole app, then reload — no jarring flash
+        const fade=document.createElement("div");
+        const bg=THEMES[data.theme]?THEMES[data.theme].bg:"#111";
+        fade.style.cssText="position:fixed;inset:0;z-index:99999;background:"+bg+";opacity:0;transition:opacity 0.35s ease;pointer-events:none;";
+        document.body.appendChild(fade);
+        requestAnimationFrame(()=>{ fade.style.opacity="1"; });
+        setTimeout(()=>window.location.reload(true), 400);
       } else {
         setPtrPhase("idle");
         setPtrY(0);
