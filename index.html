@@ -10,6 +10,12 @@
   <meta name="description" content="Your personal story journal."/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
+<script>
+    (function(){
+      var bg = localStorage.getItem("kwento_restore_bg");
+      if(bg){ document.documentElement.style.background = bg; document.body.style.background = bg; }
+    })();
+  </script>
 </head>
 <body>
 <div id="root"></div>
@@ -2418,6 +2424,11 @@ function App(){
         setPtrPhase("refreshing");
         setPtrY(PTR_THRESHOLD);
         localStorage.setItem("kwento_restore_tab", tab);
+        // Cover page with theme bg before reload to avoid white flash
+        const th=THEMES[data.theme];
+        const cover=document.createElement("div");
+        cover.style.cssText=`position:fixed;inset:0;background:${th.bg};z-index:99999;`;
+        document.body.appendChild(cover);
         setTimeout(()=>window.location.reload(true), 750);
       } else {
         setPtrPhase("idle");
