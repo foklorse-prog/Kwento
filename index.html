@@ -1004,8 +1004,24 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
 /* ── Fiesta ── */
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(130px) rotate(400deg);opacity:0;}}
-.festa-wrap{position:fixed;top:0;left:0;right:0;height:180px;pointer-events:none;overflow:hidden;z-index:1;}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1);}33%{transform:translate(18px,-12px) scale(1.08);}66%{transform:translate(-10px,8px) scale(0.94);}100%{transform:translate(0,0) scale(1);}}
+@keyframes blobDrift2{0%{transform:translate(0,0) scale(1);}33%{transform:translate(-14px,10px) scale(1.06);}66%{transform:translate(12px,-8px) scale(0.96);}100%{transform:translate(0,0) scale(1);}}
+.festa-wrap{position:fixed;top:0;left:0;right:0;height:220px;pointer-events:none;overflow:hidden;z-index:1;}
 .confetti-bit{position:absolute;border-radius:2px;animation:confettiFall ease-in infinite;}
+.fiesta-blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.fiesta-blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.32;}
+.fiesta-blob1{width:260px;height:260px;background:#f9a8d4;top:-60px;left:-40px;animation:blobDrift 7s ease-in-out infinite;}
+.fiesta-blob2{width:200px;height:200px;background:#a5f3fc;top:30%;right:-50px;animation:blobDrift2 9s ease-in-out infinite;}
+.fiesta-blob3{width:220px;height:220px;background:#fde68a;bottom:10%;left:20%;animation:blobDrift 11s ease-in-out infinite reverse;}
+.fiesta-blob4{width:180px;height:180px;background:#c4b5fd;top:55%;left:-30px;animation:blobDrift2 8s ease-in-out infinite;}
+/* liquid glass tab bar override for fiesta */
+.fiesta-tabbar{
+  background:rgba(255,255,255,0.35)!important;
+  backdrop-filter:blur(24px) saturate(180%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(180%)!important;
+  border-top:1px solid rgba(255,255,255,0.6)!important;
+  box-shadow:0 -4px 24px rgba(200,160,255,0.15),inset 0 1px 0 rgba(255,255,255,0.8)!important;
+}
 
 /* ── Hapon ── */
 @keyframes sunsetGlow{0%{opacity:0.0;transform:scale(0.85);}40%{opacity:0.25;}100%{opacity:0.0;transform:scale(1.4);}}
@@ -1020,6 +1036,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .ulan-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
 .rain-drop{position:absolute;top:-40px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,transparent,#8ecae6cc);animation:rainFall linear infinite;}
 .rain-splash{position:absolute;bottom:0;width:6px;height:3px;border-radius:50%;background:#5ba8d444;animation:rainSplash ease-out infinite;}
+#ulan-water-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 
 /* ── Taho ── */
 @keyframes steamRise{
@@ -1038,6 +1055,201 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .swipe-right-anim{animation:swipeRight 0.28s ease both;}
 .pop-in{animation:popIn 0.38s cubic-bezier(0.34,1.3,0.64,1) both;}
 `;
+
+
+// ─── ULAN RAIN + WATER FILL ──────────────────────────────────────────────────
+function UlanRain(){
+  const canvasRef=React.useRef(null);
+  const stateRef=React.useRef({
+    // water physics
+    fillLevel:0,       // 0..1, current water height fraction of tab bar
+    fillTarget:0,      // target fill level (accumulates from rain)
+    tiltX:0,           // device tilt angle (gamma), radians
+    tiltSmooth:0,      // smoothed tilt for water surface
+    // wave simulation — simple sine sum
+    waveTime:0,
+    // rain drops for canvas
+    drops:[],
+    splashes:[],
+    // drain timer
+    draining:false,
+    drainStart:0,
+  });
+
+  React.useEffect(()=>{
+    const canvas=canvasRef.current;
+    if(!canvas)return;
+    let raf;
+    const s=stateRef.current;
+
+    // Init rain drops
+    s.drops=Array.from({length:28},(_,i)=>({
+      x:Math.random(),
+      y:Math.random(),
+      h:14+Math.random()*14,
+      speed:0.28+Math.random()*0.22,
+      delay:Math.random()*2,
+      t:Math.random()*2,
+    }));
+    s.splashes=[];
+
+    // Device tilt
+    const onTilt=e=>{
+      // gamma = left/right tilt in degrees, clamp to ±30
+      const g=Math.max(-30,Math.min(30,e.gamma||0));
+      s.tiltX=g*(Math.PI/180);
+    };
+    window.addEventListener("deviceorientation",onTilt,{passive:true});
+
+    // Rain accumulation: add small fill every 900ms
+    const rainInterval=setInterval(()=>{
+      if(!s.draining){
+        s.fillTarget=Math.min(0.82,s.fillTarget+0.055+Math.random()*0.03);
+      }
+    },900);
+
+    // Drain cycle: when fill reaches ~0.78, start draining
+    let lastTime=0;
+    function frame(ts){
+      const dt=Math.min((ts-lastTime)/1000,0.05);
+      lastTime=ts;
+      s.waveTime+=dt;
+
+      // smooth tilt
+      s.tiltSmooth+=(s.tiltX-s.tiltSmooth)*0.08;
+
+      // fill physics
+      if(!s.draining){
+        s.fillLevel+=(s.fillTarget-s.fillLevel)*0.04;
+        if(s.fillLevel>0.78){
+          s.draining=true;
+          s.drainStart=ts;
+        }
+      } else {
+        s.fillLevel=Math.max(0,s.fillLevel-0.0018);
+        s.fillTarget=Math.max(0,s.fillTarget-0.002);
+        if(s.fillLevel<=0.001){
+          s.draining=false;
+          s.fillLevel=0;
+          s.fillTarget=0;
+        }
+      }
+
+      const W=canvas.width;
+      const H=canvas.height;
+      const ctx=canvas.getContext("2d");
+      ctx.clearRect(0,0,W,H);
+
+      // ── draw rain drops ──
+      s.drops.forEach(d=>{
+        d.t+=dt;
+        const y=((d.t-d.delay)*d.speed)%1.2-0.1;
+        if(y<0)return;
+        const px=d.x*W;
+        const py=y*H;
+        const grad=ctx.createLinearGradient(px,py,px,py+d.h);
+        grad.addColorStop(0,"rgba(142,202,230,0)");
+        grad.addColorStop(1,"rgba(142,202,230,0.55)");
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(px-1,py+d.h);
+        ctx.strokeStyle=grad;
+        ctx.lineWidth=1.5;
+        ctx.stroke();
+      });
+
+      // ── draw water fill in tab bar area ──
+      if(s.fillLevel>0.001){
+        const barH=H; // canvas covers just the tab bar
+        const waterH=s.fillLevel*barH;
+        const baseY=barH-waterH;
+
+        // tilt shifts the water surface: surface is a line, not flat
+        // tilt shifts left/right surface height by tiltSmooth * waterH * 0.3
+        const tiltShift=s.tiltSmooth*waterH*0.5;
+
+        // Build wave path
+        ctx.beginPath();
+        const segments=60;
+        for(let i=0;i<=segments;i++){
+          const px=(i/segments)*W;
+          // tilt contribution: linear slope across width
+          const tiltY=(i/segments-0.5)*2*tiltShift;
+          // wave: sum of 2 sines for natural look
+          const wave=
+            Math.sin(s.waveTime*1.8+i*0.4)*3.5+
+            Math.sin(s.waveTime*3.1+i*0.7)*1.8;
+          const py=baseY+tiltY+wave;
+          if(i===0) ctx.moveTo(px,py);
+          else ctx.lineTo(px,py);
+        }
+        ctx.lineTo(W,barH);
+        ctx.lineTo(0,barH);
+        ctx.closePath();
+
+        // Water gradient — translucent blue
+        const wg=ctx.createLinearGradient(0,baseY,0,barH);
+        wg.addColorStop(0,"rgba(91,168,212,0.22)");
+        wg.addColorStop(0.4,"rgba(91,168,212,0.30)");
+        wg.addColorStop(1,"rgba(22,32,48,0.10)");
+        ctx.fillStyle=wg;
+        ctx.fill();
+
+        // Surface shimmer line
+        ctx.beginPath();
+        for(let i=0;i<=segments;i++){
+          const px=(i/segments)*W;
+          const tiltY=(i/segments-0.5)*2*tiltShift;
+          const wave=Math.sin(s.waveTime*1.8+i*0.4)*3.5+Math.sin(s.waveTime*3.1+i*0.7)*1.8;
+          const py=baseY+tiltY+wave;
+          if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);
+        }
+        ctx.strokeStyle="rgba(142,202,230,0.45)";
+        ctx.lineWidth=1;
+        ctx.stroke();
+      }
+
+      raf=requestAnimationFrame(frame);
+    }
+    raf=requestAnimationFrame(frame);
+
+    return()=>{
+      cancelAnimationFrame(raf);
+      clearInterval(rainInterval);
+      window.removeEventListener("deviceorientation",onTilt);
+    };
+  },[]);
+
+  // Canvas covers the tab bar — position fixed bottom
+  // We also keep the CSS rain drops for atmosphere
+  const drops=[
+    {l:"4%",h:22,d:0,dur:1.4},{l:"9%",h:18,d:0.7,dur:1.7},{l:"15%",h:25,d:0.2,dur:1.3},
+    {l:"21%",h:20,d:1.1,dur:1.6},{l:"27%",h:16,d:0.5,dur:1.9},{l:"33%",h:23,d:1.4,dur:1.2},
+    {l:"39%",h:19,d:0.3,dur:1.8},{l:"45%",h:26,d:0.9,dur:1.4},{l:"51%",h:17,d:1.6,dur:1.7},
+    {l:"57%",h:24,d:0.1,dur:1.3},{l:"63%",h:21,d:1.2,dur:1.5},{l:"69%",h:18,d:0.6,dur:1.9},
+    {l:"75%",h:22,d:1.8,dur:1.2},{l:"81%",h:15,d:0.4,dur:1.6},{l:"87%",h:24,d:1.0,dur:1.4},
+    {l:"92%",h:20,d:0.8,dur:1.8},{l:"97%",h:17,d:1.5,dur:1.3},
+  ];
+  const splashes=[
+    {l:"6%",d:1.3,dur:1.4},{l:"14%",d:0.6,dur:1.7},{l:"23%",d:1.0,dur:1.3},
+    {l:"36%",d:0.2,dur:1.6},{l:"48%",d:1.5,dur:1.4},{l:"59%",d:0.8,dur:1.9},
+    {l:"71%",d:0.4,dur:1.5},{l:"83%",d:1.2,dur:1.2},{l:"93%",d:0.9,dur:1.8},
+  ];
+
+  return(
+    <div className="ulan-wrap">
+      {drops.map((dr,i)=><div key={i} className="rain-drop" style={{left:dr.l,height:dr.h,animationDelay:`${dr.d}s`,animationDuration:`${dr.dur}s`}}/>)}
+      {splashes.map((sp,i)=><div key={i} className="rain-splash" style={{left:sp.l,animationDelay:`${sp.d}s`,animationDuration:`${sp.dur}s`}}/>)}
+      {/* Water fill canvas — sits over the tab bar */}
+      <canvas ref={canvasRef}
+        style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",
+          width:"min(500px,100vw)",height:"80px",
+          pointerEvents:"none",zIndex:49}}
+        width={500} height={80}
+      />
+    </div>
+  );
+}
 
 // ─── THEME ANIMATIONS ────────────────────────────────────────────────────────
 function ThemeAnimations({theme}){
@@ -1070,34 +1282,14 @@ function ThemeAnimations({theme}){
   }
   if(theme==="fiesta"){
     const bits=[{l:"5%",c:"#e63946",w:10,h:6,d:0,dur:2.2},{l:"18%",c:"#f4a261",w:7,h:10,d:0.4,dur:2.6},{l:"32%",c:"#2a9d8f",w:9,h:7,d:0.9,dur:2.0},{l:"47%",c:"#e9c46a",w:8,h:9,d:1.4,dur:2.4},{l:"61%",c:"#a855f7",w:11,h:6,d:0.2,dur:2.8},{l:"74%",c:"#e63946",w:7,h:11,d:1.0,dur:2.1},{l:"86%",c:"#f4a261",w:10,h:7,d:0.6,dur:2.5},{l:"93%",c:"#2a9d8f",w:8,h:8,d:1.8,dur:2.3}];
-    return(<div className="festa-wrap">{bits.map((b,i)=><div key={i} className="confetti-bit" style={{left:b.l,background:b.c,width:b.w,height:b.h,animationDelay:`${b.d}s`,animationDuration:`${b.dur}s`}}/>)}</div>);
+    return(<><div className="fiesta-blobs"><div className="fiesta-blob fiesta-blob1"/><div className="fiesta-blob fiesta-blob2"/><div className="fiesta-blob fiesta-blob3"/><div className="fiesta-blob fiesta-blob4"/></div><div className="festa-wrap">{bits.map((b,i)=><div key={i} className="confetti-bit" style={{left:b.l,background:b.c,width:b.w,height:b.h,animationDelay:`${b.d}s`,animationDuration:`${b.dur}s`}}/>)}</div></>);
   }
   if(theme==="hapon"){
     const orbs=[{left:"50%",top:"30%",size:120,c:"#ff8c42",d:0,dur:3.5},{left:"40%",top:"40%",size:200,c:"#f4a0c0",d:0.8,dur:4.2},{left:"60%",top:"25%",size:90,c:"#e8502a",d:1.6,dur:3.0}];
     const clouds=[{top:"28%",h:12,w:120,c:"#f4c0a0",d:0,dur:8},{top:"38%",h:8,w:90,c:"#e8a0b0",d:2,dur:11},{top:"22%",h:10,w:70,c:"#f4d0c0",d:4,dur:9}];
     return(<div className="hapon-wrap">{orbs.map((o,i)=><div key={i} className="sun-orb" style={{left:o.left,top:o.top,width:o.size,height:o.size,marginLeft:-o.size/2,marginTop:-o.size/2,background:o.c,animationDelay:`${o.d}s`,animationDuration:`${o.dur}s`}}/>)}{clouds.map((c,i)=><div key={i} className="cloud-streak" style={{top:c.top,left:-c.w,height:c.h,width:c.w,background:c.c,opacity:0,animationDelay:`${c.d}s`,animationDuration:`${c.dur}s`}}/>)}</div>);
   }
-  if(theme==="ulan"){
-    const drops=[
-      {l:"4%",h:22,d:0,dur:1.4},{l:"9%",h:18,d:0.7,dur:1.7},{l:"15%",h:25,d:0.2,dur:1.3},
-      {l:"21%",h:20,d:1.1,dur:1.6},{l:"27%",h:16,d:0.5,dur:1.9},{l:"33%",h:23,d:1.4,dur:1.2},
-      {l:"39%",h:19,d:0.3,dur:1.8},{l:"45%",h:26,d:0.9,dur:1.4},{l:"51%",h:17,d:1.6,dur:1.7},
-      {l:"57%",h:24,d:0.1,dur:1.3},{l:"63%",h:21,d:1.2,dur:1.5},{l:"69%",h:18,d:0.6,dur:1.9},
-      {l:"75%",h:22,d:1.8,dur:1.2},{l:"81%",h:15,d:0.4,dur:1.6},{l:"87%",h:24,d:1.0,dur:1.4},
-      {l:"92%",h:20,d:0.8,dur:1.8},{l:"97%",h:17,d:1.5,dur:1.3},
-    ];
-    const splashes=[
-      {l:"6%",d:1.3,dur:1.4},{l:"14%",d:0.6,dur:1.7},{l:"23%",d:1.0,dur:1.3},
-      {l:"36%",d:0.2,dur:1.6},{l:"48%",d:1.5,dur:1.4},{l:"59%",d:0.8,dur:1.9},
-      {l:"71%",d:0.4,dur:1.5},{l:"83%",d:1.2,dur:1.2},{l:"93%",d:0.9,dur:1.8},
-    ];
-    return(
-      <div className="ulan-wrap">
-        {drops.map((dr,i)=><div key={i} className="rain-drop" style={{left:dr.l,height:dr.h,animationDelay:`${dr.d}s`,animationDuration:`${dr.dur}s`}}/>)}
-        {splashes.map((sp,i)=><div key={i} className="rain-splash" style={{left:sp.l,animationDelay:`${sp.d}s`,animationDuration:`${sp.dur}s`}}/>)}
-      </div>
-    );
-  }
+  if(theme==="ulan") return <UlanRain/>;
   if(theme==="taho"){
     const wisps=[
       {l:"5%",d:0,dur:2.8},{l:"14%",d:1.1,dur:3.2},{l:"23%",d:0.4,dur:2.6},
@@ -1531,9 +1723,6 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
 // ─── TAB BAR ─────────────────────────────────────────────────────────────────
 // TimelineIcon lives outside TabBar so it never remounts on tab switch
 function TimelineTabIcon({accent,sub,active,flash,animKey}){
-  const prevKey=React.useRef(animKey);
-  const shouldAnim=animKey!==0&&animKey!==prevKey.current;
-  React.useEffect(()=>{prevKey.current=animKey;},[animKey]);
   return(
     <div style={{position:"relative",display:"inline-flex"}}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -1543,12 +1732,12 @@ function TimelineTabIcon({accent,sub,active,flash,animKey}){
         <rect x="3" y="4" width="18" height="18" rx="2"/>
         <path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6"/>
       </svg>
-      {flash>0&&<span style={{
+      {flash>0&&<span key={animKey} style={{
         position:"absolute",top:-9,right:-11,
         background:accent,color:"#fff",
         fontSize:9,fontWeight:800,lineHeight:1,
         padding:"2px 5px",borderRadius:10,
-        animation:shouldAnim?"badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both":"none",
+        animation:"badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
         pointerEvents:"none",whiteSpace:"nowrap",
         boxShadow:"0 2px 8px rgba(0,0,0,0.3)"
       }}>+{flash}</span>}
@@ -1573,7 +1762,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
     {id:"settings",icon:<SettingsIcon a={tab==="settings"}/>},
   ];
   return(
-    <div style={{position:"fixed",bottom:0,left:0,right:0,background:th.bg,borderTop:`1px solid ${th.border}`,display:"flex",padding:"10px 0 22px",zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",backdropFilter:"blur(12px)"}}>
+    <div className={data.theme==="fiesta"?"fiesta-tabbar":""} style={{position:"fixed",bottom:0,left:0,right:0,background:th.bg,borderTop:`1px solid ${th.border}`,display:"flex",padding:"10px 0 22px",zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",backdropFilter:"blur(12px)"}}>
       {tabs.map(tb=>(
         <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",transform:tab===tb.id?"translateY(-2px)":"none"}}>
           <div style={{padding:"6px 14px",borderRadius:14,background:tab===tb.id?th.accent+"22":"transparent",transition:"background 0.2s"}}>{tb.icon}</div>
