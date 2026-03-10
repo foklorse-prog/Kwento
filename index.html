@@ -1461,13 +1461,10 @@ function Onboarding({onComplete}){
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
 function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
-  // Lock body scroll while modal is open
+  // Lock page scroll while modal is open
   React.useEffect(()=>{
-    const prev=document.body.style.overflow;
-    document.body.style.overflow="hidden";
     document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="hidden");
     return()=>{
-      document.body.style.overflow=prev;
       document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="auto");
     };
   },[]);
