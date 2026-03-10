@@ -1612,7 +1612,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:100,display:"flex",alignItems:"flex-end"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"22%"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
       <div
         className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
         style={{
@@ -1620,40 +1620,36 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
           ...(data.theme==="jeepney"?{
             background:"#1a0a2e",
             boxShadow:"0 -8px 32px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,210,63,0.35)",
-            border:"1px solid #5a2d82",
+            border:"1px solid #5a2d82",borderRadius:24,
           }:data.theme==="manila_nights"?{
             background:"#0a0614",
             boxShadow:"0 -8px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(0,207,255,0.4)",
-            border:"1px solid #221440",
+            border:"1px solid #221440",borderRadius:24,
           }:data.theme==="bahay_kubo"?{
             background:"#0f1a08",
             boxShadow:"0 -8px 32px rgba(0,0,0,0.6), inset 0 2px 0 rgba(212,168,67,0.3)",
-            border:"1px solid #2d4a1a",
+            border:"1px solid #2d4a1a",borderRadius:24,
           }:data.theme==="hapon"?{
             background:"linear-gradient(180deg,#fff4ee 0%,#ffe8da 100%)",
             boxShadow:"0 -8px 32px rgba(200,80,60,0.1), 0 -1px 0 rgba(255,200,180,0.8)",
-            border:"1px solid #f0c8b0",
+            border:"1px solid #f0c8b0",borderRadius:24,
           }:data.theme==="taho"?{
             background:"#f5e6c8",
             boxShadow:"0 -8px 24px rgba(80,30,4,0.12), 0 -1px 0 rgba(255,220,160,0.8)",
-            border:"1px solid #d4a96a",
+            border:"1px solid #d4a96a",borderRadius:24,
           }:data.theme==="fiesta"||data.theme==="ulan"?{}:{
             background:"#f5f0e8",
             boxShadow:"0 -6px 24px rgba(0,0,0,0.07), 0 -1px 0 rgba(255,255,255,0.9)",
-            border:"1px solid #ddd5c8",
+            border:"1px solid #ddd5c8",borderRadius:24,
           }),
-          borderTopLeftRadius:28,borderTopRightRadius:28,
-          padding:"0 0 max(24px,env(safe-area-inset-bottom))",
-          maxHeight:"92vh",
+          borderRadius:24,
+          padding:"0 0 8px",
+          maxHeight:"72vh",
+          width:"calc(100% - 32px)",
           display:"flex",flexDirection:"column",
-          borderBottom:"none",
+          border:"none",
           animation:closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)"
         }}>
-
-        {/* Drag handle */}
-        <div style={{display:"flex",justifyContent:"center",padding:"10px 0 6px"}}>
-          <div style={{width:32,height:3,borderRadius:2,background:th.border,opacity:0.6}}/>
-        </div>
 
         {/* Scrollable inner */}
         <div style={{overflowY:"auto",padding:"12px 24px 16px",display:"flex",flexDirection:"column"}}>
