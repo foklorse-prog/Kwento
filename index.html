@@ -57,7 +57,6 @@ v5.5 — 2026-03-10
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
@@ -2889,6 +2888,15 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed";
 
               if(isZip){
+                // Load JSZip dynamically only when needed
+                if(!window.JSZip){
+                  await new Promise((res,rej)=>{
+                    const s=document.createElement("script");
+                    s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+                    s.onload=res; s.onerror=rej;
+                    document.head.appendChild(s);
+                  });
+                }
                 // Use arrayBuffer — works on iOS Safari too
                 const buf=await f.arrayBuffer();
                 const zip=await JSZip.loadAsync(buf);
