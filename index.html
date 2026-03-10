@@ -57,7 +57,6 @@ v5.5 — 2026-03-10
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
@@ -712,8 +711,9 @@ function buildTagScore(logs, feedback) {
   return tc;
 }
 
-function buildSuggestionQueue(logs, feedback) {
-  const tc = buildTagScore(logs, feedback);
+function buildSuggestionQueue(logs, feedback, stepsVisible=true) {
+  const filteredLogs = stepsVisible ? logs : logs.filter(l=>!l.fromHealthKit);
+  const tc = buildTagScore(filteredLogs, feedback);
   const cats = ["movies","music","books","food","games","activities"];
   const catPools = {};
   cats.forEach(cat => {
@@ -924,7 +924,7 @@ function saveData(d){
 }
 function defaultData(){
   return{
-    onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,
+    onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true},
     logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",
     __showAvatarPicker:false,
     // Suggestion state persisted in data
@@ -2197,10 +2197,10 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
   // Build queue and descriptions ONCE at init — never re-compute on each render
   const [queue,setQueue]=useState(()=>{
     if(data.suggDate===today && data.suggQueue?.length) return data.suggQueue;
-    return buildSuggestionQueue(data.logs, data.feedback);
+    return buildSuggestionQueue(data.logs, data.feedback, data.profileVisibility?.steps!==false);
   });
   const [descriptions]=useState(()=>{
-    const q=data.suggDate===today&&data.suggQueue?.length?data.suggQueue:buildSuggestionQueue(data.logs,data.feedback);
+    const q=data.suggDate===today&&data.suggQueue?.length?data.suggQueue:buildSuggestionQueue(data.logs,data.feedback,data.profileVisibility?.steps!==false);
     return q.map((item,i)=>generateDescription(item,data.logs,data.feedback,i));
   });
   const [index,setIndex]=useState(()=>(data.suggDate===today?data.suggIndex||0:0));
@@ -2666,9 +2666,9 @@ function ProfilePage({data,onChange}){
         <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>{t.your_stats}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
-            ["📝",t.total_logs,data.logs.length],
-            ["🗓",t.days_active,new Set(data.logs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size],
-            ["✨",t.this_week,weekLogs.length],
+            ["📝",t.total_logs,data.logs.filter(l=>!l.fromHealthKit).length],
+            ["🗓",t.days_active,new Set(data.logs.filter(l=>!l.fromLetterboxd&&!l.fromHealthKit).map(l=>l.date?.split("T")[0])).size],
+            ["✨",t.this_week,weekLogs.filter(l=>!l.fromHealthKit).length],
             ["👍",lang==="fil"?"Na-like":"Liked",swipedRight.length],
           ].map(([emoji,label,val],i)=>(
             <div key={i} style={{padding:"14px 12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,textAlign:"center"}}>
@@ -2678,6 +2678,28 @@ function ProfilePage({data,onChange}){
             </div>
           ))}
         </div>
+        {(()=>{
+          const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
+          if(!stepsLogs.length) return null;
+          const stepsOn=(data.profileVisibility?.steps!==false);
+          const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+          const weekSteps=stepsLogs.filter(l=>new Date(l.customDate||l.date)>=weekAgo).reduce((s,l)=>s+(l.stepCount||0),0);
+          return(
+            <div style={{marginTop:10,padding:"14px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div>
+                <div style={{fontSize:11,color:th.sub,marginBottom:2}}>{lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week"}</div>
+                <div style={{fontSize:stepsOn?20:14,fontWeight:800,color:stepsOn?th.accent:th.sub}}>{stepsOn?weekSteps.toLocaleString():(lang==="fil"?"Nakatago":"Hidden")}</div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+                <div onClick={()=>onChange("profileVisibility",{...(data.profileVisibility||{}),steps:!stepsOn})}
+                  style={{width:40,height:24,borderRadius:12,background:stepsOn?th.accent:th.border,transition:"background 0.2s",cursor:"pointer",position:"relative",flexShrink:0}}>
+                  <div style={{position:"absolute",top:3,left:stepsOn?19:3,width:18,height:18,borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}}/>
+                </div>
+                <span style={{fontSize:10,color:th.sub}}>{stepsOn?(lang==="fil"?"Nakikita sa profile":"Show on profile"):(lang==="fil"?"Nakatago":"Hidden")}</span>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Liked */}
@@ -2869,7 +2891,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             <button onClick={()=>setShowImportInfo(v=>!v)} style={{width:20,height:20,borderRadius:"50%",background:"transparent",border:`1px solid ${th.border}`,fontSize:11,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",fontStyle:"italic",fontWeight:700,cursor:"pointer",lineHeight:1}}>i</button>
             {showImportInfo&&<>
               <div onClick={()=>setShowImportInfo(false)} style={{position:"fixed",inset:0,zIndex:18}}/>
-              <div style={{position:"absolute",right:0,top:26,width:190,padding:"10px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 16px rgba(0,0,0,0.18)",zIndex:19,pointerEvents:"auto"}}>
+              <div style={{position:"absolute",right:0,bottom:26,width:190,padding:"10px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 -4px 16px rgba(0,0,0,0.15)",zIndex:19}}>
                 <div style={{fontSize:11,color:th.sub,lineHeight:1.9}}>
                   <div style={{marginBottom:5}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span><br/>diary.csv</div>
                   <div><span style={{color:th.text,fontWeight:600}}>Apple Health</span><br/>export.zip or export.xml</div>
@@ -2890,17 +2912,11 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed";
 
               if(isZip){
-                // ⚠️ WARNING — DO NOT move JSZip to a <script> tag in <head>.
-                // Loading it statically breaks the SW cache fingerprint and causes
-                // Safari to hardcache old app versions. It MUST stay here, loaded
-                // dynamically, only when the user actually picks a zip file.
+                // ⚠️ WARNING: DO NOT move JSZip to a <script> tag in <head>.
+                // Doing so breaks the SW cache fingerprint and causes Safari to
+                // hardcache old app versions. Must stay here, loaded on demand.
                 if(!window.JSZip){
-                  await new Promise((res,rej)=>{
-                    const s=document.createElement("script");
-                    s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-                    s.onload=res; s.onerror=rej;
-                    document.head.appendChild(s);
-                  });
+                  await new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";s.onload=res;s.onerror=rej;document.head.appendChild(s);});
                 }
                 const buf=await f.arrayBuffer();
                 const zip=await JSZip.loadAsync(buf);
@@ -2975,11 +2991,11 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                 const byDay={};
                 records.forEach(r=>{
                   const raw=r.getAttribute("startDate")||"";
-                  // Apple format: "2024-03-10 08:23:11 +0800" — Safari needs ISO
+                  // Apple date: "2024-03-10 08:23:11 +0800" — Safari needs ISO format
                   const iso=raw.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/,"$1T$2$3:$4");
-                  const start=new Date(iso);
+                  const start=new Date(iso||raw);
                   if(isNaN(start)||start<cutoff)return;
-                  const day=raw.slice(0,10);
+                  const day=raw.slice(0,10); // YYYY-MM-DD straight from string, no timezone shift
                   const val=parseFloat(r.getAttribute("value")||"0");
                   byDay[day]=(byDay[day]||0)+val;
                 });
