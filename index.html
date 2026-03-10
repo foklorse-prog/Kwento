@@ -928,7 +928,6 @@ const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body,#root{height:100%;overflow:hidden;}
-.modal-open{overflow:hidden!important;}
 html{background:#000 !important;}
 body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{display:none;}
@@ -1461,13 +1460,7 @@ function Onboarding({onComplete}){
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
 function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
-  // Lock page scroll while modal is open
-  React.useEffect(()=>{
-    document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="hidden");
-    return()=>{
-      document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="auto");
-    };
-  },[]);
+
   const t=T[data.language]||T.en;
   const lang=data.language;
   const isEdit=!!editEntry;
@@ -1896,7 +1889,7 @@ function HomePage({data,onOpenLog,onRelog}){
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
 
   return(
-    <div className="fade-in page-scroll" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
 
       {/* Greeting */}
       <div style={{marginBottom:28}}>
@@ -2077,7 +2070,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     </div>
   ));
   return(
-    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{t.timeline}</h1>
         <button onClick={onOpenLog} style={{background:th.accent,color:"#fff",padding:"8px 18px",borderRadius:20,fontWeight:700,fontSize:13}}>+ {lang==="fil"?"Mag-log":"Log"}</button>
@@ -2307,7 +2300,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
   const av=AVATARS.find(a=>a.id===data.avatar);
 
   return(
-    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
       <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
 
@@ -2593,7 +2586,7 @@ function ProfilePage({data,onChange}){
   const py=data.photoPos?.y||50;
 
   return(
-    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -2747,7 +2740,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
   };
 
   return(
-    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:22}}>{t.settings_title}</h1>
 
       {/* Theme */}
@@ -3208,12 +3201,11 @@ function App(){
                 </div>
               )}
               {/* Page content slides down over indicator */}
-              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2}}>
+              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
