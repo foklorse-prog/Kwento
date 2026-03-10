@@ -33,15 +33,37 @@ v5.7 — 2026-03-10
       var bg = localStorage.getItem("kwento_restore_bg")||"#000";
       document.documentElement.style.background=bg;
       document.documentElement.style.backgroundColor=bg;
-      // Register service worker
+      // Register service worker — also check for updates on every page load
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js");
+        navigator.serviceWorker.register("./sw.js").then(reg=>{
+          // Check for waiting worker immediately (covers browser refresh case)
+          if(reg.waiting) reg.waiting.postMessage("skipWaiting");
+          // When a new SW installs, activate it immediately
+          reg.addEventListener("updatefound",()=>{
+            const nw=reg.installing;
+            if(!nw) return;
+            nw.addEventListener("statechange",()=>{
+              if(nw.state==="installed"&&navigator.serviceWorker.controller){
+                nw.postMessage("skipWaiting");
+              }
+            });
+          });
+        });
+        // When SW controller changes (new SW took over), reload to get fresh page
+        navigator.serviceWorker.addEventListener("controllerchange",()=>{
+          window.location.reload();
+        });
       }
     })();
   </script>
 </head>
 <body>
-<style>html,body{background:#000;}</style>
+<style>html,body{background:#000;}<style>
+@keyframes tri-open{from{transform:rotate(0deg)}to{transform:rotate(180deg)}}
+@keyframes tri-close{from{transform:rotate(180deg)}to{transform:rotate(0deg)}}
+.tri-btn svg{transition:transform 0.22s ease;}
+.tri-btn.open svg{transform:rotate(180deg);}
+</style>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
@@ -2660,7 +2682,7 @@ function ProfilePage({data,onChange}){
           const next=isHidden(cat)?hidden.filter(x=>x!==cat):[...hidden,cat];
           onChange("profileVisibility",{...(data.profileVisibility||{}),hidden:next});
         };
-        const stepsHidden=isHidden("steps");
+        const stepsHidden=isHidden("steps")||isHidden("activities");
         const visLogs=data.logs.filter(l=>!l.fromHealthKit);
         const totalLogs=visLogs.length;
         const daysActiveCount=new Set(visLogs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size;
@@ -2674,11 +2696,17 @@ function ProfilePage({data,onChange}){
           <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1}}>{t.your_stats}</h2>
           <div style={{position:"relative"}}>
             <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
-              style={{width:28,height:28,borderRadius:8,background:"transparent",border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer"}}>🫣</button>
+              className={`tri-btn${showVisFilter?" open":""}`}
+              style={{width:28,height:28,borderRadius:8,background:"transparent",border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0}}>
+              <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 1L11 9H1L6 1Z" fill={th.sub} stroke={th.sub} strokeWidth="1" strokeLinejoin="round"/>
+              </svg>
+            </button>
             {showVisFilter&&<>
               <div onClick={()=>setShowVisFilter(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
-              <div style={{position:"absolute",right:0,top:32,width:200,padding:"10px 0",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:89}}>
-                <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:"0 14px 8px"}}>{lang==="fil"?"Ipakita sa profile":"Show on profile"}</div>
+              <div style={{position:"absolute",right:0,top:32,width:200,borderRadius:12,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:89,overflow:"hidden"}}>
+                <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:"10px 14px 6px"}}>{lang==="fil"?"Ipakita sa profile":"Show on profile"}</div>
+                <div style={{maxHeight:210,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
                 {[...CATEGORIES,{id:"steps",emoji:"👟",labelEn:"Steps",label:"Mga Hakbang"}].map(c=>{
                   const isCatHidden=isHidden(c.id);
                   return(
@@ -2694,6 +2722,7 @@ function ProfilePage({data,onChange}){
                     </div>
                   );
                 })}
+                </div>
               </div>
             </>}
           </div>
