@@ -2864,26 +2864,28 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
           <h3 style={{fontWeight:700,color:th.text,fontSize:15}}>{lang==="fil"?"Mag-import mula sa ibang app":"Import from other apps"}</h3>
-          <button onClick={()=>setShowImportInfo(v=>!v)} style={{width:26,height:26,borderRadius:50,background:showImportInfo?th.accent+"22":"transparent",border:`1px solid ${showImportInfo?th.accent:th.border}`,fontSize:12,color:showImportInfo?th.accent:th.sub,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontStyle:"italic",fontWeight:700}}>i</button>
-        </div>
-        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>{lang==="fil"?"I-tap ang button para pumili ng file mula sa iyong nai-save na exports.":"Tap the button and pick a file you've already saved or exported from another app."}</p>
-        {showImportInfo&&(
-          <div style={{marginBottom:14,padding:"10px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`}}>
-            <div style={{fontSize:12,color:th.sub,lineHeight:1.8}}>
-              <div style={{marginBottom:4}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span> — go to letterboxd.com → Settings → Data → Export Your Data</div>
-              <div><span style={{color:th.text,fontWeight:600}}>Apple Health</span> — open the Health app → profile icon → Export All Health Data</div>
-            </div>
+          <div style={{position:"relative"}}>
+            <button onClick={()=>setShowImportInfo(v=>!v)} style={{width:22,height:22,borderRadius:50,background:"transparent",border:`1px solid ${th.border}`,fontSize:11,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",fontStyle:"italic",fontWeight:700,cursor:"pointer"}}>i</button>
+            {showImportInfo&&(
+              <div style={{position:"absolute",right:0,top:28,width:220,padding:"10px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 16px rgba(0,0,0,0.15)",zIndex:20}}>
+                <div style={{fontSize:11,color:th.sub,lineHeight:1.7}}>
+                  <div style={{marginBottom:5}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span><br/>diary.csv</div>
+                  <div><span style={{color:th.text,fontWeight:600}}>Apple Health</span><br/>export.zip or export.xml</div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>{lang==="fil"?"I-tap ang button para pumili ng file mula sa iyong nai-save na exports.":"Tap the button and pick a file you've already exported from another app."}</p>
         <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:importLoading?th.border:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:importLoading?"default":"pointer",opacity:importLoading?0.7:1}}>
           {importLoading?"⏳ "+( lang==="fil"?"Nag-iimport...":"Importing..."):"📥 "+(lang==="fil"?"I-import ang file":"Import file")}
-          <input type="file" accept=".csv,.xml,.zip,.json,text/csv,text/xml,application/xml,application/zip,application/x-zip-compressed" disabled={importLoading} onChange={async e=>{
+          <input type="file" accept=".csv,.xml,.zip" disabled={importLoading} onChange={async e=>{
             const f=e.target.files[0]; if(!f)return;
             setImportLoading(true); setLbMsg("");
             try{
               let csvText=null, xmlText=null;
               const fname=f.name.toLowerCase();
-              const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed"||f.type==="application/octet-stream";
+              const isZip=fname.endsWith(".zip")||fname.endsWith(".zip.zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed"||f.type==="application/octet-stream"||f.type===""&&!fname.endsWith(".csv")&&!fname.endsWith(".xml");
 
               if(isZip){
                 // Unzip using arrayBuffer (works on iOS)
@@ -2900,8 +2902,17 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               } else if(fname.endsWith(".xml")||f.type==="text/xml"||f.type==="application/xml"){
                 xmlText=await f.text();
               } else {
-                setLbMsg("❌ "+(lang==="fil"?"Hindi kilalang file.":"Unrecognized file type."));
-                setImportLoading(false); return;
+                // Last resort — try as zip
+                try{
+                  const buf=await f.arrayBuffer();
+                  const zip=await JSZip.loadAsync(buf);
+                  const files=Object.keys(zip.files);
+                  const csvFile=files.find(n=>n.toLowerCase().endsWith("diary.csv"));
+                  const xmlFile=files.find(n=>n.toLowerCase().endsWith("export.xml")||n.toLowerCase().includes("export.xml"));
+                  if(csvFile) csvText=await zip.files[csvFile].async("text");
+                  else if(xmlFile) xmlText=await zip.files[xmlFile].async("text");
+                  else{setLbMsg("❌ "+(lang==="fil"?"Hindi kilalang file.":"Unrecognized file. Expected diary.csv, export.xml, or export.zip."));setImportLoading(false);return;}
+                }catch{setLbMsg("❌ "+(lang==="fil"?"Hindi kilalang file.":"Unrecognized file type."));setImportLoading(false);return;}
               }
 
               const existingLogs=data.logs||[];
@@ -2990,7 +3001,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                 if(onImportSuccess)onImportSuccess(newEntries.length);
                 setLbMsg("✅ "+newEntries.length+(lang==="fil"?" araw ng steps ang na-import!":" days of steps imported!"));
               }
-            }catch(err){console.error(err);setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file."));}
+            }catch(err){console.error("Import error:",err);setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file: "+err.message));}
             setImportLoading(false);
             e.target.value="";
           }} style={{display:"none"}}/>
