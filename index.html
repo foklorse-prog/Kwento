@@ -1951,7 +1951,7 @@ function HomePage({data,onOpenLog,onRelog}){
       {data.logs.length>0&&(()=>{
         // Count frequency per unique title+category
         const freq={};
-        data.logs.forEach(l=>{const k=l.title+"||"+l.category;freq[k]=(freq[k]||{count:0,log:l});freq[k].count++;freq[k].log=l;});
+        data.logs.filter(l=>!l.fromHealthKit).forEach(l=>{const k=l.title+"||"+l.category;freq[k]=(freq[k]||{count:0,log:l});freq[k].count++;freq[k].log=l;});
         const top=Object.values(freq).sort((a,b)=>b.count-a.count).slice(0,5);
         if(!top.length)return null;
         return(
@@ -2743,6 +2743,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [importMsg,setImportMsg]=useState("");
   const [lbMsg,setLbMsg]=useState("");
   const [importLoading,setImportLoading]=useState(false);
+  const [showImportInfo,setShowImportInfo]=useState(false);
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -2860,26 +2861,37 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         {importMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:importMsg.startsWith("✅")?th.accent:"#ef4444"}}>{importMsg}</p>}
       </div>
 
-      {/* Unified Import */}
+      {/* Divider inside backup card */}
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-        <h3 style={{fontWeight:700,color:th.text,marginBottom:4,fontSize:15}}>{lang==="fil"?"I-import ang data":"Import data"}</h3>
-        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>
-          {lang==="fil"
-            ?"Sinusuportahan ang Letterboxd (diary.csv) at Apple Health (export.zip o export.xml)."
-            :"Supports Letterboxd (diary.csv) and Apple Health (export.zip or export.xml)."}
-        </p>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+          <h3 style={{fontWeight:700,color:th.text,fontSize:15}}>{lang==="fil"?"Mag-import mula sa ibang app":"Import from other apps"}</h3>
+          <div style={{position:"relative"}}>
+            <button onClick={()=>setShowImportInfo(v=>!v)} style={{width:22,height:22,borderRadius:50,background:"transparent",border:`1px solid ${th.border}`,fontSize:11,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",fontStyle:"italic",fontWeight:700,cursor:"pointer",flexShrink:0}}>i</button>
+            {showImportInfo&&(
+              <div style={{position:"absolute",right:0,top:26,width:210,padding:"10px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 16px rgba(0,0,0,0.15)",zIndex:20}}>
+                <div style={{fontSize:11,color:th.sub,lineHeight:1.8}}>
+                  <div style={{marginBottom:6}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span><br/>diary.csv</div>
+                  <div><span style={{color:th.text,fontWeight:600}}>Apple Health</span><br/>export.zip or export.xml</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>{lang==="fil"?"I-tap ang button at piliin ang file na na-export mo na mula sa ibang app.":"Tap the button and pick a file you've already exported from another app."}</p>
         <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:importLoading?th.border:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:importLoading?"default":"pointer",opacity:importLoading?0.7:1}}>
           {importLoading?"⏳ "+( lang==="fil"?"Nag-iimport...":"Importing..."):"📥 "+(lang==="fil"?"I-import ang file":"Import file")}
-          <input type="file" accept=".csv,.xml,.zip" disabled={importLoading} onChange={async e=>{
+          <input type="file" accept=".csv,.xml,.zip,.json" disabled={importLoading} onChange={async e=>{
             const f=e.target.files[0]; if(!f)return;
             setImportLoading(true); setLbMsg("");
             try{
               let csvText=null, xmlText=null;
               const fname=f.name.toLowerCase();
+              const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed";
 
-              if(fname.endsWith(".zip")){
-                // Unzip and find the relevant file
-                const zip=await JSZip.loadAsync(f);
+              if(isZip){
+                // Use arrayBuffer — works on iOS Safari too
+                const buf=await f.arrayBuffer();
+                const zip=await JSZip.loadAsync(buf);
                 const files=Object.keys(zip.files);
                 const csvFile=files.find(n=>n.toLowerCase().endsWith("diary.csv"));
                 const xmlFile=files.find(n=>n.toLowerCase().endsWith("export.xml"));
@@ -2950,9 +2962,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                 // Sum steps by day
                 const byDay={};
                 records.forEach(r=>{
-                  const start=new Date(r.getAttribute("startDate")||"");
+                  const raw=r.getAttribute("startDate")||"";
+                  // Apple format: "2024-03-10 08:23:11 +0800" — Safari needs ISO
+                  const iso=raw.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/,"$1T$2$3:$4");
+                  const start=new Date(iso);
                   if(isNaN(start)||start<cutoff)return;
-                  const day=start.toISOString().split("T")[0];
+                  const day=raw.slice(0,10); // take YYYY-MM-DD directly — no timezone shift
                   const val=parseFloat(r.getAttribute("value")||"0");
                   byDay[day]=(byDay[day]||0)+val;
                 });
