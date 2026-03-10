@@ -2,11 +2,10 @@ const CACHE = "kwento-v1";
 const ASSETS = [
   "./",
   "./index.html",
-  "https://unpkg.com/react@18/umd/react.production.min.js",
-  "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-  "https://unpkg.com/@babel/standalone/babel.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js",
 ];
-
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap";
 
 // Install: cache everything
@@ -27,10 +26,12 @@ self.addEventListener("activate", e => {
   );
 });
 
-// Fetch: serve from cache, fall back to network
+// Fetch: network-first for index.html so browser refresh always gets fresh version.
+// Cache-first for everything else (fonts, scripts) for offline support.
 self.addEventListener("fetch", e => {
   const url = e.request.url;
-  // Fonts: cache-first, then network, store for offline
+
+  // Fonts: cache-first
   if(url.includes("fonts.googleapis.com") || url.includes("fonts.gstatic.com")){
     e.respondWith(
       caches.open("kwento-fonts").then(fc =>
@@ -45,14 +46,30 @@ self.addEventListener("fetch", e => {
     );
     return;
   }
+
+  // index.html: network-first so browser refresh always loads fresh version.
+  // Falls back to cache only when offline.
+  if(url.endsWith("/") || url.endsWith("index.html") || url === self.registration.scope){
+    e.respondWith(
+      fetch(e.request, {cache:"no-store"})
+        .then(res => {
+          // Update cache with fresh version
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(e.request)) // offline fallback
+    );
+    return;
+  }
+
   // Everything else: cache-first
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
 
-// Message: when app sends "CHECK_UPDATE", fetch fresh index.html
-// and compare to cached version. If different, update cache and notify app.
+// Message: CHECK_UPDATE used by pull-to-refresh toast flow
 self.addEventListener("message", e => {
   if(e.data === "CHECK_UPDATE"){
     fetch("./index.html", {cache:"no-store"})
@@ -62,11 +79,8 @@ self.addEventListener("message", e => {
         const cached = await cache.match("./index.html");
         const cachedHtml = cached ? await cached.text() : "";
         if(freshHtml !== cachedHtml){
-          // Update ALL assets silently in background
-          await cache.addAll(ASSETS.filter(a => !a.includes("unpkg"))); // update app files
           const freshRes = new Response(freshHtml, {headers:{"Content-Type":"text/html"}});
           await cache.put("./index.html", freshRes);
-          // Tell the app there's an update ready
           e.source.postMessage("UPDATE_READY");
         } else {
           e.source.postMessage("UP_TO_DATE");
