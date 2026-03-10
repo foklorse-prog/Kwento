@@ -33,26 +33,9 @@ v5.7 — 2026-03-10
       var bg = localStorage.getItem("kwento_restore_bg")||"#000";
       document.documentElement.style.background=bg;
       document.documentElement.style.backgroundColor=bg;
-      // Register service worker — also check for updates on every page load
+      // Register service worker
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js").then(reg=>{
-          // Check for waiting worker immediately (covers browser refresh case)
-          if(reg.waiting) reg.waiting.postMessage("skipWaiting");
-          // When a new SW installs, activate it immediately
-          reg.addEventListener("updatefound",()=>{
-            const nw=reg.installing;
-            if(!nw) return;
-            nw.addEventListener("statechange",()=>{
-              if(nw.state==="installed"&&navigator.serviceWorker.controller){
-                nw.postMessage("skipWaiting");
-              }
-            });
-          });
-        });
-        // When SW controller changes (new SW took over), reload to get fresh page
-        navigator.serviceWorker.addEventListener("controllerchange",()=>{
-          window.location.reload();
-        });
+        navigator.serviceWorker.register("./sw.js");
       }
     })();
   </script>
@@ -2682,7 +2665,10 @@ function ProfilePage({data,onChange}){
           const next=isHidden(cat)?hidden.filter(x=>x!==cat):[...hidden,cat];
           onChange("profileVisibility",{...(data.profileVisibility||{}),hidden:next});
         };
-        const stepsHidden=isHidden("steps")||isHidden("activities");
+        // Steps visibility: steps toggle overrides activities toggle
+        // If steps=shown, always show regardless of activities
+        // If steps=hidden, always hide regardless of activities
+        const stepsHidden=isHidden("steps");
         const visLogs=data.logs.filter(l=>!l.fromHealthKit);
         const totalLogs=visLogs.length;
         const daysActiveCount=new Set(visLogs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size;
@@ -2697,7 +2683,7 @@ function ProfilePage({data,onChange}){
           <div style={{position:"relative"}}>
             <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
               className={`tri-btn${showVisFilter?" open":""}`}
-              style={{width:28,height:28,borderRadius:8,background:"transparent",border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0}}>
+              style={{width:28,height:28,borderRadius:8,background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0}}>
               <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6 1L11 9H1L6 1Z" fill={th.sub} stroke={th.sub} strokeWidth="1" strokeLinejoin="round"/>
               </svg>
