@@ -43,9 +43,9 @@ v5.7 — 2026-03-10
 <body>
 <style>html,body{background:#000;}</style>
 <div id="root"></div>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
@@ -700,13 +700,8 @@ function buildTagScore(logs, feedback) {
   return tc;
 }
 
-function buildSuggestionQueue(logs, feedback, profileVisibility={}) {
-  const hidden=profileVisibility.hidden||[];
-  const filteredLogs=logs.filter(l=>{
-    if(l.fromHealthKit) return !hidden.includes("steps");
-    return !hidden.includes(l.category);
-  });
-  const tc = buildTagScore(filteredLogs, feedback);
+function buildSuggestionQueue(logs, feedback) {
+  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
   const cats = ["movies","music","books","food","games","activities"];
   const catPools = {};
   cats.forEach(cat => {
@@ -2191,10 +2186,10 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
   // Build queue and descriptions ONCE at init — never re-compute on each render
   const [queue,setQueue]=useState(()=>{
     if(data.suggDate===today && data.suggQueue?.length) return data.suggQueue;
-    return buildSuggestionQueue(data.logs, data.feedback, data.profileVisibility||{});
+    return buildSuggestionQueue(data.logs, data.feedback);
   });
   const [descriptions]=useState(()=>{
-    const q=data.suggDate===today&&data.suggQueue?.length?data.suggQueue:buildSuggestionQueue(data.logs,data.feedback,data.profileVisibility||{});
+    const q=data.suggDate===today&&data.suggQueue?.length?data.suggQueue:buildSuggestionQueue(data.logs,data.feedback);
     return q.map((item,i)=>generateDescription(item,data.logs,data.feedback,i));
   });
   const [index,setIndex]=useState(()=>(data.suggDate===today?data.suggIndex||0:0));
@@ -2665,7 +2660,7 @@ function ProfilePage({data,onChange}){
           const next=isHidden(cat)?hidden.filter(x=>x!==cat):[...hidden,cat];
           onChange("profileVisibility",{...(data.profileVisibility||{}),hidden:next});
         };
-        const stepsHidden=isHidden("activities");
+        const stepsHidden=isHidden("steps");
         const visLogs=data.logs.filter(l=>!l.fromHealthKit);
         const totalLogs=visLogs.length;
         const daysActiveCount=new Set(visLogs.filter(l=>!l.fromLetterboxd).map(l=>l.date?.split("T")[0])).size;
@@ -2679,15 +2674,15 @@ function ProfilePage({data,onChange}){
           <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1}}>{t.your_stats}</h2>
           <div style={{position:"relative"}}>
             <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
-              style={{width:28,height:28,borderRadius:8,background:"transparent",border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,cursor:"pointer"}}>👁</button>
+              style={{width:28,height:28,borderRadius:8,background:"transparent",border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer"}}>🫣</button>
             {showVisFilter&&<>
-              <div onMouseDown={()=>setShowVisFilter(false)} onTouchStart={()=>setShowVisFilter(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
+              <div onClick={()=>setShowVisFilter(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
               <div style={{position:"absolute",right:0,top:32,width:200,padding:"10px 0",borderRadius:12,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:89}}>
                 <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:"0 14px 8px"}}>{lang==="fil"?"Ipakita sa profile":"Show on profile"}</div>
                 {[...CATEGORIES,{id:"steps",emoji:"👟",labelEn:"Steps",label:"Mga Hakbang"}].map(c=>{
                   const isCatHidden=isHidden(c.id);
                   return(
-                    <div key={c.id} onMouseDown={e=>{e.stopPropagation();toggleCat(c.id);}} onTouchStart={e=>{e.stopPropagation();toggleCat(c.id);}}
+                    <div key={c.id} onClick={e=>{e.stopPropagation();toggleCat(c.id);}}
                       style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 14px",cursor:"pointer",gap:10}}>
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
                         <span style={{fontSize:15}}>{c.emoji}</span>
@@ -2919,7 +2914,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               onClick={e=>{e.stopPropagation();setShowImportInfo(v=>!v);}}
               style={{width:20,height:20,borderRadius:"50%",background:"transparent",border:`1px solid ${th.border}`,fontSize:11,color:th.sub,display:"flex",alignItems:"center",justifyContent:"center",fontStyle:"italic",fontWeight:700,cursor:"pointer",lineHeight:1}}>i</button>
             {showImportInfo&&<>
-              <div onMouseDown={()=>setShowImportInfo(false)} onTouchStart={()=>setShowImportInfo(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
+              <div onClick={()=>setShowImportInfo(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
               <div style={{position:"absolute",right:0,bottom:26,width:190,padding:"10px 12px",borderRadius:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 -4px 16px rgba(0,0,0,0.15)",zIndex:89}}>
                 <div style={{fontSize:11,color:th.sub,lineHeight:1.9}}>
                   <div style={{marginBottom:5}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span><br/>diary.csv</div>
