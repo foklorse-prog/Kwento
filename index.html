@@ -1465,12 +1465,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   React.useEffect(()=>{
     const prev=document.body.style.overflow;
     document.body.style.overflow="hidden";
-    // Also lock any scrollable page containers
-    const scrollDivs=document.querySelectorAll('.page-scroll');
-    scrollDivs.forEach(el=>el.style.overflow="hidden");
+    document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="hidden");
     return()=>{
       document.body.style.overflow=prev;
-      scrollDivs.forEach(el=>el.style.overflow="");
+      document.querySelectorAll('.page-scroll').forEach(el=>el.style.overflowY="auto");
     };
   },[]);
   const t=T[data.language]||T.en;
