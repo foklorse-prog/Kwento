@@ -1575,7 +1575,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
       <div
         className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
         style={{
@@ -1884,7 +1884,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({data,onOpenLog,onRelog,modalOpen=false}){
+function HomePage({data,onOpenLog,onRelog}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const h=new Date().getHours();
@@ -1894,7 +1894,7 @@ function HomePage({data,onOpenLog,onRelog,modalOpen=false}){
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
 
   return(
-    <div className="fade-in" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:modalOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
 
       {/* Greeting */}
       <div style={{marginBottom:28}}>
@@ -2982,6 +2982,13 @@ function App(){
   const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
 
+  const anyModalOpen=showLog||showPatch;
+  useEffect(()=>{
+    const el=ptrInnerRef.current;
+    if(!el)return;
+    el.style.overflow=anyModalOpen?'hidden':'';
+  },[anyModalOpen]);
+
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
   useEffect(()=>{
@@ -3205,7 +3212,7 @@ function App(){
               )}
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2}}>
-              {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}} modalOpen={showLog}/>}
+              {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
