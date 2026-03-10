@@ -928,6 +928,7 @@ const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body,#root{height:100%;overflow:hidden;}
+.modal-open{overflow:hidden!important;}
 html{background:#000 !important;}
 body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{display:none;}
@@ -1464,7 +1465,13 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   React.useEffect(()=>{
     const prev=document.body.style.overflow;
     document.body.style.overflow="hidden";
-    return()=>{ document.body.style.overflow=prev; };
+    // Also lock any scrollable page containers
+    const scrollDivs=document.querySelectorAll('.page-scroll');
+    scrollDivs.forEach(el=>el.style.overflow="hidden");
+    return()=>{
+      document.body.style.overflow=prev;
+      scrollDivs.forEach(el=>el.style.overflow="");
+    };
   },[]);
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -1894,7 +1901,7 @@ function HomePage({data,onOpenLog,onRelog}){
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
 
   return(
-    <div className="fade-in" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in page-scroll" style={{padding:"28px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
 
       {/* Greeting */}
       <div style={{marginBottom:28}}>
@@ -2075,7 +2082,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     </div>
   ));
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text}}>{t.timeline}</h1>
         <button onClick={onOpenLog} style={{background:th.accent,color:"#fff",padding:"8px 18px",borderRadius:20,fontWeight:700,fontSize:13}}>+ {lang==="fil"?"Mag-log":"Log"}</button>
@@ -2305,7 +2312,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
   const av=AVATARS.find(a=>a.id===data.avatar);
 
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
       <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
 
@@ -2591,7 +2598,7 @@ function ProfilePage({data,onChange}){
   const py=data.photoPos?.y||50;
 
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -2745,7 +2752,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
   };
 
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in page-scroll" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:22}}>{t.settings_title}</h1>
 
       {/* Theme */}
@@ -2983,11 +2990,6 @@ function App(){
   const [logCat,setLogCat]=useState(null);
 
   const anyModalOpen=showLog||showPatch;
-  useEffect(()=>{
-    const el=ptrInnerRef.current;
-    if(!el)return;
-    el.style.overflow=anyModalOpen?'hidden':'';
-  },[anyModalOpen]);
 
   useEffect(()=>saveData(data),[data]);
   // Autosave every 5 minutes as safety net
