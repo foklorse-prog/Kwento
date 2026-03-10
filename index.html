@@ -2888,7 +2888,10 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed";
 
               if(isZip){
-                // Load JSZip dynamically only when needed
+                // ⚠️ WARNING — DO NOT move JSZip to a <script> tag in <head>.
+                // Loading it statically breaks the SW cache fingerprint and causes
+                // Safari to hardcache old app versions. It MUST stay here, loaded
+                // dynamically, only when the user actually picks a zip file.
                 if(!window.JSZip){
                   await new Promise((res,rej)=>{
                     const s=document.createElement("script");
