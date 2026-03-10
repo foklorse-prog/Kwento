@@ -1582,7 +1582,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%",touchAction:"none"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
       <div
         className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
         style={{
@@ -1622,7 +1622,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
         }}>
 
         {/* Scrollable inner */}
-        <div style={{overflowY:"auto",padding:"12px 24px 16px",display:"flex",flexDirection:"column"}}>
+        <div onTouchMove={e=>e.stopPropagation()} style={{overflowY:"auto",padding:"12px 24px 16px",display:"flex",flexDirection:"column"}}>
 
           {/* Header — Playfair display, level 1 */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -3224,7 +3224,7 @@ function App(){
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
               {showPatch&&(
                 <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:300,display:"flex",alignItems:"flex-end",touchAction:"none",backdropFilter:"blur(4px)"}} onClick={()=>setShowPatch(false)}>
-                  <div className={`slide-up ${data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}`} onClick={e=>e.stopPropagation()} style={{
+                  <div className={`slide-up ${data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}`} onClick={e=>e.stopPropagation()} onTouchMove={e=>e.stopPropagation()} style={{
                     width:"100%",maxWidth:500,margin:"0 auto",
                     borderTopLeftRadius:24,borderTopRightRadius:24,
                     padding:"24px 20px 48px",maxHeight:"70vh",overflowY:"auto",borderBottom:"none",
