@@ -3,6 +3,17 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
+v5.6 — 2026-03-10
+  - Import data: Apple Health (export.zip / export.xml) — steps only, last 90 days
+  - Import data: Letterboxd dedup now by title + year + date (rewatches allowed)
+  - Import badge: timeline badge pops with count on successful import
+  - Steps entries: activity category, no genre shown, import-only
+  - Modal scroll lock: page behind modal is fully unscrollable
+  - Modal animations: all theme animations pause when any modal is open
+  - New entry modal: darkened backdrop for focus
+  - Fiesta theme: active category pill now shows full solid color
+  - "Log something" renamed to "New entry"
+
 v5.5 — 2026-03-10
   - Log modal: theme-aware backgrounds (liquid glass for Fiesta,
     frosted dark for Ulan/Manila Nights/Jeepney/Bahay Kubo, paper for rest)
@@ -11,8 +22,6 @@ v5.5 — 2026-03-10
   - Suggestions: word-boundary matching only (no mid-word hits)
   - Log modal UI: journal-style open layout, clean design hierarchy
   - Log modal: removed category icon injection in title
-  - Photo strings capitalized for consistency
-  - Update toast no longer collides with content
   - Patch notes added (in-app + HTML comment)
 
 ================================================================
@@ -48,6 +57,7 @@ v5.5 — 2026-03-10
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef, useMemo } = React;
 
@@ -2057,8 +2067,8 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
         )}
       </div>
       <div style={{display:"flex",gap:6,flexShrink:0}}>
-        <button onClick={()=>onEdit(log)} style={{width:32,height:32,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✏️</button>
-        <button onClick={()=>onDelete(log.id)} style={{width:32,height:32,borderRadius:8,background:"#ef444415",border:"1px solid #ef444430",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>🗑️</button>
+        {!log.fromHealthKit&&<><button onClick={()=>onEdit(log)} style={{width:32,height:32,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✏️</button>
+        <button onClick={()=>onDelete(log.id)} style={{width:32,height:32,borderRadius:8,background:"#ef444415",border:"1px solid #ef444430",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>🗑️</button></>}
       </div>
     </div>);
   };
@@ -2723,7 +2733,7 @@ function ProfilePage({data,onChange}){
 }
 
 // ─── SETTINGS PAGE ────────────────────────────────────────────────────────────
-function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
+function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSuccess}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -2732,6 +2742,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
   const [msg,setMsg]=useState("");
   const [importMsg,setImportMsg]=useState("");
   const [lbMsg,setLbMsg]=useState("");
+  const [importLoading,setImportLoading]=useState(false);
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -2849,38 +2860,51 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
         {importMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:importMsg.startsWith("✅")?th.accent:"#ef4444"}}>{importMsg}</p>}
       </div>
 
-      {/* Letterboxd Import */}
+      {/* Unified Import */}
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-        <div style={{fontSize:22,marginBottom:6}}>🎬</div>
-        <h3 style={{fontWeight:700,color:th.text,marginBottom:4}}>Letterboxd</h3>
-        <p style={{fontSize:12,color:th.sub,marginBottom:4,lineHeight:1.5}}>
+        <h3 style={{fontWeight:700,color:th.text,marginBottom:4,fontSize:15}}>{lang==="fil"?"I-import ang data":"Import data"}</h3>
+        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>
           {lang==="fil"
-            ?"I-import ang iyong film diary mula sa Letterboxd. Pumunta sa Letterboxd → Settings → Import & Export → Export your data. I-unzip ang file at i-upload ang diary.csv dito."
-            :"Import your film diary from Letterboxd. Go to Letterboxd → Settings → Import & Export → Export your data. Unzip the file and upload diary.csv here."}
+            ?"Sinusuportahan ang Letterboxd (diary.csv) at Apple Health (export.zip o export.xml)."
+            :"Supports Letterboxd (diary.csv) and Apple Health (export.zip or export.xml)."}
         </p>
-        <p style={{fontSize:11,color:th.sub,marginBottom:14,lineHeight:1.5,opacity:0.75}}>
-          {lang==="fil"?"Ang mga rewatch ay ilo-log bilang bagong entry para sa mas tumpak na profile.":"Rewatches are logged as new entries to shape your profile and suggestions."}
-        </p>
-        <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:"pointer"}}>
-          📥 {lang==="fil"?"I-import ang diary.csv":"Import diary.csv"}
-          <input type="file" accept=".csv" onChange={e=>{
+        <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:importLoading?th.border:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:importLoading?"default":"pointer",opacity:importLoading?0.7:1}}>
+          {importLoading?"⏳ "+( lang==="fil"?"Nag-iimport...":"Importing..."):"📥 "+(lang==="fil"?"I-import ang file":"Import file")}
+          <input type="file" accept=".csv,.xml,.zip" disabled={importLoading} onChange={async e=>{
             const f=e.target.files[0]; if(!f)return;
-            const reader=new FileReader();
-            reader.onload=ev=>{
-              try{
-                const text=ev.target.result;
-                const lines=text.trim().split("\n");
+            setImportLoading(true); setLbMsg("");
+            try{
+              let csvText=null, xmlText=null;
+              const fname=f.name.toLowerCase();
+
+              if(fname.endsWith(".zip")){
+                // Unzip and find the relevant file
+                const zip=await JSZip.loadAsync(f);
+                const files=Object.keys(zip.files);
+                const csvFile=files.find(n=>n.toLowerCase().endsWith("diary.csv"));
+                const xmlFile=files.find(n=>n.toLowerCase().endsWith("export.xml"));
+                if(csvFile) csvText=await zip.files[csvFile].async("text");
+                else if(xmlFile) xmlText=await zip.files[xmlFile].async("text");
+                else{setLbMsg("❌ "+(lang==="fil"?"Walang nahanap na diary.csv o export.xml sa zip.":"No diary.csv or export.xml found in the zip."));setImportLoading(false);return;}
+              } else if(fname.endsWith(".csv")){
+                csvText=await f.text();
+              } else if(fname.endsWith(".xml")){
+                xmlText=await f.text();
+              } else {
+                setLbMsg("❌ "+(lang==="fil"?"Hindi kilalang file.":"Unrecognized file type."));
+                setImportLoading(false); return;
+              }
+
+              const existingLogs=data.logs||[];
+
+              if(csvText){
+                // --- Letterboxd diary.csv ---
+                const lines=csvText.trim().split("\n");
                 const headers=lines[0].split(",").map(h=>h.trim().replace(/^"|"$/g,"").toLowerCase());
-                // Map Letterboxd diary.csv columns — flexible header matching
                 const col=name=>headers.indexOf(name);
-                const nameIdx=col("name");
-                const yearIdx=col("year");
-                const ratingIdx=col("rating");
-                const watchedIdx=col("watched date");
-                const rewatchIdx=col("rewatch");
-                const tagIdx=col("tags");
-                if(nameIdx===-1){setLbMsg("❌ "+(lang==="fil"?"Hindi ito diary.csv ng Letterboxd.":"This doesn't look like a Letterboxd diary.csv."));return;}
-                // Parse CSV rows respecting quoted commas
+                const nameIdx=col("name"), yearIdx=col("year"), ratingIdx=col("rating");
+                const watchedIdx=col("watched date"), rewatchIdx=col("rewatch"), tagIdx=col("tags");
+                if(nameIdx===-1){setLbMsg("❌ "+(lang==="fil"?"Hindi ito diary.csv ng Letterboxd.":"This doesn't look like a Letterboxd diary.csv."));setImportLoading(false);return;}
                 const parseRow=row=>{
                   const cols=[]; let cur=""; let inQ=false;
                   for(let i=0;i<row.length;i++){
@@ -2889,15 +2913,15 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
                     else if(ch===","&&!inQ){cols.push(cur.trim());cur="";}
                     else cur+=ch;
                   }
-                  cols.push(cur.trim());
-                  return cols;
+                  cols.push(cur.trim()); return cols;
                 };
+                // Build dedup set: title+year+date
+                const existing=new Set(existingLogs.filter(l=>l.category==="movies").map(l=>`${(l.title||"").toLowerCase()}|${l.year||""}|${(l.customDate||l.date||"").split("T")[0]}`));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
                   const cols=parseRow(lines[i]);
-                  const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim();
-                  if(!title)continue;
+                  const title=(cols[nameIdx]||"").replace(/^"|"$/g,"").trim(); if(!title)continue;
                   const year=(cols[yearIdx]||"").replace(/^"|"$/g,"").trim();
                   const ratingRaw=parseFloat((cols[ratingIdx]||"").replace(/^"|"$/g,""));
                   const watchedDate=(cols[watchedIdx]||"").replace(/^"|"$/g,"").trim();
@@ -2905,33 +2929,52 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
                   const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
                   const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
                   if(rewatch)tags.push("rewatch");
-                  // Convert Letterboxd 0.5–5 rating to our 1–10 scale
-                  const rating=!isNaN(ratingRaw)?Math.round(ratingRaw*2):null;
+                  const dedupKey=`${title.toLowerCase()}|${year}|${watchedDate}`;
+                  if(existing.has(dedupKey))continue;
                   const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
-                  newEntries.push({
-                    id:Date.now()+i,
-                    title,
-                    year:year||null,
-                    category:"movies",
-                    tags,
-                    genre:null,
-                    note:"",
-                    mood:null,
-                    date,
-                    customDate:watchedDate||null,
-                    fromLetterboxd:true,
-                    lbRating:!isNaN(ratingRaw)?ratingRaw:null,
-                  });
+                  newEntries.push({id:Date.now()+i,title,year:year||null,category:"movies",tags,genre:null,note:"",mood:null,date,customDate:watchedDate||null,fromLetterboxd:true,lbRating:!isNaN(ratingRaw)?ratingRaw:null});
                 }
-                if(!newEntries.length){
-                  setLbMsg("⚠️ "+(lang==="fil"?"Walang bagong entry na nai-import. Baka lahat ay nandoon na.":"No new entries to import — looks like everything's already logged."));
-                  return;
-                }
-                onChange("logs",[...(data.logs||[]),...newEntries]);
-                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" na pelikula ang na-import mula sa Letterboxd!":" movies imported from Letterboxd!"));
-              }catch(err){setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file. Make sure it's diary.csv."));}
-            };
-            reader.readAsText(f);
+                if(!newEntries.length){setLbMsg("⚠️ "+(lang==="fil"?"Wala nang bagong entry.":"Nothing new to import."));setImportLoading(false);return;}
+                onChange("logs",[...existingLogs,...newEntries]);
+                if(onImportSuccess)onImportSuccess(newEntries.length);
+                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" pelikula ang na-import!":" movies imported!"));
+
+              } else if(xmlText){
+                // --- Apple Health export.xml — steps only ---
+                const parser=new DOMParser();
+                const doc=parser.parseFromString(xmlText,"application/xml");
+                const records=Array.from(doc.querySelectorAll('Record[type="HKQuantityTypeIdentifierStepCount"]'));
+                if(!records.length){setLbMsg("❌ "+(lang==="fil"?"Walang steps data sa file na ito.":"No step count data found in this file."));setImportLoading(false);return;}
+                // Cutoff: 90 days ago
+                const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-90);
+                // Sum steps by day
+                const byDay={};
+                records.forEach(r=>{
+                  const start=new Date(r.getAttribute("startDate")||"");
+                  if(isNaN(start)||start<cutoff)return;
+                  const day=start.toISOString().split("T")[0];
+                  const val=parseFloat(r.getAttribute("value")||"0");
+                  byDay[day]=(byDay[day]||0)+val;
+                });
+                // Build dedup set: steps entries by date
+                const existingStepDates=new Set(existingLogs.filter(l=>l.fromHealthKit&&l.category==="activities").map(l=>(l.customDate||l.date||"").split("T")[0]));
+                const newEntries=[]; let updated=0;
+                Object.entries(byDay).sort().forEach(([day,steps],i)=>{
+                  const count=Math.round(steps);
+                  if(existingStepDates.has(day)){
+                    // Update if count changed
+                    updated++;
+                    return;
+                  }
+                  newEntries.push({id:Date.now()+i,title:`Steps — ${count.toLocaleString()}`,category:"activities",tags:["health","steps"],genre:null,note:"",mood:null,date:new Date(day+"T12:00:00").toISOString(),customDate:day,fromHealthKit:true,stepCount:count});
+                });
+                if(!newEntries.length){setLbMsg("⚠️ "+(lang==="fil"?"Wala nang bagong steps data.":"No new step data to import."));setImportLoading(false);return;}
+                onChange("logs",[...existingLogs,...newEntries]);
+                if(onImportSuccess)onImportSuccess(newEntries.length);
+                setLbMsg("✅ "+newEntries.length+(lang==="fil"?" araw ng steps ang na-import!":" days of steps imported!"));
+              }
+            }catch(err){console.error(err);setLbMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read the file."));}
+            setImportLoading(false);
             e.target.value="";
           }} style={{display:"none"}}/>
         </label>
@@ -2955,7 +2998,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch}){
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.5</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.6</button></span>
       </div>
     </div>
   );
@@ -3206,7 +3249,7 @@ function App(){
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
-              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)}/>}
+              {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
               {showPatch&&(
@@ -3246,19 +3289,38 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.5</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.6</span>
                       <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 10, 2026</span>
                     </div>
                     {[
-                      "Log modal follows your theme — Fiesta gets liquid glass, dark themes get frosted glass",
-                      "Activities: attach a photo to any activity entry",
-                      "Genre display cleaned up — no category names, Custom stays as Custom",
-                      "Suggestions match from word boundaries only",
-                      "Log modal redesigned — journal-style open layout, clear hierarchy",
-                    ].map((n,i)=>(
-                      <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
-                        <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
-                        <span style={{fontSize:13,color:THEMES[data.theme].sub,lineHeight:1.5}}>{n}</span>
+                      {v:"v5.6",date:"Mar 10, 2026",notes:[
+                        "Import Apple Health data — steps imported as activity entries, last 90 days",
+                        "Letterboxd reimports won't duplicate — rewatches on different dates are kept",
+                        "Timeline badge pops with import count on successful import",
+                        "Page behind modals is now fully unscrollable",
+                        "All theme animations pause when a modal is open",
+                        "New entry modal has darker backdrop for focus",
+                        "Fiesta: active category pill shows full color",
+                        "Log modal renamed from 'Log something' to 'New entry'",
+                      ]},
+                      {v:"v5.5",date:"Mar 10, 2026",notes:[
+                        "Log modal follows your theme — Fiesta gets liquid glass, dark themes get frosted glass",
+                        "Activities: attach a photo to any activity entry",
+                        "Genre display cleaned up — no category names shown",
+                        "Log modal redesigned — journal-style open layout",
+                      ]},
+                    ].map((rel,ri)=>(
+                      <div key={ri} style={{marginBottom:ri===0?0:0}}>
+                        {ri>0&&<div style={{display:"flex",gap:10,alignItems:"baseline",margin:"20px 0 12px"}}>
+                          <span style={{fontSize:13,fontWeight:700,color:THEMES[data.theme].accent}}>{rel.v}</span>
+                          <span style={{fontSize:11,color:THEMES[data.theme].sub}}>{rel.date}</span>
+                        </div>}
+                        {rel.notes.map((n,i)=>(
+                          <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
+                            <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
+                            <span style={{fontSize:13,color:THEMES[data.theme].sub,lineHeight:1.5}}>{n}</span>
+                          </div>
+                        ))}
                       </div>
                     ))}
                   </div>
