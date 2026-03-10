@@ -2743,6 +2743,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [importMsg,setImportMsg]=useState("");
   const [lbMsg,setLbMsg]=useState("");
   const [importLoading,setImportLoading]=useState(false);
+  const [showImportInfo,setShowImportInfo]=useState(false);
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -2862,33 +2863,41 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
       {/* Unified Import */}
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-        <h3 style={{fontWeight:700,color:th.text,marginBottom:4,fontSize:15}}>{lang==="fil"?"I-import ang data":"Import data"}</h3>
-        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>
-          {lang==="fil"
-            ?"Sinusuportahan ang Letterboxd (diary.csv) at Apple Health (export.zip o export.xml)."
-            :"Supports Letterboxd (diary.csv) and Apple Health (export.zip or export.xml)."}
-        </p>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+          <h3 style={{fontWeight:700,color:th.text,fontSize:15}}>{lang==="fil"?"I-import ang data":"Import data"}</h3>
+          <button onClick={()=>setShowImportInfo(v=>!v)} style={{width:26,height:26,borderRadius:50,background:showImportInfo?th.accent:th.bg,border:`1px solid ${showImportInfo?th.accent:th.border}`,fontSize:12,color:showImportInfo?"#fff":th.sub,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontWeight:700}}>i</button>
+        </div>
+        {showImportInfo&&(
+          <div style={{marginBottom:14,padding:"10px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`}}>
+            <div style={{fontSize:12,color:th.sub,lineHeight:1.6}}>
+              <div style={{marginBottom:4}}><span style={{color:th.text,fontWeight:600}}>Letterboxd</span> — export diary.csv from letterboxd.com/settings/data</div>
+              <div><span style={{color:th.text,fontWeight:600}}>Apple Health</span> — share export.zip from the Health app (or the unzipped export.xml)</div>
+            </div>
+          </div>
+        )}
         <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:10,background:importLoading?th.border:th.accent,color:"#fff",fontWeight:600,fontSize:13,cursor:importLoading?"default":"pointer",opacity:importLoading?0.7:1}}>
           {importLoading?"⏳ "+( lang==="fil"?"Nag-iimport...":"Importing..."):"📥 "+(lang==="fil"?"I-import ang file":"Import file")}
-          <input type="file" accept=".csv,.xml,.zip" disabled={importLoading} onChange={async e=>{
+          <input type="file" accept="*/*" disabled={importLoading} onChange={async e=>{
             const f=e.target.files[0]; if(!f)return;
             setImportLoading(true); setLbMsg("");
             try{
               let csvText=null, xmlText=null;
               const fname=f.name.toLowerCase();
+              const isZip=fname.endsWith(".zip")||f.type==="application/zip"||f.type==="application/x-zip-compressed"||f.type==="application/octet-stream";
 
-              if(fname.endsWith(".zip")){
-                // Unzip and find the relevant file
-                const zip=await JSZip.loadAsync(f);
+              if(isZip){
+                // Unzip using arrayBuffer (works on iOS)
+                const buf=await f.arrayBuffer();
+                const zip=await JSZip.loadAsync(buf);
                 const files=Object.keys(zip.files);
                 const csvFile=files.find(n=>n.toLowerCase().endsWith("diary.csv"));
                 const xmlFile=files.find(n=>n.toLowerCase().endsWith("export.xml"));
                 if(csvFile) csvText=await zip.files[csvFile].async("text");
                 else if(xmlFile) xmlText=await zip.files[xmlFile].async("text");
                 else{setLbMsg("❌ "+(lang==="fil"?"Walang nahanap na diary.csv o export.xml sa zip.":"No diary.csv or export.xml found in the zip."));setImportLoading(false);return;}
-              } else if(fname.endsWith(".csv")){
+              } else if(fname.endsWith(".csv")||f.type==="text/csv"||f.type==="text/plain"&&fname.includes("diary")){
                 csvText=await f.text();
-              } else if(fname.endsWith(".xml")){
+              } else if(fname.endsWith(".xml")||f.type==="text/xml"||f.type==="application/xml"){
                 xmlText=await f.text();
               } else {
                 setLbMsg("❌ "+(lang==="fil"?"Hindi kilalang file.":"Unrecognized file type."));
