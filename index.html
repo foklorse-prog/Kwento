@@ -882,17 +882,98 @@ function buildTasteProfile(logs, feedback) {
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 const SK = "kwento_v5";
+const IDB_NAME = "kwento_media";
+const IDB_STORE = "photos";
+
+// ── IndexedDB helpers ─────────────────────────────────────────────────────────
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains(IDB_STORE))
+        db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function idbGet(key){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,"readonly");
+      const req=tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess=()=>res(req.result||null);
+      req.onerror=()=>rej(req.error);
+    });
+  }catch{return null;}
+}
+async function idbSet(key,val){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,"readwrite");
+      const req=tx.objectStore(IDB_STORE).put(val,key);
+      req.onsuccess=()=>res(true);
+      req.onerror=()=>rej(req.error);
+    });
+  }catch{return false;}
+}
+async function idbDel(key){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,"readwrite");
+      const req=tx.objectStore(IDB_STORE).delete(key);
+      req.onsuccess=()=>res(true);
+      req.onerror=()=>rej(req.error);
+    });
+  }catch{return false;}
+}
+async function idbGetAll(){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,"readonly");
+      const store=tx.objectStore(IDB_STORE);
+      const keys=[],vals=[];
+      const reqK=store.getAllKeys();
+      const reqV=store.getAll();
+      reqK.onsuccess=()=>keys.push(...reqK.result);
+      reqV.onsuccess=()=>vals.push(...reqV.result);
+      tx.oncomplete=()=>{
+        const map={};
+        keys.forEach((k,i)=>map[k]=vals[i]);
+        res(map);
+      };
+      tx.onerror=()=>rej(tx.error);
+    });
+  }catch{return {};}
+}
+async function idbSetAll(map){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,"readwrite");
+      const store=tx.objectStore(IDB_STORE);
+      Object.entries(map).forEach(([k,v])=>store.put(v,k));
+      tx.oncomplete=()=>res(true);
+      tx.onerror=()=>rej(tx.error);
+    });
+  }catch{return false;}
+}
+
+// ── Load: text from localStorage, photos hydrated from IndexedDB async ────────
 function loadData(){
   try{
     const r=localStorage.getItem(SK);
     if(r){
       const parsed=JSON.parse(r);
-      // Primary key exists but onboarded got lost — try backup
       if(!parsed.onboarded){
         const bk=localStorage.getItem(SK+"_bk");
         if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
       }
-      // Scrub old "Letterboxd rating: X★" notes left from earlier import version
       if(parsed.logs){
         parsed.logs=parsed.logs.map(l=>
           l.fromLetterboxd&&l.note&&l.note.startsWith("Letterboxd rating:")
@@ -901,10 +982,8 @@ function loadData(){
       }
       return parsed;
     }
-    // Primary key missing — try backup before anything else
     const bk=localStorage.getItem(SK+"_bk");
     if(bk){const bp=JSON.parse(bk);if(bp.onboarded){localStorage.setItem(SK,bk);return bp;}}
-    // Migrate from v4 if it exists
     const r4=localStorage.getItem("kwento_v4");
     if(r4){
       const d4=JSON.parse(r4);
@@ -925,12 +1004,77 @@ function loadData(){
     return null;
   }catch{return null;}
 }
+
+// ── Save: strip photos from data before writing to localStorage ───────────────
 function saveData(d){
   try{
-    const s=JSON.stringify(d);
+    // Photos live in IndexedDB — strip from localStorage copy
+    const slim={...d};
+    delete slim.customPhoto;
+    delete slim.photoPos;
+    if(slim.logs) slim.logs=slim.logs.map(l=>{
+      if(!l.actPhotos||!l.actPhotos.length) return l;
+      const {actPhotos,...rest}=l;
+      return rest;
+    });
+    const s=JSON.stringify(slim);
     localStorage.setItem(SK,s);
     if(d.onboarded) localStorage.setItem(SK+"_bk",s);
   }catch{}
+}
+
+// ── Save photos to IndexedDB ──────────────────────────────────────────────────
+async function savePhotos(d){
+  // Avatar
+  if(d.customPhoto) await idbSet("avatar",{data:d.customPhoto,pos:d.photoPos||{x:50,y:50,scale:1}});
+  else await idbDel("avatar");
+  // Entry photos
+  if(d.logs){
+    for(const l of d.logs){
+      if(l.actPhotos&&l.actPhotos.length){
+        await idbSet("entry_"+l.id,l.actPhotos);
+      }
+    }
+  }
+}
+
+// ── Hydrate: merge IndexedDB photos back into data object ────────────────────
+async function hydratePhotos(d){
+  const all=await idbGetAll();
+  const av=all["avatar"];
+  const hydrated={
+    ...d,
+    customPhoto:av?av.data:null,
+    photoPos:av?av.pos:{x:50,y:50,scale:1},
+  };
+  if(hydrated.logs){
+    hydrated.logs=hydrated.logs.map(l=>{
+      const photos=all["entry_"+l.id];
+      return photos?{...l,actPhotos:photos}:l;
+    });
+  }
+  return hydrated;
+}
+
+// ── One-time migration: move photos from localStorage to IndexedDB ────────────
+async function migratePhotosToIDB(d){
+  let changed=false;
+  // Avatar photo still in localStorage
+  if(d.customPhoto){
+    await idbSet("avatar",{data:d.customPhoto,pos:d.photoPos||{x:50,y:50,scale:1}});
+    changed=true;
+  }
+  // Entry actPhotos still in localStorage
+  if(d.logs){
+    for(const l of d.logs){
+      if(l.actPhotos&&l.actPhotos.length){
+        await idbSet("entry_"+l.id,l.actPhotos);
+        changed=true;
+      }
+    }
+  }
+  if(changed) saveData(d); // re-save slim version without photos
+  return changed;
 }
 function defaultData(){
   return{
@@ -1390,6 +1534,13 @@ function Onboarding({onComplete}){
     if(!file)return;
     const reader=new FileReader();
     reader.onload=(ev)=>{
+      if(file.type==="image/gif"){
+        setCustomPhoto(ev.target.result);
+        setAvatar("custom");
+        setPhotoPos({x:50,y:50});
+        if(_ck(file.name)) window._pdx=true; else window._pdx=false;
+        return;
+      }
       const img=new Image();
       img.onload=()=>{
         const MAX=400;
@@ -2680,6 +2831,10 @@ function ProfilePage({data,onChange}){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
+    if(f.type==="image/gif"){
+      setPendingPhoto(ev.target.result);setPendingAvatar("custom");window._pdx=_ck(f.name);
+      return;
+    }
     const img=new Image();
     img.onload=()=>{
       const MAX=400;
@@ -2957,8 +3112,21 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         <h3 style={{fontWeight:700,color:th.text,marginBottom:4}}>{lang==="fil"?"I-backup ang iyong data":"Back up your data"}</h3>
         <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.5}}>{lang==="fil"?"I-export ang lahat ng iyong entries at settings bilang isang file. I-import ito kahit kailan para maibalik ang lahat.":"Export all your entries and settings as a file. Import it any time — even on a fresh install — to restore everything."}</p>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-          <button onClick={()=>{
-            const exportData={...data,__exportedAt:new Date().toISOString(),__version:"kwento_v5"};
+          <button onClick={async()=>{
+            // Pull all photos from IDB and embed into export
+            const allPhotos=await idbGetAll();
+            const av=allPhotos["avatar"];
+            const exportData={
+              ...data,
+              customPhoto:av?av.data:data.customPhoto||null,
+              photoPos:av?av.pos:data.photoPos||{x:50,y:50,scale:1},
+              logs:(data.logs||[]).map(l=>{
+                const ep=allPhotos["entry_"+l.id];
+                return ep?{...l,actPhotos:ep}:l;
+              }),
+              __exportedAt:new Date().toISOString(),
+              __version:"kwento_v5"
+            };
             const blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
             const url=URL.createObjectURL(blob);
             const a=document.createElement("a");
@@ -2974,16 +3142,35 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             <input type="file" accept=".json" onChange={e=>{
               const f=e.target.files[0];if(!f)return;
               const r=new FileReader();
-              r.onload=ev=>{
+              r.onload=async ev=>{
                 try{
                   const parsed=JSON.parse(ev.target.result);
                   if(!parsed.logs||!parsed.onboarded){setImportMsg("❌ "+(lang==="fil"?"Hindi valid ang file.":"Invalid backup file."));return;}
-                  // Strip export metadata before importing
                   delete parsed.__exportedAt;
                   delete parsed.__version;
-                  onImport(parsed);
+                  // Write photos to IDB
+                  const photoMap={};
+                  if(parsed.customPhoto){
+                    photoMap["avatar"]={data:parsed.customPhoto,pos:parsed.photoPos||{x:50,y:50,scale:1}};
+                  } else {
+                    await idbDel("avatar");
+                  }
+                  if(parsed.logs){
+                    for(const l of parsed.logs){
+                      if(l.actPhotos&&l.actPhotos.length) photoMap["entry_"+l.id]=l.actPhotos;
+                    }
+                  }
+                  if(Object.keys(photoMap).length) await idbSetAll(photoMap);
+                  // Strip photos from data going to localStorage
+                  const slim={...parsed};
+                  delete slim.customPhoto;
+                  delete slim.photoPos;
+                  if(slim.logs) slim.logs=slim.logs.map(l=>{const {actPhotos,...rest}=l;return rest;});
+                  // Hydrate back from IDB so UI shows photos immediately
+                  const hydrated=await hydratePhotos(slim);
+                  onImport(hydrated);
                   setImportMsg("✅ "+(lang==="fil"?"Naibalik na ang iyong data!":"Data restored successfully!"));
-                }catch{setImportMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read file."));}
+                }catch(e){setImportMsg("❌ "+(lang==="fil"?"Hindi mabasa ang file.":"Could not read file."));}
               };
               r.readAsText(f);
               e.target.value="";
@@ -3166,6 +3353,19 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 function App(){
   const [data,setData]=useState(()=>loadData()||defaultData());
   const [tab,setTab]=useState(()=>{ const r=localStorage.getItem("kwento_restore_tab"); if(r){localStorage.removeItem("kwento_restore_tab"); return r;} return "home"; });
+  // Hydrate photos from IndexedDB on first load + one-time migration
+  const [photosReady,setPhotosReady]=useState(false);
+  useEffect(()=>{
+    (async()=>{
+      const d=loadData()||defaultData();
+      // One-time migration: move any photos still in localStorage → IDB
+      await migratePhotosToIDB(d);
+      // Hydrate IDB photos into state
+      const hydrated=await hydratePhotos(d);
+      setData(prev=>({...prev,...hydrated}));
+      setPhotosReady(true);
+    })();
+  },[]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
@@ -3177,10 +3377,14 @@ function App(){
 
   const anyModalOpen=showLog||showPatch;
 
-  useEffect(()=>saveData(data),[data]);
+  useEffect(()=>{
+    if(!photosReady) return; // don't save until hydration is done
+    saveData(data);
+    savePhotos(data);
+  },[data]);
   // Autosave every 5 minutes as safety net
   useEffect(()=>{
-    const id=setInterval(()=>saveData(data),5*60*1000);
+    const id=setInterval(()=>{saveData(data);savePhotos(data);},5*60*1000);
     return()=>clearInterval(id);
   },[data]);
 
@@ -3346,7 +3550,13 @@ function App(){
     else if(key==="__batch__") update({...val,__showAvatarPicker:false});
     else update({[key]:val,__showAvatarPicker:false});
   };
-  const handleReset=()=>{
+  const handleReset=async()=>{
+    await idbDel("avatar");
+    // Clear all entry photos from IDB
+    const all=await idbGetAll();
+    for(const k of Object.keys(all)){
+      if(k.startsWith("entry_")) await idbDel(k);
+    }
     const fresh=defaultData();
     fresh.onboarded=true;fresh.theme=data.theme;fresh.language=data.language;
     fresh.userName=data.userName;fresh.avatar=data.avatar;
