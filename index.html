@@ -2106,7 +2106,7 @@ function HomePage({data,onOpenLog,onRelog}){
         style={{width:"100%",padding:"15px 20px",borderRadius:18,marginBottom:36,
           background:`linear-gradient(135deg,${th.accent},${th.accent2||th.accent})`,
           color:"#fff",display:"flex",alignItems:"center",gap:12,
-          boxShadow:`0 8px 28px ${th.accent}35`,border:"none",cursor:"pointer",
+          boxShadow:`0 8px 32px ${th.accent}55, 0 2px 8px ${th.accent}30`,border:"none",cursor:"pointer",
           transition:"transform 0.15s,box-shadow 0.15s"}}>
         <span style={{fontSize:16,fontWeight:700,flex:1,textAlign:"left"}}>{t.log_something}</span>
         <span style={{fontSize:13,fontWeight:400,opacity:0.75}}>{data.logs.length} {t.entries}</span>
@@ -2126,11 +2126,13 @@ function HomePage({data,onOpenLog,onRelog}){
               <div key={c.id} onClick={()=>onOpenLog(c.id)}
                 style={{
                   background:active?c.color+"18":th.card,
-                  border:`1.5px solid ${active?c.color+"45":th.border}`,
+                  border:`1.5px solid ${active?c.color+"55":th.border+"cc"}`,
                   borderRadius:14,padding:"12px 6px 10px",textAlign:"center",cursor:"pointer",
                   transition:"all 0.15s",
                   opacity:active?1:0.55,
-                  boxShadow:active?`0 2px 12px ${c.color}20`:"none"
+                  boxShadow:active
+                    ?`0 2px 14px ${c.color}30, inset 0 1px 0 rgba(255,255,255,0.12)`
+                    :`inset 0 1px 0 rgba(255,255,255,0.06)`,
                 }}>
                 <div style={{fontSize:20,marginBottom:5,lineHeight:1}}>{c.emoji}</div>
                 <div style={{fontSize:17,fontWeight:700,color:active?c.color:th.sub,lineHeight:1,marginBottom:3,letterSpacing:-0.3}}>{cnt}</div>
@@ -2165,7 +2167,8 @@ function HomePage({data,onOpenLog,onRelog}){
                 <div key={i} style={{
                   padding:"11px 14px",borderRadius:14,
                   background:th.card,
-                  border:`1px solid ${th.border}`,
+                  border:`1px solid ${th.border+"cc"}`,
+                  boxShadow:`inset 0 1px 0 rgba(255,255,255,0.08)`,
                   display:"flex",gap:12,alignItems:"center"
                 }}>
                   <div style={{width:36,height:36,borderRadius:10,flexShrink:0,
