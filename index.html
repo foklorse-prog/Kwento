@@ -1059,6 +1059,11 @@ const CITY_FOOD_PROFILES = {
 };
 
 let _gpsCache = null; // {city, cuisines, localDishes, ts}
+// Restore from localStorage on load (only used if locationEnabled is true)
+try{
+  const stored=localStorage.getItem("kwento_location");
+  if(stored){const parsed=JSON.parse(stored);if(parsed&&parsed.ts)_gpsCache=parsed;}
+}catch(e){}
 
 // Match GPS coords to city profile
 function matchCityProfile(lat, lng) {
@@ -1121,6 +1126,8 @@ async function getPhRegion() {
         ts:Date.now()
       };
       _gpsCache=result;
+      // Persist to localStorage so it survives page reload
+      try{localStorage.setItem("kwento_location",JSON.stringify(result));}catch(e){}
       resolve(result);
     },()=>{resolve(null);},{timeout:5000,maximumAge:86400000});
   });
@@ -1397,6 +1404,10 @@ function loadData(){
             ?{...l,note:""}:l
         );
       }
+      // Migrate: ensure dismissedSugg exists
+      if(!parsed.dismissedSugg) parsed.dismissedSugg={};
+      // Migrate: ensure locationEnabled exists
+      if(parsed.locationEnabled===undefined) parsed.locationEnabled=false;
       return parsed;
     }
     const bk=localStorage.getItem(SK+"_bk");
@@ -1502,6 +1513,9 @@ function defaultData(){
     // Suggestion state persisted in data
     suggQueue:null,suggIndex:0,suggDate:null,
     barkadaQueue:null,barkadaIndex:0,barkadaDate:null,
+    locationEnabled:false,
+    // Custom entry fuzzy match dismissals: {[entryId]:{skipped:[],never:false}}
+    dismissedSugg:{},
   };
 }
 
@@ -2622,7 +2636,97 @@ function HomePage({data,onOpenLog,onRelog}){
 }
 
 // ─── TIMELINE PAGE ────────────────────────────────────────────────────────────
-function TimelinePage({data,onOpenLog,onDelete,onEdit}){
+// ─── CUSTOM ENTRY FUZZY MATCHER ──────────────────────────────────────────────
+// Offline, no API. Scores library titles against a custom entry title.
+// Returns best match above threshold, or null.
+
+function _wordOverlap(a, b) {
+  const wa = new Set(a.toLowerCase().split(/\s+/).filter(w=>w.length>2));
+  const wb = new Set(b.toLowerCase().split(/\s+/).filter(w=>w.length>2));
+  let shared = 0;
+  wa.forEach(w=>{ if(wb.has(w)) shared++; });
+  return shared / Math.max(wa.size, wb.size, 1);
+}
+
+function _substringScore(custom, libTitle) {
+  const a = custom.toLowerCase().trim();
+  const b = libTitle.toLowerCase().trim();
+  if(b === a) return 1.0;
+  if(b.includes(a)) return 0.85; // "Manok" in "Lechon Manok"
+  if(a.includes(b)) return 0.7;
+  return 0;
+}
+
+function _levenshtein(a, b) {
+  const m=a.length, n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function _fuzzyScore(customTitle, libTitle) {
+  const a = customTitle.toLowerCase().trim();
+  const b = libTitle.toLowerCase().trim();
+  const sub = _substringScore(a, b);
+  const overlap = _wordOverlap(a, b);
+  const maxLen = Math.max(a.length, b.length, 1);
+  const lev = Math.max(0, 1 - _levenshtein(a, b) / maxLen);
+  // Weighted: substring > overlap > levenshtein
+  return sub * 0.55 + overlap * 0.30 + lev * 0.15;
+}
+
+// Per session cache: entryId → best suggestion (or null)
+const _suggCache = {};
+
+function getBestLibrarySuggestion(log, dismissedSugg) {
+  if(_suggCache[log.id] !== undefined) return _suggCache[log.id];
+  // Only for Custom genre entries, not HealthKit/Letterboxd
+  if(log.genre !== "Custom" || log.fromHealthKit || log.fromLetterboxd){
+    _suggCache[log.id] = null; return null;
+  }
+  const dismissed = dismissedSugg?.[log.id] || {};
+  if(dismissed.never){ _suggCache[log.id] = null; return null; }
+  const skipped = new Set(dismissed.skipped || []);
+  const lib = LIBRARY[log.category] || [];
+  let best = null, bestScore = 0.32; // threshold
+  lib.forEach(item => {
+    if(skipped.has(item.title)) return;
+    const score = _fuzzyScore(log.title, item.title);
+    if(score > bestScore){ best = item; bestScore = score; }
+  });
+  _suggCache[log.id] = best;
+  return best;
+}
+
+function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
+  return (
+    <div style={{
+      marginBottom:10,
+      marginTop:2,
+      padding:"9px 12px 9px 14px",
+      borderRadius:11,
+      background:`${th.accent}0a`,
+      borderLeft:`2px solid ${th.accent}66`,
+      display:"flex",
+      alignItems:"center",
+      justifyContent:"space-between",
+      gap:10,
+    }}>
+      <span style={{fontSize:12,color:th.sub,lineHeight:1.4,flex:1}}>
+        Did you mean{" "}
+        <span style={{color:th.text,fontWeight:600}}>{match.title}</span>?
+      </span>
+      <div style={{display:"flex",gap:5,flexShrink:0,alignItems:"center"}}>
+        <button onClick={onAccept} style={{fontSize:11,padding:"4px 10px",borderRadius:7,background:th.accent,color:"#fff",fontWeight:600,border:"none",cursor:"pointer"}}>Yes</button>
+        <button onClick={onSkip} style={{fontSize:11,padding:"4px 9px",borderRadius:7,background:"transparent",color:th.sub,fontWeight:500,border:`1px solid ${th.border}`,cursor:"pointer"}}>Not quite</button>
+        <button onClick={onNever} style={{fontSize:11,padding:"4px 6px",borderRadius:7,background:"transparent",color:th.sub+"66",fontWeight:400,border:"none",cursor:"pointer",lineHeight:1}}>✕</button>
+      </div>
+    </div>
+  );
+}
+
+function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -2635,6 +2739,29 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const older=sorted.filter(l=>new Date(l.date)<weekStart);
 
   const applyFilter=logs=>filterCat==="all"?logs:logs.filter(l=>l.category===filterCat);
+
+  // Custom entry match handlers
+  const handleMatchAccept=(log,match)=>{
+    // Update this entry to use the library item's title and metadata
+    const updated=data.logs.map(l=>l.id===log.id
+      ?{...l,title:match.title,genre:match.genre||l.genre,tags:match.tags||l.tags}
+      :l);
+    _suggCache[log.id]=null;
+    onUpdateData({logs:updated});
+  };
+  const handleMatchSkip=(log,match)=>{
+    const prev=data.dismissedSugg||{};
+    const entry=prev[log.id]||{skipped:[],never:false};
+    const updated={...prev,[log.id]:{...entry,skipped:[...(entry.skipped||[]),match.title]}};
+    _suggCache[log.id]=undefined; // clear session cache so next-best is re-evaluated
+    onUpdateData({dismissedSugg:updated});
+  };
+  const handleMatchNever=(log)=>{
+    const prev=data.dismissedSugg||{};
+    const entry=prev[log.id]||{skipped:[],never:false};
+    _suggCache[log.id]=null;
+    onUpdateData({dismissedSugg:{...prev,[log.id]:{...entry,never:true}}});
+  };
   const filteredWeek=applyFilter(thisWeek);
   const filteredOlder=applyFilter(older);
 
@@ -2693,12 +2820,24 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
     </div>);
   };
 
-  const renderGroups=groups=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries])=>(
-    <div key={date} style={{marginBottom:22}}>
-      <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
-      {entries.map((log,i)=>renderEntry(log,i))}
-    </div>
-  ));
+  const renderGroups=(groups,isLatestBatch=false)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries],groupIdx)=>{
+    // Only show suggestion on the very first (latest) date group
+    const isLatestGroup=isLatestBatch&&groupIdx===0;
+    const suggEntry=isLatestGroup?entries.find(l=>getBestLibrarySuggestion(l,data.dismissedSugg)):null;
+    const suggMatch=suggEntry?getBestLibrarySuggestion(suggEntry,data.dismissedSugg):null;
+    return(
+      <div key={date} style={{marginBottom:22}}>
+        <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
+        {suggMatch&&<MatchPrompt
+          log={suggEntry} match={suggMatch} th={th}
+          onAccept={()=>handleMatchAccept(suggEntry,suggMatch)}
+          onSkip={()=>handleMatchSkip(suggEntry,suggMatch)}
+          onNever={()=>handleMatchNever(suggEntry)}
+        />}
+        {entries.map((log,i)=>renderEntry(log,i))}
+      </div>
+    );
+  });
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -2721,8 +2860,8 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
               <p style={{fontSize:14}}>{lang==="fil"?"Walang entries ngayong linggo.":"Nothing logged this week yet."}</p>
             </div>
           )}
-          {renderGroups(weekGroups)}
-          {visibleOlder.length>0&&renderGroups(olderGroups)}
+          {renderGroups(weekGroups, Object.keys(weekGroups).length>0)}
+          {visibleOlder.length>0&&renderGroups(olderGroups, Object.keys(weekGroups).length===0)}
           {hasMore&&(
             <button onClick={()=>setWeeksShown(w=>w+1)} style={{width:"100%",padding:"12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,color:th.accent,fontWeight:600,fontSize:14,marginTop:8}}>
               {lang==="fil"?"Ipakita ang nakaraang linggo ↓":"Load previous week ↓"}
@@ -2835,12 +2974,14 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
     return q.map((item,i)=>generateDescription(item,data.logs,data.feedback,i));
   });
 
-  // Async GPS boost — only if user opted in and queue is fresh (not persisted today)
+  // Async GPS boost — only if user opted in
+  // Uses cached location if available, fetches fresh if not
   useEffect(()=>{
-    if(!data.locationEnabled) return;
+    if(!data.locationEnabled) return; // location off = taste-only suggestions
     if(data.suggDate===today && data.suggQueue?.length) return; // already have today's queue
     (async()=>{
-      const locationData = await getPhRegion();
+      // Use in-memory cache first, then localStorage, then fetch fresh
+      const locationData = _gpsCache || await getPhRegion();
       if(!locationData) return;
       const boosted = buildSuggestionQueue(data.logs, data.feedback, locationData);
       setQueue(boosted);
@@ -2886,7 +3027,7 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
         index={displayIndex} total={queue.length}
         onLeft={handleLeft} onRight={handleRight}
         th={th} isBarkada={false}
-        onFindNearMe={data.locationEnabled?handleFindNearMe:null}
+        onFindNearMe={handleFindNearMe}
       />
       {index>0&&index%queue.length===0&&(
         <div style={{textAlign:"center",padding:"8px",fontSize:12,color:"var(--sub)",fontStyle:"italic",opacity:0.7,marginTop:8}}>
@@ -3539,12 +3680,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           const next=!(data.locationEnabled||false);
           onChange("locationEnabled",next);
           if(next){
-            // Trigger fresh permission request when toggled on
-            _gpsCache=null;
+            // Fetch fresh location and store it
             getPhRegion();
           } else {
-            // Clear cache so next enable always re-requests permission
+            // Remove stored location data entirely
             _gpsCache=null;
+            try{localStorage.removeItem("kwento_location");}catch(e){}
           }
         }}
           style={{width:46,height:27,borderRadius:14,background:(data.locationEnabled||false)?th.accent:th.border,transition:"background 0.25s",cursor:"pointer",position:"relative",flexShrink:0}}>
@@ -4127,7 +4268,7 @@ function App(){
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>saveData({...prev,...patch}))}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
