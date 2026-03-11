@@ -839,14 +839,49 @@ function generateBarkadaDescription(item, index) {
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function buildTagScore(logs, feedback) {
-  const tc = {};
-  logs.forEach(l => {
-    const w = feedback[l.title]==="up" ? 3 : 1;
-    (l.tags||[]).forEach(t => { tc[t]=(tc[t]||0)+w; });
-    if(l.mood && MOOD_TAGS[l.mood]) MOOD_TAGS[l.mood].forEach(t => { tc[t]=(tc[t]||0)+2; });
-  });
-  return tc;
+  // Feedback disabled — swipes are visual only for now
+  return {};
 }
+
+// ─── FOOD VARIETY PATTERN DETECTION ──────────────────────────────────────────
+// Detects tag dominance in recent food logs and boosts underrepresented tags.
+// Never surfaces this to the user — purely internal scoring signal.
+// Threshold: 5+ food logs in last 30 days, one tag group >65% = variety boost.
+
+const VARIETY_TAG_GROUPS = {
+  meat:    ["pork","beef","chicken","meat","roasted","grilled","fried","crispy"],
+  sweet:   ["sweet","dessert","sugary","pastry","cake","candy","chocolate"],
+  seafood: ["seafood","fish","shellfish","prawn","squid","crab"],
+  rich:    ["rich","creamy","indulgent","heavy","fatty","buttery"],
+  light:   ["light","fresh","salad","vegetable","soup","broth","steamed"],
+};
+
+function getFoodVarietyBoosts(logs) {
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  const recentFood = logs.filter(l =>
+    l.category==="food" && !l.fromHealthKit && new Date(l.date).getTime() > cutoff
+  );
+  if(recentFood.length < 8) return {}; // need at least 8 entries
+  const groupCounts = {};
+  recentFood.forEach(l => {
+    const tags = l.tags||[];
+    Object.entries(VARIETY_TAG_GROUPS).forEach(([group, groupTags]) => {
+      if(groupTags.some(t => tags.includes(t)))
+        groupCounts[group] = (groupCounts[group]||0) + 1;
+    });
+  });
+  // Trigger if any group appears 5+ times (count-based, not percentage)
+  const dominant = Object.entries(groupCounts).filter(([,c]) => c >= 5);
+  if(!dominant.length) return {};
+  const dominantTags = new Set(dominant.flatMap(([g]) => VARIETY_TAG_GROUPS[g]));
+  const underrepTags = new Set(
+    Object.entries(VARIETY_TAG_GROUPS)
+      .filter(([g]) => !dominant.find(([d])=>d===g))
+      .flatMap(([,tags]) => tags)
+  );
+  return { dominantTags, underrepTags };
+}
+
 
 function buildSuggestionQueue(logs, feedback, locationData=null) {
   const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
@@ -854,15 +889,26 @@ function buildSuggestionQueue(logs, feedback, locationData=null) {
   const catPools = {};
   // Pre-compute food suggestions with GPS data if available
   const geoFoodSuggs = locationData ? getFoodSuggestions(logs, locationData, 20) : null;
+  // Variety boosts — silently diversify if dominant pattern detected
+  const varietyBoosts = getFoodVarietyBoosts(logs);
   cats.forEach(cat => {
-    const items = (LIBRARY[cat]||[]).filter(i => feedback[i.title]!=="down");
+    const items = (LIBRARY[cat]||[]);
     catPools[cat] = items.map(i => {
-      let score = (i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0) * (i.ph?1.6:1.0) + (feedback[i.title]==="up"?8:0);
-      // For food: use GPS-aware scoring if available
-      if(cat==="food" && geoFoodSuggs){
-        const geoIdx = geoFoodSuggs.findIndex(f=>f.title===i.title);
-        if(geoIdx>=0) score += (20-geoIdx); // top geo suggestions get big boost
-        else score -= 10; // items not near user are deprioritized
+      // Base score: Filipino bias + randomness. Feedback intentionally not used.
+      let score = (i.ph?8:0) + Math.random()*4;
+      if(cat==="food"){
+        // GPS food boost if available
+        if(geoFoodSuggs){
+          const geoIdx = geoFoodSuggs.findIndex(f=>f.title===i.title);
+          if(geoIdx>=0) score += (20-geoIdx);
+          else score -= 10;
+        }
+        // Variety boost: silently surface underrepresented tags
+        if(varietyBoosts.underrepTags){
+          const tags = i.tags||[];
+          if(tags.some(t=>varietyBoosts.underrepTags.has(t))) score += 12;
+          if(tags.some(t=>varietyBoosts.dominantTags.has(t))) score -= 4;
+        }
       }
       return {...i, category:cat, score};
     }).sort((a,b) => b.score-a.score || Math.random()-0.5);
@@ -1408,6 +1454,11 @@ function loadData(){
       if(!parsed.dismissedSugg) parsed.dismissedSugg={};
       // Migrate: ensure locationEnabled exists
       if(parsed.locationEnabled===undefined) parsed.locationEnabled=false;
+      // Wipe inaccurate feedback — swipes are visual only now
+      if(!parsed._feedbackWiped){
+        parsed.feedback={};
+        parsed._feedbackWiped=true;
+      }
       return parsed;
     }
     const bk=localStorage.getItem(SK+"_bk");
@@ -3012,8 +3063,8 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
   const displayIndex=index%(queue.length||1);
   const currentDesc=descriptions[displayIndex]||"";
 
-  const handleLeft=(item)=>{onFeedback(item.title,"down");setIndex(i=>i+1);};
-  const handleRight=(item)=>{onFeedback(item.title,"up");setIndex(i=>i+1);};
+  const handleLeft=(item)=>{setIndex(i=>i+1);}; // visual only
+  const handleRight=(item)=>{setIndex(i=>i+1);}; // visual only
 
   // "Find near me" handler for food suggestions
   const handleFindNearMe=(title)=>{
@@ -4205,7 +4256,7 @@ function App(){
   };
   const handleDelete=id=>update({logs:data.logs.filter(l=>l.id!==id)});
   const handleEdit=entry=>{setEditEntry(entry);setShowLog(true);};
-  const handleFeedback=(title,val)=>update({feedback:{...data.feedback,[title]:val}});
+  const handleFeedback=(title,val)=>{}; // swipes are visual only for now
   const handleSeedSave=item=>{
     const exists=(data.tasteSeed||[]).find(x=>x.title===item.title);
     if(!exists)update({tasteSeed:[...(data.tasteSeed||[]),item]});
