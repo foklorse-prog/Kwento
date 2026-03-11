@@ -3,25 +3,19 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
-v5.9 — 2026-03-11
-  - Home: top padding corrected for mobile (status bar offset)
-
-v5.8 — 2026-03-11
-  - Home: greeting block spacing and tagline legibility improved
-  - Home: section headers (THIS WEEK, QUICK LOG) more readable and distinct
-  - Home: category grid proportions tightened
-  - Home: quick log + button now uses accent color
-  - Modal: Log it button visually lighter (less dominant)
-
-v5.7 — 2026-03-10
-  - Profile: category visibility filter — choose which categories show on profile
-  - Profile: Steps this week stat (hidden when steps filtered out)
-  - Profile: hidden categories excluded from suggestion scoring
-  - Import: info tooltip now appears above button, dismisses on outside tap
-  - Import: JSZip loads on demand only (fixes Safari hard-cache bug)
-  - Timeline: delete button now available on steps entries
-  - Days active: counts manual entries only
-  - Backup/restore: saves all preferences (theme, language, animations)
+v5.10 — 2026-03-11
+  - Storage: photos moved to IndexedDB (no more 5MB localStorage ceiling)
+  - Storage: photo migration runs automatically on first launch
+  - Backup: export/import fully preserved — same JSON format, photos embedded
+  - Backup: "Last exported" date shown in settings
+  - Backup: warning when entries haven't been exported yet
+  - Backup: export filename always kwento-backup.json (overwrites previous)
+  - Avatar: GIF avatars now animate correctly (canvas compression bypassed)
+  - Avatar: photo save fixed — no longer reverts to emoji on refresh
+  - Home: card depth improved — rim lights, stronger borders, tuned CTA glow
+  - Timeline: entries within a day now sorted newest-first by time
+  - Steps: now counted in This Week totals on home page
+  - Days active: still counts manual entries only (unchanged)
 
 ================================================================
 -->
@@ -2085,7 +2079,7 @@ function HomePage({data,onOpenLog,onRelog}){
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
   const weekLogs=getWeekLogs(data.logs);
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
-  const totalWeek=weekLogs.filter(l=>!l.fromHealthKit).length;
+  const totalWeek=weekLogs.length;
 
   return(
     <div className="fade-in" style={{padding:"24px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -2243,6 +2237,8 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
   const makeGroups=logs=>{
     const g={};
     logs.forEach(l=>{const d=l.date?.split("T")[0]||"Unknown";if(!g[d])g[d]=[];g[d].push(l);});
+    // Sort entries within each day newest-first by full timestamp
+    Object.keys(g).forEach(d=>g[d].sort((a,b)=>new Date(b.date)-new Date(a.date)));
     return g;
   };
   const weekGroups=makeGroups(filteredWeek);
@@ -3376,7 +3372,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.9</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.10</button></span>
       </div>
     </div>
   );
@@ -3695,23 +3691,18 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.9</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.10</span>
                       <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 11, 2026</span>
                     </div>
                     {[
-                      {v:"v5.9",date:"Mar 11, 2026",notes:[
-                        "Home page polish — spacing, hierarchy, and readability improvements",
-                        "Section headers (This Week, Quick Log) are now clearer and easier to scan",
-                        "Quick log + button now uses your theme accent color",
-                        "Log it button in the new entry modal is lighter and less dominant",
-                      ]},
-                      {v:"v5.7",date:"Mar 10, 2026",notes:[
-                        "Steps entries can now be deleted from the timeline",
-                        "Import info tooltip now appears above the button, dismisses on outside tap",
-                        "Profile: Days active counts manual entries only",
-                        "Profile: 👁 visibility filter — toggle each category on/off from your profile",
-                        "Suggestions respect your visibility preferences",
-                        "Import: iOS zip and date fixes for Apple Health",
+                      {v:"v5.10",date:"Mar 11, 2026",notes:[
+                        "Your photos and avatar now have unlimited storage — no more space limits",
+                        "Backup improvements — see when you last exported and get a nudge when new entries haven't been saved yet",
+                        "Backup file is now always named kwento-backup.json so it replaces the previous one",
+                        "Animated GIF avatars now work correctly",
+                        "Timeline entries within a day are now sorted by time, newest first",
+                        "Steps now count toward your This Week totals on the home page",
+                        "Home page depth — cards feel more layered and less flat",
                       ]},
                     ].map((rel,ri)=>(
                       <div key={ri}>
