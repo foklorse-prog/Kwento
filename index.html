@@ -3,6 +3,16 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
+v5.9 — 2026-03-11
+  - Home: top padding corrected for mobile (status bar offset)
+
+v5.8 — 2026-03-11
+  - Home: greeting block spacing and tagline legibility improved
+  - Home: section headers (THIS WEEK, QUICK LOG) more readable and distinct
+  - Home: category grid proportions tightened
+  - Home: quick log + button now uses accent color
+  - Modal: Log it button visually lighter (less dominant)
+
 v5.7 — 2026-03-10
   - Profile: category visibility filter — choose which categories show on profile
   - Profile: Steps this week stat (hidden when steps filtered out)
@@ -1912,7 +1922,7 @@ function HomePage({data,onOpenLog,onRelog}){
   const totalWeek=weekLogs.filter(l=>!l.fromHealthKit).length;
 
   return(
-    <div className="fade-in" style={{padding:"40px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:"24px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
 
       {/* ── Greeting block ── */}
       <div style={{marginBottom:32}}>
@@ -3118,7 +3128,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.7</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.9</button></span>
       </div>
     </div>
   );
@@ -3409,10 +3419,16 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.7</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 10, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.9</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 11, 2026</span>
                     </div>
                     {[
+                      {v:"v5.9",date:"Mar 11, 2026",notes:[
+                        "Home page polish — spacing, hierarchy, and readability improvements",
+                        "Section headers (This Week, Quick Log) are now clearer and easier to scan",
+                        "Quick log + button now uses your theme accent color",
+                        "Log it button in the new entry modal is lighter and less dominant",
+                      ]},
                       {v:"v5.7",date:"Mar 10, 2026",notes:[
                         "Steps entries can now be deleted from the timeline",
                         "Import info tooltip now appears above the button, dismisses on outside tap",
