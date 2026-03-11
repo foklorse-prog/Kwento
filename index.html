@@ -1087,7 +1087,7 @@ function defaultData(){
     onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true,movies:true,music:true,books:true,food:true,games:true,activities:true},
     logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",
     __showAvatarPicker:false,
-    autoBackup:false,lastBackupAt:null,lastBackupHash:null,
+    lastBackupAt:null,lastBackupHash:null,
     // Suggestion state persisted in data
     suggQueue:null,suggIndex:0,suggDate:null,
     barkadaQueue:null,barkadaIndex:0,barkadaDate:null,
@@ -3115,36 +3115,33 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
       {/* Export / Import */}
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-        {/* Header row: title + Auto toggle */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:22}}>💾</span>
-            <h3 style={{fontWeight:700,color:th.text}}>{lang==="fil"?"I-backup ang iyong data":"Back up your data"}</h3>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:7}}>
-            <span style={{fontSize:11,fontWeight:600,color:data.autoBackup?th.accent:th.sub}}>Auto</span>
-            <div onClick={()=>onChange("autoBackup",!data.autoBackup)}
-              style={{width:38,height:22,borderRadius:11,background:data.autoBackup?th.accent:th.border,
-                position:"relative",cursor:"pointer",transition:"background 0.2s",flexShrink:0}}>
-              <div style={{position:"absolute",top:3,left:data.autoBackup?18:3,width:16,height:16,
-                borderRadius:"50%",background:"#fff",transition:"left 0.2s",
-                boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
-            </div>
-          </div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+          <span style={{fontSize:22}}>💾</span>
+          <h3 style={{fontWeight:700,color:th.text}}>{lang==="fil"?"I-backup ang iyong data":"Back up your data"}</h3>
         </div>
-        <p style={{fontSize:12,color:th.sub,marginBottom:14,lineHeight:1.6}}>
-          {data.autoBackup
-            ?"You're covered. Every time you refresh the app, your backup updates automatically. Export once to get started — we'll keep it current from there."
-            :"Your story, safely yours. Export a backup file anytime — import it on any device to restore everything instantly."
-          }
+        <p style={{fontSize:12,color:th.sub,marginBottom:12,lineHeight:1.6}}>
+          {"Your story, safely yours. Export a backup file anytime — import it on any device to restore everything instantly."}
         </p>
-        {/* Last backup status */}
-        <p style={{fontSize:11,color:data.lastBackupAt?th.accent:th.sub,marginBottom:12,fontWeight:500}}>
-          {data.lastBackupAt
-            ?"Last backup: "+new Date(data.lastBackupAt).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" at "+new Date(data.lastBackupAt).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})
-            :data.autoBackup?"No backup yet — tap Export to get started.":"Never backed up."
-          }
-        </p>
+        {/* Last backup + unsaved nudge */}
+        {(()=>{
+          const hash=_dataHash(data);
+          const hasChanges=data.lastBackupAt&&hash!==data.lastBackupHash;
+          return(
+            <div style={{marginBottom:12}}>
+              <p style={{fontSize:11,fontWeight:500,color:data.lastBackupAt?th.sub:th.accent+"99"}}>
+                {data.lastBackupAt
+                  ?"Last exported: "+new Date(data.lastBackupAt).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" at "+new Date(data.lastBackupAt).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})
+                  :"You haven't exported a backup yet."
+                }
+              </p>
+              {hasChanges&&(
+                <p style={{fontSize:11,color:th.accent+"99",fontWeight:500,marginTop:3}}>
+                  ⚠ New entries haven't been exported yet.
+                </p>
+              )}
+            </div>
+          );
+        })()}
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <button onClick={async()=>{
             const allPhotos=await idbGetAll();
@@ -3171,7 +3168,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             const hash=_dataHash(data);
             onChange("__batch__",{lastBackupAt:now,lastBackupHash:hash,__showAvatarPicker:false});
           }} style={{padding:"10px 18px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13}}>
-            {data.autoBackup?"⬇️ Export now":"⬇️ Export"}
+            {"⬇️ Export"}
           </button>
           <label style={{padding:"10px 18px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`,color:th.text,fontWeight:600,fontSize:13,cursor:"pointer"}}>
             {lang==="fil"?"⬆️ Mag-import":"⬆️ Import"}
@@ -3520,43 +3517,18 @@ function App(){
       if(ptrY >= PTR_THRESHOLD){
         setPtrPhase("refreshing");
         setPtrY(PTR_THRESHOLD);
-        // Re-read latest data from storage (picks up deletions, edits from other views)
-        try{
-          const fresh=localStorage.getItem("kwento_v5");
-          if(fresh){const parsed=JSON.parse(fresh);setData(d=>({...d,...parsed}));}
-        }catch(e){}
+        // Re-read localStorage then re-hydrate IDB photos — never lose photo data on PTR
         localStorage.setItem("kwento_restore_tab", tab);
-        // Ask service worker to check for update silently
-        // Auto-backup on refresh if enabled and data has changed
-        if(data.autoBackup && data.lastBackupAt){
-          const currentHash=_dataHash(data);
-          if(currentHash!==data.lastBackupHash){
-            (async()=>{
-              const allPhotos=await idbGetAll();
-              const av=allPhotos["avatar"];
-              const exportData={
-                ...data,
-                customPhoto:av?av.data:data.customPhoto||null,
-                photoPos:av?av.pos:data.photoPos||{x:50,y:50,scale:1},
-                logs:(data.logs||[]).map(l=>{
-                  const ep=allPhotos["entry_"+l.id];
-                  return ep?{...l,actPhotos:ep}:l;
-                }),
-                __exportedAt:new Date().toISOString(),
-                __version:"kwento_v5"
-              };
-              const blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
-              const url=URL.createObjectURL(blob);
-              const a=document.createElement("a");
-              a.href=url;
-              a.download="kwento-backup.json";
-              a.click();
-              URL.revokeObjectURL(url);
-              const now=new Date().toISOString();
-              setData(d=>({...d,lastBackupAt:now,lastBackupHash:currentHash}));
-            })();
-          }
-        }
+        (async()=>{
+          try{
+            const fresh=localStorage.getItem("kwento_v5");
+            if(fresh){
+              const parsed=JSON.parse(fresh);
+              const hydrated=await hydratePhotos(parsed);
+              setData(d=>({...d,...hydrated}));
+            }
+          }catch(e){}
+        })();
         if(navigator.serviceWorker && navigator.serviceWorker.controller){
           navigator.serviceWorker.controller.postMessage("CHECK_UPDATE");
         } else {
