@@ -2751,13 +2751,14 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
     onUpdateData({logs:updated});
   };
   const handleMatchSkip=(log,match)=>{
-    // Dismiss this suggestion for all entries with same title — use title+category as key
     const titleKey=`${log.category}::${log.title}`;
     const prev=data.dismissedSugg||{};
     const entry=prev[titleKey]||{skipped:[],never:false};
-    const updated={...prev,[titleKey]:{...entry,skipped:[...(entry.skipped||[]),match.title]}};
-    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=undefined;});
-    onUpdateData({dismissedSugg:updated});
+    // null = done for this session (won't re-prompt until next app load)
+    data.logs.forEach(l=>{
+      if(l.title===log.title&&l.category===log.category) _suggCache[l.id]=null;
+    });
+    onUpdateData({dismissedSugg:{...prev,[titleKey]:{...entry,skipped:[...(entry.skipped||[]),match.title]}}});
   };
   const handleMatchNever=(log)=>{
     const titleKey=`${log.category}::${log.title}`;
