@@ -929,7 +929,6 @@ function saveData(d){
   try{
     const s=JSON.stringify(d);
     localStorage.setItem(SK,s);
-    // Write backup whenever user is onboarded — survives accidental primary key wipe
     if(d.onboarded) localStorage.setItem(SK+"_bk",s);
   }catch{}
 }
@@ -1391,10 +1390,19 @@ function Onboarding({onComplete}){
     if(!file)return;
     const reader=new FileReader();
     reader.onload=(ev)=>{
-      setCustomPhoto(ev.target.result);
-      setAvatar("custom");
-      setPhotoPos({x:50,y:50});
-      if(_ck(file.name)) window._pdx=true; else window._pdx=false;
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=400;
+        const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+        const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+        const c=document.createElement("canvas");c.width=w;c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        setCustomPhoto(c.toDataURL("image/jpeg",0.75));
+        setAvatar("custom");
+        setPhotoPos({x:50,y:50});
+        if(_ck(file.name)) window._pdx=true; else window._pdx=false;
+      };
+      img.src=ev.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -2668,7 +2676,24 @@ function ProfilePage({data,onChange}){
             </div>
             <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:pendingPhoto?th.accent+"22":th.card,border:"1px solid "+(pendingPhoto?th.accent:th.border),cursor:"pointer",fontSize:13,color:pendingPhoto?th.accent:th.sub,marginBottom:4}}>
               📷 {pendingPhoto?"Change photo":"Use your photo"}
-              <input type="file" accept="image/*" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{setPendingPhoto(ev.target.result);setPendingAvatar("custom");window._pdx=_ck(f.name);};r.readAsDataURL(f);}} style={{display:"none"}}/>
+              <input type="file" accept="image/*" onChange={e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=400;
+      const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+      const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      const compressed=c.toDataURL("image/jpeg",0.75);
+      setPendingPhoto(compressed);setPendingAvatar("custom");window._pdx=_ck(f.name);
+    };
+    img.src=ev.target.result;
+  };
+  r.readAsDataURL(f);
+}} style={{display:"none"}}/>
             </label>
             {pendingPhoto&&<><br/><button onClick={()=>{donePicker();openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
             <br/>
