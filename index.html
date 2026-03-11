@@ -1111,11 +1111,8 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .swipe-left-anim{animation:swipeLeft 0.28s ease both;}
 .swipe-right-anim{animation:swipeRight 0.28s ease both;}
 .pop-in{animation:popIn 0.38s cubic-bezier(0.34,1.3,0.64,1) both;}
-@keyframes _rxg{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-._dxwrap{position:relative;display:inline-block;}
-._dxring{position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(#ff0080,#ff6600,#ffee00,#00ff66,#00ccff,#9933ff,#ff0080);animation:_rxg 2s linear infinite;z-index:0;}
-._dxring::after{content:"";position:absolute;inset:3px;border-radius:50%;background:inherit;}
-._dxav{position:relative;z-index:1;border:3px solid transparent!important;background-clip:padding-box!important;}
+@keyframes _rxg{0%{box-shadow:0 0 0 3px #ff0080,0 0 18px 5px #ff008066;}14%{box-shadow:0 0 0 3px #ff6600,0 0 18px 5px #ff660066;}28%{box-shadow:0 0 0 3px #ffee00,0 0 18px 5px #ffee0066;}42%{box-shadow:0 0 0 3px #00ff66,0 0 18px 5px #00ff6666;}57%{box-shadow:0 0 0 3px #00ccff,0 0 18px 5px #00ccff66;}71%{box-shadow:0 0 0 3px #9933ff,0 0 18px 5px #9933ff66;}85%{box-shadow:0 0 0 3px #ff0080,0 0 18px 5px #ff008066;}100%{box-shadow:0 0 0 3px #ff0080,0 0 18px 5px #ff008066;}}
+._dxav{animation:_rxg 3s linear infinite!important;border:none!important;}
 `;
 
 
@@ -1869,9 +1866,10 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
   const th=THEMES[data.theme];
   const avEmoji=AVATARS.find(a=>a.id===data.avatar)?.emoji||"⭐";
   const avDisplay=data.customPhoto
-    ?<span style={{position:"relative",display:"inline-flex",alignItems:"center",justifyContent:"center",width:26,height:26}}>
-       {data._dx&&<span style={{position:"absolute",inset:-2,borderRadius:"50%",background:"conic-gradient(#ff0080,#ff6600,#ffee00,#00ff66,#00ccff,#9933ff,#ff0080)",animation:"_rxg 2s linear infinite",zIndex:0}}/>}
-       <img src={data.customPhoto} style={{width:22,height:22,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%",display:"block",position:"relative",zIndex:1}}/>
+    ?<span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",borderRadius:"50%",
+        ...(data._dx?{animation:"_rxg 3s linear infinite",padding:2}:{})
+      }}>
+       <img src={data.customPhoto} style={{width:data._dx?20:24,height:data._dx?20:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%",display:"block"}}/>
      </span>
     :<span style={{fontSize:20}}>{avEmoji}</span>;
   const HomeIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>);
@@ -2625,17 +2623,14 @@ function ProfilePage({data,onChange}){
       {/* Avatar + name */}
       <div style={{textAlign:"center",marginBottom:24}}>
         {/* Avatar circle — shows pending state as live preview when picker is open */}
-        <div style={{margin:"0 auto 12px",display:"flex",justifyContent:"center"}}>
-          <div className={data._dx?"_dxwrap":""} style={{position:"relative"}}>
-            {data._dx&&<div className="_dxring"/>}
-            <div className={data._dx?"_dxav":""} style={{width:88,height:88,borderRadius:"50%",fontSize:50,background:th.accent+"22",border:data._dx?"none":"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",overflow:"hidden",zIndex:1}}
-              onClick={openPicker}>
-              {(pickerOpen?pendingPhoto:data.customPhoto)
-                ?<img src={pickerOpen?pendingPhoto:data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
-                :(pickerOpen?AVATARS.find(a=>a.id===pendingAvatar)?.emoji:curAv?.emoji)}
-            </div>
-            {data._dx&&<div style={{position:"absolute",bottom:-2,right:-4,background:"#000",borderRadius:6,padding:"2px 6px",fontSize:9,fontWeight:700,color:"#fff",letterSpacing:0.8,zIndex:3,boxShadow:"0 1px 4px rgba(0,0,0,0.5)"}}>Dev</div>}
+        <div style={{position:"relative",display:"inline-block",margin:"0 auto 12px"}}>
+          <div className={data._dx?"_dxav":""} style={{width:88,height:88,borderRadius:"50%",fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",overflow:"hidden"}}
+            onClick={openPicker}>
+            {(pickerOpen?pendingPhoto:data.customPhoto)
+              ?<img src={pickerOpen?pendingPhoto:data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
+              :(pickerOpen?AVATARS.find(a=>a.id===pendingAvatar)?.emoji:curAv?.emoji)}
           </div>
+          {data._dx&&<div style={{position:"absolute",bottom:2,right:2,background:"linear-gradient(135deg,#ff0080,#9933ff)",borderRadius:6,padding:"1px 5px",fontSize:9,fontWeight:700,color:"#fff",letterSpacing:0.5,zIndex:2,boxShadow:"0 1px 4px rgba(0,0,0,0.4)"}}>dev</div>}
         </div>
         {pickerOpen&&(
           <div className="fade-in" style={{marginBottom:16}}>
