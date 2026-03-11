@@ -848,18 +848,22 @@ function buildTagScore(logs, feedback) {
   return tc;
 }
 
-function buildSuggestionQueue(logs, feedback, gpsRegion=null) {
+function buildSuggestionQueue(logs, feedback, locationData=null) {
   const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
-  // Region hints for food GPS boost
-  const regionHints = (gpsRegion && REGION_HINTS[gpsRegion]) || [];
   const cats = ["movies","music","books","food","games","activities"];
   const catPools = {};
+  // Pre-compute food suggestions with GPS data if available
+  const geoFoodSuggs = locationData ? getFoodSuggestions(logs, locationData, 20) : null;
   cats.forEach(cat => {
     const items = (LIBRARY[cat]||[]).filter(i => feedback[i.title]!=="down");
     catPools[cat] = items.map(i => {
       let score = (i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0) * (i.ph?1.6:1.0) + (feedback[i.title]==="up"?8:0);
-      // GPS food boost: regional dishes get extra weight
-      if(cat==="food" && regionHints.includes(i.title)) score += 20;
+      // For food: use GPS-aware scoring if available
+      if(cat==="food" && geoFoodSuggs){
+        const geoIdx = geoFoodSuggs.findIndex(f=>f.title===i.title);
+        if(geoIdx>=0) score += (20-geoIdx); // top geo suggestions get big boost
+        else score -= 10; // items not near user are deprioritized
+      }
       return {...i, category:cat, score};
     }).sort((a,b) => b.score-a.score || Math.random()-0.5);
   });
@@ -898,132 +902,286 @@ function getWeekLogs(logs) {
 }
 
 // ─── FOOD GPS SUGGESTION SYSTEM ──────────────────────────────────────────────
-// Uses device GPS (offline, no data transmitted) to bias food suggestions
-// Philippines only for now. 60% local/Filipino, 40% user taste pattern.
+// City-level food profiles — 149 Philippine cities + Siaton municipality
+// Updated periodically. Overpass API fills gaps for unmapped areas.
+// ph flag is metadata only — never shown in UI.
 
-const PH_REGIONS = [
-  // Luzon
-  {name:"Metro Manila",lat:[14.35,14.85],lng:[120.9,121.2]},
-  {name:"Bulacan",lat:[14.7,15.2],lng:[120.8,121.1]},
-  {name:"Pampanga",lat:[14.8,15.3],lng:[120.5,120.9]},
-  {name:"Batangas",lat:[13.6,14.1],lng:[120.8,121.3]},
-  {name:"Cavite",lat:[14.1,14.5],lng:[120.7,121.0]},
-  {name:"Laguna",lat:[14.0,14.4],lng:[121.1,121.6]},
-  {name:"Rizal",lat:[14.4,14.8],lng:[121.1,121.5]},
-  {name:"Ilocos Norte",lat:[17.8,18.5],lng:[120.5,120.8]},
-  {name:"Ilocos Sur",lat:[17.0,17.8],lng:[120.3,120.7]},
-  {name:"Pangasinan",lat:[15.6,16.2],lng:[119.8,120.6]},
-  {name:"Nueva Ecija",lat:[15.3,15.9],lng:[120.7,121.3]},
-  {name:"Tarlac",lat:[15.3,15.8],lng:[120.3,120.8]},
-  {name:"Zambales",lat:[14.8,15.8],lng:[119.9,120.4]},
-  {name:"Bataan",lat:[14.4,14.8],lng:[120.1,120.6]},
-  {name:"Cagayan Valley",lat:[17.0,18.6],lng:[121.5,122.5]},
-  {name:"Isabela",lat:[16.5,17.5],lng:[121.5,122.5]},
-  {name:"Bicol",lat:[12.0,13.9],lng:[123.0,124.3]},
-  {name:"Quezon Province",lat:[13.6,14.2],lng:[121.7,122.5]},
-  {name:"Benguet / Baguio",lat:[16.3,16.5],lng:[120.5,120.7]},
-  {name:"Mountain Province",lat:[16.7,17.2],lng:[120.8,121.2]},
-  // Visayas
-  {name:"Cebu",lat:[9.5,11.3],lng:[123.4,124.1]},
-  {name:"Bohol",lat:[9.5,10.2],lng:[123.6,124.5]},
-  {name:"Iloilo",lat:[10.4,11.2],lng:[122.3,123.0]},
-  {name:"Negros Occidental",lat:[9.8,11.0],lng:[122.3,123.2]},
-  {name:"Negros Oriental",lat:[9.0,10.0],lng:[122.8,123.6]},
-  {name:"Leyte",lat:[10.3,11.5],lng:[124.4,125.3]},
-  {name:"Samar",lat:[11.0,12.5],lng:[124.5,125.5]},
-  {name:"Aklan",lat:[11.4,11.9],lng:[121.9,122.5]},
-  {name:"Capiz",lat:[11.3,11.8],lng:[122.3,122.9]},
-  {name:"Antique",lat:[10.4,11.5],lng:[121.8,122.4]},
-  {name:"Guimaras",lat:[10.5,10.7],lng:[122.5,122.7]},
-  {name:"Biliran",lat:[11.4,11.7],lng:[124.4,124.7]},
-  {name:"Siquijor",lat:[9.1,9.3],lng:[123.4,123.6]},
-  // Mindanao
-  {name:"Davao",lat:[6.5,7.5],lng:[125.3,126.0]},
-  {name:"Cagayan de Oro",lat:[8.3,8.7],lng:[124.5,124.9]},
-  {name:"Zamboanga",lat:[6.8,7.5],lng:[121.9,123.0]},
-  {name:"General Santos",lat:[6.0,6.3],lng:[124.9,125.3]},
-  {name:"Cotabato",lat:[6.8,7.5],lng:[124.2,125.0]},
-  {name:"Lanao del Sur",lat:[7.5,8.5],lng:[123.8,124.6]},
-  {name:"Bukidnon",lat:[7.5,8.5],lng:[124.5,125.5]},
-  {name:"Misamis Oriental",lat:[8.3,9.0],lng:[124.5,125.2]},
-  {name:"Surigao",lat:[8.8,10.0],lng:[125.3,126.1]},
-  {name:"Agusan",lat:[8.0,9.2],lng:[125.3,126.3]},
-];
-
-// Special dish hints per region (additions on top of base Filipino pool)
-const REGION_HINTS = {
-  "Cebu":["Balbacua","Bam-i","Lechon Baboy","Kinilaw","Inun-unan","Binangkal","Inasal na Manok"],
-  "Iloilo":["KBL (Kadios Baboy Langka)","La Paz Batchoy","Kansi","Kadyos Manok Ubad","Inasal na Manok","Fresh Lumpia"],
-  "Negros Occidental":["Inasal na Manok","Balbacua","La Paz Batchoy"],
-  "Pampanga":["Sisig","Morcon","Tocino","Embutido"],
-  "Batangas":["Bulalo","Lomi","Tapa","Kapeng Barako"],
-  "Bicol":["Laing","Bicol Express","Kinunot","Sinanglay"],
-  "Ilocos Norte":["Pinakbet","Bagnet","Empanada","Longganisa"],
-  "Ilocos Sur":["Pinakbet","Bagnet","Empanada","Longganisa"],
-  "Metro Manila":["Sisig","Pancit Palabok","Lechon Kawali","Goto","Tokwa't Baboy","Fishball","Kwek-kwek"],
-  "Lanao del Sur":["Piaparan","Palapa"],
-  "Zamboanga":["Curacha","Satti"],
-  "Davao":["Durian","Kinilaw","Tuna Kinilaw"],
+const CITY_FOOD_PROFILES = {
+  "Manila":{lat:[14.57,14.62],lng:[120.97,121.02],cuisines:["filipino","chinese","japanese","korean","italian","american","indian","thai","vietnamese","spanish","halal","fastfood","coffee","milktea","dimsum","seafood"],localDishes:["Arroz Caldo","Goto","Tokwa't Baboy","Lechon Kawali","Pancit Palabok","Wanton Mami","Mami","Fishball","Kwek-kwek","Isaw"]},
+  "Quezon City":{lat:[14.62,14.76],lng:[121.02,121.12],cuisines:["filipino","chinese","japanese","korean","italian","american","indian","thai","vietnamese","halal","fastfood","coffee","milktea","seafood","barbecue"],localDishes:["Sisig","Lechon Kawali","Pancit Canton","Bulalo","Sinigang na Baboy","Korean BBQ","Ramen"]},
+  "Makati":{lat:[14.54,14.57],lng:[121.01,121.04],cuisines:["filipino","japanese","korean","italian","american","french","mediterranean","indian","thai","spanish","chinese","fastfood","coffee","milktea","steakhouse","seafood"],localDishes:["Steak","Pasta Carbonara","Sushi","Ramen","Sisig","Lechon Kawali"]},
+  "Taguig":{lat:[14.5,14.56],lng:[121.04,121.08],cuisines:["filipino","japanese","korean","italian","american","chinese","thai","indian","fastfood","coffee","milktea","seafood"],localDishes:["Steak","Sushi","Ramen","Korean BBQ","Sisig","Lechon Kawali"]},
+  "Pasig":{lat:[14.55,14.6],lng:[121.07,121.11],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea","seafood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Ramen","Korean BBQ"]},
+  "Mandaluyong":{lat:[14.57,14.6],lng:[121.02,121.05],cuisines:["filipino","chinese","japanese","korean","american","italian","fastfood","coffee","milktea"],localDishes:["Sisig","Lechon Kawali","Ramen","Korean BBQ","Pasta Carbonara"]},
+  "San Juan":{lat:[14.59,14.62],lng:[121.02,121.05],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea"],localDishes:["Sisig","Lechon Kawali","Ramen","Korean BBQ"]},
+  "Marikina":{lat:[14.62,14.68],lng:[121.09,121.13],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea","barbecue"],localDishes:["Sinigang na Baboy","Lechon Kawali","Inihaw na Liempo","Korean BBQ","Ramen"]},
+  "Pasay":{lat:[14.53,14.57],lng:[120.99,121.02],cuisines:["filipino","chinese","japanese","korean","american","italian","seafood","fastfood","coffee","milktea"],localDishes:["Lechon Kawali","Sinigang na Baboy","Ramen","Korean BBQ","Seafood"]},
+  "Parañaque":{lat:[14.47,14.53],lng:[121.0,121.05],cuisines:["filipino","chinese","japanese","korean","american","italian","seafood","fastfood","coffee","milktea"],localDishes:["Lechon Kawali","Bulalo","Korean BBQ","Ramen","Seafood"]},
+  "Las Piñas":{lat:[14.43,14.48],lng:[120.97,121.02],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea","seafood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen"]},
+  "Muntinlupa":{lat:[14.38,14.44],lng:[121.02,121.06],cuisines:["filipino","chinese","japanese","korean","american","italian","seafood","fastfood","coffee","milktea"],localDishes:["Bulalo","Sinigang na Baboy","Korean BBQ","Ramen","Seafood"]},
+  "Malabon":{lat:[14.65,14.68],lng:[120.95,120.98],cuisines:["filipino","chinese","seafood","fastfood","coffee"],localDishes:["Pancit Malabon","Lechon Kawali","Sinigang na Baboy","Seafood","Fishball"]},
+  "Navotas":{lat:[14.66,14.69],lng:[120.94,120.97],cuisines:["filipino","chinese","seafood","fastfood","coffee"],localDishes:["Seafood","Sinangag","Lechon Kawali","Fishball","Tinola"]},
+  "Valenzuela":{lat:[14.68,14.73],lng:[120.96,121.0],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Pancit Canton"]},
+  "Caloocan":{lat:[14.64,14.77],lng:[120.96,121.01],cuisines:["filipino","chinese","japanese","korean","american","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Korean BBQ","Fishball"]},
+  "Laoag":{lat:[18.18,18.22],lng:[120.57,120.61],cuisines:["filipino","ilocano","chinese","fastfood","coffee"],localDishes:["Pinakbet","Bagnet","Empanada","Longganisa","Dinengdeng","Sinangag"]},
+  "Batac":{lat:[18.05,18.08],lng:[120.56,120.59],cuisines:["filipino","ilocano","fastfood","coffee"],localDishes:["Pinakbet","Bagnet","Empanada","Longganisa","Dinengdeng"]},
+  "Candon":{lat:[17.19,17.22],lng:[120.44,120.47],cuisines:["filipino","ilocano","fastfood"],localDishes:["Pinakbet","Bagnet","Longganisa","Dinengdeng","Sinangag"]},
+  "Vigan":{lat:[17.57,17.6],lng:[120.38,120.41],cuisines:["filipino","ilocano","chinese","coffee","heritage"],localDishes:["Pinakbet","Bagnet","Empanada","Longganisa","Vigan Longganisa","Okoy","Dinengdeng"]},
+  "San Fernando (La Union)":{lat:[16.61,16.64],lng:[120.31,120.34],cuisines:["filipino","ilocano","chinese","seafood","fastfood","coffee"],localDishes:["Pinakbet","Bagnet","Lechon Kawali","Seafood","Sinigang na Baboy"]},
+  "Alaminos":{lat:[16.15,16.18],lng:[119.97,120.0],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Pinakbet","Sinigang na Baboy","Sinangag","Lechon Kawali"]},
+  "Dagupan":{lat:[16.04,16.07],lng:[120.34,120.37],cuisines:["filipino","pangasinan","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Bangus","Daing na Bangus","Bonuan Bangus","Seafood","Pinakbet","Dinengdeng"]},
+  "San Carlos (Pangasinan)":{lat:[15.92,15.95],lng:[120.34,120.37],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Bangus","Sinigang na Baboy","Seafood","Pinakbet","Sinangag"]},
+  "Urdaneta":{lat:[15.97,16.0],lng:[120.56,120.59],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Bangus"]},
+  "Tuguegarao":{lat:[17.61,17.65],lng:[121.72,121.76],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Batil Patung","Pinakbet","Longganisa"]},
+  "Cauayan":{lat:[16.92,16.95],lng:[121.76,121.79],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pinakbet","Sinangag"]},
+  "Ilagan":{lat:[17.14,17.17],lng:[121.87,121.91],cuisines:["filipino","chinese","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Longganisa","Pinakbet"]},
+  "Santiago (Isabela)":{lat:[16.68,16.71],lng:[121.54,121.57],cuisines:["filipino","chinese","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Longanisa","Pancit Canton"]},
+  "Baguio":{lat:[16.4,16.43],lng:[120.59,120.62],cuisines:["filipino","cordilleran","korean","japanese","american","chinese","western","coffee","milktea","fastfood","vegetarian"],localDishes:["Pinikpikan","Etag","Strawberry products","Ube Jam","Tapsilog","Korean BBQ","Ramen","Pasta Carbonara"]},
+  "Tabuk":{lat:[17.4,17.43],lng:[121.44,121.47],cuisines:["filipino","cordilleran","fastfood"],localDishes:["Pinikpikan","Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "La Trinidad":{lat:[16.46,16.49],lng:[120.58,120.61],cuisines:["filipino","cordilleran","coffee","fastfood"],localDishes:["Pinikpikan","Strawberry products","Tapsilog","Lechon Kawali"]},
+  "Angeles":{lat:[15.13,15.17],lng:[120.57,120.61],cuisines:["filipino","kapampangan","american","korean","japanese","chinese","fastfood","coffee","milktea","barbecue"],localDishes:["Sisig","Lechon Kawali","Morcon","Embutido","Kare-kare","Dinuguan","Tocino","Korean BBQ"]},
+  "Mabalacat":{lat:[15.21,15.24],lng:[120.56,120.59],cuisines:["filipino","kapampangan","chinese","fastfood","coffee"],localDishes:["Sisig","Lechon Kawali","Kare-kare","Sinigang na Baboy","Tocino"]},
+  "San Fernando (Pampanga)":{lat:[15.02,15.06],lng:[120.68,120.71],cuisines:["filipino","kapampangan","chinese","korean","japanese","fastfood","coffee","milktea"],localDishes:["Sisig","Lechon Kawali","Kare-kare","Morcon","Embutido","Tocino","Dinuguan"]},
+  "Olongapo":{lat:[14.82,14.85],lng:[120.27,120.3],cuisines:["filipino","american","korean","japanese","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Lechon Kawali","Korean BBQ","Ramen","Sinigang na Baboy"]},
+  "Cabanatuan":{lat:[15.47,15.51],lng:[120.96,121.0],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Goto","Arroz Caldo","Lechon Kawali","Sinigang na Baboy","Longganisa","Pancit Canton"]},
+  "Gapan":{lat:[15.3,15.33],lng:[120.94,120.97],cuisines:["filipino","chinese","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Longganisa"]},
+  "Muñoz":{lat:[15.71,15.74],lng:[120.9,120.93],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Tapa"]},
+  "Palayan":{lat:[15.54,15.57],lng:[121.08,121.11],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Science City of Muñoz":{lat:[15.71,15.74],lng:[120.9,120.93],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Tarlac City":{lat:[15.47,15.5],lng:[120.58,120.61],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea"],localDishes:["Sisig","Lechon Kawali","Sinigang na Baboy","Korean BBQ","Ramen","Pancit Canton"]},
+  "Balanga":{lat:[14.67,14.7],lng:[120.53,120.56],cuisines:["filipino","chinese","fastfood","coffee","seafood"],localDishes:["Seafood","Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Meycauayan":{lat:[14.73,14.76],lng:[120.95,120.98],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Korean BBQ"]},
+  "Malolos":{lat:[14.84,14.87],lng:[120.8,120.83],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Pancit Canton"]},
+  "San Jose del Monte":{lat:[14.81,14.84],lng:[121.02,121.05],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Korean BBQ"]},
+  "Bocaue":{lat:[14.79,14.82],lng:[120.91,120.94],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Antipolo":{lat:[14.62,14.66],lng:[121.12,121.16],cuisines:["filipino","chinese","korean","japanese","fastfood","coffee","milktea","barbecue"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Bulalo"]},
+  "Calamba":{lat:[14.2,14.23],lng:[121.15,121.18],cuisines:["filipino","chinese","korean","japanese","fastfood","coffee","milktea","seafood"],localDishes:["Buko Pie","Sinigang na Baboy","Bulalo","Korean BBQ","Ramen","Lechon Kawali"]},
+  "San Pablo":{lat:[14.06,14.09],lng:[121.32,121.35],cuisines:["filipino","chinese","fastfood","coffee","milktea","seafood"],localDishes:["Sinigang na Baboy","Buko Pie","Lechon Kawali","Seafood","Tilapia"]},
+  "Santa Rosa":{lat:[14.3,14.33],lng:[121.1,121.13],cuisines:["filipino","chinese","korean","japanese","italian","american","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Korean BBQ","Ramen","Pasta Carbonara","Lechon Kawali"]},
+  "Bacoor":{lat:[14.45,14.48],lng:[120.94,120.97],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Pancit Canton"]},
+  "Dasmariñas":{lat:[14.32,14.35],lng:[120.93,120.96],cuisines:["filipino","chinese","korean","japanese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Pancit Canton"]},
+  "General Trias":{lat:[14.38,14.41],lng:[120.87,120.9],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Korean BBQ"]},
+  "Imus":{lat:[14.42,14.45],lng:[120.93,120.96],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen"]},
+  "Tagaytay":{lat:[14.09,14.12],lng:[120.95,120.98],cuisines:["filipino","korean","japanese","american","italian","coffee","milktea","bulalo","fastfood"],localDishes:["Bulalo","Buko Pie","Tawilis","Korean BBQ","Pasta Carbonara","Steak"]},
+  "Trece Martires":{lat:[14.28,14.31],lng:[120.85,120.88],cuisines:["filipino","chinese","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Pancit Canton"]},
+  "Batangas City":{lat:[13.74,13.77],lng:[121.04,121.07],cuisines:["filipino","batangueño","chinese","korean","seafood","fastfood","coffee","milktea"],localDishes:["Bulalo","Lomi","Tapa","Kapeng Barako","Goto","Arroz Caldo","Sinigang na Baboy"]},
+  "Lipa":{lat:[13.93,13.96],lng:[121.15,121.18],cuisines:["filipino","batangueño","chinese","fastfood","coffee","milktea"],localDishes:["Bulalo","Lomi","Kapeng Barako","Tapa","Sinigang na Baboy","Lechon Kawali"]},
+  "Tanauan":{lat:[14.08,14.11],lng:[121.15,121.18],cuisines:["filipino","batangueño","fastfood","coffee"],localDishes:["Bulalo","Lomi","Sinigang na Baboy","Lechon Kawali","Kapeng Barako"]},
+  "Lucena":{lat:[13.93,13.96],lng:[121.6,121.63],cuisines:["filipino","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Pancit Lucena","Seafood","Sinigang na Baboy","Lechon Kawali","Goto"]},
+  "Puerto Princesa":{lat:[9.74,9.77],lng:[118.73,118.76],cuisines:["filipino","seafood","chinese","korean","japanese","coffee","milktea","fastfood"],localDishes:["Tamilok","Crocodile meat dishes","Seafood","Kinilaw","Sinigang na Isda","Halo-Halo"]},
+  "Calapan":{lat:[13.4,13.43],lng:[121.17,121.2],cuisines:["filipino","chinese","seafood","fastfood","coffee"],localDishes:["Seafood","Sinigang na Baboy","Lechon Kawali","Sinangag","Tinola"]},
+  "Romblon":{lat:[12.57,12.6],lng:[122.26,122.29],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Sinigang na Isda","Kinilaw","Sinangag","Tinola"]},
+  "Legazpi":{lat:[13.13,13.16],lng:[123.73,123.76],cuisines:["filipino","bicolano","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Laing","Bicol Express","Kinunot","Sili Ice Cream","Pili Tart","Pinangat","Sinigang na Isda"]},
+  "Naga":{lat:[13.62,13.65],lng:[123.18,123.21],cuisines:["filipino","bicolano","chinese","korean","japanese","fastfood","coffee","milktea"],localDishes:["Laing","Bicol Express","Pinangat","Kinunot","Pili products","Sinigang na Baboy"]},
+  "Iriga":{lat:[13.42,13.45],lng:[123.4,123.43],cuisines:["filipino","bicolano","fastfood","coffee"],localDishes:["Laing","Bicol Express","Pinangat","Sinigang na Baboy","Lechon Kawali"]},
+  "Ligao":{lat:[13.22,13.25],lng:[123.51,123.54],cuisines:["filipino","bicolano","fastfood"],localDishes:["Laing","Bicol Express","Sinigang na Baboy","Sinangag","Lechon Kawali"]},
+  "Tabaco":{lat:[13.35,13.38],lng:[123.72,123.75],cuisines:["filipino","bicolano","seafood","fastfood"],localDishes:["Laing","Bicol Express","Seafood","Sinigang na Isda","Sinangag"]},
+  "Sorsogon City":{lat:[12.97,13.0],lng:[124.0,124.03],cuisines:["filipino","bicolano","seafood","fastfood","coffee"],localDishes:["Laing","Bicol Express","Seafood","Kinunot","Whale Shark watching + Butanding"]},
+  "Iloilo City":{lat:[10.69,10.73],lng:[122.55,122.59],cuisines:["filipino","ilonggo","chinese","japanese","korean","italian","seafood","fastfood","coffee","milktea","barbecue"],localDishes:["La Paz Batchoy","KBL (Kadios Baboy Langka)","Kansi","Fresh Lumpia","Pancit Molo","Inasal na Manok","Kadyos Manok Ubad","Seafood"]},
+  "Bacolod":{lat:[10.66,10.7],lng:[122.94,122.98],cuisines:["filipino","negrense","chinese","japanese","korean","fastfood","coffee","milktea","barbecue"],localDishes:["Inasal na Manok","Chicken Inasal","Chicken Binakol","Batchoy","Piaya","Piyaya","Korean BBQ","Ramen"]},
+  "Roxas City":{lat:[11.58,11.61],lng:[122.74,122.77],cuisines:["filipino","capizeno","seafood","fastfood","coffee"],localDishes:["Seafood","La Paz Batchoy","Sinigang na Isda","Kinilaw","Pancit Canton"]},
+  "Escalante":{lat:[10.83,10.86],lng:[123.49,123.52],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Inasal na Manok","Sinigang na Isda","Sinangag"]},
+  "Sagay":{lat:[10.89,10.92],lng:[123.41,123.44],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Inasal na Manok","Kinilaw","Sinigang na Isda"]},
+  "San Carlos (Negros Occidental)":{lat:[10.49,10.52],lng:[123.4,123.43],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Inasal na Manok","Sinigang na Baboy","Sinangag"]},
+  "Silay":{lat:[10.79,10.82],lng:[122.97,123.0],cuisines:["filipino","negrense","chinese","fastfood","coffee"],localDishes:["Inasal na Manok","Piaya","Cansi","Sinigang na Baboy","Lechon Kawali"]},
+  "Talisay (Negros Occidental)":{lat:[10.73,10.76],lng:[122.96,122.99],cuisines:["filipino","negrense","fastfood","coffee"],localDishes:["Inasal na Manok","Sinigang na Baboy","Lechon Kawali","Pancit Canton"]},
+  "Victorias":{lat:[10.89,10.92],lng:[123.07,123.1],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Inasal na Manok","Lechon Kawali","Sinangag"]},
+  "Cadiz":{lat:[10.95,10.98],lng:[123.29,123.32],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Inasal na Manok","Sinigang na Isda","Sinangag"]},
+  "Kabankalan":{lat:[9.98,10.01],lng:[122.81,122.84],cuisines:["filipino","fastfood","coffee"],localDishes:["Inasal na Manok","Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Himamaylan":{lat:[10.09,10.12],lng:[122.86,122.89],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Inasal na Manok","Sinangag","Lechon Kawali"]},
+  "Bago":{lat:[10.53,10.56],lng:[122.83,122.86],cuisines:["filipino","negrense","fastfood","coffee"],localDishes:["Inasal na Manok","Sinigang na Baboy","Lechon Kawali","Piaya"]},
+  "La Carlota":{lat:[10.42,10.45],lng:[122.91,122.94],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Inasal na Manok","Sinangag"]},
+  "Passi":{lat:[11.1,11.13],lng:[122.63,122.66],cuisines:["filipino","ilonggo","fastfood"],localDishes:["La Paz Batchoy","KBL (Kadios Baboy Langka)","Sinigang na Baboy","Sinangag"]},
+  "Sara":{lat:[11.26,11.29],lng:[122.97,123.0],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Cebu City":{lat:[10.29,10.38],lng:[123.87,123.92],cuisines:["filipino","cebuano","chinese","japanese","korean","italian","american","seafood","fastfood","coffee","milktea","barbecue","dimsum"],localDishes:["Lechon Baboy","Balbacua","Bam-i","Kinilaw","Inun-unan","Binangkal","Sutukil","Puso rice","Ngohiong","Pork Chicharon","Inasal na Manok"]},
+  "Lapu-Lapu":{lat:[10.29,10.33],lng:[123.96,124.01],cuisines:["filipino","cebuano","seafood","chinese","fastfood","coffee","milktea","korean","japanese"],localDishes:["Lechon Baboy","Kinilaw","Seafood","Sutukil","Bam-i","Balbacua","Inasal na Manok"]},
+  "Mandaue":{lat:[10.33,10.37],lng:[123.92,123.96],cuisines:["filipino","cebuano","chinese","japanese","korean","fastfood","coffee","milktea","seafood"],localDishes:["Lechon Baboy","Bam-i","Kinilaw","Balbacua","Inasal na Manok","Pork Chicharon"]},
+  "Talisay (Cebu)":{lat:[10.24,10.27],lng:[123.84,123.87],cuisines:["filipino","cebuano","chinese","fastfood","coffee","milktea","seafood"],localDishes:["Lechon Baboy","Kinilaw","Bam-i","Balbacua","Inasal na Manok","Seafood"]},
+  "Naga (Cebu)":{lat:[10.2,10.23],lng:[123.75,123.78],cuisines:["filipino","cebuano","fastfood","coffee","seafood"],localDishes:["Lechon Baboy","Kinilaw","Bam-i","Seafood","Inasal na Manok"]},
+  "Carcar":{lat:[10.1,10.13],lng:[123.63,123.66],cuisines:["filipino","cebuano","fastfood","coffee"],localDishes:["Lechon Baboy","Chicharon","Ampao","Bam-i","Kinilaw"]},
+  "Danao":{lat:[10.52,10.55],lng:[124.01,124.04],cuisines:["filipino","cebuano","fastfood","coffee"],localDishes:["Lechon Baboy","Kinilaw","Bam-i","Seafood","Inasal na Manok"]},
+  "Bogo":{lat:[11.04,11.07],lng:[124.0,124.03],cuisines:["filipino","cebuano","seafood","fastfood","coffee"],localDishes:["Lechon Baboy","Kinilaw","Seafood","Bam-i","Sinangag"]},
+  "Toledo":{lat:[10.37,10.4],lng:[123.63,123.66],cuisines:["filipino","cebuano","fastfood","coffee"],localDishes:["Lechon Baboy","Kinilaw","Bam-i","Sinigang na Baboy","Sinangag"]},
+  "Tagbilaran":{lat:[9.65,9.68],lng:[123.84,123.87],cuisines:["filipino","boholano","chinese","korean","japanese","seafood","fastfood","coffee","milktea"],localDishes:["Lechon Baboy","Kinilaw","Seafood","Kalamay","Chicken Humba","Inun-unan","Ramen","Korean BBQ"]},
+  "Dumaguete":{lat:[9.3,9.33],lng:[123.29,123.32],cuisines:["filipino","negrense oriental","chinese","japanese","indian","italian","european","seafood","fastfood","coffee","milktea"],localDishes:["Silvanas","Sans Rival","Budbud Kabog","Baked Scallops","Kinilaw","Seafood","Sizzling Chicken","Lechon Baboy","Ramen","Pasta Carbonara","Binakhaw"]},
+  "Bayawan":{lat:[9.36,9.39],lng:[122.8,122.83],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Baboy","Sinangag"]},
+  "Bais":{lat:[9.59,9.62],lng:[123.12,123.15],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Lechon Baboy"]},
+  "Canlaon":{lat:[10.38,10.41],lng:[123.19,123.22],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Kinilaw"]},
+  "Guihulngan":{lat:[10.12,10.15],lng:[123.27,123.3],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Kawali","Sinangag"]},
+  "Tanjay":{lat:[9.51,9.54],lng:[123.15,123.18],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Lechon Kawali"]},
+  "Maasin":{lat:[10.13,10.16],lng:[124.84,124.87],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Kawali","Sinangag","Tinola"]},
+  "Ormoc":{lat:[11.0,11.03],lng:[124.6,124.63],cuisines:["filipino","seafood","chinese","fastfood","coffee","milktea"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Kawali","Sinangag","Pancit Canton"]},
+  "Tacloban":{lat:[11.24,11.27],lng:[124.99,125.02],cuisines:["filipino","waray","chinese","korean","japanese","seafood","fastfood","coffee","milktea"],localDishes:["Sinugno","Sinabawang Manok","Binagol","Moron","Seafood","Kinilaw","Sinigang na Isda","Ramen","Korean BBQ"]},
+  "Calbayog":{lat:[12.06,12.09],lng:[124.59,124.62],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Tinola","Sinangag","Lechon Kawali"]},
+  "Catbalogan":{lat:[11.77,11.8],lng:[124.88,124.91],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Tinola","Sinangag"]},
+  "Baybay":{lat:[10.67,10.7],lng:[124.8,124.83],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Tinola"]},
+  "Borongan":{lat:[11.6,11.63],lng:[125.43,125.46],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag"]},
+  "Naval":{lat:[11.56,11.59],lng:[124.4,124.43],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Tinola"]},
+  "Zamboanga City":{lat:[6.9,6.94],lng:[122.06,122.1],cuisines:["filipino","zamboangueño","halal","seafood","chinese","fastfood","coffee","milktea"],localDishes:["Tiyula Itum","Satti","Curacha","Ketupat","Pastil","Knickerbocker","Seafood","Kinilaw"]},
+  "Dipolog":{lat:[8.58,8.61],lng:[123.33,123.36],cuisines:["filipino","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Sinigang na Baboy","Lechon Kawali","Kinilaw","Tinola"]},
+  "Dapitan":{lat:[8.65,8.68],lng:[123.42,123.45],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Kawali","Sinangag"]},
+  "Pagadian":{lat:[7.82,7.85],lng:[123.43,123.46],cuisines:["filipino","chinese","halal","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Sinigang na Baboy","Kinilaw","Lechon Kawali","Halal BBQ"]},
+  "Isabela (Basilan)":{lat:[6.7,6.73],lng:[121.97,122.0],cuisines:["filipino","halal","seafood","fastfood"],localDishes:["Seafood","Pastil","Halal dishes","Sinangag","Kinilaw"]},
+  "Cagayan de Oro":{lat:[8.46,8.5],lng:[124.63,124.67],cuisines:["filipino","chinese","korean","japanese","italian","american","seafood","fastfood","coffee","milktea","barbecue"],localDishes:["Chicken Surol","Sinuglaw","Binaki","Pastil","Sinigang na Baboy","Korean BBQ","Ramen","Lechon Kawali","Kinilaw"]},
+  "Oroquieta":{lat:[8.48,8.51],lng:[123.8,123.83],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Sinigang na Baboy","Kinilaw","Lechon Kawali","Sinangag"]},
+  "Ozamiz":{lat:[8.14,8.17],lng:[123.84,123.87],cuisines:["filipino","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Kinilaw","Sinigang na Baboy","Lechon Kawali","Pancit Canton"]},
+  "Tangub":{lat:[8.06,8.09],lng:[123.74,123.77],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Sinigang na Isda","Kinilaw","Sinangag","Lechon Kawali"]},
+  "Gingoog":{lat:[8.82,8.85],lng:[125.09,125.12],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Lechon Kawali"]},
+  "El Salvador":{lat:[8.55,8.58],lng:[124.52,124.55],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag"]},
+  "Malaybalay":{lat:[8.15,8.18],lng:[125.12,125.15],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Kinilaw","Korean BBQ"]},
+  "Valencia (Bukidnon)":{lat:[7.9,7.93],lng:[125.09,125.12],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Bulalo"]},
+  "Iligan":{lat:[8.22,8.26],lng:[124.23,124.27],cuisines:["filipino","chinese","korean","japanese","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Kinilaw","Sinigang na Baboy","Korean BBQ","Ramen","Lechon Kawali","Pancit Canton"]},
+  "Davao City":{lat:[7.06,7.12],lng:[125.58,125.64],cuisines:["filipino","chinese","japanese","korean","italian","american","halal","seafood","fastfood","coffee","milktea","barbecue","durian"],localDishes:["Fresh Tuna Kinilaw","Grilled Tuna","Durian","Kinilaw na Isda","Sinuglaw","Seafood","Korean BBQ","Ramen","Lechon Baboy","Balbacua"]},
+  "Panabo":{lat:[7.3,7.33],lng:[125.68,125.71],cuisines:["filipino","chinese","fastfood","coffee","seafood"],localDishes:["Seafood","Kinilaw","Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Samal":{lat:[7.06,7.09],lng:[125.71,125.74],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Fresh Tuna","Sinigang na Isda","Sinangag"]},
+  "Tagum":{lat:[7.44,7.47],lng:[125.8,125.83],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea","seafood"],localDishes:["Seafood","Kinilaw","Sinigang na Baboy","Korean BBQ","Lechon Kawali","Pancit Canton"]},
+  "Digos":{lat:[6.74,6.77],lng:[125.35,125.38],cuisines:["filipino","chinese","fastfood","coffee","seafood"],localDishes:["Seafood","Sinigang na Baboy","Kinilaw","Lechon Kawali","Sinangag"]},
+  "Mati":{lat:[6.95,6.98],lng:[126.21,126.24],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Fresh Tuna","Kinilaw","Sinigang na Isda","Sinangag"]},
+  "General Santos":{lat:[6.1,6.14],lng:[125.15,125.19],cuisines:["filipino","chinese","korean","japanese","halal","seafood","tuna","fastfood","coffee","milktea"],localDishes:["Tuna Kinilaw","Grilled Tuna","Tuna Belly","Fresh Tuna Sashimi","Seafood","Korean BBQ","Sinigang na Tuna","Kinilaw","Lechon Baboy"]},
+  "Koronadal":{lat:[6.5,6.53],lng:[124.84,124.87],cuisines:["filipino","chinese","fastfood","coffee","milktea","halal"],localDishes:["Sinigang na Baboy","Lechon Kawali","Kinilaw","Halal BBQ","Pancit Canton"]},
+  "Kidapawan":{lat:[7.0,7.03],lng:[125.08,125.11],cuisines:["filipino","chinese","fastfood","coffee","halal"],localDishes:["Sinigang na Baboy","Lechon Kawali","Kinilaw","Sinangag","Halal dishes"]},
+  "Tacurong":{lat:[6.69,6.72],lng:[124.67,124.7],cuisines:["filipino","fastfood","coffee","halal"],localDishes:["Sinigang na Baboy","Lechon Kawali","Halal BBQ","Sinangag"]},
+  "Butuan":{lat:[8.94,8.97],lng:[125.54,125.57],cuisines:["filipino","chinese","korean","seafood","fastfood","coffee","milktea"],localDishes:["Sinuglaw","Kinilaw","Seafood","Sinigang na Baboy","Korean BBQ","Lechon Kawali","Pancit Canton"]},
+  "Surigao City":{lat:[9.78,9.81],lng:[125.5,125.53],cuisines:["filipino","chinese","seafood","fastfood","coffee","milktea"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Lechon Kawali","Sinangag","Pancit Canton"]},
+  "Bislig":{lat:[8.21,8.24],lng:[126.32,126.35],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag"]},
+  "Cabadbaran":{lat:[9.12,9.15],lng:[125.52,125.55],cuisines:["filipino","fastfood","coffee"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag","Kinilaw"]},
+  "Bayugan":{lat:[8.71,8.74],lng:[125.73,125.76],cuisines:["filipino","fastfood"],localDishes:["Sinigang na Baboy","Lechon Kawali","Sinangag"]},
+  "Cotabato City":{lat:[7.21,7.24],lng:[124.24,124.27],cuisines:["filipino","halal","chinese","fastfood","coffee"],localDishes:["Tiyula Itum","Piaparan","Pastil","Palapa","Halal BBQ","Sinigang na Baboy","Ketupat"]},
+  "Marawi":{lat:[7.99,8.02],lng:[124.28,124.31],cuisines:["filipino","halal","maranao"],localDishes:["Tiyula Itum","Piaparan","Palapa","Pastil","Ketupat","Halal dishes","Sinuglaw"]},
+  "Lamitan":{lat:[6.65,6.68],lng:[122.12,122.15],cuisines:["filipino","halal","seafood","fastfood"],localDishes:["Halal dishes","Seafood","Pastil","Sinangag","Kinilaw"]},
+  "Siaton":{lat:[9.06,9.1],lng:[123.01,123.04],cuisines:["filipino","seafood"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Tinola","Lechon Kawali"]},
+  "Biñan":{lat:[14.32,14.35],lng:[121.07,121.1],cuisines:["filipino","chinese","korean","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Korean BBQ","Ramen","Pancit Canton"]},
+  "Cabuyao":{lat:[14.27,14.3],lng:[121.12,121.15],cuisines:["filipino","chinese","fastfood","coffee","milktea"],localDishes:["Sinigang na Baboy","Lechon Kawali","Pancit Canton","Korean BBQ"]},
+  "San Jose (Batangas)":{lat:[13.86,13.89],lng:[121.05,121.08],cuisines:["filipino","batangueño","fastfood","coffee"],localDishes:["Bulalo","Lomi","Kapeng Barako","Sinigang na Baboy","Sinangag"]},
+  "Catarman":{lat:[12.5,12.53],lng:[124.63,124.66],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Tinola"]},
+  "Coron":{lat:[11.99,12.02],lng:[120.2,120.23],cuisines:["filipino","seafood","fastfood","coffee"],localDishes:["Seafood","Kinilaw","Sinigang na Isda","Sinangag","Fresh fish"]},
+  "San Jose (Occidental Mindoro)":{lat:[12.35,12.38],lng:[121.06,121.09],cuisines:["filipino","seafood","fastfood"],localDishes:["Seafood","Sinigang na Isda","Kinilaw","Sinangag","Tinola"]},
 };
 
-let _gpsCache = null; // {region, ts}
+let _gpsCache = null; // {city, cuisines, localDishes, ts}
+
+// Match GPS coords to city profile
+function matchCityProfile(lat, lng) {
+  for(const [city, p] of Object.entries(CITY_FOOD_PROFILES)){
+    if(lat>=p.lat[0]&&lat<=p.lat[1]&&lng>=p.lng[0]&&lng<=p.lng[1]) return {city,...p};
+  }
+  return null;
+}
+
+// Query Overpass for cuisine types near coordinates (async, online only)
+async function fetchOverpassCuisines(lat, lng, radius=4000) {
+  try{
+    const query=`[out:json][timeout:10];nwr["amenity"="restaurant"]["cuisine"](around:${radius},${lat},${lng});out tags;`;
+    const url=`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    if(!res.ok) return [];
+    const json=await res.json();
+    const cuisines=new Set();
+    (json.elements||[]).forEach(el=>{
+      const c=(el.tags?.cuisine||"").toLowerCase().split(";");
+      c.forEach(x=>{if(x.trim()) cuisines.add(x.trim());});
+    });
+    return [...cuisines];
+  }catch(e){return [];}
+}
+
+// Normalize Overpass cuisine tags to our internal cuisine keys
+function normalizeCuisine(raw) {
+  const map={
+    "filipino":"filipino","japanese":"japanese","korean":"korean","chinese":"chinese",
+    "italian":"italian","american":"american","thai":"thai","vietnamese":"vietnamese",
+    "indian":"indian","french":"french","spanish":"spanish","halal":"halal",
+    "fast_food":"fastfood","burger":"fastfood","pizza":"italian","coffee_shop":"coffee",
+    "cafe":"coffee","seafood":"seafood","sushi":"japanese","ramen":"japanese",
+    "bbq":"barbecue","barbecue":"barbecue","chicken":"fastfood","international":"filipino",
+    "asian":"filipino","noodle":"chinese","dimsum":"dimsum","regional":"filipino",
+  };
+  return map[raw]||null;
+}
 
 async function getPhRegion() {
-  // Return cached result if fresh (1 hour)
-  if(_gpsCache && Date.now()-_gpsCache.ts < 3600000) return _gpsCache.region;
+  // Return cache if fresh (24 hours)
+  if(_gpsCache && Date.now()-_gpsCache.ts < 86400000) return _gpsCache;
   return new Promise(resolve=>{
     if(!navigator.geolocation){resolve(null);return;}
-    navigator.geolocation.getCurrentPosition(pos=>{
+    navigator.geolocation.getCurrentPosition(async pos=>{
       const {latitude:lat,longitude:lng}=pos.coords;
-      let found=null;
-      for(const r of PH_REGIONS){
-        if(lat>=r.lat[0]&&lat<=r.lat[1]&&lng>=r.lng[0]&&lng<=r.lng[1]){found=r.name;break;}
-      }
-      // Fallback: if coords are in PH bounding box but no region matched, use generic PH
-      if(!found && lat>=4.5&&lat<=21.5&&lng>=116.0&&lng<=127.0) found="Philippines";
-      _gpsCache={region:found,ts:Date.now()};
-      resolve(found);
-    },()=>{resolve(null);},{timeout:4000,maximumAge:3600000});
+      // Match to city profile
+      const profile=matchCityProfile(lat,lng);
+      // Fetch Overpass cuisines (best effort, may fail offline)
+      const overpassRaw=await fetchOverpassCuisines(lat,lng);
+      const overpassCuisines=[...new Set(overpassRaw.map(normalizeCuisine).filter(Boolean))];
+      // Merge: city profile cuisines + overpass cuisines
+      const baseCuisines=profile?.cuisines||["filipino"];
+      const merged=[...new Set([...baseCuisines,...overpassCuisines])];
+      const result={
+        city:profile?.city||"Philippines",
+        cuisines:merged,
+        localDishes:profile?.localDishes||[],
+        ts:Date.now()
+      };
+      _gpsCache=result;
+      resolve(result);
+    },()=>{resolve(null);},{timeout:5000,maximumAge:86400000});
   });
 }
 
-function getFoodSuggestions(logs, region, count=5) {
-  const foodLib = LIBRARY.food || [];
-  const phItems = foodLib.filter(f=>f.ph);
-  const nonPhItems = foodLib.filter(f=>!f.ph);
+function getFoodSuggestions(logs, locationData, count=8) {
+  const foodLib = LIBRARY.food||[];
+  if(!locationData) return foodLib.slice(0,count);
 
-  // Region hints boost specific dishes
-  const regionHints = (region && REGION_HINTS[region]) || [];
+  const {cuisines=[], localDishes=[]} = locationData;
 
-  // User taste: what non-PH cuisines have they logged?
-  const loggedFood = logs.filter(l=>l.category==="food");
-  const nonPhLogged = loggedFood.filter(l=>{
-    const match = foodLib.find(f=>f.title===l.title);
-    return match && !match.ph;
+  // Cuisine to food library mapping
+  const cuisineMap={
+    "filipino":["Filipino","Bicolano","Ilonggo","Cebuano","Kapampangan","Ilocano","Visayan","Chinese-Filipino","Filipino-American"],
+    "japanese":["Noodles","Sushi","Grill"],
+    "korean":["Grill","Street Food","Soup","Rice Bowl","Snack","Dessert"],
+    "chinese":["Dim Sum","Noodles","Main","Porridge"],
+    "italian":["Pasta","Pizza","Main","Dessert"],
+    "thai":["Noodles","Curry","Soup","Salad","Dessert"],
+    "seafood":["Seafood","Fish","Soup"],
+    "fastfood":["Fast Food"],
+    "american":["Fast Food","Main","Salad"],
+    "indian":["Curry","Main"],
+    "vietnamese":["Noodles","Snack"],
+    "halal":["Halal"],
+    "barbecue":["Grill"],
+    "dimsum":["Dim Sum"],
+  };
+
+  // User taste from logs
+  const loggedFood=logs.filter(l=>l.category==="food");
+  const tagCnt={};
+  loggedFood.forEach(l=>{
+    const match=foodLib.find(f=>f.title===l.title);
+    (match?.tags||[]).forEach(t=>{tagCnt[t]=(tagCnt[t]||0)+1;});
   });
-  const cuisineCnt = {};
-  nonPhLogged.forEach(l=>{
-    const match = foodLib.find(f=>f.title===l.title);
-    if(match?.genre) cuisineCnt[match.genre]=(cuisineCnt[match.genre]||0)+1;
-  });
 
-  // Already logged today — don't suggest again
-  const today = new Date().toISOString().split("T")[0];
-  const loggedToday = new Set(loggedFood.filter(l=>(l.customDate||l.date?.split("T")[0])===today).map(l=>l.title));
+  // Available genres based on nearby cuisines
+  const availableGenres=new Set();
+  cuisines.forEach(c=>{(cuisineMap[c]||[]).forEach(g=>availableGenres.add(g));});
+  // Always include Filipino as base
+  (cuisineMap["filipino"]||[]).forEach(g=>availableGenres.add(g));
 
   // Score each item
-  const scored = foodLib.map(f=>{
-    if(loggedToday.has(f.title)) return {f,score:-1};
-    let score = 0;
-    if(f.ph) score += 60; // 60% Filipino bias
-    if(regionHints.includes(f.title)) score += 30; // regional boost
-    if(!f.ph && cuisineCnt[f.genre]) score += cuisineCnt[f.genre]*10; // user taste boost (40% pool)
-    score += Math.random()*8; // small shuffle
+  const scored=foodLib.map(f=>{
+    // Filter: only items whose genre matches available cuisines (or is Filipino/universal)
+    const genreOk=availableGenres.size===0||availableGenres.has(f.genre)||f.ph;
+    if(!genreOk) return {f,score:-1};
+
+    let score=0;
+    if(f.ph) score+=60; // Filipino base bias
+    if(localDishes.includes(f.title)) score+=35; // local specialty boost
+    // User taste
+    score+=(f.tags||[]).reduce((s,t)=>s+(tagCnt[t]||0)*5,0);
+    score+=Math.random()*6;
     return {f,score};
   }).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score);
 
   return scored.slice(0,count).map(x=>x.f);
 }
+
 
 
 
@@ -2578,7 +2736,7 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit}){
 
 // ─── SINGLE SUGGESTION CARD ───────────────────────────────────────────────────
 // No metadata (tags/genre/category) shown. Swipe left = skip, right = like.
-function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada}){
+function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada,onFindNearMe}){
   const [drag,setDrag]=useState(0);
   const [animOut,setAnimOut]=useState(null);
   const startX=useRef(null);
@@ -2635,6 +2793,16 @@ function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada}){
               </div>
               <div style={{fontSize:14,color:"var(--text)",lineHeight:1.7,fontStyle:"italic",opacity:0.85}}>{description}</div>
             </div>
+            {item.category==="food"&&onFindNearMe&&(
+              <button onClick={e=>{e.stopPropagation();onFindNearMe(item.title);}}
+                style={{marginTop:14,width:"100%",padding:"10px",borderRadius:12,
+                  background:"transparent",border:`1px solid var(--border)`,
+                  fontSize:12,fontWeight:600,color:"var(--sub)",
+                  display:"flex",alignItems:"center",justifyContent:"center",gap:6,
+                  cursor:"pointer"}}>
+                🔍 Find near me
+              </button>
+            )}
           </div>
 
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",borderTop:"1px solid var(--border)"}}>
@@ -2672,9 +2840,9 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
     if(!data.locationEnabled) return;
     if(data.suggDate===today && data.suggQueue?.length) return; // already have today's queue
     (async()=>{
-      const region = await getPhRegion();
-      if(!region) return;
-      const boosted = buildSuggestionQueue(data.logs, data.feedback, region);
+      const locationData = await getPhRegion();
+      if(!locationData) return;
+      const boosted = buildSuggestionQueue(data.logs, data.feedback, locationData);
       setQueue(boosted);
       setDescriptions(boosted.map((item,i)=>generateDescription(item,data.logs,data.feedback,i)));
     })();
@@ -2697,6 +2865,12 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
   const handleLeft=(item)=>{onFeedback(item.title,"down");setIndex(i=>i+1);};
   const handleRight=(item)=>{onFeedback(item.title,"up");setIndex(i=>i+1);};
 
+  // "Find near me" handler for food suggestions
+  const handleFindNearMe=(title)=>{
+    const query=encodeURIComponent(title+" near me");
+    window.open(`https://www.google.com/search?q=${query}`,"_blank");
+  };
+
   if(!currentItem) return(
     <div style={{textAlign:"center",padding:"32px 20px",color:"var(--sub)"}}>
       <div style={{fontSize:40,marginBottom:10}}>🌿</div>
@@ -2712,6 +2886,7 @@ function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
         index={displayIndex} total={queue.length}
         onLeft={handleLeft} onRight={handleRight}
         th={th} isBarkada={false}
+        onFindNearMe={data.locationEnabled?handleFindNearMe:null}
       />
       {index>0&&index%queue.length===0&&(
         <div style={{textAlign:"center",padding:"8px",fontSize:12,color:"var(--sub)",fontStyle:"italic",opacity:0.7,marginTop:8}}>
@@ -3364,11 +3539,11 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           const next=!(data.locationEnabled||false);
           onChange("locationEnabled",next);
           if(next){
-            // Trigger permission request immediately when toggled on
-            getPhRegion().then(r=>{
-              if(r) _gpsCache={region:r,ts:Date.now()};
-            });
+            // Trigger fresh permission request when toggled on
+            _gpsCache=null;
+            getPhRegion();
           } else {
+            // Clear cache so next enable always re-requests permission
             _gpsCache=null;
           }
         }}
