@@ -2681,15 +2681,15 @@ const _suggCache = {};
 
 function getBestLibrarySuggestion(log, dismissedSugg) {
   if(_suggCache[log.id] !== undefined) return _suggCache[log.id];
-  // Only for Custom genre entries, not HealthKit/Letterboxd
   if(log.genre !== "Custom" || log.fromHealthKit || log.fromLetterboxd){
-    _suggCache[log.id] = null; return null;
+    _suggCache[log.id]=null; return null;
   }
-  const dismissed = dismissedSugg?.[log.id] || {};
-  if(dismissed.never){ _suggCache[log.id] = null; return null; }
+  const titleKey=`${log.category}::${log.title}`;
+  const dismissed = (dismissedSugg||{})[titleKey] || {};
+  if(dismissed.never){ _suggCache[log.id]=null; return null; }
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
-  let best = null, bestScore = 0.32; // threshold
+  let best = null, bestScore = 0.32;
   lib.forEach(item => {
     if(skipped.has(item.title)) return;
     const score = _fuzzyScore(log.title, item.title);
@@ -2714,8 +2714,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
       gap:10,
     }}>
       <span style={{fontSize:12,color:th.sub,lineHeight:1.4,flex:1}}>
-        Did you mean{" "}
-        <span style={{color:th.text,fontWeight:600}}>{match.title}</span>?
+        By <span style={{color:th.text,fontWeight:600}}>"{log.title}"</span>, did you mean <span style={{color:th.text,fontWeight:600}}>{match.title}</span>?
       </span>
       <div style={{display:"flex",gap:5,flexShrink:0,alignItems:"center"}}>
         <button onClick={onAccept} style={{fontSize:11,padding:"4px 10px",borderRadius:7,background:th.accent,color:"#fff",fontWeight:600,border:"none",cursor:"pointer"}}>Yes</button>
@@ -2727,7 +2726,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
-  const th=THEMES[data.theme];
+  const th=THEMES[data?.theme]||THEMES.manila_nights;
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [filterCat,setFilterCat]=useState("all");
@@ -2742,25 +2741,29 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
 
   // Custom entry match handlers
   const handleMatchAccept=(log,match)=>{
-    // Update this entry to use the library item's title and metadata
-    const updated=data.logs.map(l=>l.id===log.id
-      ?{...l,title:match.title,genre:match.genre||l.genre,tags:match.tags||l.tags}
-      :l);
-    _suggCache[log.id]=null;
+    // Update ALL entries with the same title+category to the library version
+    const updated=data.logs.map(l=>
+      (l.title===log.title&&l.category===log.category&&l.genre==="Custom")
+        ?{...l,title:match.title,genre:match.genre||l.genre,tags:match.tags||l.tags}
+        :l);
+    // Clear session cache for all affected entries
+    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=null;});
     onUpdateData({logs:updated});
   };
   const handleMatchSkip=(log,match)=>{
+    // Dismiss this suggestion for all entries with same title — use title+category as key
+    const titleKey=`${log.category}::${log.title}`;
     const prev=data.dismissedSugg||{};
-    const entry=prev[log.id]||{skipped:[],never:false};
-    const updated={...prev,[log.id]:{...entry,skipped:[...(entry.skipped||[]),match.title]}};
-    _suggCache[log.id]=undefined; // clear session cache so next-best is re-evaluated
+    const entry=prev[titleKey]||{skipped:[],never:false};
+    const updated={...prev,[titleKey]:{...entry,skipped:[...(entry.skipped||[]),match.title]}};
+    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=undefined;});
     onUpdateData({dismissedSugg:updated});
   };
   const handleMatchNever=(log)=>{
+    const titleKey=`${log.category}::${log.title}`;
     const prev=data.dismissedSugg||{};
-    const entry=prev[log.id]||{skipped:[],never:false};
-    _suggCache[log.id]=null;
-    onUpdateData({dismissedSugg:{...prev,[log.id]:{...entry,never:true}}});
+    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=null;});
+    onUpdateData({dismissedSugg:{...prev,[titleKey]:{skipped:[],never:true}}});
   };
   const filteredWeek=applyFilter(thisWeek);
   const filteredOlder=applyFilter(older);
@@ -2820,24 +2823,23 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
     </div>);
   };
 
-  const renderGroups=(groups,isLatestBatch=false)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries],groupIdx)=>{
-    // Only show suggestion on the very first (latest) date group
-    const isLatestGroup=isLatestBatch&&groupIdx===0;
-    const suggEntry=isLatestGroup?entries.find(l=>getBestLibrarySuggestion(l,data.dismissedSugg)):null;
-    const suggMatch=suggEntry?getBestLibrarySuggestion(suggEntry,data.dismissedSugg):null;
-    return(
-      <div key={date} style={{marginBottom:22}}>
-        <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
-        {suggMatch&&<MatchPrompt
-          log={suggEntry} match={suggMatch} th={th}
-          onAccept={()=>handleMatchAccept(suggEntry,suggMatch)}
-          onSkip={()=>handleMatchSkip(suggEntry,suggMatch)}
-          onNever={()=>handleMatchNever(suggEntry)}
-        />}
-        {entries.map((log,i)=>renderEntry(log,i))}
-      </div>
-    );
-  });
+  // Find the single best suggestion across ALL visible logs, once per session
+  const _topSugg = React.useMemo(()=>{
+    const dismissed = data.dismissedSugg || {};
+    const allVisible=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    for(const log of allVisible){
+      const match=getBestLibrarySuggestion(log, dismissed);
+      if(match) return {log,match};
+    }
+    return null;
+  },[data.logs,data.dismissedSugg]);
+
+  const renderGroups=(groups)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries])=>(
+    <div key={date} style={{marginBottom:22}}>
+      <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
+      {entries.map((log,i)=>renderEntry(log,i))}
+    </div>
+  ));
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -2854,14 +2856,20 @@ function TimelinePage({data,onOpenLog,onDelete,onEdit,onUpdateData}){
         <div style={{textAlign:"center",padding:"60px 20px",color:th.sub}}><div style={{fontSize:44,marginBottom:10}}>📭</div><p>{t.empty_state}</p></div>
       ):(
         <>
+          {_topSugg&&<MatchPrompt
+            log={_topSugg.log} match={_topSugg.match} th={th}
+            onAccept={()=>handleMatchAccept(_topSugg.log,_topSugg.match)}
+            onSkip={()=>handleMatchSkip(_topSugg.log,_topSugg.match)}
+            onNever={()=>handleMatchNever(_topSugg.log)}
+          />}
           {Object.keys(weekGroups).length===0&&(
             <div style={{textAlign:"center",padding:"40px 20px",color:th.sub}}>
               <div style={{fontSize:36,marginBottom:8}}>📅</div>
               <p style={{fontSize:14}}>{lang==="fil"?"Walang entries ngayong linggo.":"Nothing logged this week yet."}</p>
             </div>
           )}
-          {renderGroups(weekGroups, Object.keys(weekGroups).length>0)}
-          {visibleOlder.length>0&&renderGroups(olderGroups, Object.keys(weekGroups).length===0)}
+          {renderGroups(weekGroups)}
+          {visibleOlder.length>0&&renderGroups(olderGroups)}
           {hasMore&&(
             <button onClick={()=>setWeeksShown(w=>w+1)} style={{width:"100%",padding:"12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,color:th.accent,fontWeight:600,fontSize:14,marginTop:8}}>
               {lang==="fil"?"Ipakita ang nakaraang linggo ↓":"Load previous week ↓"}
@@ -4043,11 +4051,10 @@ function App(){
   // Auto-enrich custom entries when library has matching title+category
   useEffect(()=>{
     const enriched=data.logs.map(log=>{
-      if(log.genre!=="Custom")return log; // only touch custom entries
+      if(log.genre!=="Custom")return log;
       const lib=LIBRARY[log.category]||[];
       const match=lib.find(item=>item.title.toLowerCase()===log.title.toLowerCase());
       if(!match)return log;
-      // Found a library match for same category — update metadata
       return {...log,genre:match.genre,tags:match.tags,enriched:true};
     });
     const changed=enriched.some((l,i)=>l!==data.logs[i]);
@@ -4268,7 +4275,7 @@ function App(){
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>saveData({...prev,...patch}))}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
