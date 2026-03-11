@@ -2777,62 +2777,83 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
-function SwipeableEntry({log, th, onDelete, onTap}){
+function SwipeableEntry({log, th, onDelete, onTap, undoEntry, onUndo}){
   const [drag,setDrag]=useState(0);
   const [deleting,setDeleting]=useState(false);
   const startX=useRef(null);
   const meta=CAT_MAP[log.category];
-  const DELETE_THRESHOLD=90;
+  const DELETE_THRESHOLD=100;
+  const hasPhotos=log.actPhotos&&log.actPhotos.length>0;
 
   const hs=e=>{startX.current=(e.touches?e.touches[0]:e).clientX;};
   const hm=e=>{
     if(startX.current===null) return;
     const dx=(e.touches?e.touches[0]:e).clientX-startX.current;
-    if(dx<0) setDrag(dx); // only allow left swipe
+    if(dx<0) setDrag(dx);
   };
   const he=()=>{
     if(drag<-DELETE_THRESHOLD){
       setDeleting(true);
-      setTimeout(()=>onDelete(),220);
+      setTimeout(()=>onDelete(),320);
     } else {
       setDrag(0);
     }
     startX.current=null;
   };
 
-  const tx=deleting?-420:drag;
-  const deleteOpacity=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
-  const isPastThreshold=drag<-DELETE_THRESHOLD;
+  // Peel physics
+  const progress=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
+  const isPast=drag<-DELETE_THRESHOLD;
+  // Rotation increases as you pull — feels like lifting bottom-left corner
+  const rotation=deleting?-18:drag*0.08;
+  // Scale down slightly as it peels off
+  const scale=deleting?0.88:1-progress*0.04;
+  // Shadow lifts as it peels
+  const shadowBlur=deleting?32:progress*24;
+  const shadowOpacity=deleting?0.4:progress*0.25;
+  const tx=deleting?-440:drag;
+
+  // Show undo placeholder if this entry was just deleted
+  if(undoEntry&&undoEntry.log.id===log.id){
+    return(
+      <UndoPlaceholder log={undoEntry.log} th={th} onUndo={onUndo} timer={undoEntry.timer}/>
+    );
+  }
 
   return(
-    <div style={{position:"relative",marginBottom:8,borderRadius:14,overflow:"hidden"}}>
-      {/* Delete zone underneath */}
+    <div style={{position:"relative",marginBottom:8,borderRadius:14,overflow:"visible"}}>
+      {/* Delete zone — red layer underneath, revealed by peel */}
       <div style={{
         position:"absolute",inset:0,borderRadius:14,
-        background:`#ef4444`,
+        background:"#ef4444",
         display:"flex",alignItems:"center",justifyContent:"flex-end",
-        paddingRight:20,opacity:deleteOpacity,transition:"opacity 0.1s"
+        paddingRight:22,
+        opacity:Math.min(progress*1.4,1),
       }}>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-          <span style={{fontSize:isPastThreshold?26:20,transition:"font-size 0.15s"}}>{isPastThreshold?"🗑️":"←"}</span>
-          <span style={{fontSize:10,color:"#fff",fontWeight:600,opacity:0.9}}>
-            {isPastThreshold?"Release to delete":"Swipe to delete"}
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,transform:`scale(${0.7+progress*0.3})`,transition:"transform 0.1s"}}>
+          <span style={{fontSize:20}}>🗑️</span>
+          <span style={{fontSize:9,color:"#fff",fontWeight:700,opacity:0.9,letterSpacing:0.5,textTransform:"uppercase"}}>
+            {isPast?"Let go":"Peel off"}
           </span>
         </div>
       </div>
-      {/* Card */}
+      {/* Card — peels with rotation + shadow */}
       <div
         onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
         onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-        onClick={()=>{if(drag===0) onTap();}}
+        onClick={()=>{if(Math.abs(drag)<4) onTap();}}
         style={{
-          transform:`translateX(${tx}px)`,
-          transition:deleting?"transform 0.22s ease-in":(drag===0?"transform 0.25s spring":"none"),
+          transform:`translateX(${tx}px) rotate(${rotation}deg) scale(${scale})`,
+          transformOrigin:"top right",
+          transition:deleting
+            ?"transform 0.32s cubic-bezier(0.4,0,1,1)"
+            :(drag===0?"transform 0.28s cubic-bezier(0.34,1.56,0.64,1)":"none"),
+          boxShadow:`0 ${4+progress*14}px ${shadowBlur}px rgba(0,0,0,${shadowOpacity})`,
           touchAction:"pan-y",cursor:"pointer",
           padding:"14px 16px",borderRadius:14,
           background:th.card,border:`1px solid ${th.border}`,
           display:"flex",gap:12,alignItems:"flex-start",
-          userSelect:"none",
+          userSelect:"none",position:"relative",zIndex:1,
         }}>
         <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
         <div style={{flex:1,minWidth:0}}>
@@ -2845,13 +2866,55 @@ function SwipeableEntry({log, th, onDelete, onTap}){
             const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
             const skip=["Film","Movies","Music","Books","Food","Games","Activities"];
             if(libMatch?.genre&&!skip.includes(libMatch.genre)) return <div style={{fontSize:11,color:th.sub}}>{libMatch.genre}</div>;
-            if(log.genre&&!skip.includes(log.genre)) return <div style={{fontSize:11,color:th.sub}}>{log.genre}</div>;
+            if(log.genre&&!skip.includes(log.genre)&&log.genre!=="Custom") return <div style={{fontSize:11,color:th.sub}}>{log.genre}</div>;
             return null;
           })()}
           {log.note&&<div style={{marginTop:6,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",opacity:0.8}}>"{log.note}"</div>}
         </div>
-
+        {/* Photo indicator */}
+        {hasPhotos&&(
+          <div style={{flexShrink:0,display:"flex",alignItems:"center",alignSelf:"center",opacity:0.45}}>
+            <span style={{fontSize:13}}>📷</span>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+// ─── INLINE UNDO PLACEHOLDER ─────────────────────────────────────────────────
+function UndoPlaceholder({log, th, onUndo, timer}){
+  const [progress,setProgress]=useState(100);
+  const DURATION=60000;
+  useEffect(()=>{
+    const start=Date.now();
+    const id=setInterval(()=>{
+      const pct=Math.max(0,100-((Date.now()-start)/DURATION)*100);
+      setProgress(pct);
+      if(pct===0) clearInterval(id);
+    },300);
+    return()=>clearInterval(id);
+  },[]);
+
+  return(
+    <div style={{
+      marginBottom:8,padding:"12px 16px",borderRadius:14,
+      background:"transparent",
+      border:`1px dashed ${th.border}`,
+      display:"flex",alignItems:"center",gap:10,
+      position:"relative",overflow:"hidden",
+    }}>
+      {/* Progress drain bar at bottom */}
+      <div style={{position:"absolute",bottom:0,left:0,height:2,borderRadius:1,background:th.accent,width:`${progress}%`,transition:"width 0.3s linear",opacity:0.5}}/>
+      <div style={{flex:1,minWidth:0}}>
+        <span style={{fontSize:13,color:th.sub,opacity:0.7}}>Deleted </span>
+        <span style={{fontSize:13,color:th.text,fontWeight:600}}>{log.title}</span>
+      </div>
+      <button onClick={onUndo} style={{
+        padding:"5px 12px",borderRadius:8,flexShrink:0,
+        background:"transparent",border:`1px solid ${th.accent}`,
+        color:th.accent,fontWeight:600,fontSize:12,cursor:"pointer"
+      }}>Undo</button>
     </div>
   );
 }
@@ -2935,49 +2998,6 @@ function EntryPreviewSheet({log, th, onClose, onEdit}){
   );
 }
 
-// ─── UNDO TOAST ───────────────────────────────────────────────────────────────
-function UndoToast({entry, onUndo, onDismiss, th}){
-  const [progress,setProgress]=useState(100);
-  const DURATION=60000;
-  useEffect(()=>{
-    const start=Date.now();
-    const id=setInterval(()=>{
-      const elapsed=Date.now()-start;
-      const pct=Math.max(0,100-(elapsed/DURATION)*100);
-      setProgress(pct);
-      if(pct===0) clearInterval(id);
-    },200);
-    return()=>clearInterval(id);
-  },[]);
-
-  return(
-    <div style={{
-      position:"fixed",bottom:90,left:20,right:20,zIndex:300,
-      background:th.card,border:`1px solid ${th.border}`,
-      borderRadius:14,padding:"12px 16px",
-      boxShadow:"0 4px 24px rgba(0,0,0,0.25)",
-    }}>
-      {/* Progress bar */}
-      <div style={{position:"absolute",bottom:0,left:0,height:3,borderRadius:"0 0 14px 14px",background:th.accent,width:`${progress}%`,transition:"width 0.2s linear"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <span style={{fontSize:13,color:th.text,flex:1}}>
-          <span style={{opacity:0.6}}>Deleted </span>
-          <span style={{fontWeight:600}}>{entry.title}</span>
-        </span>
-        <button onClick={onUndo} style={{
-          padding:"6px 14px",borderRadius:9,
-          background:th.accent,color:"#fff",
-          fontWeight:700,fontSize:13,border:"none",cursor:"pointer",flexShrink:0
-        }}>Undo</button>
-        <button onClick={onDismiss} style={{
-          padding:"6px 8px",borderRadius:9,
-          background:"transparent",color:th.sub,
-          fontWeight:400,fontSize:13,border:"none",cursor:"pointer",flexShrink:0
-        }}>✕</button>
-      </div>
-    </div>
-  );
-}
 
 function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const th=THEMES[data?.theme]||THEMES.manila_nights;
@@ -3067,6 +3087,8 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
     <SwipeableEntry key={log.id||i} log={log} th={th}
       onDelete={()=>handleSoftDelete(log)}
       onTap={()=>setPreviewLog(log)}
+      undoEntry={undoEntry}
+      onUndo={handleUndo}
     />
   );
 
@@ -3124,11 +3146,6 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
           )}
         </>
       )}
-      {undoEntry&&<UndoToast
-        entry={undoEntry.log} th={th}
-        onUndo={handleUndo}
-        onDismiss={()=>{clearTimeout(undoEntry.timer);setUndoEntry(null);}}
-      />}
       {previewLog&&<EntryPreviewSheet
         log={previewLog} th={th}
         onClose={()=>setPreviewLog(null)}
