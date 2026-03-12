@@ -2789,84 +2789,258 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
-function SwipeableEntry({log, th, onDelete, onTap}){
-  const cardRef=useRef(null);
+function SwipeableEntry({log, th, onDelete, onSave, data}){
   const [drag,setDrag]=useState(0);
   const [confirmed,setConfirmed]=useState(false);
   const startX=useRef(null);
   const isDragging=useRef(false);
   const deleteFired=useRef(false);
-  const meta=CAT_MAP[log.category];
   const DELETE_THRESHOLD=110;
   const hasPhotos=log.actPhotos&&log.actPhotos.length>0;
+  const isSteps=!!log.fromHealthKit;
 
-  const hs=e=>{startX.current=(e.touches?e.touches[0]:e).clientX;isDragging.current=false;};
+  const [expanded,setExpanded]=useState(false);
+  const [editing,setEditing]=useState(false);
+  const [editTitle,setEditTitle]=useState(log.title);
+  const [editNote,setEditNote]=useState(log.note||"");
+  const [editCat,setEditCat]=useState(log.category);
+  const [editDate,setEditDate]=useState((log.customDate||(log.date||"").split("T")[0])||"");
+  const [editPhotos,setEditPhotos]=useState(log.actPhotos||[]);
+  const [showCatPicker,setShowCatPicker]=useState(false);
+  const [useToday,setUseToday]=useState(false);
+  const [titleResults,setTitleResults]=useState([]);
+
+  // Autocomplete: search library when typing title in edit mode
+  useEffect(()=>{
+    if(!editing) return;
+    const lq=editTitle.trim().toLowerCase();
+    if(lq.length<2){setTitleResults([]);return;}
+    const pool=(LIBRARY[editCat]||[]).map(i=>({...i,_cat:editCat}));
+    const wordStart=i=>{const t=i.title.toLowerCase();if(t.startsWith(lq))return true;return t.split(/\s+/).some(w=>w.startsWith(lq));};
+    setTitleResults(pool.filter(wordStart).slice(0,5));
+  },[editTitle,editCat,editing]);
+
+  const dirty=editing&&(
+    editTitle.trim()!==log.title||
+    editNote.trim()!==(log.note||"").trim()||
+    editCat!==log.category||
+    editDate!==((log.customDate||(log.date||"").split("T")[0])||"")||
+    editPhotos.length!==((log.actPhotos||[]).length)
+  );
+
+  const handleTap=()=>{
+    if(isDragging.current||isSteps) return;
+    if(editing) return;
+    setExpanded(e=>{if(e)setShowCatPicker(false);return !e;});
+  };
+
+  const startEdit=e=>{
+    e.stopPropagation();
+    setEditTitle(log.title);
+    setEditNote(log.note||"");
+    setEditCat(log.category);
+    setEditDate(log.customDate||(log.date||"").split("T")[0]||"");
+    setEditPhotos(log.actPhotos||[]);
+    setUseToday(false);
+    setTitleResults([]);
+    setEditing(true);
+    setExpanded(true);
+  };
+
+  const cancelEdit=e=>{
+    e.stopPropagation();
+    setEditing(false);
+    setShowCatPicker(false);
+    setTitleResults([]);
+  };
+
+  const saveEdit=e=>{
+    e.stopPropagation();
+    const d=useToday?new Date().toISOString().split("T")[0]:editDate;
+    onSave({...log,title:editTitle.trim()||log.title,note:editNote.trim(),category:editCat,customDate:d,date:new Date(d+"T12:00:00").toISOString(),actPhotos:editPhotos});
+    setEditing(false);
+    setShowCatPicker(false);
+    setTitleResults([]);
+    setExpanded(false);
+  };
+
+  const hs=e=>{startX.current=(e.touches?e.touches[0]:e).clientX;isDragging.current=false;deleteFired.current=false;};
   const hm=e=>{
-    if(startX.current===null) return;
+    if(startX.current===null||editing) return;
     const dx=(e.touches?e.touches[0]:e).clientX-startX.current;
     if(dx<-4){isDragging.current=true;setDrag(Math.max(dx,-DELETE_THRESHOLD*1.4));}
   };
   const he=()=>{
-    if(drag<-DELETE_THRESHOLD&&!deleteFired.current){
-      deleteFired.current=true;
-      setConfirmed(true);
-      setTimeout(()=>onDelete(),260);
-    } else {
-      setDrag(0);
-    }
+    if(drag<-DELETE_THRESHOLD&&!deleteFired.current){deleteFired.current=true;setConfirmed(true);setTimeout(()=>onDelete(),260);}
+    else{setDrag(0);}
     startX.current=null;
   };
 
   const progress=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
+  const lib=(LIBRARY[log.category]||[]);
+  const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
+  const skipG=["Film","Movies","Music","Books","Food","Games","Activities","Custom"];
+  const genre=(libMatch?.genre&&!skipG.includes(libMatch.genre)?libMatch.genre:null)||(log.genre&&!skipG.includes(log.genre)&&log.genre!=="Custom"?log.genre:null);
+  const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
+  const activeMeta=CAT_MAP[editing?editCat:log.category];
 
   return(
-    <div style={{position:"relative",marginBottom:8,borderRadius:14,overflow:"hidden"}}>
-      {/* Red layer underneath */}
-      <div style={{
-        position:"absolute",inset:0,background:"#e53935",borderRadius:14,
-        display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:20,
-      }}>
-        {progress>0.1&&(
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-            style={{opacity:Math.min((progress-0.1)/0.3,1)}}>
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-          </svg>
-        )}
-      </div>
-      {/* Card */}
-      <div
-        onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
-        onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-        ref={cardRef}
-        onClick={()=>{if(!isDragging.current){const r=cardRef.current?.getBoundingClientRect();onTap(r?r.top+r.height/2:null);}}}
-        style={{
-          transform:`translateX(${confirmed?-520:drag}px)`,
-          transition:confirmed?"transform 0.26s ease-in":(drag===0?"transform 0.3s cubic-bezier(0.34,1.2,0.64,1)":"none"),
-          touchAction:"pan-y",cursor:"pointer",
-          padding:"11px 14px",borderRadius:14,
-          background:th.card,
-          border:`1px solid ${th.border}cc`,
-          boxShadow:`inset 0 1px 0 rgba(255,255,255,0.08)`,
-          display:"flex",gap:12,alignItems:"center",
-          userSelect:"none",position:"relative",zIndex:1,
-        }}>
-        <div style={{width:36,height:36,borderRadius:10,flexShrink:0,fontSize:18,background:(meta?.color||"#888")+"18",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1.3}}>
-            {log.title}
-            {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:11,fontWeight:400,color:th.sub,marginLeft:4}}>({y})</span>:null;})()}
-          </div>
-          {(()=>{
-            const lib=(LIBRARY[log.category]||[]);
-            const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-            const skip=["Film","Movies","Music","Books","Food","Games","Activities"];
-            if(libMatch?.genre&&!skip.includes(libMatch.genre)) return <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{libMatch.genre}</div>;
-            if(log.genre&&!skip.includes(log.genre)&&log.genre!=="Custom") return <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{log.genre}</div>;
-            return null;
-          })()}
-          {log.note&&<div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.7,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontStyle:"italic"}}>"{log.note}"</div>}
+    <div style={{marginBottom:8}}>
+      <div style={{position:"relative",borderRadius:14,overflow:"hidden"}}>
+        {/* Red delete layer */}
+        <div style={{position:"absolute",inset:0,background:"#e53935",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:20}}>
+          {progress>0.1&&(
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{opacity:Math.min((progress-0.1)/0.3,1)}}>
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+          )}
         </div>
-        {hasPhotos&&<div style={{flexShrink:0,opacity:0.4,fontSize:13}}>📷</div>}
+        {/* Card */}
+        <div
+          onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
+          onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
+          onClick={handleTap}
+          style={{
+            transform:`translateX(${confirmed?-520:drag}px)`,
+            transition:confirmed?"transform 0.26s ease-in":(drag===0?"transform 0.3s cubic-bezier(0.34,1.2,0.64,1)":"none"),
+            touchAction:"pan-y",cursor:isSteps?"default":"pointer",
+            padding:"11px 14px",paddingBottom:expanded?"14px":"11px",borderRadius:14,
+            background:th.card,
+            border:`1px solid ${expanded?th.accent+"55":th.border+"cc"}`,
+            boxShadow:expanded?`0 0 0 2px ${th.accent}15, inset 0 1px 0 rgba(255,255,255,0.08)`:`inset 0 1px 0 rgba(255,255,255,0.08)`,
+            display:"flex",flexDirection:"column",
+            userSelect:"none",position:"relative",zIndex:1,
+          }}>
+          {/* Top row */}
+          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+            <div
+              onClick={editing?e=>{e.stopPropagation();setShowCatPicker(p=>!p);}:undefined}
+              style={{width:36,height:36,borderRadius:10,flexShrink:0,fontSize:18,
+                background:(activeMeta?.color||"#888")+"18",display:"flex",alignItems:"center",justifyContent:"center",
+                cursor:editing?"pointer":"default",
+                outline:editing&&showCatPicker?`2px solid ${th.accent}`:"none"}}>
+              {activeMeta?.emoji}
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              {editing?(
+                <input value={editTitle} onChange={e=>{setEditTitle(e.target.value);}}
+                  onClick={e=>e.stopPropagation()}
+                  style={{width:"100%",background:"transparent",border:"none",
+                    borderBottom:`1.5px solid ${th.accent}`,color:th.text,
+                    fontSize:13,fontWeight:600,padding:"2px 0",outline:"none"}}/>
+              ):(
+                <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:isSteps?"nowrap":"nowrap",lineHeight:1.3}}>
+                  {log.title}{yr?<span style={{fontSize:11,fontWeight:400,color:th.sub,marginLeft:4}}>({yr})</span>:null}
+                  {isSteps&&log.stepCount&&<span style={{fontSize:11,fontWeight:400,color:th.sub,marginLeft:6}}>{log.stepCount.toLocaleString()} steps</span>}
+                </div>
+              )}
+              {!editing&&genre&&<div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{genre}</div>}
+              {!editing&&!expanded&&log.note&&(
+                <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.65,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontStyle:"italic"}}>"{log.note}"</div>
+              )}
+            </div>
+            {!editing&&hasPhotos&&!expanded&&<div style={{flexShrink:0,opacity:0.35,fontSize:13}}>📷</div>}
+          </div>
+
+          {/* Title autocomplete dropdown */}
+          {editing&&titleResults.length>0&&(
+            <div onClick={e=>e.stopPropagation()} style={{marginTop:4,background:th.card,borderRadius:"0 0 10px 10px",
+              border:`1px solid ${th.border}`,borderTop:"none",overflow:"hidden",
+              boxShadow:`0 6px 16px rgba(0,0,0,${th.dark?0.3:0.08})`}}>
+              {titleResults.map((item,i)=>(
+                <div key={i}
+                  onMouseDown={e=>e.preventDefault()}
+                  onClick={e=>{e.stopPropagation();setEditTitle(item.title);setTitleResults([]);}}
+                  style={{padding:"8px 12px",cursor:"pointer",
+                    borderBottom:i<titleResults.length-1?`1px solid ${th.border}`:"none",
+                    display:"flex",alignItems:"center",gap:10,background:th.card}}>
+                  <span style={{fontSize:16,flexShrink:0}}>{CAT_MAP[editCat]?.emoji}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {item.title}{item.year?<span style={{fontSize:11,fontWeight:400,color:th.sub}}> ({item.year})</span>:null}
+                    </div>
+                    {item.genre&&item.genre!=="Custom"&&item.genre!=="Film"&&<div style={{fontSize:10,color:th.sub,opacity:0.75}}>{item.genre}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Category picker */}
+          {editing&&showCatPicker&&(
+            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",flexWrap:"wrap",gap:6}}>
+              {CATEGORIES.map(c=>(
+                <button key={c.id} onClick={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
+                  style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,cursor:"pointer",
+                    border:"none",background:editCat===c.id?c.color:th.bg,color:editCat===c.id?"#fff":th.sub}}>
+                  {c.emoji} {c.labelEn}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Expanded section (non-steps only) */}
+          {expanded&&!isSteps&&(
+            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
+              {editing?(
+                <textarea value={editNote} onChange={e=>setEditNote(e.target.value)}
+                  placeholder="Add a reflection note..." rows={2} onClick={e=>e.stopPropagation()}
+                  style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,
+                    color:th.text,fontSize:12,padding:"7px 10px",outline:"none",resize:"none",
+                    fontFamily:"inherit",lineHeight:1.5,boxSizing:"border-box"}}/>
+              ):(
+                log.note&&<div style={{fontSize:12,color:th.sub,lineHeight:1.6,fontStyle:"italic"}}>"{log.note}"</div>
+              )}
+              {/* Photos */}
+              {(editing?editPhotos:log.actPhotos)?.length>0&&(
+                <div style={{display:"grid",gridTemplateColumns:(editing?editPhotos:log.actPhotos).length===1?"1fr":"1fr 1fr",gap:5}}>
+                  {(editing?editPhotos:log.actPhotos).map((src,i)=>(
+                    <div key={i} style={{borderRadius:8,overflow:"hidden",aspectRatio:"4/3",position:"relative"}}>
+                      <img src={src} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                      {editing&&(
+                        <button
+                          onMouseDown={e=>e.preventDefault()}
+                          onClick={e=>{e.stopPropagation();setEditPhotos(p=>p.filter((_,j)=>j!==i));}}
+                          style={{position:"absolute",top:4,right:4,width:22,height:22,borderRadius:"50%",
+                            background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",
+                            fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Date picker */}
+              {editing&&(
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <button onClick={e=>{e.stopPropagation();setUseToday(true);setEditDate(new Date().toISOString().split("T")[0]);}}
+                    style={{fontSize:11,color:useToday?th.accent:th.sub,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:useToday?700:400,flexShrink:0}}>
+                    Use today
+                  </button>
+                  <input type="date" value={editDate} onClick={e=>e.stopPropagation()}
+                    onChange={e=>{setEditDate(e.target.value);setUseToday(false);}}
+                    style={{flex:1,background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,
+                      color:th.text,fontSize:12,padding:"5px 8px",outline:"none"}}/>
+                </div>
+              )}
+              {/* Edit / Save / Cancel */}
+              <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:2}}>
+                {editing?(
+                  <>
+                    <button onClick={cancelEdit} style={{fontSize:12,color:th.sub,background:"none",border:`1px solid ${th.border}`,borderRadius:8,padding:"5px 12px",cursor:"pointer"}}>Cancel</button>
+                    <button onClick={saveEdit} disabled={!dirty}
+                      style={{fontSize:12,fontWeight:600,color:"#fff",background:dirty?th.accent:"#888",border:"none",borderRadius:8,padding:"5px 14px",cursor:dirty?"pointer":"default",opacity:dirty?1:0.5}}>
+                      Save
+                    </button>
+                  </>
+                ):(
+                  <button onClick={startEdit} style={{fontSize:12,fontWeight:600,color:th.accent,background:"none",border:`1px solid ${th.accent}55`,borderRadius:8,padding:"5px 14px",cursor:"pointer"}}>Edit</button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2906,117 +3080,12 @@ function UndoPlaceholder({log, th, onUndo, createdAt}){
   );
 }
 
-// ─── ENTRY PREVIEW SHEET ─────────────────────────────────────────────────────
-function EntryPreviewSheet({log, th, onClose, onEdit, data, tapY}){
-  const [closing,setClosing]=useState(false);
-  const closeWithAnim=()=>{setClosing(true);setTimeout(onClose,260);};
-  const meta=CAT_MAP[log.category];
-  const dateStr=new Date(log.customDate||log.date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  // Position modal near where user tapped, keeping it on screen
-  // Estimate modal height ~320px. Try to show it centered around tap point.
-  const vh=window.innerHeight;
-  const modalH=340;
-  const margin=16;
-  let top;
-  if(tapY!=null){
-    top=tapY-(modalH/2);
-    top=Math.max(margin, Math.min(top, vh-modalH-margin));
-  } else {
-    top=Math.round(vh*0.2);
-  }
-
-  return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:200,touchAction:"none"}}
-      onClick={e=>{if(e.target===e.currentTarget)closeWithAnim();}}>
-      <div
-        className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
-        onClick={e=>e.stopPropagation()}
-        style={{
-          position:"absolute",
-          top,left:16,right:16,
-          maxWidth:468,margin:"0 auto",
-          ...(data.theme==="jeepney"?{background:"#1a0a2e",boxShadow:"0 8px 32px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,210,63,0.35)",border:"1px solid #5a2d82",}
-            :data.theme==="manila_nights"?{background:"#0a0614",boxShadow:"0 8px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(0,207,255,0.4)",border:"1px solid #221440",}
-            :data.theme==="bahay_kubo"?{background:"#0f1a08",boxShadow:"0 8px 32px rgba(0,0,0,0.6), inset 0 2px 0 rgba(212,168,67,0.3)",border:"1px solid #2d4a1a",}
-            :data.theme==="hapon"?{background:"linear-gradient(180deg,#fff4ee 0%,#ffe8da 100%)",boxShadow:"0 8px 32px rgba(200,80,60,0.1)",border:"1px solid #f0c8b0",}
-            :data.theme==="taho"?{background:"#f5e6c8",boxShadow:"0 8px 24px rgba(80,30,4,0.12)",border:"1px solid #d4a96a",}
-            :data.theme==="fiesta"||data.theme==="ulan"?{}
-            :{background:"#f5f0e8",boxShadow:"0 8px 24px rgba(0,0,0,0.07)",border:"1px solid #ddd5c8",}),
-          borderRadius:20,
-          animation:closing?"scaleOut 0.22s ease forwards":"scaleIn 0.22s cubic-bezier(0,0,0.2,1)",
-        }}>
-        <div style={{padding:"16px 24px 20px",display:"flex",flexDirection:"column"}}>
-          {/* Header */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <span style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:700,color:th.text,letterSpacing:-0.3,lineHeight:1.1}}>
-              {log.title}
-              {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:14,fontWeight:400,color:th.sub,marginLeft:6}}>({y})</span>:null;})()}
-            </span>
-            <button onClick={closeWithAnim} style={{fontSize:20,color:th.sub,lineHeight:1,background:"none",border:"none",cursor:"pointer",padding:"4px 2px",opacity:0.7}}>×</button>
-          </div>
-          {/* Category + date row */}
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-            <div style={{width:32,height:32,borderRadius:9,flexShrink:0,fontSize:17,background:(meta?.color||"#888")+"18",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
-            <div>
-              {(()=>{
-                const lib=(LIBRARY[log.category]||[]);
-                const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-                const skip=["Film","Movies","Music","Books","Food","Games","Activities","Custom"];
-                const genre=libMatch?.genre||log.genre;
-                if(genre&&!skip.includes(genre)) return <div style={{fontSize:12,fontWeight:600,color:th.sub}}>{genre}</div>;
-                return null;
-              })()}
-              <div style={{fontSize:11,color:th.sub,opacity:0.7}}>{dateStr}</div>
-            </div>
-          </div>
-          {/* Note */}
-          {log.note&&(
-            <div style={{padding:"10px 14px",borderRadius:12,background:th.bg||"rgba(0,0,0,0.04)",border:`1px solid ${th.border}`,fontSize:13,color:th.text,lineHeight:1.6,fontStyle:"italic",marginBottom:14}}>
-              "{log.note}"
-            </div>
-          )}
-          {/* Photos */}
-          {log.actPhotos&&log.actPhotos.length>0&&(
-            <div style={{display:"grid",gridTemplateColumns:log.actPhotos.length===1?"1fr":"1fr 1fr",gap:6,marginBottom:14}}>
-              {log.actPhotos.map((src,i)=>(
-                <div key={i} style={{borderRadius:10,overflow:"hidden",aspectRatio:"4/3"}}>
-                  <img src={src} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                </div>
-              ))}
-            </div>
-          )}
-          {/* Steps */}
-          {log.fromHealthKit&&log.stepCount&&(
-            <div style={{textAlign:"center",padding:"12px",borderRadius:12,background:th.bg||"rgba(0,0,0,0.04)",border:`1px solid ${th.border}`,marginBottom:14}}>
-              <div style={{fontSize:28,fontWeight:700,color:th.accent}}>{log.stepCount.toLocaleString()}</div>
-              <div style={{fontSize:11,color:th.sub,marginTop:1}}>steps</div>
-            </div>
-          )}
-          {/* Edit button */}
-          {!log.fromHealthKit&&(
-            <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}>
-              <button onClick={()=>{onEdit(log);closeWithAnim();}} style={{
-                padding:"7px 18px",borderRadius:10,
-                background:"transparent",border:`1px solid ${th.border}`,
-                color:th.sub,fontWeight:600,fontSize:13,cursor:"pointer"
-              }}>Edit</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
+function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
   const th=THEMES[data?.theme]||THEMES.manila_nights;
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [filterCat,setFilterCat]=useState("all");
   const [weeksShown,setWeeksShown]=useState(1);
-  const [previewLog,setPreviewLog]=useState(null);
-  const [previewTapY,setPreviewTapY]=useState(null);
   const [undoEntries,setUndoEntries]=useState([]); // array of {log, timer, uid}
 
   const handleSoftDelete=(log)=>{
@@ -3116,9 +3185,9 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   });
 
   const renderEntry=(log,i)=>(
-    <SwipeableEntry key={log.id||i} log={log} th={th}
+    <SwipeableEntry key={log.id||i} log={log} th={th} data={data}
       onDelete={()=>handleSoftDelete(log)}
-      onTap={(tapY)=>{setPreviewLog(log);setPreviewTapY(tapY);}}
+      onSave={onSave}
     />
   );
 
@@ -3199,12 +3268,6 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
           )}
         </>
       )}
-      {previewLog&&<EntryPreviewSheet
-        log={previewLog} th={th} data={data}
-        tapY={previewTapY}
-        onClose={()=>{setPreviewLog(null);setPreviewTapY(null);}}
-        onEdit={onEdit}
-      />}
     </div>
   );
 }
@@ -4264,7 +4327,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                   const dedupKey=`${title.toLowerCase().trim()}|${year.trim()}|${watchedDate.trim()}`;
                   if(existing.has(dedupKey))continue;
                   const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
-                  newEntries.push({id:Date.now()+i,title,year:year||null,category:"movies",tags,genre:null,note:"",mood:null,date,customDate:watchedDate||null,fromLetterboxd:true,lbRating:!isNaN(ratingRaw)?ratingRaw:null});
+                  newEntries.push({id:Date.now()*10000+Math.floor(Math.random()*9999),title,year:year||null,category:"movies",tags,genre:null,note:"",mood:null,date,customDate:watchedDate||null,fromLetterboxd:true,lbRating:!isNaN(ratingRaw)?ratingRaw:null});
                 }
                 if(!newEntries.length){setLbMsg("⚠️ "+(lang==="fil"?"Wala nang bagong entry.":"Nothing new to import."));setImportLoading(false);return;}
                 onChange("logs",[...existingLogs,...newEntries]);
@@ -4301,7 +4364,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                     updated++;
                     return;
                   }
-                  newEntries.push({id:Date.now()+i,title:`Steps — ${count.toLocaleString()}`,category:"activities",tags:["health","steps"],genre:null,note:"",mood:null,date:new Date(day+"T12:00:00").toISOString(),customDate:day,fromHealthKit:true,stepCount:count});
+                  newEntries.push({id:Date.now()*10000+Math.floor(Math.random()*9999),title:`Steps — ${count.toLocaleString()}`,category:"activities",tags:["health","steps"],genre:null,note:"",mood:null,date:new Date(day+"T12:00:00").toISOString(),customDate:day,fromHealthKit:true,stepCount:count});
                 });
                 if(!newEntries.length){setLbMsg("⚠️ "+(lang==="fil"?"Wala nang bagong steps data.":"No new step data to import."));setImportLoading(false);return;}
                 onChange("logs",[...existingLogs,...newEntries]);
@@ -4611,7 +4674,7 @@ function App(){
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
-              }} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
+              }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
