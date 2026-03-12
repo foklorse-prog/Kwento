@@ -4488,11 +4488,13 @@ function App(){
   },[]);
 
   // Listen for service worker update messages
+  const [updateReady, setUpdateReady] = useState(false);
   useEffect(()=>{
     if(!navigator.serviceWorker) return;
     const onMsg = e => {
       if(e.data === "UPDATE_READY"){
-        setPtrPhase("done");
+        setUpdateReady(true);
+        setPtrPhase("idle");
         setPtrY(0);
       } else if(e.data === "UP_TO_DATE" || e.data === "OFFLINE"){
         setPtrPhase("idle");
@@ -4500,7 +4502,16 @@ function App(){
       }
     };
     navigator.serviceWorker.addEventListener("message", onMsg);
-    return () => navigator.serviceWorker.removeEventListener("message", onMsg);
+    // On launch: check for update after SW is ready
+    const launchCheck = setTimeout(()=>{
+      if(navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage("CHECK_UPDATE");
+      }
+    }, 1500);
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onMsg);
+      clearTimeout(launchCheck);
+    };
   }, []);
 
 
@@ -4605,13 +4616,6 @@ function App(){
 
   const ptrProgress = Math.min(ptrY / PTR_THRESHOLD, 1);
 
-  // Auto-dismiss done toast after 3s
-  useEffect(()=>{
-    if(ptrPhase === "done"){
-      const t = setTimeout(()=>setPtrPhase("idle"), 3000);
-      return ()=>clearTimeout(t);
-    }
-  },[ptrPhase]);
   const ptrIsRefreshing = ptrPhase === "refreshing";
   const ptrIsReady = ptrPhase === "ready";
   const ptrTranslate = ptrIsRefreshing ? PTR_THRESHOLD : ptrY;
@@ -4687,15 +4691,17 @@ function App(){
                   </div>
                 </div>
               )}
-              {/* Updated toast — floats above page, never collides */}
-              {ptrPhase==="done"&&(
-                <div style={{position:"absolute",top:16,left:"50%",transform:"translateX(-50%)",zIndex:200,
-                  background:"rgba(30,30,30,0.92)",backdropFilter:"blur(8px)",
-                  color:"#fff",padding:"9px 18px",borderRadius:20,
-                  fontSize:13,fontWeight:600,whiteSpace:"nowrap",
-                  boxShadow:"0 4px 20px rgba(0,0,0,0.3)",
-                  animation:"popIn 0.2s ease",pointerEvents:"none"}}>
-                  ✓ Updated — relaunch to apply
+              {/* Update ready banner — persistent, tap to reload */}
+              {updateReady&&(
+                <div onClick={()=>window.location.reload()}
+                  style={{position:"absolute",top:16,left:"50%",transform:"translateX(-50%)",zIndex:200,
+                    background:"rgba(20,20,20,0.93)",backdropFilter:"blur(10px)",
+                    color:"#fff",padding:"10px 20px",borderRadius:20,
+                    fontSize:13,fontWeight:600,whiteSpace:"nowrap",
+                    boxShadow:"0 4px 20px rgba(0,0,0,0.35)",
+                    cursor:"pointer",animation:"popIn 0.2s ease",
+                    display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:15}}>↻</span> New version — tap to reload
                 </div>
               )}
               {/* Page content slides down over indicator */}
