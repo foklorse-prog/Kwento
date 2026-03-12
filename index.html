@@ -1587,6 +1587,8 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(100%);}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.93);}to{opacity:1;transform:scale(1);}}
+@keyframes scaleOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(0.93);}}
 @keyframes suckToIcon{
   0%  {transform-origin:50% 100%;transform:translateY(0) scale(1);opacity:1;border-radius:24px 24px 0 0;}
   35% {transform-origin:50% 100%;transform:translateY(0) scale(0.55);opacity:1;border-radius:14px;}
@@ -2624,7 +2626,17 @@ function HomePage({data,onOpenLog,onRelog}){
       {/* ── Quick log ── */}
       {data.logs.length>0&&(()=>{
         const freq={};
-        data.logs.filter(l=>!l.fromHealthKit).forEach(l=>{const k=l.title+"||"+l.category;freq[k]=(freq[k]||{count:0,log:l});freq[k].count++;freq[k].log=l;});
+        data.logs.filter(l=>!l.fromHealthKit).forEach(l=>{
+          const k=l.title.trim().toLowerCase()+"||"+l.category;
+          if(!freq[k]){freq[k]={count:0,log:l};}
+          freq[k].count++;
+          // Prefer the entry with more metadata (year, genre) as the display representative
+          const cur=freq[k].log;
+          const betterYear=(!cur.year&&l.year)||(cur.year&&l.year&&l.year!==cur.year?false:false);
+          if((!cur.year&&l.year)||(!cur.genre&&l.genre)||(!cur.lbRating&&l.lbRating)){
+            freq[k].log=l;
+          }
+        });
         const top=Object.values(freq).sort((a,b)=>b.count-a.count).slice(0,5);
         if(!top.length)return null;
         return(
@@ -2824,7 +2836,7 @@ function SwipeableEntry({log, th, onDelete, onTap}){
       <div
         onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
         onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-        onClick={()=>{if(!isDragging.current) onTap();}}
+        onClick={(e)=>{if(!isDragging.current) onTap(e.clientY);}}
         style={{
           transform:`translateX(${confirmed?-520:drag}px)`,
           transition:confirmed?"transform 0.26s ease-in":(drag===0?"transform 0.3s cubic-bezier(0.34,1.2,0.64,1)":"none"),
@@ -2893,28 +2905,43 @@ function UndoPlaceholder({log, th, onUndo, createdAt}){
 }
 
 // ─── ENTRY PREVIEW SHEET ─────────────────────────────────────────────────────
-function EntryPreviewSheet({log, th, onClose, onEdit, data}){
+function EntryPreviewSheet({log, th, onClose, onEdit, data, tapY}){
   const [closing,setClosing]=useState(false);
   const closeWithAnim=()=>{setClosing(true);setTimeout(onClose,260);};
   const meta=CAT_MAP[log.category];
   const dateStr=new Date(log.customDate||log.date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  // Position modal near where user tapped, keeping it on screen
+  // Estimate modal height ~320px. Try to show it centered around tap point.
+  const vh=window.innerHeight;
+  const modalH=340;
+  const margin=16;
+  let top;
+  if(tapY!=null){
+    top=tapY-(modalH/2);
+    top=Math.max(margin, Math.min(top, vh-modalH-margin));
+  } else {
+    top=Math.round(vh*0.2);
+  }
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%",touchAction:"none"}}
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:200,touchAction:"none"}}
       onClick={e=>{if(e.target===e.currentTarget)closeWithAnim();}}>
       <div
         className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
+        onClick={e=>e.stopPropagation()}
         style={{
-          width:"calc(100% - 32px)",maxWidth:500,margin:"0 auto",
-          ...(data.theme==="jeepney"?{background:"#1a0a2e",boxShadow:"0 -8px 32px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,210,63,0.35)",border:"1px solid #5a2d82",}
-            :data.theme==="manila_nights"?{background:"#0a0614",boxShadow:"0 -8px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(0,207,255,0.4)",border:"1px solid #221440",}
-            :data.theme==="bahay_kubo"?{background:"#0f1a08",boxShadow:"0 -8px 32px rgba(0,0,0,0.6), inset 0 2px 0 rgba(212,168,67,0.3)",border:"1px solid #2d4a1a",}
-            :data.theme==="hapon"?{background:"linear-gradient(180deg,#fff4ee 0%,#ffe8da 100%)",boxShadow:"0 -8px 32px rgba(200,80,60,0.1)",border:"1px solid #f0c8b0",}
-            :data.theme==="taho"?{background:"#f5e6c8",boxShadow:"0 -8px 24px rgba(80,30,4,0.12)",border:"1px solid #d4a96a",}
+          position:"absolute",
+          top,left:16,right:16,
+          maxWidth:468,margin:"0 auto",
+          ...(data.theme==="jeepney"?{background:"#1a0a2e",boxShadow:"0 8px 32px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,210,63,0.35)",border:"1px solid #5a2d82",}
+            :data.theme==="manila_nights"?{background:"#0a0614",boxShadow:"0 8px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(0,207,255,0.4)",border:"1px solid #221440",}
+            :data.theme==="bahay_kubo"?{background:"#0f1a08",boxShadow:"0 8px 32px rgba(0,0,0,0.6), inset 0 2px 0 rgba(212,168,67,0.3)",border:"1px solid #2d4a1a",}
+            :data.theme==="hapon"?{background:"linear-gradient(180deg,#fff4ee 0%,#ffe8da 100%)",boxShadow:"0 8px 32px rgba(200,80,60,0.1)",border:"1px solid #f0c8b0",}
+            :data.theme==="taho"?{background:"#f5e6c8",boxShadow:"0 8px 24px rgba(80,30,4,0.12)",border:"1px solid #d4a96a",}
             :data.theme==="fiesta"||data.theme==="ulan"?{}
-            :{background:"#f5f0e8",boxShadow:"0 -6px 24px rgba(0,0,0,0.07)",border:"1px solid #ddd5c8",}),
-          borderRadius:24,padding:"0 0 8px",
-          animation:closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)",
+            :{background:"#f5f0e8",boxShadow:"0 8px 24px rgba(0,0,0,0.07)",border:"1px solid #ddd5c8",}),
+          borderRadius:20,
+          animation:closing?"scaleOut 0.22s ease forwards":"scaleIn 0.22s cubic-bezier(0,0,0.2,1)",
         }}>
         <div style={{padding:"16px 24px 20px",display:"flex",flexDirection:"column"}}>
           {/* Header */}
@@ -2987,6 +3014,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const [filterCat,setFilterCat]=useState("all");
   const [weeksShown,setWeeksShown]=useState(1);
   const [previewLog,setPreviewLog]=useState(null);
+  const [previewTapY,setPreviewTapY]=useState(null);
   const [undoEntries,setUndoEntries]=useState([]); // array of {log, timer, uid}
 
   const handleSoftDelete=(log)=>{
@@ -3017,7 +3045,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   };
 
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
-  const sorted=[...data.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const sorted=[...data.logs].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
   const thisWeek=sorted.filter(l=>new Date(l.date)>=weekStart);
   const older=sorted.filter(l=>new Date(l.date)<weekStart);
 
@@ -3087,7 +3115,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const renderEntry=(log,i)=>(
     <SwipeableEntry key={log.id||i} log={log} th={th}
       onDelete={()=>handleSoftDelete(log)}
-      onTap={()=>setPreviewLog(log)}
+      onTap={(tapY)=>{setPreviewLog(log);setPreviewTapY(tapY);}}
     />
   );
 
@@ -3160,7 +3188,8 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
       )}
       {previewLog&&<EntryPreviewSheet
         log={previewLog} th={th} data={data}
-        onClose={()=>setPreviewLog(null)}
+        tapY={previewTapY}
+        onClose={()=>{setPreviewLog(null);setPreviewTapY(null);}}
         onEdit={onEdit}
       />}
     </div>
@@ -4562,7 +4591,7 @@ function App(){
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
-                const restored=[...data.logs,log].sort((a,b)=>new Date(b.date)-new Date(a.date));
+                const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
