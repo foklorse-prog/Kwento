@@ -1754,7 +1754,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 `;
 
 
-// ─── ULAN RAIN + PUDDLE RIPPLES ─────────────────────────────────────────────
+// ─── ULAN RAIN ───────────────────────────────────────────────────────────────
 function UlanRain(){
   const fullRef=React.useRef(null);
 
@@ -1763,31 +1763,32 @@ function UlanRain(){
     if(!canvas) return;
     let raf;
 
-    const resize=()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;};
+    const resize=()=>{
+      canvas.width=window.innerWidth;
+      canvas.height=window.innerHeight;
+    };
     resize();
     window.addEventListener("resize",resize);
     const ctx=canvas.getContext("2d");
     if(!ctx) return;
 
-    const ANGLE=0.10;
-    const TAB_H=0;
-    const DROP_COUNT=20;
-    const drops=Array.from({length:DROP_COUNT},(_,i)=>({
-      x:(i+0.5)/DROP_COUNT + (Math.random()-0.5)*0.06,
-      y:Math.random()*1.2-0.2,
-      len:22+Math.random()*26,
-      speed:260+Math.random()*100,
-      opacity:0.18+Math.random()*0.18,
-      width:0.6+Math.random()*0.5,
-      triggered:false,
+    // Realistic rain: short drops, slight angle, varied speeds/opacity
+    const ANGLE=0.08; // subtle rightward lean
+    const DROP_COUNT=55;
+    const sinA=Math.sin(ANGLE), cosA=Math.cos(ANGLE);
+
+    const drops=Array.from({length:DROP_COUNT},()=>({
+      x:Math.random(),
+      y:Math.random(),           // start scattered across screen
+      len:6+Math.random()*10,   // SHORT — 6-16px, not 22-48px meteors
+      speed:380+Math.random()*220, // fast but realistic
+      opacity:0.10+Math.random()*0.16,
+      width:0.5+Math.random()*0.4,
     }));
 
-    const ripples=[];
+    const FPS=28, FRAME_MS=1000/FPS;
     let lastTime=0;
 
-    function spawnRippleAt(x,y,ts){}
-
-    const FPS=30, FRAME_MS=1000/FPS;
     function frame(ts){
       raf=requestAnimationFrame(frame);
       if(ts-lastTime < FRAME_MS) return;
@@ -1795,28 +1796,23 @@ function UlanRain(){
       lastTime=ts;
 
       const W=canvas.width, H=canvas.height;
-      const tabTop=H-TAB_H;
       ctx.clearRect(0,0,W,H);
 
-      const sinA=Math.sin(ANGLE), cosA=Math.cos(ANGLE);
       drops.forEach(d=>{
         d.y+=d.speed*dt/H;
-        const px=d.x*W, py=d.y*H;
-        const tipX=px+sinA*d.len, tipY=py+cosA*d.len;
-        if(!d.triggered && tipY>=tabTop){
-          d.triggered=true;
-          spawnRippleAt(Math.max(8,Math.min(W-8,tipX)), tabTop+8+Math.random()*20, ts);
+        if(d.y>1.05){
+          d.y=-0.05-Math.random()*0.1;
+          d.x=Math.random();
         }
-        if(py>H+d.len){
-          d.y=-d.len/H-Math.random()*0.4;
-          d.x=Math.max(0,Math.min(1,d.x+(Math.random()-0.5)*0.04));
-          d.triggered=false;
-        }
-        const ey=Math.min(tipY, tabTop+1);
-        if(ey<=py) return;
+
+        const px=d.x*W;
+        const py=d.y*H;
+        const ex=px+sinA*d.len;
+        const ey=py+cosA*d.len;
+
         ctx.beginPath();
         ctx.moveTo(px,py);
-        ctx.lineTo(tipX,ey);
+        ctx.lineTo(ex,ey);
         ctx.strokeStyle=`rgba(182,218,242,${d.opacity})`;
         ctx.lineWidth=d.width;
         ctx.lineCap="round";
@@ -2532,26 +2528,52 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
 
   if(isUlan){
     return(
-      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,display:"flex",justifyContent:"center",alignItems:"flex-end",paddingBottom:"max(16px, env(safe-area-inset-bottom))",pointerEvents:"none"}}>
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,display:"flex",justifyContent:"center",alignItems:"flex-end",paddingBottom:"max(20px, env(safe-area-inset-bottom))",pointerEvents:"none",background:"transparent"}}>
         <div style={{
           display:"flex",alignItems:"center",justifyContent:"space-around",
-          background:"rgba(13,21,32,0.78)",
+          background:"rgba(13,21,32,0.82)",
           backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
           border:"1px solid rgba(255,255,255,0.1)",
-          borderRadius:40,padding:"6px 4px",
+          borderRadius:40,
+          padding:"5px 6px",
           width:"calc(100% - 32px)",maxWidth:468,
           pointerEvents:"all",
           boxShadow:"0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
         }}>
-          {tabs.map(tb=>(
-            <button key={tb.id} onClick={()=>setTab(tb.id)}
-              style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",
-                padding:"9px 0",borderRadius:30,position:"relative",
-                background:"transparent",border:"none",transition:"all 0.2s"}}>
-              {tab===tb.id&&<GlassPill/>}
-              <span style={{position:"relative",zIndex:1}}>{tb.icon}</span>
-            </button>
-          ))}
+          {tabs.map(tb=>{
+            const active=tab===tb.id;
+            return(
+              <button key={tb.id} onClick={()=>setTab(tb.id)}
+                style={{
+                  flex:1,display:"flex",alignItems:"center",justifyContent:"center",
+                  cursor:"pointer",border:"none",background:"transparent",
+                  padding:"5px 0",borderRadius:40,position:"relative",
+                  transition:"all 0.2s",
+                }}>
+                {active&&(
+                  <span style={{
+                    position:"absolute",
+                    top:"50%",left:"50%",
+                    transform:"translate(-50%,-50%)",
+                    width:46,height:34,
+                    borderRadius:17,
+                    background:"transparent",
+                    border:"none",
+                    boxShadow:[
+                      // top-left inner shadow — away from light
+                      "inset 3px 3px 6px rgba(0,0,0,0.75)",
+                      // bottom-right inner highlight — softened
+                      "inset -3px -3px 6px rgba(255,255,255,0.22)",
+                      // outer drop shadow for depth
+                      "0 4px 12px rgba(0,0,0,0.55)",
+                    ].join(","),
+                    pointerEvents:"none",zIndex:0,
+                  }}/>
+                )}
+                <span style={{position:"relative",zIndex:1,opacity:active?1:0.55}}>{tb.icon}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -4685,7 +4707,7 @@ function App(){
   return(
     <>
       <style>{CSS}</style>
-      <div style={{background:th.grad,color:th.text,height:"100vh","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflow:"hidden"}}>
+      <div style={{background:th.grad,color:th.text,height:"100vh",minHeight:"-webkit-fill-available","--bg":th.bg,"--card":th.card,"--accent":th.accent,"--accent2":th.accent2,"--text":th.text,"--sub":th.sub,"--border":th.border,overflow:"hidden",paddingBottom:"env(safe-area-inset-bottom)"}}>
         <div ref={ptrWrapRef} style={{maxWidth:500,margin:"0 auto",height:"100%",position:"relative",overflow:"hidden"}}>
           {!data.onboarded?(
             <Onboarding onComplete={handleOnboard}/>
