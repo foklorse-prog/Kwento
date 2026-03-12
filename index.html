@@ -2790,6 +2790,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
 function SwipeableEntry({log, th, onDelete, onTap}){
+  const cardRef=useRef(null);
   const [drag,setDrag]=useState(0);
   const [confirmed,setConfirmed]=useState(false);
   const startX=useRef(null);
@@ -2836,7 +2837,8 @@ function SwipeableEntry({log, th, onDelete, onTap}){
       <div
         onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
         onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-        onClick={(e)=>{if(!isDragging.current) onTap(e.clientY);}}
+        ref={cardRef}
+        onClick={()=>{if(!isDragging.current){const r=cardRef.current?.getBoundingClientRect();onTap(r?r.top+r.height/2:null);}}}
         style={{
           transform:`translateX(${confirmed?-520:drag}px)`,
           transition:confirmed?"transform 0.26s ease-in":(drag===0?"transform 0.3s cubic-bezier(0.34,1.2,0.64,1)":"none"),
@@ -3018,20 +3020,21 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const [undoEntries,setUndoEntries]=useState([]); // array of {log, timer, uid}
 
   const handleSoftDelete=(log)=>{
-    // Guard: don't create a second undo entry if already pending for this log
     if(undoEntries.some(e=>e.log.id===log.id)) return;
     const uid=`undo_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
     const createdAt=Date.now();
-    // Find the entry's position within its date group so we can restore it there
     const date=log.date?.split("T")[0];
+    // Find the entry immediately above this one in the sorted group (the one before it)
     const groupEntries=[...data.logs]
       .filter(l=>l.date?.split("T")[0]===date)
-      .sort((a,b)=>new Date(b.date)-new Date(a.date));
-    const indexInGroup=groupEntries.findIndex(l=>l.id===log.id);
+      .sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
+    const idx=groupEntries.findIndex(l=>l.id===log.id);
+    // aboveId: the entry that comes before this one (higher in the list = lower index)
+    const aboveId=idx>0?groupEntries[idx-1].id:null;
     const timer=setTimeout(()=>{
       setUndoEntries(p=>p.filter(e=>e.uid!==uid));
     }, 30000);
-    setUndoEntries(prev=>[...prev,{log, timer, uid, createdAt, date, indexInGroup}]);
+    setUndoEntries(prev=>[...prev,{log, timer, uid, createdAt, date, aboveId}]);
     onDelete(log.id);
   };
   const handleUndo=(uid)=>{
@@ -3132,19 +3135,29 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
 
   const renderGroups=(groups)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries])=>{
     const deletedInGroup=undoEntries.filter(e=>e.date===date);
-    // Build a merged list of real entries + placeholders sorted by original index
-    // Each real entry has its current index; placeholders have their saved indexInGroup
-    const items=[];
-    // Add real entries with their current sorted position
-    entries.forEach((log,i)=>items.push({type:"entry",log,sortIdx:i}));
-    // Add placeholders — their indexInGroup was their position before deletion
-    deletedInGroup.forEach(e=>items.push({type:"placeholder",entry:e,sortIdx:e.indexInGroup}));
-    // Sort by original index so placeholder appears where the entry was
-    items.sort((a,b)=>a.sortIdx-b.sortIdx);
+    // Build ordered list: insert each placeholder directly after its aboveId anchor
+    // If aboveId is null, the deleted entry was at the top — insert at position 0
+    const result=[];
+    entries.forEach(log=>{
+      result.push({type:"entry",log});
+      // After adding this entry, check if any placeholder's anchor is this entry
+      deletedInGroup.filter(e=>e.aboveId===log.id).forEach(e=>{
+        result.push({type:"placeholder",entry:e});
+      });
+    });
+    // Placeholders with aboveId=null go at the very top
+    deletedInGroup.filter(e=>e.aboveId===null).forEach(e=>{
+      result.unshift({type:"placeholder",entry:e});
+    });
+    // Placeholders whose aboveId no longer exists (that entry was also deleted) go at end
+    const handledUids=new Set(result.filter(i=>i.type==="placeholder").map(i=>i.entry.uid));
+    deletedInGroup.filter(e=>!handledUids.has(e.uid)).forEach(e=>{
+      result.push({type:"placeholder",entry:e});
+    });
     return(
       <div key={date} style={{marginBottom:22}}>
         <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
-        {items.map((item,i)=>
+        {result.map((item,i)=>
           item.type==="entry"
             ? renderEntry(item.log,i)
             : <UndoPlaceholder key={item.entry.uid} log={item.entry.log} th={th} onUndo={()=>handleUndo(item.entry.uid)} createdAt={item.entry.createdAt}/>
@@ -4229,8 +4242,13 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                   }
                   cols.push(cur.trim()); return cols;
                 };
-                // Build dedup set: title+year+date
-                const existing=new Set(existingLogs.filter(l=>l.category==="movies").map(l=>`${(l.title||"").toLowerCase()}|${l.year||""}|${(l.customDate||l.date||"").split("T")[0]}`));
+                // Build dedup set from ALL existing movie entries (Letterboxd or manual) using normalized title+year+watchedDate
+                const existing=new Set(existingLogs.filter(l=>l.category==="movies").map(l=>{
+                  const t=(l.title||"").toLowerCase().trim();
+                  const y=(l.year||"").toString().trim();
+                  const d=(l.customDate||(l.date||"").split("T")[0]||"").trim();
+                  return `${t}|${y}|${d}`;
+                }));
                 const newEntries=[];
                 for(let i=1;i<lines.length;i++){
                   if(!lines[i].trim())continue;
@@ -4243,7 +4261,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                   const tagsRaw=(tagIdx>=0?(cols[tagIdx]||""):"").replace(/^"|"$/g,"").trim();
                   const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
                   if(rewatch)tags.push("rewatch");
-                  const dedupKey=`${title.toLowerCase()}|${year}|${watchedDate}`;
+                  const dedupKey=`${title.toLowerCase().trim()}|${year.trim()}|${watchedDate.trim()}`;
                   if(existing.has(dedupKey))continue;
                   const date=watchedDate?new Date(watchedDate+"T12:00:00").toISOString():new Date().toISOString();
                   newEntries.push({id:Date.now()+i,title,year:year||null,category:"movies",tags,genre:null,note:"",mood:null,date,customDate:watchedDate||null,fromLetterboxd:true,lbRating:!isNaN(ratingRaw)?ratingRaw:null});
