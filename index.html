@@ -2777,135 +2777,108 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
-function SwipeableEntry({log, th, onDelete, onTap, undoEntry, onUndo}){
+function SwipeableEntry({log, th, onDelete, onTap}){
   const [drag,setDrag]=useState(0);
-  const [deleting,setDeleting]=useState(false);
+  const [confirmed,setConfirmed]=useState(false);
   const startX=useRef(null);
+  const isDragging=useRef(false);
+  const deleteFired=useRef(false);
   const meta=CAT_MAP[log.category];
-  const DELETE_THRESHOLD=100;
+  const DELETE_THRESHOLD=110;
   const hasPhotos=log.actPhotos&&log.actPhotos.length>0;
 
-  const hs=e=>{startX.current=(e.touches?e.touches[0]:e).clientX;};
+  const hs=e=>{startX.current=(e.touches?e.touches[0]:e).clientX;isDragging.current=false;};
   const hm=e=>{
     if(startX.current===null) return;
     const dx=(e.touches?e.touches[0]:e).clientX-startX.current;
-    if(dx<0) setDrag(dx);
+    if(dx<-4){isDragging.current=true;setDrag(Math.max(dx,-DELETE_THRESHOLD*1.4));}
   };
   const he=()=>{
-    if(drag<-DELETE_THRESHOLD){
-      setDeleting(true);
-      setTimeout(()=>onDelete(),320);
+    if(drag<-DELETE_THRESHOLD&&!deleteFired.current){
+      deleteFired.current=true;
+      setConfirmed(true);
+      setTimeout(()=>onDelete(),260);
     } else {
       setDrag(0);
     }
     startX.current=null;
   };
 
-  // Peel physics
   const progress=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
-  const isPast=drag<-DELETE_THRESHOLD;
-  // Rotation increases as you pull — feels like lifting bottom-left corner
-  const rotation=deleting?-18:drag*0.08;
-  // Scale down slightly as it peels off
-  const scale=deleting?0.88:1-progress*0.04;
-  // Shadow lifts as it peels
-  const shadowBlur=deleting?32:progress*24;
-  const shadowOpacity=deleting?0.4:progress*0.25;
-  const tx=deleting?-440:drag;
-
-  // Show undo placeholder if this entry was just deleted
-  if(undoEntry&&undoEntry.log.id===log.id){
-    return(
-      <UndoPlaceholder log={undoEntry.log} th={th} onUndo={onUndo} timer={undoEntry.timer}/>
-    );
-  }
 
   return(
-    <div style={{position:"relative",marginBottom:8,borderRadius:14,overflow:"visible"}}>
-      {/* Delete zone — red layer underneath, revealed by peel */}
+    <div style={{position:"relative",marginBottom:8,borderRadius:14,overflow:"hidden"}}>
+      {/* Red layer underneath */}
       <div style={{
-        position:"absolute",inset:0,borderRadius:14,
-        background:"#ef4444",
-        display:"flex",alignItems:"center",justifyContent:"flex-end",
-        paddingRight:22,
-        opacity:Math.min(progress*1.4,1),
+        position:"absolute",inset:0,background:"#e53935",borderRadius:14,
+        display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:20,
       }}>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,transform:`scale(${0.7+progress*0.3})`,transition:"transform 0.1s"}}>
-          <span style={{fontSize:20}}>🗑️</span>
-          <span style={{fontSize:9,color:"#fff",fontWeight:700,opacity:0.9,letterSpacing:0.5,textTransform:"uppercase"}}>
-            {isPast?"Let go":"Peel off"}
-          </span>
-        </div>
+        {progress>0.1&&(
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+            style={{opacity:Math.min((progress-0.1)/0.3,1)}}>
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+          </svg>
+        )}
       </div>
-      {/* Card — peels with rotation + shadow */}
+      {/* Card */}
       <div
         onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
         onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-        onClick={()=>{if(Math.abs(drag)<4) onTap();}}
+        onClick={()=>{if(!isDragging.current) onTap();}}
         style={{
-          transform:`translateX(${tx}px) rotate(${rotation}deg) scale(${scale})`,
-          transformOrigin:"top right",
-          transition:deleting
-            ?"transform 0.32s cubic-bezier(0.4,0,1,1)"
-            :(drag===0?"transform 0.28s cubic-bezier(0.34,1.56,0.64,1)":"none"),
-          boxShadow:`0 ${4+progress*14}px ${shadowBlur}px rgba(0,0,0,${shadowOpacity})`,
+          transform:`translateX(${confirmed?-520:drag}px)`,
+          transition:confirmed?"transform 0.26s ease-in":(drag===0?"transform 0.3s cubic-bezier(0.34,1.2,0.64,1)":"none"),
           touchAction:"pan-y",cursor:"pointer",
-          padding:"14px 16px",borderRadius:14,
-          background:th.card,border:`1px solid ${th.border}`,
-          display:"flex",gap:12,alignItems:"flex-start",
+          padding:"11px 14px",borderRadius:14,
+          background:th.card,
+          border:`1px solid ${th.border}cc`,
+          boxShadow:`inset 0 1px 0 rgba(255,255,255,0.08)`,
+          display:"flex",gap:12,alignItems:"center",
           userSelect:"none",position:"relative",zIndex:1,
         }}>
-        <div style={{width:42,height:42,borderRadius:12,flexShrink:0,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
+        <div style={{width:36,height:36,borderRadius:10,flexShrink:0,fontSize:18,background:(meta?.color||"#888")+"18",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:14,fontWeight:600,color:th.text,marginBottom:2}}>
+          <div style={{fontSize:13,fontWeight:600,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1.3}}>
             {log.title}
-            {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:12,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}
+            {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:11,fontWeight:400,color:th.sub,marginLeft:4}}>({y})</span>:null;})()}
           </div>
           {(()=>{
             const lib=(LIBRARY[log.category]||[]);
             const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
             const skip=["Film","Movies","Music","Books","Food","Games","Activities"];
-            if(libMatch?.genre&&!skip.includes(libMatch.genre)) return <div style={{fontSize:11,color:th.sub}}>{libMatch.genre}</div>;
-            if(log.genre&&!skip.includes(log.genre)&&log.genre!=="Custom") return <div style={{fontSize:11,color:th.sub}}>{log.genre}</div>;
+            if(libMatch?.genre&&!skip.includes(libMatch.genre)) return <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{libMatch.genre}</div>;
+            if(log.genre&&!skip.includes(log.genre)&&log.genre!=="Custom") return <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{log.genre}</div>;
             return null;
           })()}
-          {log.note&&<div style={{marginTop:6,fontSize:13,color:th.sub,lineHeight:1.5,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",opacity:0.8}}>"{log.note}"</div>}
+          {log.note&&<div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.7,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontStyle:"italic"}}>"{log.note}"</div>}
         </div>
-        {/* Photo indicator */}
-        {hasPhotos&&(
-          <div style={{flexShrink:0,display:"flex",alignItems:"center",alignSelf:"center",opacity:0.45}}>
-            <span style={{fontSize:13}}>📷</span>
-          </div>
-        )}
+        {hasPhotos&&<div style={{flexShrink:0,opacity:0.4,fontSize:13}}>📷</div>}
       </div>
     </div>
   );
 }
 
 // ─── INLINE UNDO PLACEHOLDER ─────────────────────────────────────────────────
-function UndoPlaceholder({log, th, onUndo, timer}){
-  const [progress,setProgress]=useState(100);
-  const DURATION=60000;
+function UndoPlaceholder({log, th, onUndo, createdAt}){
+  const DURATION=30000;
+  const [progress,setProgress]=useState(()=>Math.max(0,100-((Date.now()-createdAt)/DURATION)*100));
   useEffect(()=>{
-    const start=Date.now();
     const id=setInterval(()=>{
-      const pct=Math.max(0,100-((Date.now()-start)/DURATION)*100);
+      const pct=Math.max(0,100-((Date.now()-createdAt)/DURATION)*100);
       setProgress(pct);
-      if(pct===0) clearInterval(id);
-    },300);
+      if(pct<=0) clearInterval(id);
+    },250);
     return()=>clearInterval(id);
-  },[]);
+  },[createdAt]);
 
   return(
     <div style={{
       marginBottom:8,padding:"12px 16px",borderRadius:14,
-      background:"transparent",
-      border:`1px dashed ${th.border}`,
+      background:"transparent",border:`1px dashed ${th.border}`,
       display:"flex",alignItems:"center",gap:10,
       position:"relative",overflow:"hidden",
     }}>
-      {/* Progress drain bar at bottom */}
-      <div style={{position:"absolute",bottom:0,left:0,height:2,borderRadius:1,background:th.accent,width:`${progress}%`,transition:"width 0.3s linear",opacity:0.5}}/>
+      <div style={{position:"absolute",bottom:0,left:0,height:2,borderRadius:1,background:th.accent,width:`${progress}%`,transition:"width 0.25s linear",opacity:0.5}}/>
       <div style={{flex:1,minWidth:0}}>
         <span style={{fontSize:13,color:th.sub,opacity:0.7}}>Deleted </span>
         <span style={{fontSize:13,color:th.text,fontWeight:600}}>{log.title}</span>
@@ -2920,54 +2893,62 @@ function UndoPlaceholder({log, th, onUndo, timer}){
 }
 
 // ─── ENTRY PREVIEW SHEET ─────────────────────────────────────────────────────
-function EntryPreviewSheet({log, th, onClose, onEdit}){
+function EntryPreviewSheet({log, th, onClose, onEdit, data}){
+  const [closing,setClosing]=useState(false);
+  const closeWithAnim=()=>{setClosing(true);setTimeout(onClose,260);};
   const meta=CAT_MAP[log.category];
   const dateStr=new Date(log.customDate||log.date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{
-        position:"relative",zIndex:1,width:"100%",maxWidth:420,
-        background:th.card,borderRadius:20,
-        boxShadow:"0 8px 40px rgba(0,0,0,0.3)",
-        overflow:"hidden",
-      }}>
-        {/* Top color strip */}
-        <div style={{height:3,background:`linear-gradient(90deg,${meta?.color||th.accent},${th.accent})`}}/>
-        <div style={{padding:"18px 20px 20px"}}>
-          {/* Header row */}
-          <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:14}}>
-            <div style={{width:44,height:44,borderRadius:12,fontSize:22,background:(meta?.color||"#888")+"22",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{meta?.emoji}</div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,color:th.text,lineHeight:1.3}}>
-                {log.title}
-                {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:13,fontWeight:400,color:th.sub,marginLeft:5}}>({y})</span>:null;})()}
-              </div>
-              <div style={{fontSize:11,color:th.sub,marginTop:3}}>{dateStr}</div>
-            </div>
-            <button onClick={onClose} style={{width:28,height:28,borderRadius:8,background:th.bg,border:`1px solid ${th.border}`,color:th.sub,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}>✕</button>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%",touchAction:"none"}}
+      onClick={e=>{if(e.target===e.currentTarget)closeWithAnim();}}>
+      <div
+        className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
+        style={{
+          width:"calc(100% - 32px)",maxWidth:500,margin:"0 auto",
+          ...(data.theme==="jeepney"?{background:"#1a0a2e",boxShadow:"0 -8px 32px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,210,63,0.35)",border:"1px solid #5a2d82",}
+            :data.theme==="manila_nights"?{background:"#0a0614",boxShadow:"0 -8px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(0,207,255,0.4)",border:"1px solid #221440",}
+            :data.theme==="bahay_kubo"?{background:"#0f1a08",boxShadow:"0 -8px 32px rgba(0,0,0,0.6), inset 0 2px 0 rgba(212,168,67,0.3)",border:"1px solid #2d4a1a",}
+            :data.theme==="hapon"?{background:"linear-gradient(180deg,#fff4ee 0%,#ffe8da 100%)",boxShadow:"0 -8px 32px rgba(200,80,60,0.1)",border:"1px solid #f0c8b0",}
+            :data.theme==="taho"?{background:"#f5e6c8",boxShadow:"0 -8px 24px rgba(80,30,4,0.12)",border:"1px solid #d4a96a",}
+            :data.theme==="fiesta"||data.theme==="ulan"?{}
+            :{background:"#f5f0e8",boxShadow:"0 -6px 24px rgba(0,0,0,0.07)",border:"1px solid #ddd5c8",}),
+          borderRadius:24,padding:"0 0 8px",
+          animation:closing?"slideDown 0.26s cubic-bezier(0.4,0,1,1) forwards":"slideUp 0.28s cubic-bezier(0,0,0.2,1)",
+        }}>
+        <div style={{padding:"16px 24px 20px",display:"flex",flexDirection:"column"}}>
+          {/* Header */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <span style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:700,color:th.text,letterSpacing:-0.3,lineHeight:1.1}}>
+              {log.title}
+              {(()=>{const y=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);return y?<span style={{fontSize:14,fontWeight:400,color:th.sub,marginLeft:6}}>({y})</span>:null;})()}
+            </span>
+            <button onClick={closeWithAnim} style={{fontSize:20,color:th.sub,lineHeight:1,background:"none",border:"none",cursor:"pointer",padding:"4px 2px",opacity:0.7}}>×</button>
           </div>
-          {/* Genre pill */}
-          {(()=>{
-            const lib=(LIBRARY[log.category]||[]);
-            const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-            const skip=["Film","Movies","Music","Books","Food","Games","Activities"];
-            const genre=libMatch?.genre||log.genre;
-            if(genre&&!skip.includes(genre)&&genre!=="Custom") return(
-              <div style={{display:"inline-block",padding:"3px 9px",borderRadius:7,background:th.bg,border:`1px solid ${th.border}`,fontSize:11,color:th.sub,marginBottom:12}}>{genre}</div>
-            );
-            return null;
-          })()}
+          {/* Category + date row */}
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+            <div style={{width:32,height:32,borderRadius:9,flexShrink:0,fontSize:17,background:(meta?.color||"#888")+"18",display:"flex",alignItems:"center",justifyContent:"center"}}>{meta?.emoji}</div>
+            <div>
+              {(()=>{
+                const lib=(LIBRARY[log.category]||[]);
+                const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
+                const skip=["Film","Movies","Music","Books","Food","Games","Activities","Custom"];
+                const genre=libMatch?.genre||log.genre;
+                if(genre&&!skip.includes(genre)) return <div style={{fontSize:12,fontWeight:600,color:th.sub}}>{genre}</div>;
+                return null;
+              })()}
+              <div style={{fontSize:11,color:th.sub,opacity:0.7}}>{dateStr}</div>
+            </div>
+          </div>
           {/* Note */}
           {log.note&&(
-            <div style={{padding:"10px 14px",borderRadius:12,background:th.bg,border:`1px solid ${th.border}`,fontSize:13,color:th.text,lineHeight:1.6,fontStyle:"italic",marginBottom:12}}>
+            <div style={{padding:"10px 14px",borderRadius:12,background:th.bg||"rgba(0,0,0,0.04)",border:`1px solid ${th.border}`,fontSize:13,color:th.text,lineHeight:1.6,fontStyle:"italic",marginBottom:14}}>
               "{log.note}"
             </div>
           )}
           {/* Photos */}
           {log.actPhotos&&log.actPhotos.length>0&&(
-            <div style={{display:"grid",gridTemplateColumns:log.actPhotos.length===1?"1fr":"1fr 1fr",gap:6,marginBottom:12}}>
+            <div style={{display:"grid",gridTemplateColumns:log.actPhotos.length===1?"1fr":"1fr 1fr",gap:6,marginBottom:14}}>
               {log.actPhotos.map((src,i)=>(
                 <div key={i} style={{borderRadius:10,overflow:"hidden",aspectRatio:"4/3"}}>
                   <img src={src} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
@@ -2977,16 +2958,16 @@ function EntryPreviewSheet({log, th, onClose, onEdit}){
           )}
           {/* Steps */}
           {log.fromHealthKit&&log.stepCount&&(
-            <div style={{textAlign:"center",padding:"12px",borderRadius:12,background:th.bg,border:`1px solid ${th.border}`,marginBottom:12}}>
+            <div style={{textAlign:"center",padding:"12px",borderRadius:12,background:th.bg||"rgba(0,0,0,0.04)",border:`1px solid ${th.border}`,marginBottom:14}}>
               <div style={{fontSize:28,fontWeight:700,color:th.accent}}>{log.stepCount.toLocaleString()}</div>
               <div style={{fontSize:11,color:th.sub,marginTop:1}}>steps</div>
             </div>
           )}
-          {/* Edit — subtle, not dominant */}
+          {/* Edit button */}
           {!log.fromHealthKit&&(
             <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}>
-              <button onClick={()=>{onEdit(log);onClose();}} style={{
-                padding:"7px 16px",borderRadius:9,
+              <button onClick={()=>{onEdit(log);closeWithAnim();}} style={{
+                padding:"7px 18px",borderRadius:10,
                 background:"transparent",border:`1px solid ${th.border}`,
                 color:th.sub,fontWeight:600,fontSize:13,cursor:"pointer"
               }}>Edit</button>
@@ -3006,21 +2987,33 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const [filterCat,setFilterCat]=useState("all");
   const [weeksShown,setWeeksShown]=useState(1);
   const [previewLog,setPreviewLog]=useState(null);
-  const [undoEntry,setUndoEntry]=useState(null); // {log, timer}
+  const [undoEntries,setUndoEntries]=useState([]); // array of {log, timer, uid}
 
   const handleSoftDelete=(log)=>{
+    // Guard: don't create a second undo entry if already pending for this log
+    if(undoEntries.some(e=>e.log.id===log.id)) return;
+    const uid=`undo_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+    const createdAt=Date.now();
+    // Find the entry's position within its date group so we can restore it there
+    const date=log.date?.split("T")[0];
+    const groupEntries=[...data.logs]
+      .filter(l=>l.date?.split("T")[0]===date)
+      .sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const indexInGroup=groupEntries.findIndex(l=>l.id===log.id);
+    const timer=setTimeout(()=>{
+      setUndoEntries(p=>p.filter(e=>e.uid!==uid));
+    }, 30000);
+    setUndoEntries(prev=>[...prev,{log, timer, uid, createdAt, date, indexInGroup}]);
     onDelete(log.id);
-    // Cancel any existing undo timer
-    if(undoEntry) clearTimeout(undoEntry.timer);
-    const timer=setTimeout(()=>setUndoEntry(null), 60000);
-    setUndoEntry({log, timer});
   };
-  const handleUndo=()=>{
-    if(!undoEntry) return;
-    clearTimeout(undoEntry.timer);
-    // Restore the entry by passing it back up — need onRestore
-    onRestore(undoEntry.log);
-    setUndoEntry(null);
+  const handleUndo=(uid)=>{
+    setUndoEntries(prev=>{
+      const entry=prev.find(e=>e.uid===uid);
+      if(!entry) return prev;
+      clearTimeout(entry.timer);
+      onRestore(entry.log);
+      return prev.filter(e=>e.uid!==uid);
+    });
   };
 
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
@@ -3076,19 +3069,25 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
   const makeGroups=logs=>{
     const g={};
     logs.forEach(l=>{const d=l.date?.split("T")[0]||"Unknown";if(!g[d])g[d]=[];g[d].push(l);});
-    // Sort entries within each day newest-first by full timestamp
     Object.keys(g).forEach(d=>g[d].sort((a,b)=>new Date(b.date)-new Date(a.date)));
     return g;
   };
   const weekGroups=makeGroups(filteredWeek);
   const olderGroups=makeGroups(visibleOlder);
 
+  // Inject empty date groups for any deleted entries whose group no longer exists
+  undoEntries.forEach(({date:deletedDate})=>{
+    if(deletedDate){
+      const isThisWeek=new Date(deletedDate+"T00:00:00")>=weekStart;
+      if(isThisWeek){if(!weekGroups[deletedDate])weekGroups[deletedDate]=[];}
+      else{if(!olderGroups[deletedDate])olderGroups[deletedDate]=[];}
+    }
+  });
+
   const renderEntry=(log,i)=>(
     <SwipeableEntry key={log.id||i} log={log} th={th}
       onDelete={()=>handleSoftDelete(log)}
       onTap={()=>setPreviewLog(log)}
-      undoEntry={undoEntry}
-      onUndo={handleUndo}
     />
   );
 
@@ -3103,12 +3102,28 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
     return null;
   },[data.logs,data.dismissedSugg]);
 
-  const renderGroups=(groups)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries])=>(
-    <div key={date} style={{marginBottom:22}}>
-      <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
-      {entries.map((log,i)=>renderEntry(log,i))}
-    </div>
-  ));
+  const renderGroups=(groups)=>Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).map(([date,entries])=>{
+    const deletedInGroup=undoEntries.filter(e=>e.date===date);
+    // Build a merged list of real entries + placeholders sorted by original index
+    // Each real entry has its current index; placeholders have their saved indexInGroup
+    const items=[];
+    // Add real entries with their current sorted position
+    entries.forEach((log,i)=>items.push({type:"entry",log,sortIdx:i}));
+    // Add placeholders — their indexInGroup was their position before deletion
+    deletedInGroup.forEach(e=>items.push({type:"placeholder",entry:e,sortIdx:e.indexInGroup}));
+    // Sort by original index so placeholder appears where the entry was
+    items.sort((a,b)=>a.sortIdx-b.sortIdx);
+    return(
+      <div key={date} style={{marginBottom:22}}>
+        <div style={{fontSize:11,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>{formatDate(date+"T00:00:00")}</div>
+        {items.map((item,i)=>
+          item.type==="entry"
+            ? renderEntry(item.log,i)
+            : <UndoPlaceholder key={item.entry.uid} log={item.entry.log} th={th} onUndo={()=>handleUndo(item.entry.uid)} createdAt={item.entry.createdAt}/>
+        )}
+      </div>
+    );
+  });
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -3121,7 +3136,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
           <button key={c.id} onClick={()=>setFilterCat(c.id)} style={{padding:"6px 13px",borderRadius:20,fontSize:12,fontWeight:600,whiteSpace:"nowrap",background:filterCat===c.id?c.color:th.card,color:filterCat===c.id?"#fff":th.sub,border:`1px solid ${filterCat===c.id?c.color:th.border}`}}>{c.emoji} {cnt}</button>
         );})}
       </div>
-      {!data.logs.length?(
+      {(!data.logs.length&&undoEntries.length===0)?(
         <div style={{textAlign:"center",padding:"60px 20px",color:th.sub}}><div style={{fontSize:44,marginBottom:10}}>📭</div><p>{t.empty_state}</p></div>
       ):(
         <>
@@ -3132,10 +3147,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
             onNever={()=>handleMatchNever(_topSugg.log)}
           />}
           {Object.keys(weekGroups).length===0&&(
-            <div style={{textAlign:"center",padding:"40px 20px",color:th.sub}}>
-              <div style={{fontSize:36,marginBottom:8}}>📅</div>
-              <p style={{fontSize:14}}>{lang==="fil"?"Walang entries ngayong linggo.":"Nothing logged this week yet."}</p>
-            </div>
+            <></>
           )}
           {renderGroups(weekGroups)}
           {visibleOlder.length>0&&renderGroups(olderGroups)}
@@ -3147,7 +3159,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onEdit,onUpdateData}){
         </>
       )}
       {previewLog&&<EntryPreviewSheet
-        log={previewLog} th={th}
+        log={previewLog} th={th} data={data}
         onClose={()=>setPreviewLog(null)}
         onEdit={onEdit}
       />}
@@ -4549,7 +4561,10 @@ function App(){
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>update({logs:[log,...data.logs]})} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
+                const restored=[...data.logs,log].sort((a,b)=>new Date(b.date)-new Date(a.date));
+                update({logs:restored});
+              }} onEdit={handleEdit} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
