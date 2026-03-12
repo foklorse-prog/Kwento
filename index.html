@@ -2809,16 +2809,17 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
   const [showCatPicker,setShowCatPicker]=useState(false);
   const [useToday,setUseToday]=useState(false);
   const [titleResults,setTitleResults]=useState([]);
+  const [titleEdited,setTitleEdited]=useState(false);
 
-  // Autocomplete: search library when typing title in edit mode
+  // Autocomplete: only fires after user has actually changed the title
   useEffect(()=>{
-    if(!editing) return;
+    if(!editing||!titleEdited) return;
     const lq=editTitle.trim().toLowerCase();
     if(lq.length<2){setTitleResults([]);return;}
     const pool=(LIBRARY[editCat]||[]).map(i=>({...i,_cat:editCat}));
     const wordStart=i=>{const t=i.title.toLowerCase();if(t.startsWith(lq))return true;return t.split(/\s+/).some(w=>w.startsWith(lq));};
     setTitleResults(pool.filter(wordStart).slice(0,5));
-  },[editTitle,editCat,editing]);
+  },[editTitle,editCat,editing,titleEdited]);
 
   const dirty=editing&&(
     editTitle.trim()!==log.title||
@@ -2842,6 +2843,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     setEditDate(log.customDate||(log.date||"").split("T")[0]||"");
     setEditPhotos(log.actPhotos||[]);
     setUseToday(false);
+    setTitleEdited(false);
     setTitleResults([]);
     setEditing(true);
     setExpanded(true);
@@ -2852,6 +2854,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     setEditing(false);
     setShowCatPicker(false);
     setTitleResults([]);
+    setTitleEdited(false);
   };
 
   const saveEdit=e=>{
@@ -2861,6 +2864,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     setEditing(false);
     setShowCatPicker(false);
     setTitleResults([]);
+    setTitleEdited(false);
     setExpanded(false);
   };
 
@@ -2923,7 +2927,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
             </div>
             <div style={{flex:1,minWidth:0}}>
               {editing?(
-                <input value={editTitle} onChange={e=>{setEditTitle(e.target.value);}}
+                <input value={editTitle} onChange={e=>{setEditTitle(e.target.value);setTitleEdited(true);}}
                   onClick={e=>e.stopPropagation()}
                   style={{width:"100%",background:"transparent",border:"none",
                     borderBottom:`1.5px solid ${th.accent}`,color:th.text,
@@ -2950,7 +2954,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
               {titleResults.map((item,i)=>(
                 <div key={i}
                   onMouseDown={e=>e.preventDefault()}
-                  onClick={e=>{e.stopPropagation();setEditTitle(item.title);setTitleResults([]);}}
+                  onClick={e=>{e.stopPropagation();setEditTitle(item.title);setTitleResults([]);setTitleEdited(false);}}
                   style={{padding:"8px 12px",cursor:"pointer",
                     borderBottom:i<titleResults.length-1?`1px solid ${th.border}`:"none",
                     display:"flex",alignItems:"center",gap:10,background:th.card}}>
@@ -3035,7 +3039,17 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
                     </button>
                   </>
                 ):(
-                  <button onClick={startEdit} style={{fontSize:12,fontWeight:600,color:th.accent,background:"none",border:`1px solid ${th.accent}55`,borderRadius:8,padding:"5px 14px",cursor:"pointer"}}>Edit</button>
+                  <button onClick={startEdit}
+                    style={{background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:8,
+                      opacity:0.45,display:"flex",alignItems:"center",justifyContent:"center",
+                      transition:"opacity 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
+                    onMouseLeave={e=>e.currentTarget.style.opacity="0.45"}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
                 )}
               </div>
             </div>
