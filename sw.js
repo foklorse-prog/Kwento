@@ -26,12 +26,10 @@ self.addEventListener("activate", e => {
   );
 });
 
-// Fetch: network-first for index.html so browser refresh always gets fresh version.
-// Cache-first for everything else (fonts, scripts) for offline support.
+// Fetch: network-first for index.html, cache-first for everything else
 self.addEventListener("fetch", e => {
   const url = e.request.url;
 
-  // Fonts: cache-first
   if(url.includes("fonts.googleapis.com") || url.includes("fonts.gstatic.com")){
     e.respondWith(
       caches.open("kwento-fonts").then(fc =>
@@ -47,45 +45,46 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // index.html: network-first so browser refresh always loads fresh version.
-  // Falls back to cache only when offline.
   if(url.endsWith("/") || url.endsWith("index.html") || url === self.registration.scope){
     e.respondWith(
       fetch(e.request, {cache:"no-store"})
         .then(res => {
-          // Update cache with fresh version
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
           return res;
         })
-        .catch(() => caches.match(e.request)) // offline fallback
+        .catch(() => caches.match(e.request))
     );
     return;
   }
 
-  // Everything else: cache-first
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
 
-// Message: CHECK_UPDATE used by pull-to-refresh toast flow
+// CHECK_UPDATE: compare network vs cached index.html, notify client if different
+async function checkUpdate(client) {
+  try {
+    const freshRes = await fetch("./index.html", {cache:"no-store"});
+    const freshHtml = await freshRes.text();
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match("./index.html");
+    const cachedHtml = cached ? await cached.text() : "";
+    if(freshHtml !== cachedHtml){
+      // Store fresh version so next reload gets it
+      await cache.put("./index.html", new Response(freshHtml, {headers:{"Content-Type":"text/html"}}));
+      client.postMessage("UPDATE_READY");
+    } else {
+      client.postMessage("UP_TO_DATE");
+    }
+  } catch(e) {
+    client.postMessage("OFFLINE");
+  }
+}
+
 self.addEventListener("message", e => {
   if(e.data === "CHECK_UPDATE"){
-    fetch("./index.html", {cache:"no-store"})
-      .then(res => res.text())
-      .then(async freshHtml => {
-        const cache = await caches.open(CACHE);
-        const cached = await cache.match("./index.html");
-        const cachedHtml = cached ? await cached.text() : "";
-        if(freshHtml !== cachedHtml){
-          const freshRes = new Response(freshHtml, {headers:{"Content-Type":"text/html"}});
-          await cache.put("./index.html", freshRes);
-          e.source.postMessage("UPDATE_READY");
-        } else {
-          e.source.postMessage("UP_TO_DATE");
-        }
-      })
-      .catch(() => e.source.postMessage("OFFLINE"));
+    checkUpdate(e.source);
   }
 });
