@@ -2627,16 +2627,17 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
     :<span style={{opacity:0.8,display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>;
 
 
-  // Active tab indicator — frosted pill
+  // Active tab indicator — frosted pill (not used for manila_nights)
   const GlassPill=()=>(
+    data.theme==="manila_nights"?null:
     <span style={{
       position:"absolute",top:"50%",left:"50%",
       transform:"translate(-50%,-50%)",
       width:46,height:38,borderRadius:19,
-      background:`linear-gradient(160deg, ${th.accent}22 0%, ${th.accent}10 100%)`,
-      border:`1px solid ${th.accent}40`,
+      background:th.dark?`linear-gradient(160deg, ${th.accent}18 0%, ${th.accent}08 100%)`:`${th.accent}0f`,
+      border:`1px solid ${th.accent}${th.dark?"28":"1a"}`,
       backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",
-      boxShadow:`inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.1), 0 2px 8px ${th.accent}18`,
+      boxShadow:`0 1px 6px ${th.accent}10`,
       pointerEvents:"none",zIndex:0,display:"block",
     }}/>
   );
@@ -2736,29 +2737,16 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
   }
 
   if(data.theme==="manila_nights"){
+    const mnSilver="#c8ccd8";
     const mnEmboss=`drop-shadow(0 2px 3px rgba(0,0,0,0.7))`;
-    const MNSvgFilter=(
-      <svg width="0" height="0" style={{position:"absolute"}}>
-        <defs>
-          <filter id="mn-inner-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feFlood floodColor="rgba(0,0,0,0.75)" result="color"/>
-            <feComposite in="color" in2="SourceGraphic" operator="in" result="shadow"/>
-            <feOffset dx="0" dy="2" result="offset"/>
-            <feGaussianBlur stdDeviation="1.5" in="offset" result="blur"/>
-            <feComposite in="blur" in2="SourceGraphic" operator="in" result="innerShadow"/>
-            <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="innerShadow"/></feMerge>
-          </filter>
-        </defs>
-      </svg>
-    );
     const MNTabs=[
-      {id:"home",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="home"?"#ffffff":th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="home"?`${mnEmboss} url(#mn-inner-shadow)`:"none"}}><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>},
-      {id:"timeline",icon:<TimelineTabIcon accent={tab==="timeline"?"#ffffff":th.sub} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
+      {id:"home",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="home"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="home"?mnEmboss:"none"}}><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>},
+      {id:"timeline",icon:<TimelineTabIcon accent={tab==="timeline"?mnSilver:th.sub} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
       {id:"profile",icon:tab==="profile"
-        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:`${mnEmboss} url(#mn-inner-shadow)`}}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mnSilver} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:mnEmboss}}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         :<span style={{opacity:0.45,display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>},
-      {id:"mystory",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="mystory"?"#ffffff":th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="mystory"?`${mnEmboss} url(#mn-inner-shadow)`:"none"}}><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/><path d="M9.5 9.5l5 5"/></svg>},
-      {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="settings"?"#ffffff":th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="settings"?`${mnEmboss} url(#mn-inner-shadow)`:"none"}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>},
+      {id:"mystory",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="mystory"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="mystory"?mnEmboss:"none"}}><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/><path d="M9.5 9.5l5 5"/></svg>},
+      {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="settings"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="settings"?mnEmboss:"none"}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>},
     ];
     return(
       <div style={{
@@ -2768,17 +2756,15 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
         borderTop:"1px solid rgba(255,255,255,0.07)",
         display:"flex",padding:"10px 0 22px",
         zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",
-        overflow:"hidden",
       }}>
-        {MNSvgFilter}
         {MNTabs.map(tb=>{
           const active=tab===tb.id;
           return(
             <button key={tb.id} onClick={()=>setTab(tb.id)}
               style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
                 justifyContent:"center",cursor:"pointer",transition:"all 0.2s",
-                padding:"4px 0",position:"relative",border:"none",background:"transparent"}}>
-              {/* Neon orb centered behind the icon */}
+                padding:"4px 0",position:"relative",border:"none",background:"transparent",
+                overflow:"visible",WebkitTapHighlightColor:"transparent",outline:"none"}}>
               {active&&(
                 <span style={{
                   position:"absolute",
@@ -2793,7 +2779,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
                   zIndex:0,
                 }}/>
               )}
-              <div style={{position:"relative",zIndex:1,padding:"6px 14px",borderRadius:14,
+              <div style={{position:"relative",zIndex:1,
                 opacity:active?1:0.45,transition:"all 0.2s",
               }}>{tb.icon}</div>
             </button>
@@ -2813,9 +2799,9 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
         overflow:"hidden",
       }}>
       {tabs.map(tb=>(
-        <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",position:"relative"}}>
+        <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",position:"relative",background:"transparent",border:"none",WebkitTapHighlightColor:"transparent",outline:"none"}}>
           {tab===tb.id&&<GlassPill/>}
-          <div style={{position:"relative",zIndex:1,padding:"6px 14px",borderRadius:14,transition:"background 0.2s"}}>{tb.icon}</div>
+          <div style={{position:"relative",zIndex:1,transition:"background 0.2s"}}>{tb.icon}</div>
         </button>
       ))}
     </div>
