@@ -2633,7 +2633,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
     <span style={{
       position:"absolute",top:"50%",left:"50%",
       transform:"translate(-50%,-50%)",
-      width:50,height:44,borderRadius:22,
+      width:46,height:34,borderRadius:17,
       background:th.dark?`linear-gradient(160deg, ${th.accent}18 0%, ${th.accent}08 100%)`:`${th.accent}0f`,
       border:`1px solid ${th.accent}${th.dark?"28":"1a"}`,
       backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",
@@ -2769,7 +2769,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
                 filter:active?`drop-shadow(0 0 8px ${th.accent}88)`:"none",
                 transition:"filter 0.25s ease",
               }}>
-              <div style={{position:"relative",zIndex:1,padding:"11px 14px",
+              <div style={{position:"relative",zIndex:1,padding:"6px 12px",
                 opacity:active?1:0.45,transition:"opacity 0.25s ease",
               }}>{tb.icon}</div>
             </button>
@@ -2791,7 +2791,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
       {tabs.map(tb=>(
         <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",position:"relative",background:"transparent",border:"none",WebkitTapHighlightColor:"transparent",outline:"none"}}>
           {tab===tb.id&&<GlassPill/>}
-          <div style={{position:"relative",zIndex:1,padding:"11px 14px",transition:"background 0.2s"}}>{tb.icon}</div>
+          <div style={{position:"relative",zIndex:1,padding:"6px 12px"}}>{tb.icon}</div>
         </button>
       ))}
     </div>
