@@ -2535,7 +2535,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
           backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
           border:"1px solid rgba(255,255,255,0.1)",
           borderRadius:40,
-          padding:"5px 6px",
+          padding:"10px 8px",
           width:"calc(100% - 32px)",maxWidth:468,
           pointerEvents:"all",
           boxShadow:"0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
@@ -2547,7 +2547,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
                 style={{
                   flex:1,display:"flex",alignItems:"center",justifyContent:"center",
                   cursor:"pointer",border:"none",background:"transparent",
-                  padding:"5px 0",borderRadius:40,position:"relative",
+                  padding:"8px 0",borderRadius:40,position:"relative",
                   transition:"all 0.2s",
                 }}>
                 {active&&(
@@ -2555,16 +2555,13 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
                     position:"absolute",
                     top:"50%",left:"50%",
                     transform:"translate(-50%,-50%)",
-                    width:46,height:34,
-                    borderRadius:17,
+                    width:52,height:40,
+                    borderRadius:20,
                     background:"transparent",
                     border:"none",
                     boxShadow:[
-                      // top-left inner shadow — away from light
                       "inset 3px 3px 6px rgba(0,0,0,0.75)",
-                      // bottom-right inner highlight — softened
-                      "inset -3px -3px 6px rgba(255,255,255,0.22)",
-                      // outer drop shadow for depth
+                      "inset -3px -3px 6px rgba(255,255,255,0.18)",
                       "0 4px 12px rgba(0,0,0,0.55)",
                     ].join(","),
                     pointerEvents:"none",zIndex:0,
