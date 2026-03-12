@@ -3,19 +3,18 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
-v5.10 — 2026-03-11
-  - Storage: photos moved to IndexedDB (no more 5MB localStorage ceiling)
-  - Storage: photo migration runs automatically on first launch
-  - Backup: export/import fully preserved — same JSON format, photos embedded
-  - Backup: "Last exported" date shown in settings
-  - Backup: warning when entries haven't been exported yet
-  - Backup: export filename always kwento-backup.json (overwrites previous)
-  - Avatar: GIF avatars now animate correctly (canvas compression bypassed)
-  - Avatar: photo save fixed — no longer reverts to emoji on refresh
-  - Home: card depth improved — rim lights, stronger borders, tuned CTA glow
-  - Timeline: entries within a day now sorted newest-first by time
-  - Steps: now counted in This Week totals on home page
-  - Days active: still counts manual entries only (unchanged)
+v5.11 — 2026-03-12
+  - Timeline: inline card expand — tap entry to see details, tap Edit to edit in place
+  - Timeline: inline editing — title (with autocomplete), note, category, date, photo removal
+  - Timeline: steps entries no longer expandable — swipe to delete only
+  - Timeline: per-theme card depth — glow for dark themes, shadows for light themes
+  - Timeline: fixed bug where editing one entry updated all entries with same title (duplicate IDs from Letterboxd import)
+  - Steps: title now uses en dash (Steps – 214), no redundant step count label
+  - Updates: app now checks for new version on every launch — persistent banner appears if update is ready, tap to reload instantly
+  - Nav: profile and suggestions tabs swapped
+  - Nav: profile tab shows your avatar when away, star when on profile
+  - Nav: suggestions tab has new icon
+  - Nav: Ulan theme gets a floating bubble menu tab bar
 
 ================================================================
 -->
@@ -2518,24 +2517,60 @@ function TimelineTabIcon({accent,sub,active,flash,animKey}){
 
 function TabBar({tab,setTab,data,flash=0,animKey=0}){
   const th=THEMES[data.theme];
+  const isUlan=data.theme==="ulan";
   const avEmoji=AVATARS.find(a=>a.id===data.avatar)?.emoji||"⭐";
   const avDisplay=data.customPhoto
-    ?<span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",borderRadius:"50%",
-        ...(data._dx?{animation:"_rxg 3s linear infinite",padding:2}:{})
-      }}>
-       <img src={data.customPhoto} style={{width:data._dx?20:24,height:data._dx?20:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%",display:"block"}}/>
-     </span>
-    :<span style={{fontSize:20}}>{avEmoji}</span>;
+    ?<img src={data.customPhoto} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",objectPosition:((data.photoPos||{x:50,y:50}).x)+"% "+((data.photoPos||{x:50,y:50}).y)+"%",display:"block"}}/>
+    :<span style={{fontSize:20,lineHeight:1}}>{avEmoji}</span>;
+
   const HomeIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>);
-  const StoryIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.4 2.4-7.4L2 9.4h7.6L12 2z"/></svg>);
+  // Suggestion icon: sparkle/compass feel — consistent SVG stroke style
+  const SuggIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/><path d="M9.5 9.5l5 5"/></svg>);
+  const StarIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.4 2.4-7.4L2 9.4h7.6L12 2z"/></svg>);
   const SettingsIcon=({a})=>(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?th.accent:th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>);
+
+  // Profile icon: avatar when not on profile, star when on profile
+  const ProfileIcon=()=>tab==="profile"
+    ?<StarIcon a={true}/>
+    :<span style={{opacity:0.75,display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>;
+
   const tabs=[
     {id:"home",icon:<HomeIcon a={tab==="home"}/>},
     {id:"timeline",icon:<TimelineTabIcon accent={th.accent} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
-    {id:"mystory",icon:<StoryIcon a={tab==="mystory"}/>},
-    {id:"profile",icon:<span style={{fontSize:20,lineHeight:1,opacity:tab==="profile"?1:0.55}}>{avDisplay}</span>},
+    {id:"profile",icon:<ProfileIcon/>},
+    {id:"mystory",icon:<SuggIcon a={tab==="mystory"}/>},
     {id:"settings",icon:<SettingsIcon a={tab==="settings"}/>},
   ];
+
+  if(isUlan){
+    return(
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,display:"flex",justifyContent:"center",padding:"0 0 28px",pointerEvents:"none"}}>
+        <div style={{
+          display:"flex",alignItems:"center",
+          background:"rgba(13,21,32,0.72)",
+          backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
+          border:"1px solid rgba(255,255,255,0.1)",
+          borderRadius:40,
+          padding:"8px 10px",
+          gap:4,
+          pointerEvents:"all",
+          boxShadow:"0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+        }}>
+          {tabs.map(tb=>(
+            <button key={tb.id} onClick={()=>setTab(tb.id)}
+              style={{display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",
+                padding:"8px 14px",borderRadius:30,
+                background:tab===tb.id?th.accent+"28":"transparent",
+                border:tab===tb.id?`1px solid ${th.accent}44`:"1px solid transparent",
+                transition:"all 0.2s",transform:tab===tb.id?"translateY(-1px)":"none"}}>
+              {tb.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return(
     <div
       className={data.theme==="fiesta"?"fiesta-tabbar":""}
@@ -2545,7 +2580,6 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
         zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",backdropFilter:"blur(12px)",
         overflow:"hidden",
       }}>
-
       {tabs.map(tb=>(
         <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s",padding:"4px 0",transform:tab===tb.id?"translateY(-2px)":"none"}}>
           <div style={{padding:"6px 14px",borderRadius:14,background:tab===tb.id?th.accent+"22":"transparent",transition:"background 0.2s"}}>{tb.icon}</div>
@@ -4426,7 +4460,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.10</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.11</button></span>
       </div>
     </div>
   );
@@ -4753,18 +4787,20 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.10</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 11, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.11</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 12, 2026</span>
                     </div>
                     {[
-                      {v:"v5.10",date:"Mar 11, 2026",notes:[
-                        "Your photos and avatar now have unlimited storage — no more space limits",
-                        "Backup improvements — see when you last exported and get a nudge when new entries haven't been saved yet",
-                        "Backup file is now always named kwento-backup.json so it replaces the previous one",
-                        "Animated GIF avatars now work correctly",
-                        "Timeline entries within a day are now sorted by time, newest first",
-                        "Steps now count toward your This Week totals on the home page",
-                        "Home page depth — cards feel more layered and less flat",
+                      {v:"v5.11",date:"Mar 12, 2026",notes:[
+                        "Tap any timeline entry to expand it — see your note, photos, and details in place",
+                        "Edit directly from the expanded card — title, note, category, date, and photo removal, no modal needed",
+                        "Title field suggests from the library as you type, just like when logging",
+                        "Fixed a bug where editing one entry could update all entries with the same title",
+                        "Steps entries are simpler now — just the title and swipe to delete",
+                        "App checks for updates on every launch — a tap-to-reload banner appears if a new version is ready",
+                        "Profile and Suggestions tabs have switched positions",
+                        "Profile tab now shows your avatar when you're elsewhere, and a star when you're on it",
+                        "Ulan theme gets a floating bubble menu navigation bar",
                       ]},
                     ].map((rel,ri)=>(
                       <div key={ri}>
