@@ -4381,10 +4381,9 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
-  const [showSheet,setShowSheet]=useState(false);
   const BRAND_H=26;
   const DPR=Math.min(window.devicePixelRatio||1,2);
 
@@ -4412,30 +4411,15 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
     return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   },[value,label,iconId]);
 
-  // openSheet is called by StatGrid after 1.2s hold
-  function openSheet(){
-    setShowSheet(true);
-    onStickerOpen&&onStickerOpen(true);
-  }
-
-  useEffect(()=>{ onRegisterOpen&&onRegisterOpen(openSheet); },[]);
-
   return(
-    <>
-      <div ref={wrapRef}
-        style={{position:"relative",overflow:"hidden",borderRadius:16,
-          width:"100%",height:"100%",
-          WebkitTapHighlightColor:"transparent",
-          ...(span?{gridColumn:"span 3"}:{}),
-        }}>
-        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
-      </div>
-      {showSheet&&<StickerSaveSheet
-        iconId={iconId} label={label} value={value} data={data}
-        onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
-        onGenerate={onGenerate}
-      />}
-    </>
+    <div ref={wrapRef}
+      style={{position:"relative",overflow:"hidden",borderRadius:16,
+        width:"100%",height:"100%",
+        WebkitTapHighlightColor:"transparent",
+        ...(span?{gridColumn:"span 3"}:{}),
+      }}>
+      <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
+    </div>
   );
 }
 
@@ -4483,10 +4467,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     });
   }
 
-  // Each card calls these up to StatGrid
-  // stickerRefs: iconId → openSheet fn, set by each StatSticker via callback
-  const stickerOpenRefs = useRef({});
-
   function onCardTouchStart(iconId, e){
     const t=e.touches;
     if(t.length===1){
@@ -4496,13 +4476,30 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
         setDragging(iconId);
         if(navigator.vibrate) navigator.vibrate(25);
 
-        // 1200ms total → save sheet (only if still not moved)
+        // 1200ms total → share directly (only if still not moved)
         longTimer.current=setTimeout(()=>{
           if(dragState.current.active && !dragState.current.moved){
-            // cancel drag, open save sheet
             dragState.current={active:false,fromId:null,overId:null,moved:false};
             setDragging(null); setDragOver(null);
-            stickerOpenRefs.current[iconId]&&stickerOpenRefs.current[iconId]();
+            if(navigator.vibrate) navigator.vibrate([30,40,30]);
+            // Generate PNG and share immediately — no sheet
+            const card=orderedCards.find(c=>c.iconId===iconId);
+            if(!card) return;
+            const canvas=document.createElement("canvas");
+            const CARD_W=240,CARD_H=165,BRAND_H=39;
+            const DPR=Math.min(window.devicePixelRatio||1,2);
+            canvas.width=CARD_W*DPR; canvas.height=(CARD_H+BRAND_H)*DPR;
+            const ctx=canvas.getContext("2d");
+            ctx.scale(DPR,DPR);
+            drawSticker(ctx,CARD_W,CARD_H+BRAND_H,CARD_H,card.label,card.value,card.iconId);
+            canvas.toBlob(async blob=>{
+              if(!blob) return;
+              const file=new File([blob],"kwento-stat.png",{type:"image/png"});
+              if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+                try{ await navigator.share({files:[file],title:"My Kwento Stat"}); }
+                catch(e){ /* cancelled or failed silently */ }
+              }
+            },"image/png");
           }
         },800);
       },400);
@@ -4615,7 +4612,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
               iconId={card.iconId} label={card.label} value={card.value}
               data={data} span={false}
               onStickerOpen={onStickerOpen}
-              onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
               onGenerate={()=>{
                 const today=todayKey();
                 const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
