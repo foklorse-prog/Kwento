@@ -4391,10 +4391,14 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
     const canvas=canvasRef.current;
     const wrap=wrapRef.current;
     if(!canvas||!wrap) return;
+    let lastW=0, lastH=0;
     function redraw(){
       const W=wrap.offsetWidth;
       const CARD_H=wrap.offsetHeight;
       if(!W||!CARD_H) return;
+      // Only redraw if dimensions actually changed — prevents thrashing
+      if(W===lastW && CARD_H===lastH) return;
+      lastW=W; lastH=CARD_H;
       const H=CARD_H+BRAND_H;
       canvas.width=W*DPR; canvas.height=H*DPR;
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
@@ -4483,7 +4487,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
             setDragging(null); setDragOver(null);
             if(navigator.vibrate) navigator.vibrate([30,40,30]);
             // Generate PNG and share immediately — no sheet
-            const card=orderedCards.find(c=>c.iconId===iconId);
+            const card=cards.find(c=>c.iconId===iconId);
             if(!card) return;
             const canvas=document.createElement("canvas");
             const CARD_W=240,CARD_H=165,BRAND_H=39;
@@ -4492,13 +4496,30 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
             const ctx=canvas.getContext("2d");
             ctx.scale(DPR,DPR);
             drawSticker(ctx,CARD_W,CARD_H+BRAND_H,CARD_H,card.label,card.value,card.iconId);
-            canvas.toBlob(async blob=>{
+            canvas.toBlob(blob=>{
               if(!blob) return;
-              const file=new File([blob],"kwento-stat.png",{type:"image/png"});
-              if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-                try{ await navigator.share({files:[file],title:"My Kwento Stat"}); }
-                catch(e){ /* cancelled or failed silently */ }
-              }
+              const url=URL.createObjectURL(blob);
+              // Inject a real <img> into the DOM at the touch position,
+              // then fire a synthetic long-press so iOS shows "Save / Copy / Share"
+              const img=document.createElement("img");
+              img.src=url;
+              img.style.cssText=`position:fixed;opacity:0;pointer-events:auto;
+                width:1px;height:1px;top:0;left:0;z-index:9999;
+                -webkit-touch-callout:default;user-select:none;`;
+              document.body.appendChild(img);
+              // iOS needs the img to be visible/rendered before touch events work
+              requestAnimationFrame(()=>{
+                const rect={left:0,top:0};
+                const touch=new Touch({identifier:1,target:img,
+                  clientX:rect.left,clientY:rect.top,
+                  screenX:rect.left,screenY:rect.top,
+                  pageX:rect.left,pageY:rect.top,radiusX:1,radiusY:1,rotationAngle:0,force:1});
+                img.dispatchEvent(new TouchEvent("touchstart",{touches:[touch],targetTouches:[touch],changedTouches:[touch],bubbles:true,cancelable:true}));
+                setTimeout(()=>{
+                  img.dispatchEvent(new TouchEvent("touchend",{touches:[],targetTouches:[],changedTouches:[touch],bubbles:true,cancelable:true}));
+                  setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(img); },500);
+                },600);
+              });
             },"image/png");
           }
         },800);
@@ -4516,7 +4537,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     const cardEl=el.closest("[data-cardid]");
     if(!cardEl) return;
     const overId=cardEl.getAttribute("data-cardid");
-    if(overId && overId!==dragState.current.fromId){
+    if(overId && overId!==dragState.current.fromId && overId!==dragState.current.overId){
       dragState.current.overId=overId;
       setDragOver(overId);
     }
