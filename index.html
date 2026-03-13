@@ -193,12 +193,12 @@ const ITEM_MOOD = {
 
 // ─── ARCHETYPES ───────────────────────────────────────────────────────────────
 const ARCHETYPES = [
-  {id:"night_lakad",name:"The Night Lakad",nameFil:"Ang Gala ng Gabi",desc:"Night walks, mellow music, quiet films. You find magic in the hours when the world slows down.",descFil:"Night walks, mellow na musika, tahimik na pelikula.",tags:["night","solo","reflective","calm","slow","meditative"],emoji:"🌙"},
-  {id:"barkada_soul",name:"The Barkada Soul",nameFil:"Ang Kaluluwa ng Barkada",desc:"You thrive with people — loud music, group hangouts, and shared meals define your story.",descFil:"Sumisinag ka kapag may kasama — maingay na musika at masarap na pagkain.",tags:["barkada","social","upbeat","fun","competitive","interactive"],emoji:"🎉"},
-  {id:"cozy_bahay",name:"The Cozy Bahay",nameFil:"Ang Tahimik na Bahay",desc:"Comfort food, slow films, staying in. Home is your sanctuary and your favorite adventure.",descFil:"Comfort food, mabagal na pelikula, stay-at-home.",tags:["cozy","comfort","indoor","warm","relaxed","family"],emoji:"🏡"},
-  {id:"cultural_explorer",name:"The Cultural Explorer",nameFil:"Ang Manlalakbay ng Kultura",desc:"You seek new flavors, foreign films, and stories from everywhere. Curiosity is your compass.",descFil:"Naghahanap ka ng bagong lasa at kwento mula sa lahat ng dako.",tags:["cultural","historical","global","creative","artistic","discovery"],emoji:"🧭"},
-  {id:"malikhaing_diwa",name:"The Malikhaing Diwa",nameFil:"Ang Malikhaing Diwa",desc:"Art, music, and making things. You see the world as a canvas waiting to be filled.",descFil:"Sining, musika, at paggawa.",tags:["creative","artistic","indie","musical","expressive","aesthetic"],emoji:"🎨"},
-  {id:"tahimik_manunuri",name:"The Quiet Critic",nameFil:"Ang Tahimik na Manunuri",desc:"You read, reflect, and understand deeply. Your taste is refined, your thoughts quiet but profound.",descFil:"Nagbabasa ka, nag-iisip, malalim ang pag-unawa.",tags:["reflective","literary","slow","philosophical","intellectual","melancholic"],emoji:"📖"},
+  {id:"night_lakad",name:"The Night Owl",nameFil:"The Night Owl",desc:"Night walks, mellow music, quiet films. You find magic in the hours when the world slows down.",descFil:"Night walks, mellow music, quiet films. You find magic in the hours when the world slows down.",tags:["night","solo","reflective","calm","slow","meditative"],emoji:"🌙"},
+  {id:"barkada_soul",name:"The Social Butterfly",nameFil:"The Social Butterfly",desc:"You thrive with people — loud music, group hangouts, and shared meals define your story.",descFil:"You thrive with people — loud music, group hangouts, and shared meals define your story.",tags:["barkada","social","upbeat","fun","competitive","interactive"],emoji:"🎉"},
+  {id:"cozy_bahay",name:"The Homebody",nameFil:"The Homebody",desc:"Comfort food, slow films, staying in. Home is your sanctuary and your favorite adventure.",descFil:"Comfort food, slow films, staying in. Home is your sanctuary and your favorite adventure.",tags:["cozy","comfort","indoor","warm","relaxed","family"],emoji:"🏡"},
+  {id:"cultural_explorer",name:"The Cultural Explorer",nameFil:"The Cultural Explorer",desc:"You seek new flavors, foreign films, and stories from everywhere. Curiosity is your compass.",descFil:"You seek new flavors, foreign films, and stories from everywhere. Curiosity is your compass.",tags:["cultural","historical","global","creative","artistic","discovery"],emoji:"🧭"},
+  {id:"malikhaing_diwa",name:"The Creative",nameFil:"The Creative",desc:"Art, music, and making things. You see the world as a canvas waiting to be filled.",descFil:"Art, music, and making things. You see the world as a canvas waiting to be filled.",tags:["creative","artistic","indie","musical","expressive","aesthetic"],emoji:"🎨"},
+  {id:"tahimik_manunuri",name:"The Quiet Critic",nameFil:"The Quiet Critic",desc:"You read, reflect, and understand deeply. Your taste is refined, your thoughts quiet but profound.",descFil:"You read, reflect, and understand deeply. Your taste is refined, your thoughts quiet but profound.",tags:["reflective","literary","slow","philosophical","intellectual","melancholic"],emoji:"📖"},
 ];
 
 // ─── TRANSLATIONS ────────────────────────────────────────────────────────────
@@ -4346,24 +4346,45 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   }
   ctx.restore();
 
-  // ── Value — auto-size down for long strings
-  const isStr=typeof value==="string"&&isNaN(Number(value));
-  const maxValW=cW*0.9;
-  let vSize=valueFontSize;
-  if(isStr){
-    vSize=Math.round(sizeRef*0.18);
-    ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`;
-    while(ctx.measureText(String(value)).width>maxValW&&vSize>9){ vSize--; ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`; }
-  } else {
-    ctx.font=`bold ${vSize}px 'DM Sans', sans-serif`;
-  }
+  // ── Value — consistent typography, multi-line for breakdown
   ctx.textAlign="center";
-  ctx.fillStyle=th.accent;
   ctx.shadowColor=th.accent;
   ctx.shadowBlur=10;
-  ctx.fillText(String(value), cx, PAD+cH*0.62);
-  ctx.shadowBlur=0;
-  ctx.fillText(String(value), cx, PAD+cH*0.62);
+
+  const isNum=typeof value==="number"||!isNaN(Number(value));
+  if(isNum){
+    // Numeric cards — large bold accent number
+    ctx.font=`bold ${valueFontSize}px 'DM Sans', sans-serif`;
+    ctx.fillStyle=th.accent;
+    ctx.fillText(String(value), cx, PAD+cH*0.62);
+    ctx.shadowBlur=0;
+    ctx.fillText(String(value), cx, PAD+cH*0.62);
+  } else if(iconId==="week_breakdown"){
+    // Multi-line: each tag on its own line
+    const lines=String(value).split(" · ");
+    const lineH=Math.round(sizeRef*0.14);
+    const lineFontSize=Math.round(sizeRef*0.13);
+    ctx.font=`600 ${lineFontSize}px 'DM Sans', sans-serif`;
+    ctx.fillStyle=th.accent;
+    const totalH=lines.length*lineH;
+    const startY=PAD+(cH-totalH)/2+lineH*0.8;
+    lines.forEach((line,i)=>{
+      ctx.shadowBlur=6;
+      ctx.fillText(line, cx, startY+i*lineH);
+      ctx.shadowBlur=0;
+      ctx.fillText(line, cx, startY+i*lineH);
+    });
+  } else {
+    // Short string — auto-shrink to fit
+    let vSize=Math.round(sizeRef*0.18);
+    ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`;
+    const maxW=cW*0.88;
+    while(ctx.measureText(String(value)).width>maxW&&vSize>9){ vSize--; ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`; }
+    ctx.fillStyle=th.accent;
+    ctx.fillText(String(value), cx, PAD+cH*0.62);
+    ctx.shadowBlur=0;
+    ctx.fillText(String(value), cx, PAD+cH*0.62);
+  }
 
   // ── Label
   ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
@@ -5044,20 +5065,20 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         </div>
         {(()=>{
           const registry=[
-            {iconId:"total", emoji:"📝", label:t.total_logs,          value:totalLogs,        min:1},
-            {iconId:"days",  emoji:"🗓", label:t.days_active,          value:daysActiveCount,  min:1},
-            {iconId:"week",  emoji:"📅", label:t.this_week,            value:thisWeekCount,    min:1},
+            {iconId:"total", emoji:"📝", label:"Total Logs",           value:totalLogs,        min:1},
+            {iconId:"days",  emoji:"🗓", label:"Days Active",           value:daysActiveCount,  min:1},
+            {iconId:"week",  emoji:"📅", label:"Entries",               value:thisWeekCount,    min:1},
             {iconId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:swipedRight.length, min:1},
             ...(stepsLogs.length>0
-              ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
+              ?[{iconId:"steps", emoji:"👟", label:"Steps", value:weekSteps, min:1}]
               :[]),
             ...(topCatId&&topCatCount>=3?[{iconId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, min:1}]:[]),
-            ...(timeVibe?[{iconId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:"You Are A", value:timeVibe.replace(" 🦉","").replace(" 🌅",""), min:1}]:[]),
+            ...(timeVibe?[{iconId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", min:1}]:[]),
             ...(mostLoggedTitle?[{iconId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, min:1}]:[]),
-            ...(topDirector?[{iconId:"top_director", emoji:"🎬", label:"Fave Director", value:topDirector, min:1}]:[]),
-            ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Fave Actor", value:topActor, min:1}]:[]),
-            ...(weekBreakdownValue?[{iconId:"week_breakdown", emoji:"📊", label:"This Week", value:weekBreakdownValue, min:1, defaultSpan:{colSpan:2,rowSpan:1}}]:[]),
-            ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"This Week", value:weekPulse, min:1}]:[]),
+            ...(topDirector?[{iconId:"top_director", emoji:"🎬", label:"Director", value:topDirector, min:1}]:[]),
+            ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Actor", value:topActor, min:1}]:[]),
+            ...(weekBreakdownValue?[{iconId:"week_breakdown", emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:{colSpan:2,rowSpan:1}}]:[]),
+            ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"Pace", value:weekPulse, min:1}]:[]),
           ];
 
           // Filter to only cards that have meaningful data
@@ -5079,7 +5100,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
             />
-            {weekNarrative&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
+            {weekNarrative&&false&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
               <p style={{fontSize:13,color:th.sub,lineHeight:1.6,fontStyle:"italic"}}>{weekNarrative}</p>
             </div>}
             {slots<=9&&<div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3}}>
