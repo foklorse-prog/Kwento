@@ -4216,12 +4216,22 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   // ── Stat content — centred in the CARD_H visible zone
   // Icon rendered as image-from-SVG (we do this inline via Path2D approximations)
   // For canvas we draw simplified vector shapes directly
-  const cx=W/2, iconY=CARD_H*0.24;
-  // Scale all sizes relative to card width so it looks right at any size
-  const iconScale=(W/160)*0.75;
-  const valueFontSize=Math.round(W*0.18);
-  const labelFontSize=Math.round(W*0.065);
-  const brandFontSize=Math.round(W*0.058);
+  // PAD mirrors what CSS `padding: 14px 12px` gives a div.
+  // All content is expressed relative to this inset area so nothing
+  // ever draws flush against the edge, regardless of card width.
+  const PAD=14;
+  const cW=W-PAD*2;       // content width
+  const cH=CARD_H-PAD*2;  // content height (visible zone only)
+  const cx=W/2;
+  // Use the shorter content dimension as the type-size reference
+  // so a wide orphan card gets the same text weight as a normal card.
+  const sizeRef=Math.min(cW,cH);
+  const iconScale=(sizeRef/100)*0.9;
+  const valueFontSize=Math.round(sizeRef*0.32);
+  const labelFontSize=Math.round(sizeRef*0.115);
+  const brandFontSize=Math.round(sizeRef*0.10);
+  // Vertical positions expressed as fractions of cH, offset by PAD
+  const iconY=PAD+cH*0.22;
 
   ctx.save();
   ctx.strokeStyle="#00cfff";
@@ -4254,35 +4264,35 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   }
   ctx.restore();
 
-  // ── Value number
+  // ── Value number — positioned within the padded content area
   ctx.textAlign="center";
   ctx.font=`bold ${valueFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle=th.accent;
   ctx.shadowColor=th.accent;
   ctx.shadowBlur=10;
-  ctx.fillText(String(value), cx, CARD_H*0.62);
+  ctx.fillText(String(value), cx, PAD+cH*0.62);
   ctx.shadowBlur=0;
-  ctx.fillText(String(value), cx, CARD_H*0.62);
+  ctx.fillText(String(value), cx, PAD+cH*0.62);
 
   // ── Label
   ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle="rgba(136,120,170,0.9)";
-  ctx.fillText(label.toUpperCase(), cx, CARD_H*0.82);
+  ctx.fillText(label.toUpperCase(), cx, PAD+cH*0.84);
 
-  // ── Subtle divider
+  // ── Subtle divider — inset by PAD horizontally
   ctx.strokeStyle="rgba(200,204,216,0.08)";
   ctx.lineWidth=1;
   ctx.beginPath();
-  ctx.moveTo(16, CARD_H-1); ctx.lineTo(W-16, CARD_H-1);
+  ctx.moveTo(PAD, CARD_H-1); ctx.lineTo(W-PAD, CARD_H-1);
   ctx.stroke();
 
-  // ── "My week on Kwento" branding — clipped on profile, visible in export
+  // ── Branding strip — below the visible card area
   ctx.font=`400 ${brandFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle="rgba(136,120,170,0.5)";
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-function StatSticker({iconId, label, value, data, onGenerate}){
+function StatSticker({iconId, label, value, data, onGenerate, span}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
@@ -4294,15 +4304,25 @@ function StatSticker({iconId, label, value, data, onGenerate}){
     const canvas=canvasRef.current;
     const wrap=wrapRef.current;
     if(!canvas||!wrap) return;
-    // Measure actual rendered cell dimensions so canvas fills it exactly
-    const W=wrap.offsetWidth||160;
-    const CARD_H=wrap.offsetHeight||160;
-    const H=CARD_H+BRAND_H;
-    canvas.width=W*DPR; canvas.height=H*DPR;
-    canvas.style.width=W+"px"; canvas.style.height=H+"px";
-    const ctx=canvas.getContext("2d");
-    ctx.scale(DPR,DPR);
-    drawSticker(ctx, W, H, CARD_H, label, value, iconId);
+
+    function redraw(){
+      const W=wrap.offsetWidth;
+      const CARD_H=wrap.offsetHeight;
+      if(!W||!CARD_H) return; // not laid out yet
+      const H=CARD_H+BRAND_H;
+      canvas.width=W*DPR; canvas.height=H*DPR;
+      canvas.style.width=W+"px"; canvas.style.height=H+"px";
+      const ctx=canvas.getContext("2d");
+      ctx.scale(DPR,DPR);
+      drawSticker(ctx, W, H, CARD_H, label, value, iconId);
+    }
+
+    // Use ResizeObserver so we draw AFTER layout is complete
+    const ro=new ResizeObserver(()=>{ redraw(); ro.disconnect(); });
+    ro.observe(wrap);
+    // Also try immediately in case layout is already known
+    redraw();
+    return ()=>ro.disconnect();
   },[value,label,iconId]);
 
   return(
@@ -4315,8 +4335,8 @@ function StatSticker({iconId, label, value, data, onGenerate}){
           borderRadius:16,cursor:"pointer",
           WebkitTapHighlightColor:"transparent",
           transition:"transform 0.15s",
-          // Fill the grid cell completely
           width:"100%",height:"100%",minHeight:95,
+          ...(span?{gridColumn:"span 3"}:{}),
         }}
         onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
         onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}
@@ -4652,39 +4672,61 @@ function ProfilePage({data,onChange}){
             </>}
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          {[
-            ["total",t.total_logs,totalLogs],
-            ["days",t.days_active,daysActiveCount],
-            ["week",t.this_week,thisWeekCount],
-            ["liked",lang==="fil"?"Na-like":"Liked",swipedRight.length],
-          ].map(([iconId,label,val],i)=>(
-            data.theme==="manila_nights"
-              ?<StatSticker key={i} iconId={iconId} label={label} value={val} data={data}
-                  onGenerate={()=>{
-                    const today=todayKey();
-                    const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                    onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-                  }}/>
-              :<div key={i} style={{
-                padding:"14px 12px",borderRadius:14,
-                background:th.card,
-                border:`1px solid ${th.border}`,
-                textAlign:"center",
-              }}>
-                <div style={{fontSize:20}}>{["📝","🗓","📅","👍"][i]}</div>
-                <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{val}</div>
-                <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{label}</div>
-              </div>
-          ))}
-          {stepsLogs.length>0&&!stepsHidden&&(
-            <div style={{padding:"14px 12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,textAlign:"center",gridColumn:"span 2"}}>
-              <div style={{fontSize:20}}>👟</div>
-              <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{weekSteps.toLocaleString()}</div>
-              <div style={{fontSize:11,color:th.sub,marginTop:2}}>{lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week"}</div>
+        {(()=>{
+          // ── Stats registry: each entry defines a stat candidate.
+          // Only stats whose value passes the threshold will render.
+          // This means the grid grows and shrinks with real data —
+          // no empty "0" cards taking up space.
+          const registry=[
+            {iconId:"total", emoji:"📝", label:t.total_logs,          value:totalLogs,        min:1},
+            {iconId:"days",  emoji:"🗓", label:t.days_active,          value:daysActiveCount,  min:1},
+            {iconId:"week",  emoji:"📅", label:t.this_week,            value:thisWeekCount,    min:1},
+            {iconId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:swipedRight.length, min:1},
+            // Steps gets its own entry — only if steps category is visible and has data
+            ...(stepsLogs.length>0&&!stepsHidden
+              ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
+              :[]),
+          ];
+
+          // Filter to only cards that have meaningful data
+          const visible=registry.filter(s=>s.value>=s.min);
+
+          // Nothing to show — render nothing (the section header is still visible)
+          if(!visible.length) return(
+            <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
+              {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
             </div>
-          )}
-        </div>
+          );
+
+          return(
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+              {visible.map((s,i)=>{
+                // Orphan: last card on an incomplete row — span all 3 columns
+                const isOrphan=visible.length%3!==0 && i===visible.length-1;
+                const spanStyle=isOrphan?{gridColumn:"span 3"}:{};
+
+                return data.theme==="manila_nights"
+                  ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
+                      onGenerate={()=>{
+                        const today=todayKey();
+                        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+                        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
+                      }}/>
+                  :<div key={s.iconId} style={{
+                    padding:"14px 12px",borderRadius:14,
+                    background:th.card,border:`1px solid ${th.border}`,
+                    textAlign:"center",...spanStyle,
+                  }}>
+                    <div style={{fontSize:20}}>{s.emoji}</div>
+                    <div style={{fontSize:22,fontWeight:800,color:th.accent}}>
+                      {s.iconId==="steps"?s.value.toLocaleString():s.value}
+                    </div>
+                    <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{s.label}</div>
+                  </div>;
+              })}
+            </div>
+          );
+        })()}
 
       </div>
         );
@@ -5119,7 +5161,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.11</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6</button></span>
       </div>
     </div>
   );
@@ -5446,11 +5488,11 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.11</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6</span>
                       <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 12, 2026</span>
                     </div>
                     {[
-                      {v:"v5.11",date:"Mar 12, 2026",notes:[
+                      {v:"v6",date:"Mar 12, 2026",notes:[
                         "Tap any timeline entry to expand it — see your note, photos, and details in place",
                         "Edit directly from the expanded card — title, note, category, date, and photo removal, no modal needed",
                         "Title field suggests from the library as you type, just like when logging",
