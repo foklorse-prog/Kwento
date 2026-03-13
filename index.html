@@ -4289,89 +4289,13 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, span}){
-  const th=THEMES.manila_nights;
-  const canvasRef=useRef(null);
-  const wrapRef=useRef(null);
-  const [showPreview,setShowPreview]=useState(false);
-  const BRAND_H=26;
-  const DPR=Math.min(window.devicePixelRatio||1,2);
-
-  useEffect(()=>{
-    const canvas=canvasRef.current;
-    const wrap=wrapRef.current;
-    if(!canvas||!wrap) return;
-
-    function redraw(){
-      const W=wrap.offsetWidth;
-      const CARD_H=wrap.offsetHeight;
-      if(!W||!CARD_H) return;
-      const H=CARD_H+BRAND_H;
-      canvas.width=W*DPR; canvas.height=H*DPR;
-      canvas.style.width=W+"px"; canvas.style.height=H+"px";
-      const ctx=canvas.getContext("2d");
-      ctx.scale(DPR,DPR);
-      drawSticker(ctx, W, H, CARD_H, label, value, iconId);
-    }
-
-    // On mobile, offsetWidth/offsetHeight can still be 0 on first paint
-    // even inside a ResizeObserver callback, because the grid layout hasn't
-    // fully committed to the screen yet. A double rAF (two animation frames)
-    // guarantees we run after the browser has both calculated layout AND painted
-    // it to the screen, so we always get real dimensions.
-    let raf1, raf2;
-    const ro=new ResizeObserver(()=>{
-      ro.disconnect();
-      raf1=requestAnimationFrame(()=>{
-        raf2=requestAnimationFrame(()=>{ redraw(); });
-      });
-    });
-    ro.observe(wrap);
-
-    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
-  },[value,label,iconId]);
-
-  return(
-    <>
-      <div
-        ref={wrapRef}
-        onClick={()=>{ setShowPreview(true); onStickerOpen&&onStickerOpen(true); }}
-        style={{
-          position:"relative",overflow:"hidden",
-          borderRadius:16,cursor:"pointer",
-          WebkitTapHighlightColor:"transparent",
-          transition:"transform 0.15s",
-          width:"100%",height:"100%",minHeight:95,
-          ...(span?{gridColumn:"span 3"}:{}),
-        }}
-        onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
-        onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}
-        onTouchCancel={e=>e.currentTarget.style.transform="scale(1)"}
-      >
-        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
-      </div>
-
-      {showPreview&&<StickerPreviewModal
-        iconId={iconId} label={label} value={value} data={data}
-        onClose={()=>{ setShowPreview(false); onStickerOpen&&onStickerOpen(false); }}
-        onGenerate={onGenerate}
-      />}
-    </>
-  );
-}
-
-function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
+// Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
+function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
-  const [limitHit,setLimitHit]=useState(false);
-
-  // Larger canvas for the preview — 2× the profile card
-  const SCALE=1.5;
-  const CARD_W=160*SCALE, CARD_H=110*SCALE, BRAND_H=26*SCALE;
+  const CARD_W=240, CARD_H=165, BRAND_H=39;
   const DPR=Math.min(window.devicePixelRatio||1,2);
-
-  // Check freemium limit — beta mode bypasses entirely
   const today=todayKey();
   const genCount=data.stickerGenDate===today?(data.stickerGenCount||0):0;
   const canGenerate=data.betaMode||genCount<STICKER_FREE_LIMIT;
@@ -4384,67 +4308,324 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
     canvas.style.width=W+"px"; canvas.style.height=H+"px";
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
-    drawSticker(ctx, W, H, CARD_H, label, value, iconId);
-    setImgUrl(canvas.toDataURL("image/png"));
+    drawSticker(ctx,W,H,CARD_H,label,value,iconId);
+    if(canGenerate){ setImgUrl(canvas.toDataURL("image/png")); onGenerate&&onGenerate(); }
+    else setImgUrl(canvas.toDataURL("image/png"));
   },[]);
 
   return(
-    <div
-      onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:200,
-        display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-        backdropFilter:"blur(8px)",padding:32,
-        overflow:"hidden"}}>
-
-      {/* Label above */}
-      <p style={{color:"rgba(136,120,170,0.7)",fontSize:11,fontWeight:500,
-        letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:20}}>
-        Hold to save or share
-      </p>
-
-      {/* Hidden canvas — generates the image data only */}
-      <canvas ref={canvasRef} style={{display:"none"}}/>
-
-      {/* Visible img — iOS native long-press gives "Save to Photos / Share / Copy" */}
-      {imgUrl&&(
-        <img
-          src={imgUrl}
-          alt="Kwento stat sticker"
-          style={{
-            // Match the canvas CSS dimensions (CARD_W=240, CARD_H=165, BRAND_H=39)
-            // so the img renders at intended sticker size, not raw bitmap resolution
-            width:240,
-            height:204,
-            borderRadius:16,
-            boxShadow:`0 12px 40px rgba(0,207,255,0.2)`,
-            display:"block",
-            WebkitTouchCallout:"default",
-            userSelect:"none",
-          }}
-        />
-      )}
-
-      {/* Freemium counter */}
-      {!limitHit?(
-        <p style={{color:"rgba(136,120,170,0.5)",fontSize:11,marginTop:20,letterSpacing:"0.4px"}}>
-          {data.betaMode
-            ?"🔓 Beta — unlimited saves"
-            :canGenerate
-              ?`${STICKER_FREE_LIMIT-genCount} free ${STICKER_FREE_LIMIT-genCount===1?"save":"saves"} left today`
-              :"No free saves left today"}
+    <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}
+      style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",
+        display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div onClick={e=>e.stopPropagation()}
+        style={{width:"100%",maxWidth:500,background:"#0a0614",
+          borderTopLeftRadius:24,borderTopRightRadius:24,
+          padding:"24px 24px 48px",
+          display:"flex",flexDirection:"column",alignItems:"center",gap:16,
+          border:"1px solid #221440",boxShadow:"0 -8px 40px rgba(0,0,0,0.8)"}}>
+        <div style={{width:36,height:4,borderRadius:2,background:"rgba(136,120,170,0.3)",marginBottom:4}}/>
+        <p style={{color:"rgba(136,120,170,0.6)",fontSize:11,fontWeight:500,letterSpacing:"1.2px",textTransform:"uppercase"}}>
+          {canGenerate?"Hold image to save or share":"Daily limit reached"}
         </p>
-      ):(
-        <div style={{marginTop:20,textAlign:"center"}}>
-          <p style={{color:th.accent2,fontSize:13,fontWeight:600,marginBottom:4}}>Daily limit reached</p>
-          <p style={{color:"rgba(136,120,170,0.6)",fontSize:12}}>3 free stickers per day · Unlimited with Premium</p>
-        </div>
-      )}
+        <canvas ref={canvasRef} style={{display:"none"}}/>
+        {imgUrl&&(
+          <img src={imgUrl} alt="Kwento stat sticker"
+            style={{width:240,height:204,borderRadius:16,
+              boxShadow:"0 8px 32px rgba(0,207,255,0.18)",display:"block",
+              WebkitTouchCallout:"default",userSelect:"none"}}/>
+        )}
+        {!canGenerate&&(
+          <p style={{color:"rgba(136,120,170,0.5)",fontSize:12,textAlign:"center"}}>
+            3 free saves per day · Unlimited with Premium
+          </p>
+        )}
+        <button onClick={onClose}
+          style={{background:"transparent",border:"none",color:"rgba(136,120,170,0.45)",
+            fontSize:13,cursor:"pointer",letterSpacing:"0.4px",marginTop:4}}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      {/* Close */}
-      <button onClick={onClose} style={{marginTop:24,background:"transparent",border:"none",
-        color:"rgba(136,120,170,0.5)",fontSize:13,cursor:"pointer",letterSpacing:"0.4px"}}>
-        Close
-      </button>
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen}){
+  const canvasRef=useRef(null);
+  const wrapRef=useRef(null);
+  const [showSheet,setShowSheet]=useState(false);
+  const BRAND_H=26;
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current;
+    const wrap=wrapRef.current;
+    if(!canvas||!wrap) return;
+    function redraw(){
+      const W=wrap.offsetWidth;
+      const CARD_H=wrap.offsetHeight;
+      if(!W||!CARD_H) return;
+      const H=CARD_H+BRAND_H;
+      canvas.width=W*DPR; canvas.height=H*DPR;
+      canvas.style.width=W+"px"; canvas.style.height=H+"px";
+      const ctx=canvas.getContext("2d");
+      ctx.scale(DPR,DPR);
+      drawSticker(ctx,W,H,CARD_H,label,value,iconId);
+    }
+    let raf1,raf2;
+    const ro=new ResizeObserver(()=>{
+      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
+      raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{ redraw(); }); });
+    });
+    ro.observe(wrap);
+    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  },[value,label,iconId]);
+
+  // openSheet is called by StatGrid after 1.2s hold
+  function openSheet(){
+    setShowSheet(true);
+    onStickerOpen&&onStickerOpen(true);
+  }
+
+  useEffect(()=>{ onRegisterOpen&&onRegisterOpen(openSheet); },[]);
+
+  return(
+    <>
+      <div ref={wrapRef}
+        style={{position:"relative",overflow:"hidden",borderRadius:16,
+          width:"100%",height:"100%",
+          WebkitTapHighlightColor:"transparent",
+          ...(span?{gridColumn:"span 3"}:{}),
+        }}>
+        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
+        {/* Subtle hint label */}
+        <div style={{position:"absolute",bottom:6,left:0,right:0,textAlign:"center",
+          fontSize:9,fontWeight:500,color:"rgba(136,120,170,0.45)",letterSpacing:"0.6px",
+          textTransform:"uppercase",pointerEvents:"none"}}>
+          hold to save
+        </div>
+      </div>
+      {showSheet&&<StickerSaveSheet
+        iconId={iconId} label={label} value={value} data={data}
+        onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
+        onGenerate={onGenerate}
+      />}
+    </>
+  );
+}
+
+// ─── STAT GRID ────────────────────────────────────────────────────────────────
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
+  const savedSizes = data.statCardSizes || {};
+  const savedOrder = data.statCardOrder || [];
+
+  const [order, setOrder] = useState(()=>{
+    const known = savedOrder.filter(id=>cards.find(c=>c.iconId===id));
+    const fresh  = cards.filter(c=>!known.includes(c.iconId)).map(c=>c.iconId);
+    return [...known,...fresh];
+  });
+  const [sizes, setSizes] = useState(()=>{
+    const s={};
+    cards.forEach(c=>{ s[c.iconId]=savedSizes[c.iconId]||{colSpan:1,rowSpan:1}; });
+    return s;
+  });
+
+  // drag state lives in refs so touch handlers always see current values
+  const dragState = useRef({active:false, fromId:null, overId:null});
+  const [dragging, setDragging] = useState(null);
+  const [dragOver, setDragOver] = useState(null);
+  const longTimer  = useRef(null);
+
+  function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
+
+  function resize(iconId,patch){
+    setSizes(prev=>{
+      const next={...prev,[iconId]:{...prev[iconId],...patch}};
+      persist(order,next);
+      return next;
+    });
+  }
+
+  function reorder(fromId,toId){
+    if(!fromId||!toId||fromId===toId) return;
+    setOrder(prev=>{
+      const a=[...prev];
+      const fi=a.indexOf(fromId), ti=a.indexOf(toId);
+      if(fi<0||ti<0) return prev;
+      a.splice(fi,1); a.splice(ti,0,fromId);
+      persist(a,sizes);
+      return a;
+    });
+  }
+
+  // Each card calls these up to StatGrid
+  // stickerRefs: iconId → openSheet fn, set by each StatSticker via callback
+  const stickerOpenRefs = useRef({});
+
+  function onCardTouchStart(iconId, e){
+    const t=e.touches;
+    if(t.length===1){
+      // 400ms → drag mode
+      longTimer.current=setTimeout(()=>{
+        dragState.current={active:true,fromId:iconId,overId:null};
+        setDragging(iconId);
+        if(navigator.vibrate) navigator.vibrate(25);
+
+        // 1200ms total → save sheet (only if still not moved)
+        longTimer.current=setTimeout(()=>{
+          if(dragState.current.active && !dragState.current.moved){
+            // cancel drag, open save sheet
+            dragState.current={active:false,fromId:null,overId:null,moved:false};
+            setDragging(null); setDragOver(null);
+            stickerOpenRefs.current[iconId]&&stickerOpenRefs.current[iconId]();
+          }
+        },800);
+      },400);
+    }
+    if(t.length===2) clearTimeout(longTimer.current);
+  }
+
+  function onCardTouchMove(iconId, e){
+    if(!dragState.current.active) return;
+    dragState.current.moved=true;
+    const t=e.touches[0];
+    const el=document.elementFromPoint(t.clientX,t.clientY);
+    if(!el) return;
+    const cardEl=el.closest("[data-cardid]");
+    if(!cardEl) return;
+    const overId=cardEl.getAttribute("data-cardid");
+    if(overId && overId!==dragState.current.fromId){
+      dragState.current.overId=overId;
+      setDragOver(overId);
+    }
+  }
+
+  function onCardTouchEnd(){
+    clearTimeout(longTimer.current);
+    if(dragState.current.active){
+      reorder(dragState.current.fromId, dragState.current.overId);
+      dragState.current={active:false,fromId:null,overId:null};
+      setDragging(null);
+      setDragOver(null);
+    }
+  }
+
+  const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
+
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
+      {orderedCards.map(card=>{
+        const {colSpan,rowSpan}=sizes[card.iconId]||{colSpan:1,rowSpan:1};
+        const BASE_H=95;
+        const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
+        const area=colSpan*rowSpan;
+        const emojiSz=area>=4?30:area>=2?25:20;
+        const valSz=area>=4?32:area>=2?27:22;
+        const lblSz=area>=4?13:area>=2?12:11;
+        const pad=area>=4?"18px 16px":area>=2?"16px 13px":"14px 12px";
+        const isDrag=dragging===card.iconId;
+        const isOver=dragOver===card.iconId;
+
+        // pinch ref per card — stored on card object each render (safe, same ref)
+        if(!card._pinch) card._pinch={on:false,isH:false,dist0:0,col0:1,row0:1};
+        const pinch=card._pinch;
+
+        function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
+
+        function handleTouchStart(e){
+          onCardTouchStart(card.iconId,e);
+          if(e.touches.length===2){
+            e.preventDefault();
+            const t=e.touches;
+            const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
+            pinch.on=true; pinch.isH=Math.abs(dx)>=Math.abs(dy);
+            pinch.dist0=Math.hypot(dx,dy); pinch.col0=colSpan; pinch.row0=rowSpan;
+          }
+        }
+
+        function handleTouchMove(e){
+          onCardTouchMove(card.iconId,e);
+          if(!pinch.on||e.touches.length!==2) return;
+          e.preventDefault();
+          const ratio=d2(e)/pinch.dist0;
+          if(pinch.isH){
+            const next=ratio>1.28?Math.min(pinch.col0+1,2):ratio<0.78?Math.max(pinch.col0-1,1):pinch.col0;
+            if(next!==colSpan){ resize(card.iconId,{colSpan:next}); pinch.col0=next; pinch.dist0=d2(e); }
+          } else {
+            const next=ratio>1.28?Math.min(pinch.row0+1,2):ratio<0.78?Math.max(pinch.row0-1,1):pinch.row0;
+            if(next!==rowSpan){ resize(card.iconId,{rowSpan:next}); pinch.row0=next; pinch.dist0=d2(e); }
+          }
+        }
+
+        function handleTouchEnd(e){
+          pinch.on=false;
+          onCardTouchEnd();
+        }
+
+        const wrapStyle={
+          gridColumn:`span ${colSpan}`,
+          gridRow:`span ${rowSpan}`,
+          height:cardH,
+          transition:"height 0.28s ease, transform 0.22s ease, opacity 0.2s ease, box-shadow 0.2s ease",
+          transform:isDrag?"scale(1.04)":isOver?"scale(0.96)":"scale(1)",
+          opacity:isDrag?0.8:1,
+          boxShadow:isDrag?"0 14px 36px rgba(0,0,0,0.4)":"none",
+          zIndex:isDrag?20:1,
+          position:"relative",
+          WebkitUserSelect:"none",userSelect:"none",
+          WebkitTouchCallout:"none",
+          WebkitTapHighlightColor:"transparent",
+          touchAction:"pan-y",
+        };
+
+        if(isMN) return(
+          <div key={card.iconId} data-cardid={card.iconId}
+            style={wrapStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+          >
+            <StatSticker
+              iconId={card.iconId} label={card.label} value={card.value}
+              data={data} span={false}
+              onStickerOpen={onStickerOpen}
+              onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
+              onGenerate={()=>{
+                const today=todayKey();
+                const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+                onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
+              }}
+            />
+          </div>
+        );
+
+        return(
+          <div key={card.iconId} data-cardid={card.iconId}
+            style={wrapStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+          >
+            <div style={{
+              width:"100%",height:"100%",padding:pad,
+              borderRadius:14,background:th.card,border:`1px solid ${th.border}`,
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              textAlign:"center",gap:rowSpan===2?8:4,boxSizing:"border-box",
+            }}>
+              <div style={{fontSize:emojiSz,lineHeight:1}}>{card.emoji}</div>
+              <div style={{fontSize:valSz,fontWeight:800,color:th.accent,lineHeight:1}}>
+                {card.iconId==="steps"?card.value.toLocaleString():card.value}
+              </div>
+              <div style={{fontSize:lblSz,color:th.sub,lineHeight:1.3,
+                letterSpacing:isHapon?"0.3px":undefined,
+                whiteSpace:colSpan===2?"nowrap":"normal",
+                overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
+              }}>{card.label}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -4639,33 +4820,11 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
           );
 
           return(
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-              {visible.map((s,i)=>{
-                // Orphan: last card on an incomplete row — span all 3 columns
-                const isOrphan=visible.length%3!==0 && i===visible.length-1;
-                const spanStyle=isOrphan?{gridColumn:"span 3"}:{};
-
-                return data.theme==="manila_nights"
-                  ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
-                      onStickerOpen={onStickerOpen}
-                      onGenerate={()=>{
-                        const today=todayKey();
-                        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-                      }}/>
-                  :<div key={s.iconId} style={{
-                    padding:"14px 12px",borderRadius:14,
-                    background:th.card,border:`1px solid ${th.border}`,
-                    textAlign:"center",...spanStyle,
-                  }}>
-                    <div style={{fontSize:20}}>{s.emoji}</div>
-                    <div style={{fontSize:22,fontWeight:800,color:th.accent}}>
-                      {s.iconId==="steps"?s.value.toLocaleString():s.value}
-                    </div>
-                    <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{s.label}</div>
-                  </div>;
-              })}
-            </div>
+            <StatGrid
+              cards={visible} data={data} onChange={onChange}
+              th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
+              onStickerOpen={onStickerOpen}
+            />
           );
         })()}
 
