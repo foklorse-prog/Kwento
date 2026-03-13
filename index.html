@@ -4449,7 +4449,7 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   );
 }
 
-function ProfilePage({data,onChange,onStickerOpen}){
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -4495,7 +4495,7 @@ function ProfilePage({data,onChange,onStickerOpen}){
   const isHapon=data.theme==="hapon";
   const isMN=data.theme==="manila_nights";
   return(
-    <div className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -5245,20 +5245,6 @@ function App(){
   const ptrInnerRef = useRef(null);
   const ptrWrapRef = useRef(null);
 
-  // Same approach as onboarding: just set overflow:hidden on the root wrapper.
-  // Onboarding does overflowY:step===2?"auto":"hidden" on its container div —
-  // we do the same here on ptrWrapRef when the sticker modal is open.
-  // No gesture fighting, no React conflicts, just CSS doing its job.
-  useEffect(()=>{
-    const wrap = ptrWrapRef.current;
-    if(!wrap) return;
-    if(stickerOpen){
-      wrap.style.overflow = "hidden";
-    } else {
-      wrap.style.overflow = "";
-    }
-  }, [stickerOpen]);
-
   useEffect(()=>{
     const wrap = ptrWrapRef.current;
     if(!wrap) return;
@@ -5441,14 +5427,14 @@ function App(){
                 </div>
               )}
               {/* Page content slides down over indicator */}
-              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
+              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"auto"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
