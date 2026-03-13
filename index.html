@@ -4289,7 +4289,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-function StatSticker({iconId, label, value, data, onGenerate, span}){
+function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, span}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
@@ -4335,7 +4335,7 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
     <>
       <div
         ref={wrapRef}
-        onClick={()=>setShowPreview(true)}
+        onClick={()=>{ setShowPreview(true); onStickerOpen&&onStickerOpen(true); }}
         style={{
           position:"relative",overflow:"hidden",
           borderRadius:16,cursor:"pointer",
@@ -4353,7 +4353,7 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
 
       {showPreview&&<StickerPreviewModal
         iconId={iconId} label={label} value={value} data={data}
-        onClose={()=>setShowPreview(false)}
+        onClose={()=>{ setShowPreview(false); onStickerOpen&&onStickerOpen(false); }}
         onGenerate={onGenerate}
       />}
     </>
@@ -4365,22 +4365,6 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
   const [limitHit,setLimitHit]=useState(false);
-
-  useEffect(()=>{
-    const html=document.documentElement;
-    const body=document.body;
-    const prevHtmlOverscroll=html.style.overscrollBehavior;
-    const prevHtmlOverflow=html.style.overflow;
-    const prevBodyOverflow=body.style.overflow;
-    html.style.overscrollBehavior="none";
-    html.style.overflow="hidden";
-    body.style.overflow="hidden";
-    return ()=>{
-      html.style.overscrollBehavior=prevHtmlOverscroll;
-      html.style.overflow=prevHtmlOverflow;
-      body.style.overflow=prevBodyOverflow;
-    };
-  },[]);
 
   // Larger canvas for the preview — 2× the profile card
   const SCALE=1.5;
@@ -4465,7 +4449,7 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   );
 }
 
-function ProfilePage({data,onChange}){
+function ProfilePage({data,onChange,onStickerOpen}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -4663,6 +4647,7 @@ function ProfilePage({data,onChange}){
 
                 return data.theme==="manila_nights"
                   ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
+                      onStickerOpen={onStickerOpen}
                       onGenerate={()=>{
                         const today=todayKey();
                         const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
@@ -5192,11 +5177,12 @@ function App(){
   const [editEntry,setEditEntry]=useState(null);
   const [timelineUnread,setTimelineUnread]=useState(0);
   const [showPatch,setShowPatch]=useState(false);
+  const [stickerOpen,setStickerOpen]=useState(false);
   const [badgeAnimKey,setBadgeAnimKey]=useState(0);
   const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
 
-  const anyModalOpen=showLog||showPatch;
+  const anyModalOpen=showLog||showPatch||stickerOpen;
 
   useEffect(()=>{
     if(!photosReady) return; // don't save until hydration is done
@@ -5274,6 +5260,7 @@ function App(){
 
     const onTouchStart = e => {
       if(tab === "settings") return; // no PTR on settings
+      if(stickerOpen) return;        // no PTR when sticker modal is open
       const inner = ptrInnerRef.current;
       if(!inner) return;
       // Find deepest scrollable container that is scrolled
@@ -5347,7 +5334,7 @@ function App(){
       wrap.removeEventListener("touchmove", onTouchMove);
       wrap.removeEventListener("touchend", onTouchEnd);
     };
-  }, [tab, ptrY]);
+  }, [tab, ptrY, stickerOpen]);
 
   const ptrProgress = Math.min(ptrY / PTR_THRESHOLD, 1);
 
@@ -5447,7 +5434,7 @@ function App(){
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
