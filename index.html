@@ -4156,6 +4156,162 @@ function ShareCardModal({archetype,data,av,onClose}){
 }
 
 // ─── PROFILE PAGE ────────────────────────────────────────────────────────────
+// ─── STAT STICKER — Manila Nights only ───────────────────────────────────────
+// Renders a frosted-glass sticker to canvas on long-press.
+// The canvas is taller than the visible card — the bottom "My week on Kwento"
+// branding is clipped via overflow:hidden on the wrapper div.
+function StatSticker({emoji,label,value,data,visible}){
+  const th=THEMES.manila_nights;
+  const canvasRef=useRef(null);
+  const longPressTimer=useRef(null);
+  const [pressing,setPressing]=useState(false);
+
+  // Card dimensions — visible portion is CARD_H, full canvas is CARD_H + BRAND_H
+  const CARD_W=160, CARD_H=120, BRAND_H=30, DPR=Math.min(window.devicePixelRatio||1,2);
+
+  // Draw the full sticker (card + hidden branding strip) to canvas
+  useEffect(()=>{
+    const canvas=canvasRef.current;
+    if(!canvas) return;
+    const W=CARD_W, H=CARD_H+BRAND_H;
+    canvas.width=W*DPR; canvas.height=H*DPR;
+    canvas.style.width=W+"px"; canvas.style.height=H+"px";
+    const ctx=canvas.getContext("2d");
+    ctx.scale(DPR,DPR);
+
+    // ── Transparent base — this is what makes it a sticker
+    ctx.clearRect(0,0,W,H);
+
+    // ── Frosted glass card background
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(0,0,W,CARD_H,18);
+    ctx.clip();
+
+    // Dark semi-transparent fill — like the reference image
+    ctx.fillStyle="rgba(10,6,20,0.72)";
+    ctx.fillRect(0,0,W,CARD_H);
+
+    // Subtle cyan glow top-left
+    const glow=ctx.createRadialGradient(W*0.2,0,0,W*0.2,0,W*0.7);
+    glow.addColorStop(0,"rgba(0,207,255,0.18)");
+    glow.addColorStop(1,"transparent");
+    ctx.fillStyle=glow; ctx.fillRect(0,0,W,CARD_H);
+
+    // Subtle magenta glow bottom-right
+    const glow2=ctx.createRadialGradient(W*0.85,CARD_H,0,W*0.85,CARD_H,W*0.6);
+    glow2.addColorStop(0,"rgba(255,62,157,0.14)");
+    glow2.addColorStop(1,"transparent");
+    ctx.fillStyle=glow2; ctx.fillRect(0,0,W,CARD_H);
+
+    ctx.restore();
+
+    // ── Glass edge border — thin, silver-white
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(0.5,0.5,W-1,CARD_H-1,18);
+    ctx.strokeStyle="rgba(200,204,216,0.18)";
+    ctx.lineWidth=1;
+    ctx.stroke();
+    ctx.restore();
+
+    // ── Emoji
+    ctx.font=`${22}px serif`;
+    ctx.textAlign="center";
+    ctx.fillText(emoji, W/2, 30);
+
+    // ── Value — big, cyan accent, DM Sans bold
+    ctx.font=`bold 32px 'DM Sans', sans-serif`;
+    ctx.fillStyle=th.accent;
+    ctx.textAlign="center";
+    ctx.fillText(String(value), W/2, 68);
+
+    // ── Neon glow on the value number
+    ctx.shadowColor=th.accent;
+    ctx.shadowBlur=12;
+    ctx.fillText(String(value), W/2, 68);
+    ctx.shadowBlur=0;
+
+    // ── Label — small, subdued
+    ctx.font=`500 10px 'DM Sans', sans-serif`;
+    ctx.fillStyle="rgba(136,120,170,0.9)";
+    ctx.letterSpacing="0.8px";
+    ctx.fillText(label.toUpperCase(), W/2, 88);
+    ctx.letterSpacing="0px";
+
+    // ── Thin separator between card and branding strip
+    ctx.strokeStyle="rgba(200,204,216,0.10)";
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(16,CARD_H); ctx.lineTo(W-16,CARD_H);
+    ctx.stroke();
+
+    // ── Branding strip — "My week on Kwento" (hidden on screen, shows in export)
+    ctx.font=`500 9px 'DM Sans', sans-serif`;
+    ctx.fillStyle="rgba(136,120,170,0.55)";
+    ctx.textAlign="center";
+    ctx.letterSpacing="0.6px";
+    ctx.fillText("MY WEEK ON KWENTO", W/2, CARD_H+18);
+    ctx.letterSpacing="0px";
+
+  },[value, label, emoji]); // re-draw whenever the stat value changes
+
+  // ── Share / download the full canvas PNG
+  const exportSticker=async()=>{
+    const canvas=canvasRef.current;
+    if(!canvas) return;
+    const dataUrl=canvas.toDataURL("image/png");
+    try{
+      const res=await fetch(dataUrl);
+      const blob=await res.blob();
+      const file=new File([blob],`kwento-${label.toLowerCase().replace(/\s+/g,"-")}.png`,{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:"My week on Kwento"});
+      } else {
+        // Fallback: trigger download
+        const a=document.createElement("a");
+        a.href=dataUrl;
+        a.download=file.name;
+        a.click();
+      }
+    } catch(e){ console.warn("Share failed",e); }
+  };
+
+  // ── Long-press detection (500ms threshold, cancels on move)
+  const onTouchStart=e=>{
+    setPressing(true);
+    longPressTimer.current=setTimeout(()=>{
+      setPressing(false);
+      exportSticker();
+    },500);
+  };
+  const onTouchEnd=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
+  const onTouchMove=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
+
+  return(
+    // Wrapper clips the branding strip — only CARD_H pixels are visible
+    <div
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchMove={onTouchMove}
+      style={{
+        position:"relative",
+        height:CARD_H,
+        overflow:"hidden",
+        borderRadius:18,
+        // Subtle press feedback
+        transform:pressing?"scale(0.96)":"scale(1)",
+        transition:"transform 0.15s",
+        cursor:"pointer",
+        // Hold hint ring on press
+        boxShadow:pressing?`0 0 0 2px ${THEMES.manila_nights.accent}88`:"none",
+      }}
+    >
+      <canvas ref={canvasRef} style={{display:"block"}}/>
+    </div>
+  );
+}
+
 function ProfilePage({data,onChange}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
@@ -4381,16 +4537,18 @@ function ProfilePage({data,onChange}){
             ["📅",t.this_week,thisWeekCount],
             ["👍",lang==="fil"?"Na-like":"Liked",swipedRight.length],
           ].map(([emoji,label,val],i)=>(
-            <div key={i} style={{
-              padding:"14px 12px",borderRadius:14,
-              background:th.card,
-              border:`1px solid ${th.border}`,
-              textAlign:"center",
-            }}>
-              <div style={{fontSize:20}}>{emoji}</div>
-              <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{val}</div>
-              <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{label}</div>
-            </div>
+            data.theme==="manila_nights"
+              ?<StatSticker key={i} emoji={emoji} label={label} value={val} data={data}/>
+              :<div key={i} style={{
+                padding:"14px 12px",borderRadius:14,
+                background:th.card,
+                border:`1px solid ${th.border}`,
+                textAlign:"center",
+              }}>
+                <div style={{fontSize:20}}>{emoji}</div>
+                <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{val}</div>
+                <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{label}</div>
+              </div>
           ))}
           {stepsLogs.length>0&&!stepsHidden&&(
             <div style={{padding:"14px 12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,textAlign:"center",gridColumn:"span 2"}}>
