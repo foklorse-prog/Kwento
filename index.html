@@ -4477,7 +4477,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimers = useRef({});
-  const dragCardRef = useRef(null); // ref so touch handlers can read current dragging
+  const dragCardRef = useRef(null);
+  const dragOverRef = useRef(null); // ref mirror so touchend can read it
 
   function persist(o, s){ onChange("__batch__",{statCardOrder:o, statCardSizes:s}); }
 
@@ -4490,11 +4491,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
   }
 
   function handleReorder(fromId, toId){
-    if(!fromId || fromId===toId) return;
+    if(!fromId || !toId || fromId===toId) return;
     setOrder(prev=>{
       const next = [...prev];
       const fi = next.indexOf(fromId);
       const ti = next.indexOf(toId);
+      if(fi===-1||ti===-1) return prev;
       next.splice(fi,1);
       next.splice(ti,0,fromId);
       persist(next, sizes);
@@ -4502,9 +4504,10 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     });
   }
 
-  function startLongPress(iconId, touchX, touchY){
+  function startLongPress(iconId){
     longTimers.current[iconId] = setTimeout(()=>{
       dragCardRef.current = iconId;
+      dragOverRef.current = null;
       setDragging(iconId);
       if(navigator.vibrate) navigator.vibrate(25);
     }, 500);
@@ -4512,6 +4515,32 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
 
   function cancelLongPress(iconId){
     clearTimeout(longTimers.current[iconId]);
+  }
+
+  // Called from StatCardItem's touchmove when a drag is live
+  function onDragMove(x, y){
+    if(!dragCardRef.current) return;
+    // Find which card element is under the finger
+    const el = document.elementFromPoint(x, y);
+    if(!el) return;
+    const cardEl = el.closest("[data-cardid]");
+    if(!cardEl) return;
+    const overId = cardEl.getAttribute("data-cardid");
+    if(overId && overId!==dragCardRef.current && overId!==dragOverRef.current){
+      dragOverRef.current = overId;
+      setDragOver(overId);
+    }
+  }
+
+  // Called from StatCardItem's touchend when a drag is live
+  function onDragEnd(){
+    if(dragCardRef.current){
+      handleReorder(dragCardRef.current, dragOverRef.current);
+    }
+    dragCardRef.current = null;
+    dragOverRef.current = null;
+    setDragging(null);
+    setDragOver(null);
   }
 
   const orderedCards = order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
@@ -4526,15 +4555,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
           onResize={patch=>handleResize(card.iconId,patch)}
           isDragging={dragging===card.iconId}
           isDragOver={dragOver===card.iconId}
-          onLongPressStart={(tx,ty)=>startLongPress(card.iconId,tx,ty)}
+          isDragActive={!!dragging}
+          onLongPressStart={()=>startLongPress(card.iconId)}
           onLongPressCancel={()=>cancelLongPress(card.iconId)}
-          onDragEnter={()=>{ if(dragCardRef.current && dragCardRef.current!==card.iconId) setDragOver(card.iconId); }}
-          onDragDrop={()=>{
-            handleReorder(dragCardRef.current, card.iconId);
-            dragCardRef.current=null;
-            setDragging(null);
-            setDragOver(null);
-          }}
+          onDragMove={onDragMove}
+          onDragEnd={onDragEnd}
           th={th} isHapon={isHapon} isMN={isMN}
           data={data} onChange={onChange} onStickerOpen={onStickerOpen}
         />
@@ -4543,22 +4568,22 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
   );
 }
 
-function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPressStart, onLongPressCancel, onDragEnter, onDragDrop, th, isHapon, isMN, data, onChange, onStickerOpen}){
+function StatCardItem({card, size, onResize, isDragging, isDragOver, isDragActive, onLongPressStart, onLongPressCancel, onDragMove, onDragEnd, th, isHapon, isMN, data, onChange, onStickerOpen}){
   const {colSpan, rowSpan} = size;
 
-  // Row height: 95px per row + 10px gap per extra row
   const BASE_H = 95;
-  const cardH   = rowSpan===2 ? BASE_H*2+10 : BASE_H;
+  const cardH  = rowSpan===2 ? BASE_H*2+10 : BASE_H;
 
-  // Scale text/padding with card area
-  const area   = colSpan * rowSpan;
-  const emoji  = area>=4 ? 30 : area>=2 ? 25 : 20;
-  const valSz  = area>=4 ? 32 : area>=2 ? 27 : 22;
-  const lblSz  = area>=4 ? 13 : area>=2 ? 12 : 11;
-  const pad    = area>=4 ? "18px 16px" : area>=2 ? "16px 13px" : "14px 12px";
+  const area  = colSpan * rowSpan;
+  const emoji = area>=4 ? 30 : area>=2 ? 25 : 20;
+  const valSz = area>=4 ? 32 : area>=2 ? 27 : 22;
+  const lblSz = area>=4 ? 13 : area>=2 ? 12 : 11;
+  const pad   = area>=4 ? "18px 16px" : area>=2 ? "16px 13px" : "14px 12px";
 
-  // Pinch state
-  const pinch = useRef({on:false, isH:false, dist0:0, col0:1, row0:1});
+  const pinch    = useRef({on:false, isH:false, dist0:0, col0:1, row0:1});
+  const draggingRef = useRef(false); // mirrors isDragging for use inside touch handlers
+
+  useEffect(()=>{ draggingRef.current = isDragging; }, [isDragging]);
 
   function dist2(e){
     const t = e.touches;
@@ -4568,17 +4593,15 @@ function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPress
   function onTouchStart(e){
     const t = e.touches;
     if(t.length===1){
-      // Single finger — start long-press timer for drag
-      onLongPressStart(t[0].clientX, t[0].clientY);
+      onLongPressStart();
     }
     if(t.length===2){
-      // Two fingers — begin pinch, cancel any pending long-press
       onLongPressCancel();
       e.preventDefault();
       const dx = t[1].clientX - t[0].clientX;
       const dy = t[1].clientY - t[0].clientY;
       pinch.current = {
-        on: true,
+        on:true,
         isH: Math.abs(dx) >= Math.abs(dy),
         dist0: Math.hypot(dx,dy),
         col0: colSpan,
@@ -4588,32 +4611,40 @@ function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPress
   }
 
   function onTouchMove(e){
+    // If drag is active, track finger position for hover detection
+    if(draggingRef.current){
+      const t = e.touches[0];
+      onDragMove(t.clientX, t.clientY);
+      return;
+    }
+    // Otherwise handle pinch
     if(!pinch.current.on || e.touches.length!==2) return;
     e.preventDefault();
     const ratio = dist2(e) / pinch.current.dist0;
     if(pinch.current.isH){
       const next = ratio>1.28 ? Math.min(pinch.current.col0+1,2) : ratio<0.78 ? Math.max(pinch.current.col0-1,1) : pinch.current.col0;
-      if(next!==colSpan) onResize({colSpan:next});
+      if(next!==colSpan){ onResize({colSpan:next}); pinch.current.col0=next; pinch.current.dist0=dist2(e); }
     } else {
       const next = ratio>1.28 ? Math.min(pinch.current.row0+1,2) : ratio<0.78 ? Math.max(pinch.current.row0-1,1) : pinch.current.row0;
-      if(next!==rowSpan) onResize({rowSpan:next});
+      if(next!==rowSpan){ onResize({rowSpan:next}); pinch.current.row0=next; pinch.current.dist0=dist2(e); }
     }
   }
 
   function onTouchEnd(e){
     pinch.current.on = false;
-    if(e.touches.length===0) onLongPressCancel();
-    // If this is the end of a drag, drop onto self (no-op, parent handles it)
-    onDragDrop();
+    onLongPressCancel();
+    if(draggingRef.current){
+      onDragEnd();
+    }
   }
 
   return(
     <div
+      data-cardid={card.iconId}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
-      onMouseEnter={onDragEnter}
       style={{
         gridColumn:`span ${colSpan}`,
         gridRow:`span ${rowSpan}`,
@@ -4631,7 +4662,6 @@ function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPress
       }}
     >
       {isMN
-        // Manila Nights — canvas sticker, ResizeObserver redraws on size change
         ?<StatSticker
             iconId={card.iconId} label={card.label} value={card.value}
             data={data} span={false}
@@ -4642,7 +4672,6 @@ function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPress
               onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
             }}
           />
-        // All other themes — plain div card
         :<div style={{
             width:"100%", height:"100%",
             padding:pad,
@@ -4652,18 +4681,18 @@ function StatCardItem({card, size, onResize, isDragging, isDragOver, onLongPress
             display:"flex", flexDirection:"column",
             alignItems:"center", justifyContent:"center",
             textAlign:"center",
-            gap: rowSpan===2 ? 8 : 4,
+            gap: rowSpan===2?8:4,
             boxSizing:"border-box",
           }}>
-            <div style={{fontSize:emoji, lineHeight:1}}>{card.emoji}</div>
-            <div style={{fontSize:valSz, fontWeight:800, color:th.accent, lineHeight:1}}>
-              {card.iconId==="steps" ? card.value.toLocaleString() : card.value}
+            <div style={{fontSize:emoji,lineHeight:1}}>{card.emoji}</div>
+            <div style={{fontSize:valSz,fontWeight:800,color:th.accent,lineHeight:1}}>
+              {card.iconId==="steps"?card.value.toLocaleString():card.value}
             </div>
             <div style={{
-              fontSize:lblSz, color:th.sub, lineHeight:1.3,
+              fontSize:lblSz,color:th.sub,lineHeight:1.3,
               letterSpacing:isHapon?"0.3px":undefined,
               whiteSpace:colSpan===2?"nowrap":"normal",
-              overflow:"hidden", textOverflow:"ellipsis", maxWidth:"100%",
+              overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
             }}>{card.label}</div>
           </div>
       }
