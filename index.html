@@ -5245,24 +5245,18 @@ function App(){
   const ptrInnerRef = useRef(null);
   const ptrWrapRef = useRef(null);
 
-  // Lock the profile page's own scroll container when the sticker modal is open.
-  // We deliberately avoid touching ptrInnerRef here because the PTR system
-  // already controls that div's overflow via the anyModalOpen prop — fighting
-  // over the same style property causes the "PTR broken after close" bug.
-  // Instead we find the first overflowY:auto descendant of ptrInnerRef, which
-  // is the actual page scroll container, and lock only that.
+  // Same approach as onboarding: just set overflow:hidden on the root wrapper.
+  // Onboarding does overflowY:step===2?"auto":"hidden" on its container div —
+  // we do the same here on ptrWrapRef when the sticker modal is open.
+  // No gesture fighting, no React conflicts, just CSS doing its job.
   useEffect(()=>{
-    if(!stickerOpen) return; // only run when opening — cleanup handles restore
-    const inner = ptrInnerRef.current;
-    if(!inner) return;
-    // Walk direct children to find the scrollable page div
-    const scroller = Array.from(inner.querySelectorAll("*")).find(
-      el => el.style && (el.style.overflowY === "auto" || el.style.overflowY === "scroll")
-    );
-    if(!scroller) return;
-    const prev = scroller.style.overflowY;
-    scroller.style.overflowY = "hidden";
-    return ()=>{ scroller.style.overflowY = prev; };
+    const wrap = ptrWrapRef.current;
+    if(!wrap) return;
+    if(stickerOpen){
+      wrap.style.overflow = "hidden";
+    } else {
+      wrap.style.overflow = "";
+    }
   }, [stickerOpen]);
 
   useEffect(()=>{
