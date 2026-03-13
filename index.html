@@ -4823,6 +4823,116 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
         const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
         const weekSteps=stepsLogs.filter(l=>new Date(l.customDate||l.date)>=weekAgo).reduce((s,l)=>s+(l.stepCount||0),0);
+
+        // ── TOP CATEGORY ──────────────────────────────────────────────────────
+        const catCount={};
+        manualLogs.forEach(l=>{ if(l.category) catCount[l.category]=(catCount[l.category]||0)+1; });
+        const topCatId=Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0]?.[0];
+        const topCatCount=topCatId?catCount[topCatId]:0;
+        const topCatEmoji=topCatId?CAT_MAP[topCatId]?.emoji:"";
+        const topCatLabel=topCatId?CAT_MAP[topCatId]?.labelEn||topCatId:"";
+        // personality narrative
+        const topCatTags={};
+        manualLogs.filter(l=>l.category===topCatId).forEach(l=>(l.tags||[]).forEach(tag=>{ topCatTags[tag]=(topCatTags[tag]||0)+1; }));
+        const topCatTag=Object.entries(topCatTags).sort((a,b)=>b[1]-a[1])[0]?.[0];
+        const topCatNarratives=[
+          `Mostly ${topCatLabel?.toLowerCase()} — and if "${topCatTag}" keeps showing up, that tracks.`,
+          `Your logs lean ${topCatLabel?.toLowerCase()}. "${topCatTag}" energy, apparently.`,
+          `${topCatEmoji} ${topCatLabel} is clearly your thing. "${topCatTag}" runs through it.`,
+        ];
+        const topCatNarrative=topCatNarratives[(topCatCount||0)%topCatNarratives.length];
+
+        // ── CURRENT STREAK ────────────────────────────────────────────────────
+        // Streak = consecutive calendar days each with 2+ logs. Starts counting at day 2.
+        const logsByDay={};
+        manualLogs.forEach(l=>{ const d=l.date?.split("T")[0]; if(d) logsByDay[d]=(logsByDay[d]||0)+1; });
+        const qualifyingDays=Object.entries(logsByDay).filter(([,c])=>c>=2).map(([d])=>d).sort();
+        let streak=0;
+        if(qualifyingDays.length>=2){
+          let run=1;
+          for(let i=qualifyingDays.length-1;i>0;i--){
+            const a=new Date(qualifyingDays[i]);
+            const b=new Date(qualifyingDays[i-1]);
+            const diff=(a-b)/(1000*60*60*24);
+            if(diff===1) run++;
+            else break;
+          }
+          // Only count if the most recent qualifying day is today or yesterday
+          const lastQ=new Date(qualifyingDays[qualifyingDays.length-1]);
+          const today=new Date(); today.setHours(0,0,0,0);
+          const diffToday=(today-lastQ)/(1000*60*60*24);
+          streak=diffToday<=1?run:0;
+        }
+
+        // ── NIGHT OWL / EARLY BIRD ────────────────────────────────────────────
+        let nightOwlScore=0, earlyBirdScore=0;
+        manualLogs.forEach(l=>{
+          if(!l.date) return;
+          const h=new Date(l.date).getHours();
+          if(h>=20||h<4) nightOwlScore++;
+          else if(h>=5&&h<12) earlyBirdScore++;
+        });
+        const timeVibe=manualLogs.length>=5
+          ?(nightOwlScore>earlyBirdScore?"Night Owl 🦉":"Early Bird 🌅")
+          :null;
+        const timeVibeRaw=manualLogs.length>=5
+          ?(nightOwlScore>earlyBirdScore?"night_owl":"early_bird")
+          :null;
+
+        // ── MOST LOGGED ───────────────────────────────────────────────────────
+        const titleCount={};
+        manualLogs.forEach(l=>{ if(l.title) titleCount[l.title]=(titleCount[l.title]||0)+1; });
+        const mostLoggedEntry=Object.entries(titleCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0];
+        const mostLoggedTitle=mostLoggedEntry?.[0];
+        const mostLoggedCount=mostLoggedEntry?.[1];
+
+        // ── TOP DIRECTOR / TOP ACTOR ──────────────────────────────────────────
+        const movieLogs=manualLogs.filter(l=>l.category==="movies");
+        const directorCount={};
+        movieLogs.forEach(l=>{ if(l.director) l.director.split(",").map(d=>d.trim()).forEach(d=>{ directorCount[d]=(directorCount[d]||0)+1; }); });
+        const topDirector=Object.entries(directorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
+        const actorCount={};
+        movieLogs.forEach(l=>{ if(l.actor) actorCount[l.actor]=(actorCount[l.actor]||0)+1; });
+        const topActor=Object.entries(actorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+        // ── THIS WEEK'S VIBE (top 3 tags + %) ────────────────────────────────
+        const weekTagCount={};
+        weekLogs.forEach(l=>(l.tags||[]).forEach(tag=>{ weekTagCount[tag]=(weekTagCount[tag]||0)+1; }));
+        const weekTagTotal=Object.values(weekTagCount).reduce((s,c)=>s+c,0);
+        const topWeekTags=Object.entries(weekTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3)
+          .map(([tag,cnt])=>({tag,pct:Math.round(cnt/weekTagTotal*100)}));
+
+        // ── LOCAL VS GLOBAL ───────────────────────────────────────────────────
+        const phLogs=manualLogs.filter(l=>l.ph===true).length;
+        const phPct=manualLogs.length>=5?Math.round(phLogs/manualLogs.length*100):null;
+
+        // ── WEEKLY PULSE (relative to personal avg) ───────────────────────────
+        const allWeekCounts=[];
+        if(manualLogs.length>=7){
+          const oldest=new Date(manualLogs.map(l=>l.date).filter(Boolean).sort()[0]);
+          const totalWeeks=Math.max(1,Math.ceil((Date.now()-oldest.getTime())/(7*24*60*60*1000)));
+          const avgPerWeek=manualLogs.length/totalWeeks;
+          const pulseRatio=thisWeekCount/avgPerWeek;
+          var weekPulse=pulseRatio>=1.3?"busier than usual":pulseRatio<=0.7?"quieter than usual":"about your pace";
+          var weekPulseEmoji=pulseRatio>=1.3?"🔥":pulseRatio<=0.7?"🌙":"〰️";
+        }
+
+        // ── WEEK NARRATIVE ────────────────────────────────────────────────────
+        const narrativePool=[];
+        if(weekPulse&&topCatLabel&&topCatTag&&timeVibeRaw){
+          narrativePool.push(`A ${weekPulse} — mostly ${topCatLabel?.toLowerCase()}, mostly ${topCatTag}. ${timeVibeRaw==="night_owl"?"Late nights, apparently.":"Mornings, turns out."}`);
+        }
+        if(weekPulse&&topCatLabel&&streak>=2){
+          narrativePool.push(`${weekPulse==="busier than usual"?"More logs than usual.":weekPulse==="quieter than usual"?"Quiet week.":"Steady week."} ${streak} days running, mostly ${topCatLabel?.toLowerCase()}.`);
+        }
+        if(topWeekTags.length>=2&&weekPulse){
+          narrativePool.push(`${topWeekTags[0].pct}% ${topWeekTags[0].tag}, ${topWeekTags[1].pct}% ${topWeekTags[1].tag}. ${weekPulse==="quieter than usual"?"Not a big week, but intentional.":"That's the week."}`);
+        }
+        if(phPct!==null&&topCatLabel){
+          narrativePool.push(`${phPct}% local, ${100-phPct}% not. ${topCatLabel} is carrying the count.`);
+        }
+        const weekNarrative=narrativePool.length>0?narrativePool[new Date().getDay()%narrativePool.length]:null;
+
         return(
       <div style={{marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
@@ -4843,6 +4953,15 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
             ...(stepsLogs.length>0
               ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
               :[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, subtext:topCatNarrative, min:1}]:[]),
+            ...(streak>=2?[{iconId:"streak", emoji:"🔥", label:"Current Streak", value:`${streak} days`, min:1}]:[]),
+            ...(timeVibe?[{iconId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:"You Are A", value:timeVibe.replace(" 🦉","").replace(" 🌅",""), min:1}]:[]),
+            ...(mostLoggedTitle?[{iconId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, subtext:`${mostLoggedCount}×`, min:1}]:[]),
+            ...(topDirector?[{iconId:"top_director", emoji:"🎬", label:"Fave Director", value:topDirector, min:1}]:[]),
+            ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Fave Actor", value:topActor, min:1}]:[]),
+            ...(topWeekTags.length>=3?[{iconId:"week_vibe", emoji:"🏷️", label:"This Week's Vibe", value:topWeekTags.map(t=>`${t.pct}% ${t.tag}`).join(" · "), min:1}]:[]),
+            ...(phPct!==null?[{iconId:"local_global", emoji:"🌏", label:"Local vs Global", value:`${phPct}% Local`, subtext:`${100-phPct}% Global`, min:1}]:[]),
+            ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"This Week", value:weekPulse, min:1}]:[]),
           ];
 
           // Filter to only cards that have meaningful data
@@ -4864,6 +4983,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
             />
+            {weekNarrative&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
+              <p style={{fontSize:13,color:th.sub,lineHeight:1.6,fontStyle:"italic"}}>{weekNarrative}</p>
+            </div>}
             {slots<=9&&<div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3}}>
               <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
               <p style={{fontSize:data.logs.length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
