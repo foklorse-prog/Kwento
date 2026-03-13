@@ -4289,12 +4289,10 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-// On mount: renders PNG, immediately tries navigator.share (Option C).
-// Falls back to sheet UI if share not supported or fails.
+// Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
 function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
-  const [showFallback,setShowFallback]=useState(false);
   const CARD_W=240, CARD_H=165, BRAND_H=39;
   const DPR=Math.min(window.devicePixelRatio||1,2);
   const today=todayKey();
@@ -4310,38 +4308,17 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
     drawSticker(ctx,W,H,CARD_H,label,value,iconId);
-    const url=canvas.toDataURL("image/png");
-    setImgUrl(url);
+    setImgUrl(canvas.toDataURL("image/png"));
     if(canGenerate) onGenerate&&onGenerate();
-
-    // Option C — try navigator.share immediately
-    if(navigator.share && navigator.canShare){
-      canvas.toBlob(async blob=>{
-        if(!blob) return setShowFallback(true);
-        const file=new File([blob],"kwento-stat.png",{type:"image/png"});
-        if(!navigator.canShare({files:[file]})) return setShowFallback(true);
-        try{
-          await navigator.share({files:[file],title:"My Kwento Stat"});
-          onClose(); // dismiss after share
-        } catch(e){
-          // User cancelled or error — show fallback sheet
-          if(e.name!=="AbortError") setShowFallback(true);
-          else onClose();
-        }
-      },"image/png");
-    } else {
-      setShowFallback(true);
-    }
   },[]);
 
-  // Portal to document.body
+  // Portal to document.body so position:fixed isn't clipped by any scroll container
   const el=useMemo(()=>document.createElement("div"),[]);
-  useEffect(()=>{ document.body.appendChild(el); return ()=>document.body.removeChild(el); },[]);
+  useEffect(()=>{
+    document.body.appendChild(el);
+    return ()=>document.body.removeChild(el);
+  },[]);
 
-  // While share is being triggered, render nothing visible
-  if(!showFallback) return ReactDOM.createPortal(<canvas ref={canvasRef} style={{display:"none"}}/>, el);
-
-  // Fallback sheet
   const sheet=(
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}
       style={{position:"fixed",inset:0,zIndex:9999,
@@ -4353,12 +4330,14 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
           borderTopLeftRadius:24,borderTopRightRadius:24,
           padding:"20px 24px 52px",
           display:"flex",flexDirection:"column",alignItems:"center",gap:14,
-          border:"1px solid #221440",boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
+          border:"1px solid #221440",
+          boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"rgba(136,120,170,0.3)"}}/>
         <p style={{color:"rgba(136,120,170,0.6)",fontSize:11,fontWeight:500,
           letterSpacing:"1.2px",textTransform:"uppercase"}}>
           {canGenerate?"Hold image to save or share":"Daily limit reached"}
         </p>
+        <canvas ref={canvasRef} style={{display:"none"}}/>
         {imgUrl&&(
           <img src={imgUrl} alt="Kwento stat sticker"
             style={{width:240,height:204,borderRadius:16,
@@ -4378,12 +4357,14 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
       </div>
     </div>
   );
+
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
+  const [showSheet,setShowSheet]=useState(false);
   const BRAND_H=26;
   const DPR=Math.min(window.devicePixelRatio||1,2);
 
@@ -4391,14 +4372,10 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
     const canvas=canvasRef.current;
     const wrap=wrapRef.current;
     if(!canvas||!wrap) return;
-    let lastW=0, lastH=0;
     function redraw(){
       const W=wrap.offsetWidth;
       const CARD_H=wrap.offsetHeight;
       if(!W||!CARD_H) return;
-      // Only redraw if dimensions actually changed — prevents thrashing
-      if(W===lastW && CARD_H===lastH) return;
-      lastW=W; lastH=CARD_H;
       const H=CARD_H+BRAND_H;
       canvas.width=W*DPR; canvas.height=H*DPR;
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
@@ -4415,15 +4392,30 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
     return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   },[value,label,iconId]);
 
+  // openSheet is called by StatGrid after 1.2s hold
+  function openSheet(){
+    setShowSheet(true);
+    onStickerOpen&&onStickerOpen(true);
+  }
+
+  useEffect(()=>{ onRegisterOpen&&onRegisterOpen(openSheet); },[]);
+
   return(
-    <div ref={wrapRef}
-      style={{position:"relative",overflow:"hidden",borderRadius:16,
-        width:"100%",height:"100%",
-        WebkitTapHighlightColor:"transparent",
-        ...(span?{gridColumn:"span 3"}:{}),
-      }}>
-      <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
-    </div>
+    <>
+      <div ref={wrapRef}
+        style={{position:"relative",overflow:"hidden",borderRadius:16,
+          width:"100%",height:"100%",
+          WebkitTapHighlightColor:"transparent",
+          ...(span?{gridColumn:"span 3"}:{}),
+        }}>
+        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
+      </div>
+      {showSheet&&<StickerSaveSheet
+        iconId={iconId} label={label} value={value} data={data}
+        onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
+        onGenerate={onGenerate}
+      />}
+    </>
   );
 }
 
@@ -4471,6 +4463,10 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     });
   }
 
+  // Each card calls these up to StatGrid
+  // stickerRefs: iconId → openSheet fn, set by each StatSticker via callback
+  const stickerOpenRefs = useRef({});
+
   function onCardTouchStart(iconId, e){
     const t=e.touches;
     if(t.length===1){
@@ -4480,47 +4476,13 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
         setDragging(iconId);
         if(navigator.vibrate) navigator.vibrate(25);
 
-        // 1200ms total → share directly (only if still not moved)
+        // 1200ms total → save sheet (only if still not moved)
         longTimer.current=setTimeout(()=>{
           if(dragState.current.active && !dragState.current.moved){
+            // cancel drag, open save sheet
             dragState.current={active:false,fromId:null,overId:null,moved:false};
             setDragging(null); setDragOver(null);
-            if(navigator.vibrate) navigator.vibrate([30,40,30]);
-            // Generate PNG and share immediately — no sheet
-            const card=cards.find(c=>c.iconId===iconId);
-            if(!card) return;
-            const canvas=document.createElement("canvas");
-            const CARD_W=240,CARD_H=165,BRAND_H=39;
-            const DPR=Math.min(window.devicePixelRatio||1,2);
-            canvas.width=CARD_W*DPR; canvas.height=(CARD_H+BRAND_H)*DPR;
-            const ctx=canvas.getContext("2d");
-            ctx.scale(DPR,DPR);
-            drawSticker(ctx,CARD_W,CARD_H+BRAND_H,CARD_H,card.label,card.value,card.iconId);
-            canvas.toBlob(blob=>{
-              if(!blob) return;
-              const url=URL.createObjectURL(blob);
-              // Inject a real <img> into the DOM at the touch position,
-              // then fire a synthetic long-press so iOS shows "Save / Copy / Share"
-              const img=document.createElement("img");
-              img.src=url;
-              img.style.cssText=`position:fixed;opacity:0;pointer-events:auto;
-                width:1px;height:1px;top:0;left:0;z-index:9999;
-                -webkit-touch-callout:default;user-select:none;`;
-              document.body.appendChild(img);
-              // iOS needs the img to be visible/rendered before touch events work
-              requestAnimationFrame(()=>{
-                const rect={left:0,top:0};
-                const touch=new Touch({identifier:1,target:img,
-                  clientX:rect.left,clientY:rect.top,
-                  screenX:rect.left,screenY:rect.top,
-                  pageX:rect.left,pageY:rect.top,radiusX:1,radiusY:1,rotationAngle:0,force:1});
-                img.dispatchEvent(new TouchEvent("touchstart",{touches:[touch],targetTouches:[touch],changedTouches:[touch],bubbles:true,cancelable:true}));
-                setTimeout(()=>{
-                  img.dispatchEvent(new TouchEvent("touchend",{touches:[],targetTouches:[],changedTouches:[touch],bubbles:true,cancelable:true}));
-                  setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(img); },500);
-                },600);
-              });
-            },"image/png");
+            stickerOpenRefs.current[iconId]&&stickerOpenRefs.current[iconId]();
           }
         },800);
       },400);
@@ -4537,7 +4499,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     const cardEl=el.closest("[data-cardid]");
     if(!cardEl) return;
     const overId=cardEl.getAttribute("data-cardid");
-    if(overId && overId!==dragState.current.fromId && overId!==dragState.current.overId){
+    if(overId && overId!==dragState.current.fromId){
       dragState.current.overId=overId;
       setDragOver(overId);
     }
@@ -4633,6 +4595,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
               iconId={card.iconId} label={card.label} value={card.value}
               data={data} span={false}
               onStickerOpen={onStickerOpen}
+              onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
               onGenerate={()=>{
                 const today=todayKey();
                 const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
@@ -4856,7 +4819,11 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
           const visible=registry.filter(s=>s.value>=s.min);
 
           // Nothing to show — render nothing (the section header is still visible)
-          if(!visible.length) return null;
+          if(!visible.length) return(
+            <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
+              {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
+            </div>
+          );
 
           return(
             <StatGrid
