@@ -15,7 +15,7 @@ v6.0 — 2026-03-13
 ================================================================
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">a
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
@@ -1554,7 +1554,7 @@ async function migratePhotosToIDB(d){
 function defaultData(){
   return{
     onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true,movies:true,music:true,books:true,food:true,games:true,activities:true},
-    logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",
+    logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",profilePhotoIds:[],
     __showAvatarPicker:false,
     lastBackupAt:null,lastBackupHash:null,
     // Suggestion state persisted in data
@@ -2195,6 +2195,7 @@ async function fetchMovieMeta(title){
       actor:d.Actors?d.Actors.split(",")[0].trim():null,
       year:d.Year?d.Year.slice(0,4):null,
       poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
+      genre:d.Genre&&d.Genre!=="N/A"?d.Genre.split(",")[0].trim():null,
     };
   }catch(e){ return null; }
 }
@@ -2318,7 +2319,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       const entry={...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])};
       if(cat==="movies"){
         const meta=await fetchMovieMeta(entry.title);
-        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; }
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
       }
       onSave(entry);
       onClose();
@@ -2335,7 +2336,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       const entry={...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
       if(item.category==="movies"||cat==="movies"){
         const meta=await fetchMovieMeta(item.title);
-        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; }
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
       }
       return entry;
     }));
@@ -3041,7 +3042,7 @@ function HomePage({data,onOpenLog,onRelog}){
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {top.map(({log,count},i)=>{
               const meta=CAT_MAP[log.category];
-              const skipG=["Film","Custom","Movies","Music","Books","Food","Games","Activities"];
+              const skipG=["Movies","Music","Books","Food","Games","Activities","Custom"];
               const libM=(LIBRARY[log.category]||[]).find(x=>x.title.toLowerCase()===log.title.toLowerCase());
               const genre=(libM?.genre&&!skipG.includes(libM.genre)?libM.genre:null)||(log.genre&&!skipG.includes(log.genre)?log.genre:null)||null;
               const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
@@ -3282,7 +3283,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
   const progress=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
   const lib=(LIBRARY[log.category]||[]);
   const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-  const skipG=["Film","Movies","Music","Books","Food","Games","Activities","Custom"];
+  const skipG=["Movies","Music","Books","Food","Games","Activities","Custom"];
   const genre=(libMatch?.genre&&!skipG.includes(libMatch.genre)?libMatch.genre:null)||(log.genre&&!skipG.includes(log.genre)&&log.genre!=="Custom"?log.genre:null);
   const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
   const activeMeta=CAT_MAP[editing?editCat:log.category];
@@ -3461,6 +3462,23 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
                   ))}
                 </div>
               )}
+              {/* Show on profile toggle — only when entry has photos */}
+              {editing&&editPhotos.length>0&&(()=>{
+                const pinned=data.profilePhotoIds||[];
+                const isPinned=pinned.includes(log.id);
+                const canPin=isPinned||pinned.length<3;
+                return(
+                  <button onClick={e=>{
+                    e.stopPropagation();
+                    const cur=data.profilePhotoIds||[];
+                    if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
+                    else if(cur.length<3) onChange("profilePhotoIds",[...cur,log.id]);
+                  }} style={{display:"flex",alignItems:"center",gap:7,background:"none",border:`1px solid ${isPinned?th.accent:th.border}`,borderRadius:10,padding:"6px 12px",cursor:canPin?"pointer":"default",opacity:canPin?1:0.4,color:isPinned?th.accent:th.sub,fontSize:12,fontWeight:isPinned?600:400}}>
+                    <span>{isPinned?"✦":"○"}</span>
+                    {isPinned?"Showing on profile":`Show on profile${!canPin?" (3 max)":""}`}
+                  </button>
+                );
+              })()}
               {/* Date picker */}
               {editing&&(
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -4809,6 +4827,35 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         </div>
       )}
 
+      {/* Profile Photos */}
+      {(()=>{
+        const pinnedIds=data.profilePhotoIds||[];
+        if(!pinnedIds.length) return null;
+        const pinnedEntries=pinnedIds.map(id=>data.logs.find(l=>l.id===id)).filter(Boolean);
+        if(!pinnedEntries.length) return null;
+        return(
+          <div style={{marginBottom:20}}>
+            <div style={{display:"grid",gridTemplateColumns:pinnedEntries.length===1?"1fr":pinnedEntries.length===2?"1fr 1fr":"1fr 1fr 1fr",gap:6}}>
+              {pinnedEntries.map((entry,i)=>{
+                const photo=entry.actPhotos?.[0];
+                if(!photo) return null;
+                return(
+                  <div key={i} style={{borderRadius:14,overflow:"hidden",aspectRatio:"1/1",position:"relative"}}>
+                    <img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                    <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"6px 8px",
+                      background:"linear-gradient(transparent,rgba(0,0,0,0.55))",
+                      fontSize:10,color:"rgba(255,255,255,0.85)",fontWeight:500,
+                      overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {entry.title}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Stats */}
       {(()=>{
         const totalLogs=data.logs.length;
@@ -4907,7 +4954,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         const phPct=manualLogs.length>=5?Math.round(phLogs/manualLogs.length*100):null;
 
         // ── WEEKLY PULSE (relative to personal avg) ───────────────────────────
-        const allWeekCounts=[];
         if(manualLogs.length>=7){
           const oldest=new Date(manualLogs.map(l=>l.date).filter(Boolean).sort()[0]);
           const totalWeeks=Math.max(1,Math.ceil((Date.now()-oldest.getTime())/(7*24*60*60*1000)));
@@ -4918,20 +4964,13 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         }
 
         // ── WEEK NARRATIVE ────────────────────────────────────────────────────
-        const narrativePool=[];
-        if(weekPulse&&topCatLabel&&topCatTag&&timeVibeRaw){
-          narrativePool.push(`A ${weekPulse} — mostly ${topCatLabel?.toLowerCase()}, mostly ${topCatTag}. ${timeVibeRaw==="night_owl"?"Late nights, apparently.":"Mornings, turns out."}`);
-        }
-        if(weekPulse&&topCatLabel&&streak>=2){
-          narrativePool.push(`${weekPulse==="busier than usual"?"More logs than usual.":weekPulse==="quieter than usual"?"Quiet week.":"Steady week."} ${streak} days running, mostly ${topCatLabel?.toLowerCase()}.`);
-        }
-        if(topWeekTags.length>=2&&weekPulse){
-          narrativePool.push(`${topWeekTags[0].pct}% ${topWeekTags[0].tag}, ${topWeekTags[1].pct}% ${topWeekTags[1].tag}. ${weekPulse==="quieter than usual"?"Not a big week, but intentional.":"That's the week."}`);
-        }
-        if(phPct!==null&&topCatLabel){
-          narrativePool.push(`${phPct}% local, ${100-phPct}% not. ${topCatLabel} is carrying the count.`);
-        }
-        const weekNarrative=narrativePool.length>0?narrativePool[new Date().getDay()%narrativePool.length]:null;
+        const narrativeLines=[];
+        if(weekPulse&&topCatLabel) narrativeLines.push(`${weekPulse==="busier than usual"?"More active than usual.":weekPulse==="quieter than usual"?"A quieter week.":"Steady as always."} Mostly ${topCatLabel.toLowerCase()}.`);
+        if(topWeekTags.length>=2) narrativeLines.push(`${topWeekTags[0].tag} and ${topWeekTags[1].tag} kept coming up.`);
+        if(timeVibeRaw==="night_owl") narrativeLines.push("Late nights, mostly.");
+        else if(timeVibeRaw==="early_bird") narrativeLines.push("Mornings, turns out.");
+        if(phPct!==null) narrativeLines.push(`${phPct>=50?"Leaning local":"Mostly global"} this week.`);
+        const weekNarrative=narrativeLines.length>=2?narrativeLines.join(" "):null;
 
         return(
       <div style={{marginBottom:16}}>
@@ -4953,14 +4992,15 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
             ...(stepsLogs.length>0
               ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
               :[]),
-            ...(topCatId&&topCatCount>=3?[{iconId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, subtext:topCatNarrative, min:1}]:[]),
-            ...(streak>=2?[{iconId:"streak", emoji:"🔥", label:"Current Streak", value:`${streak} days`, min:1}]:[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, min:1}]:[]),
             ...(timeVibe?[{iconId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:"You Are A", value:timeVibe.replace(" 🦉","").replace(" 🌅",""), min:1}]:[]),
-            ...(mostLoggedTitle?[{iconId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, subtext:`${mostLoggedCount}×`, min:1}]:[]),
+            ...(mostLoggedTitle?[{iconId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, min:1}]:[]),
             ...(topDirector?[{iconId:"top_director", emoji:"🎬", label:"Fave Director", value:topDirector, min:1}]:[]),
             ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Fave Actor", value:topActor, min:1}]:[]),
-            ...(topWeekTags.length>=3?[{iconId:"week_vibe", emoji:"🏷️", label:"This Week's Vibe", value:topWeekTags.map(t=>`${t.pct}% ${t.tag}`).join(" · "), min:1}]:[]),
-            ...(phPct!==null?[{iconId:"local_global", emoji:"🌏", label:"Local vs Global", value:`${phPct}% Local`, subtext:`${100-phPct}% Global`, min:1}]:[]),
+            ...(topWeekTags.length>=3?[{iconId:"week_vibe_1", emoji:"🏷️", label:"This Week's Vibe", value:`${topWeekTags[0].pct}% ${topWeekTags[0].tag}`, min:1}]:[]),
+            ...(topWeekTags.length>=3?[{iconId:"week_vibe_2", emoji:"🏷️", label:" ", value:`${topWeekTags[1].pct}% ${topWeekTags[1].tag}`, min:1}]:[]),
+            ...(topWeekTags.length>=3?[{iconId:"week_vibe_3", emoji:"🏷️", label:" ", value:`${topWeekTags[2].pct}% ${topWeekTags[2].tag}`, min:1}]:[]),
+            ...(phPct!==null?[{iconId:"local_global", emoji:"🌏", label:"Local vs Global", value:`${phPct}% Local · ${100-phPct}% Global`, min:1}]:[]),
             ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"This Week", value:weekPulse, min:1}]:[]),
           ];
 
