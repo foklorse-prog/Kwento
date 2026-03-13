@@ -41,8 +41,7 @@ v6.0 — 2026-03-13
 </head>
 <body>
 <style>html,body{background:#000;user-select:none;-webkit-user-select:none;}
-.selectable{user-select:text;-webkit-user-select:text;}
-<style>
+.selectable{user-select:text;-webkit-user-select:text;}<style>
 @keyframes tri-open{from{transform:rotate(0deg)}to{transform:rotate(180deg)}}
 @keyframes tri-close{from{transform:rotate(180deg)}to{transform:rotate(0deg)}}
 .tri-btn svg{transition:transform 0.22s ease;}
@@ -3961,7 +3960,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
         <BarkadaDeck data={data} onUpdateBarkadaState={onUpdateBarkadaState}/>
       </div>
 
-      {/* Premium upsell — hidden for beta users */}
+      {/* Premium upsell — at the bottom */}
       {!data.betaMode&&<div style={{padding:"14px 18px",borderRadius:16,background:"var(--accent)08",border:"1px dashed var(--accent)44",textAlign:"center"}}>
         <div style={{fontSize:13,color:"var(--sub)",lineHeight:1.6}}>
           ✨ <span style={{color:"var(--accent)",fontWeight:700}}>Premium</span> — endless suggestions, refreshed any time
@@ -4795,13 +4794,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
         const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
         const weekSteps=stepsLogs.filter(l=>new Date(l.customDate||l.date)>=weekAgo).reduce((s,l)=>s+(l.stepCount||0),0);
-        const visibleCount=[totalLogs,daysActiveCount,thisWeekCount,swipedRight.length,...(stepsLogs.length>0?[weekSteps]:[])].filter(v=>v>=1).length;
-        const savedSizes=data.statCardSizes||{};
-        const occupiedSlots=[totalLogs,daysActiveCount,thisWeekCount,swipedRight.length,...(stepsLogs.length>0?[weekSteps]:[])].filter(v=>v>=1).reduce((sum,_,i)=>{
-          const ids=["total","days","week","liked",...(stepsLogs.length>0?["steps"]:[])];
-          const s=savedSizes[ids[i]]||{colSpan:1,rowSpan:1};
-          return sum+s.colSpan*s.rowSpan;
-        },0);
         return(
       <div style={{marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
@@ -4834,12 +4826,20 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
             </div>
           );
 
+          const slots=visible.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
+
           return(
+            <>
             <StatGrid
               cards={visible} data={data} onChange={onChange}
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
             />
+            {slots<=9&&<div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3}}>
+              <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
+              <p style={{fontSize:data.logs.length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+            </div>}
+            </>
           );
         })()}
 
@@ -4889,10 +4889,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         </div>
       )}
 
-      <div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3,display:occupiedSlots>9?"none":"block"}}>
-        <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
-        <p style={{fontSize:data.logs.length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
-      </div>
     </div>
   );
 }
@@ -4915,7 +4911,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const handleRedeem=()=>{
     if(redeemInput.trim().toLowerCase()==="beta"){
       onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null});
-      setRedeemMsg("✅ Beta activated — all limits removed!");
+      setRedeemMsg("✅ Beta mode activated — unlimited sticker saves!");
       setRedeemInput("");
     } else {
       setRedeemMsg("❌ Invalid code.");
