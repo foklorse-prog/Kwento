@@ -4289,7 +4289,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, span}){
+function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, span, colSpan, rowSpan}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
@@ -4321,7 +4321,7 @@ function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, spa
     // it to the screen, so we always get real dimensions.
     let raf1, raf2;
     const ro=new ResizeObserver(()=>{
-      ro.disconnect();
+      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
       raf1=requestAnimationFrame(()=>{
         raf2=requestAnimationFrame(()=>{ redraw(); });
       });
@@ -4341,7 +4341,7 @@ function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, spa
           borderRadius:16,cursor:"pointer",
           WebkitTapHighlightColor:"transparent",
           transition:"transform 0.15s",
-          width:"100%",height:"100%",minHeight:95,
+          width:"100%",height:"100%",
           ...(span?{gridColumn:"span 3"}:{}),
         }}
         onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
@@ -4445,6 +4445,269 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
         color:"rgba(136,120,170,0.5)",fontSize:13,cursor:"pointer",letterSpacing:"0.4px"}}>
         Close
       </button>
+    </div>
+  );
+}
+
+// ─── STAT GRID ────────────────────────────────────────────────────────────────
+// Manages per-card col/row span (max 2×2), pinch-to-resize per card,
+// long-press drag-to-reorder, slide animations on reflow, and persistence.
+
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
+  const COLS = 3;
+  const GAP  = 10;
+
+  // ── Saved layout: {[iconId]: {colSpan:1|2, rowSpan:1|2}}
+  // ── Saved order:  [iconId, ...]
+  const savedSizes = data.statCardSizes || {};
+  const savedOrder = data.statCardOrder || [];
+
+  // Build ordered card list — respect saved order, append any new cards at end
+  const initialOrder = useMemo(()=>{
+    const known = savedOrder.filter(id => cards.find(c=>c.iconId===id));
+    const fresh  = cards.filter(c=>!known.includes(c.iconId)).map(c=>c.iconId);
+    return [...known, ...fresh];
+  }, [cards.map(c=>c.iconId).join(",")]);
+
+  const [order,  setOrder]  = useState(initialOrder);
+  const [sizes,  setSizes]  = useState(()=>{
+    const s={};
+    cards.forEach(c=>{ s[c.iconId] = savedSizes[c.iconId] || {colSpan:1,rowSpan:1}; });
+    return s;
+  });
+
+  // ── Drag state
+  const [dragging,   setDragging]   = useState(null); // iconId being dragged
+  const [dragOver,   setDragOver]   = useState(null); // iconId of slot being hovered
+  const longPressRef = useRef({});
+
+  // ── Persist whenever sizes or order change
+  function persist(newOrder, newSizes){
+    onChange("__batch__",{statCardOrder:newOrder, statCardSizes:newSizes});
+  }
+
+  function updateSize(iconId, patch){
+    setSizes(prev=>{
+      const next={...prev, [iconId]:{...prev[iconId],...patch}};
+      persist(order, next);
+      return next;
+    });
+  }
+
+  function updateOrder(newOrder){
+    setOrder(newOrder);
+    persist(newOrder, sizes);
+  }
+
+  // ── Drag handlers
+  function onLongPressStart(iconId, e){
+    const t = setTimeout(()=>{
+      setDragging(iconId);
+      if(navigator.vibrate) navigator.vibrate(30);
+    }, 450);
+    longPressRef.current[iconId] = t;
+  }
+  function onLongPressCancel(iconId){
+    clearTimeout(longPressRef.current[iconId]);
+  }
+  function onDragEnter(iconId){
+    if(dragging && iconId!==dragging) setDragOver(iconId);
+  }
+  function onDrop(targetId){
+    if(!dragging || dragging===targetId){ setDragging(null); setDragOver(null); return; }
+    const from = order.indexOf(dragging);
+    const to   = order.indexOf(targetId);
+    const next = [...order];
+    next.splice(from,1);
+    next.splice(to,0,dragging);
+    updateOrder(next);
+    setDragging(null);
+    setDragOver(null);
+  }
+
+  const orderedCards = order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
+
+  return(
+    <div style={{
+      display:"grid",
+      gridTemplateColumns:`repeat(${COLS},1fr)`,
+      gridAutoFlow:"dense",
+      gap:GAP,
+    }}>
+      {orderedCards.map(card=>(
+        <StatCardItem
+          key={card.iconId}
+          card={card}
+          size={sizes[card.iconId]||{colSpan:1,rowSpan:1}}
+          onResize={(patch)=>updateSize(card.iconId,patch)}
+          dragging={dragging===card.iconId}
+          dragOver={dragOver===card.iconId}
+          onLongPressStart={(e)=>onLongPressStart(card.iconId,e)}
+          onLongPressCancel={()=>onLongPressCancel(card.iconId)}
+          onDragEnter={()=>onDragEnter(card.iconId)}
+          onDrop={()=>onDrop(card.iconId)}
+          th={th}
+          isHapon={isHapon}
+          isMN={isMN}
+          data={data}
+          onChange={onChange}
+          onStickerOpen={onStickerOpen}
+        />
+      ))}
+    </div>
+  );
+}
+
+function StatCardItem({card, size, onResize, dragging, dragOver, onLongPressStart, onLongPressCancel, onDragEnter, onDrop, th, isHapon, isMN, data, onChange, onStickerOpen}){
+  const {colSpan, rowSpan} = size;
+  const wrapRef  = useRef(null);
+  const pinchRef = useRef({active:false, t1:null, t2:null, startDist:0, startDirH:null, startColSpan:1, startRowSpan:1});
+
+  // ── Base row height in px — drives how tall 1 row vs 2 rows feels
+  const BASE_ROW_H = 95;
+  const cardH = rowSpan===2 ? BASE_ROW_H*2+10 : BASE_ROW_H; // +10 = gap
+
+  // ── Font scales with card area
+  const area    = colSpan * rowSpan;
+  const emojiSz = area>=4 ? 32 : area>=2 ? 26 : 20;
+  const valueSz = area>=4 ? 34 : area>=2 ? 28 : 22;
+  const labelSz = area>=4 ? 13 : area>=2 ? 12 : 11;
+  const padV    = area>=4 ? 20 : area>=2 ? 17 : 14;
+  const padH    = area>=4 ? 16 : area>=2 ? 14 : 12;
+
+  // ── Pinch gesture — first finger can land anywhere, second joins
+  function getTouches(e){ return Array.from(e.touches); }
+
+  function onTouchStart(e){
+    onLongPressStart(e);
+    const touches = getTouches(e);
+    if(touches.length===2){
+      e.preventDefault();
+      const dx = touches[1].clientX - touches[0].clientX;
+      const dy = touches[1].clientY - touches[0].clientY;
+      const dist = Math.hypot(dx,dy);
+      const isH  = Math.abs(dx) >= Math.abs(dy); // horizontal or vertical spread
+      pinchRef.current = {
+        active:true,
+        startDist:dist,
+        isH,
+        startColSpan:colSpan,
+        startRowSpan:rowSpan,
+        committed:false,
+      };
+    }
+  }
+
+  function onTouchMove(e){
+    if(!pinchRef.current.active) return;
+    const touches = getTouches(e);
+    if(touches.length!==2) return;
+    e.preventDefault();
+
+    const dx   = touches[1].clientX - touches[0].clientX;
+    const dy   = touches[1].clientY - touches[0].clientY;
+    const dist = Math.hypot(dx,dy);
+    const ratio = dist / pinchRef.current.startDist;
+
+    const {isH, startColSpan, startRowSpan, committed} = pinchRef.current;
+
+    if(isH){
+      // Horizontal: change colSpan (1↔2)
+      let next = startColSpan;
+      if(ratio > 1.3 && startColSpan < 2)       next = 2;
+      else if(ratio < 0.75 && startColSpan > 1)  next = 1;
+      if(next!==colSpan){
+        pinchRef.current.committed = true;
+        onResize({colSpan:next});
+      }
+    } else {
+      // Vertical: change rowSpan (1↔2)
+      let next = startRowSpan;
+      if(ratio > 1.3 && startRowSpan < 2)       next = 2;
+      else if(ratio < 0.75 && startRowSpan > 1)  next = 1;
+      if(next!==rowSpan){
+        pinchRef.current.committed = true;
+        onResize({rowSpan:next});
+      }
+    }
+  }
+
+  function onTouchEnd(e){
+    pinchRef.current.active = false;
+    onLongPressCancel();
+  }
+
+  const isMNtheme = isMN;
+
+  return(
+    <div
+      ref={wrapRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+      onPointerEnter={onDragEnter}
+      onPointerUp={onDrop}
+      style={{
+        gridColumn:`span ${colSpan}`,
+        gridRow:`span ${rowSpan}`,
+        height: cardH,
+        transition:"grid-column 0.3s ease, grid-row 0.3s ease, height 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease",
+        transform: dragging?"scale(1.05)":dragOver?"scale(0.97)":"scale(1)",
+        opacity: dragging?0.85:1,
+        boxShadow: dragging?`0 12px 32px rgba(0,0,0,0.4)`:"none",
+        zIndex: dragging?10:1,
+        borderRadius:14,
+        overflow:"hidden",
+        touchAction:"none",
+        WebkitTapHighlightColor:"transparent",
+        cursor: dragging?"grabbing":"grab",
+        position:"relative",
+      }}
+    >
+      {isMNtheme
+        ?<StatSticker
+            iconId={card.iconId}
+            label={card.label}
+            value={card.value}
+            data={data}
+            span={false}
+            colSpan={colSpan}
+            rowSpan={rowSpan}
+            onStickerOpen={onStickerOpen}
+            onGenerate={()=>{
+              const today=todayKey();
+              const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+              onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
+            }}
+          />
+        :<div style={{
+            width:"100%",height:"100%",
+            padding:`${padV}px ${padH}px`,
+            borderRadius:14,
+            background:th.card,
+            border:`1px solid ${th.border}`,
+            textAlign:"center",
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+            gap: rowSpan===2?8:4,
+            transition:"padding 0.3s ease",
+          }}>
+            <div style={{fontSize:emojiSz,transition:"font-size 0.3s ease",lineHeight:1}}>{card.emoji}</div>
+            <div style={{fontSize:valueSz,fontWeight:800,color:th.accent,transition:"font-size 0.3s ease",lineHeight:1}}>
+              {card.iconId==="steps"?card.value.toLocaleString():card.value}
+            </div>
+            <div style={{
+              fontSize:labelSz,color:th.sub,
+              letterSpacing:isHapon?"0.3px":undefined,
+              transition:"font-size 0.3s ease",
+              lineHeight:1.3,
+              maxWidth:"100%",
+              whiteSpace: colSpan===2?"nowrap":"normal",
+              overflow:"hidden",
+              textOverflow:"ellipsis",
+            }}>{card.label}</div>
+          </div>
+      }
     </div>
   );
 }
@@ -4627,45 +4890,22 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
               ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
               :[]),
           ];
-
-          // Filter to only cards that have meaningful data
           const visible=registry.filter(s=>s.value>=s.min);
-
-          // Nothing to show — render nothing (the section header is still visible)
           if(!visible.length) return(
             <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
               {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
             </div>
           );
-
           return(
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-              {visible.map((s,i)=>{
-                // Orphan: last card on an incomplete row — span all 3 columns
-                const isOrphan=visible.length%3!==0 && i===visible.length-1;
-                const spanStyle=isOrphan?{gridColumn:"span 3"}:{};
-
-                return data.theme==="manila_nights"
-                  ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
-                      onStickerOpen={onStickerOpen}
-                      onGenerate={()=>{
-                        const today=todayKey();
-                        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-                      }}/>
-                  :<div key={s.iconId} style={{
-                    padding:"14px 12px",borderRadius:14,
-                    background:th.card,border:`1px solid ${th.border}`,
-                    textAlign:"center",...spanStyle,
-                  }}>
-                    <div style={{fontSize:20}}>{s.emoji}</div>
-                    <div style={{fontSize:22,fontWeight:800,color:th.accent}}>
-                      {s.iconId==="steps"?s.value.toLocaleString():s.value}
-                    </div>
-                    <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{s.label}</div>
-                  </div>;
-              })}
-            </div>
+            <StatGrid
+              cards={visible}
+              data={data}
+              onChange={onChange}
+              th={th}
+              isHapon={isHapon}
+              isMN={data.theme==="manila_nights"}
+              onStickerOpen={onStickerOpen}
+            />
           );
         })()}
 
