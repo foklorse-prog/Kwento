@@ -4289,10 +4289,12 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-// Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
+// On mount: renders PNG, immediately tries navigator.share (Option C).
+// Falls back to sheet UI if share not supported or fails.
 function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
+  const [showFallback,setShowFallback]=useState(false);
   const CARD_W=240, CARD_H=165, BRAND_H=39;
   const DPR=Math.min(window.devicePixelRatio||1,2);
   const today=todayKey();
@@ -4308,17 +4310,38 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
     drawSticker(ctx,W,H,CARD_H,label,value,iconId);
-    setImgUrl(canvas.toDataURL("image/png"));
+    const url=canvas.toDataURL("image/png");
+    setImgUrl(url);
     if(canGenerate) onGenerate&&onGenerate();
+
+    // Option C — try navigator.share immediately
+    if(navigator.share && navigator.canShare){
+      canvas.toBlob(async blob=>{
+        if(!blob) return setShowFallback(true);
+        const file=new File([blob],"kwento-stat.png",{type:"image/png"});
+        if(!navigator.canShare({files:[file]})) return setShowFallback(true);
+        try{
+          await navigator.share({files:[file],title:"My Kwento Stat"});
+          onClose(); // dismiss after share
+        } catch(e){
+          // User cancelled or error — show fallback sheet
+          if(e.name!=="AbortError") setShowFallback(true);
+          else onClose();
+        }
+      },"image/png");
+    } else {
+      setShowFallback(true);
+    }
   },[]);
 
-  // Portal to document.body so position:fixed isn't clipped by any scroll container
+  // Portal to document.body
   const el=useMemo(()=>document.createElement("div"),[]);
-  useEffect(()=>{
-    document.body.appendChild(el);
-    return ()=>document.body.removeChild(el);
-  },[]);
+  useEffect(()=>{ document.body.appendChild(el); return ()=>document.body.removeChild(el); },[]);
 
+  // While share is being triggered, render nothing visible
+  if(!showFallback) return ReactDOM.createPortal(<canvas ref={canvasRef} style={{display:"none"}}/>, el);
+
+  // Fallback sheet
   const sheet=(
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}
       style={{position:"fixed",inset:0,zIndex:9999,
@@ -4330,14 +4353,12 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
           borderTopLeftRadius:24,borderTopRightRadius:24,
           padding:"20px 24px 52px",
           display:"flex",flexDirection:"column",alignItems:"center",gap:14,
-          border:"1px solid #221440",
-          boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
+          border:"1px solid #221440",boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"rgba(136,120,170,0.3)"}}/>
         <p style={{color:"rgba(136,120,170,0.6)",fontSize:11,fontWeight:500,
           letterSpacing:"1.2px",textTransform:"uppercase"}}>
           {canGenerate?"Hold image to save or share":"Daily limit reached"}
         </p>
-        <canvas ref={canvasRef} style={{display:"none"}}/>
         {imgUrl&&(
           <img src={imgUrl} alt="Kwento stat sticker"
             style={{width:240,height:204,borderRadius:16,
@@ -4357,7 +4378,6 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
       </div>
     </div>
   );
-
   return ReactDOM.createPortal(sheet, el);
 }
 
@@ -4819,11 +4839,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
           const visible=registry.filter(s=>s.value>=s.min);
 
           // Nothing to show — render nothing (the section header is still visible)
-          if(!visible.length) return(
-            <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
-              {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
-            </div>
-          );
+          if(!visible.length) return null;
 
           return(
             <StatGrid
