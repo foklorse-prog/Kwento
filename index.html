@@ -40,12 +40,13 @@ v6.0 — 2026-03-13
   </script>
 </head>
 <body>
-<style>html,body{background:#000;user-select:none;-webkit-user-select:none;}<style>
+<style>html,body{background:#000;user-select:none;-webkit-user-select:none;}
+.selectable{user-select:text;-webkit-user-select:text;}
+<style>
 @keyframes tri-open{from{transform:rotate(0deg)}to{transform:rotate(180deg)}}
 @keyframes tri-close{from{transform:rotate(180deg)}to{transform:rotate(0deg)}}
 .tri-btn svg{transition:transform 0.22s ease;}
 .tri-btn.open svg{transform:rotate(180deg);}
-.selectable{user-select:text;-webkit-user-select:text;}
 </style>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
@@ -3960,12 +3961,12 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
         <BarkadaDeck data={data} onUpdateBarkadaState={onUpdateBarkadaState}/>
       </div>
 
-      {/* Premium upsell — at the bottom */}
-      <div style={{padding:"14px 18px",borderRadius:16,background:"var(--accent)08",border:"1px dashed var(--accent)44",textAlign:"center"}}>
+      {/* Premium upsell — hidden for beta users */}
+      {!data.betaMode&&<div style={{padding:"14px 18px",borderRadius:16,background:"var(--accent)08",border:"1px dashed var(--accent)44",textAlign:"center"}}>
         <div style={{fontSize:13,color:"var(--sub)",lineHeight:1.6}}>
           ✨ <span style={{color:"var(--accent)",fontWeight:700}}>Premium</span> — endless suggestions, refreshed any time
         </div>
-      </div>
+      </div>}
 
       {showCard&&archetype&&<ShareCardModal archetype={archetype} data={data} av={av} onClose={()=>setShowCard(false)}/>}
     </div>
@@ -4290,12 +4291,10 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   ctx.fillText("My week on Kwento", cx, CARD_H+16);
 }
 
-// On mount: renders PNG, immediately tries navigator.share (Option C).
-// Falls back to sheet UI if share not supported or fails.
+// Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
 function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
-  const [showFallback,setShowFallback]=useState(false);
   const CARD_W=240, CARD_H=165, BRAND_H=39;
   const DPR=Math.min(window.devicePixelRatio||1,2);
   const today=todayKey();
@@ -4311,38 +4310,17 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
     drawSticker(ctx,W,H,CARD_H,label,value,iconId);
-    const url=canvas.toDataURL("image/png");
-    setImgUrl(url);
+    setImgUrl(canvas.toDataURL("image/png"));
     if(canGenerate) onGenerate&&onGenerate();
-
-    // Option C — try navigator.share immediately
-    if(navigator.share && navigator.canShare){
-      canvas.toBlob(async blob=>{
-        if(!blob) return setShowFallback(true);
-        const file=new File([blob],"kwento-stat.png",{type:"image/png"});
-        if(!navigator.canShare({files:[file]})) return setShowFallback(true);
-        try{
-          await navigator.share({files:[file],title:"My Kwento Stat"});
-          onClose(); // dismiss after share
-        } catch(e){
-          // User cancelled or error — show fallback sheet
-          if(e.name!=="AbortError") setShowFallback(true);
-          else onClose();
-        }
-      },"image/png");
-    } else {
-      setShowFallback(true);
-    }
   },[]);
 
-  // Portal to document.body
+  // Portal to document.body so position:fixed isn't clipped by any scroll container
   const el=useMemo(()=>document.createElement("div"),[]);
-  useEffect(()=>{ document.body.appendChild(el); return ()=>document.body.removeChild(el); },[]);
+  useEffect(()=>{
+    document.body.appendChild(el);
+    return ()=>document.body.removeChild(el);
+  },[]);
 
-  // While share is being triggered, render nothing visible
-  if(!showFallback) return ReactDOM.createPortal(<canvas ref={canvasRef} style={{display:"none"}}/>, el);
-
-  // Fallback sheet
   const sheet=(
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}
       style={{position:"fixed",inset:0,zIndex:9999,
@@ -4354,12 +4332,14 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
           borderTopLeftRadius:24,borderTopRightRadius:24,
           padding:"20px 24px 52px",
           display:"flex",flexDirection:"column",alignItems:"center",gap:14,
-          border:"1px solid #221440",boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
+          border:"1px solid #221440",
+          boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"rgba(136,120,170,0.3)"}}/>
         <p style={{color:"rgba(136,120,170,0.6)",fontSize:11,fontWeight:500,
           letterSpacing:"1.2px",textTransform:"uppercase"}}>
           {canGenerate?"Hold image to save or share":"Daily limit reached"}
         </p>
+        <canvas ref={canvasRef} style={{display:"none"}}/>
         {imgUrl&&(
           <img src={imgUrl} alt="Kwento stat sticker"
             style={{width:240,height:204,borderRadius:16,
@@ -4379,12 +4359,14 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate}){
       </div>
     </div>
   );
+
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
+  const [showSheet,setShowSheet]=useState(false);
   const BRAND_H=26;
   const DPR=Math.min(window.devicePixelRatio||1,2);
 
@@ -4392,10 +4374,9 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
     const canvas=canvasRef.current;
     const wrap=wrapRef.current;
     if(!canvas||!wrap) return;
-    // Draw once after layout commits — no ResizeObserver, no continuous redraws
-    let raf1,raf2;
-    raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{
-      const W=wrap.offsetWidth, CARD_H=wrap.offsetHeight;
+    function redraw(){
+      const W=wrap.offsetWidth;
+      const CARD_H=wrap.offsetHeight;
       if(!W||!CARD_H) return;
       const H=CARD_H+BRAND_H;
       canvas.width=W*DPR; canvas.height=H*DPR;
@@ -4403,120 +4384,45 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
       const ctx=canvas.getContext("2d");
       ctx.scale(DPR,DPR);
       drawSticker(ctx,W,H,CARD_H,label,value,iconId);
-    }); });
-    return ()=>{ cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+    }
+    let raf1,raf2;
+    const ro=new ResizeObserver(()=>{
+      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
+      raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{ redraw(); }); });
+    });
+    ro.observe(wrap);
+    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   },[value,label,iconId]);
 
+  // openSheet is called by StatGrid after 1.2s hold
+  function openSheet(){
+    setShowSheet(true);
+    onStickerOpen&&onStickerOpen(true);
+  }
+
+  useEffect(()=>{ onRegisterOpen&&onRegisterOpen(openSheet); },[]);
+
   return(
-    <div ref={wrapRef}
-      style={{position:"relative",overflow:"hidden",borderRadius:16,
-        width:"100%",height:"100%",
-        WebkitTapHighlightColor:"transparent",
-        ...(span?{gridColumn:"span 3"}:{}),
-      }}>
-      <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
-    </div>
+    <>
+      <div ref={wrapRef}
+        style={{position:"relative",overflow:"hidden",borderRadius:16,
+          width:"100%",height:"100%",
+          WebkitTapHighlightColor:"transparent",
+          ...(span?{gridColumn:"span 3"}:{}),
+        }}>
+        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
+      </div>
+      {showSheet&&<StickerSaveSheet
+        iconId={iconId} label={label} value={value} data={data}
+        onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
+        onGenerate={onGenerate}
+      />}
+    </>
   );
 }
 
-// ─── STAT STICKER SHARE MODAL ────────────────────────────────────────────────
-function StatStickerShareModal({card,data,onClose,onGenerate}){
-  const th=THEMES.manila_nights;
-  const canvasRef=useRef(null);
-  const [imgUrl,setImgUrl]=useState(null);
-  const [rendering,setRendering]=useState(true);
-  const CARD_W=240,CARD_H=165,BRAND_H=39;
-  const DPR=Math.min(window.devicePixelRatio||1,2);
-  const today=todayKey();
-  const genCount=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-  const canGenerate=data.betaMode||genCount<STICKER_FREE_LIMIT;
-
-  useEffect(()=>{
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    canvas.width=CARD_W*DPR; canvas.height=(CARD_H+BRAND_H)*DPR;
-    const ctx=canvas.getContext("2d");
-    ctx.scale(DPR,DPR);
-    drawSticker(ctx,CARD_W,CARD_H+BRAND_H,CARD_H,card.label,card.value,card.iconId);
-    setImgUrl(canvas.toDataURL("image/png"));
-    setRendering(false);
-  },[]);
-
-  const handleShare=async()=>{
-    if(!imgUrl||!canGenerate) return;
-    try{
-      const res=await fetch(imgUrl);
-      const blob=await res.blob();
-      const file=new File([blob],"kwento-stat.png",{type:"image/png"});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"My Kwento Stat"});
-        onGenerate&&onGenerate();
-        onClose();
-      } else handleSave();
-    }catch(e){ if(e.name!=="AbortError") handleSave(); else onClose(); }
-  };
-
-  const handleSave=()=>{
-    if(!imgUrl||!canGenerate) return;
-    const a=document.createElement("a");
-    a.href=imgUrl; a.download="kwento-stat.png"; a.click();
-    onGenerate&&onGenerate();
-  };
-
-  // Portal to body so fixed positioning works outside scroll containers
-  const el=useMemo(()=>document.createElement("div"),[]);
-  useEffect(()=>{ document.body.appendChild(el); return ()=>document.body.removeChild(el); },[]);
-
-  return ReactDOM.createPortal(
-    <div onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{position:"fixed",inset:0,zIndex:9999,
-        background:"rgba(0,0,0,0.88)",backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",
-        display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-        padding:"40px 24px"}}>
-      <canvas ref={canvasRef} style={{display:"none"}}/>
-      {rendering?(
-        <div style={{width:240,height:204,borderRadius:16,background:th.card,
-          display:"flex",alignItems:"center",justifyContent:"center",
-          color:"rgba(136,120,170,0.5)",fontSize:13}}>Rendering…</div>
-      ):(
-        <img src={imgUrl} alt="Kwento stat sticker"
-          style={{width:240,height:204,borderRadius:16,
-            boxShadow:"0 12px 40px rgba(0,207,255,0.2)",display:"block"}}/>
-      )}
-      <div style={{width:"100%",maxWidth:300,display:"flex",flexDirection:"column",gap:10,marginTop:24}}>
-        <button onClick={handleShare} disabled={rendering}
-          style={{width:"100%",padding:"14px",borderRadius:16,
-            background:`linear-gradient(135deg,#00cffe,#b06aff)`,
-            color:"#fff",fontWeight:700,fontSize:15,border:"none",cursor:canGenerate?"pointer":"default",
-            display:"flex",alignItems:"center",justifyContent:"center",gap:8,
-            boxShadow:"0 8px 24px rgba(0,207,255,0.25)",opacity:(rendering||!canGenerate)?0.4:1}}>
-          <span>📤</span><span>Share</span>
-        </button>
-        <button onClick={handleSave} disabled={rendering||!canGenerate}
-          style={{width:"100%",padding:"13px",borderRadius:16,
-            background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",
-            color:"#fff",fontWeight:600,fontSize:14,cursor:canGenerate?"pointer":"default",
-            display:"flex",alignItems:"center",justifyContent:"center",gap:8,
-            opacity:(rendering||!canGenerate)?0.4:1}}>
-          <span>💾</span><span>Save to Device</span>
-        </button>
-        {!canGenerate&&(
-          <p style={{color:"rgba(136,120,170,0.5)",fontSize:12,textAlign:"center",margin:"4px 0 0"}}>
-            {data.betaMode?"":"3 free saves per day · Resets at midnight"}
-          </p>
-        )}
-        <button onClick={onClose}
-          style={{width:"100%",padding:"12px",borderRadius:14,background:"transparent",
-            border:"none",color:"rgba(136,120,170,0.45)",fontSize:13,cursor:"pointer"}}>
-          Close
-        </button>
-      </div>
-    </div>,
-  el);
-}
-
 // ─── STAT GRID ────────────────────────────────────────────────────────────────
-function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, showGrow}){
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
   const savedSizes = data.statCardSizes || {};
   const savedOrder = data.statCardOrder || [];
 
@@ -4536,7 +4442,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
-  const [stickerShare, setStickerShare] = useState(null); // card to share
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4560,21 +4465,26 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
     });
   }
 
+  // Each card calls these up to StatGrid
+  // stickerRefs: iconId → openSheet fn, set by each StatSticker via callback
+  const stickerOpenRefs = useRef({});
+
   function onCardTouchStart(iconId, e){
     const t=e.touches;
     if(t.length===1){
+      // 400ms → drag mode
       longTimer.current=setTimeout(()=>{
         dragState.current={active:true,fromId:iconId,overId:null};
         setDragging(iconId);
         if(navigator.vibrate) navigator.vibrate(25);
 
+        // 1200ms total → save sheet (only if still not moved)
         longTimer.current=setTimeout(()=>{
           if(dragState.current.active && !dragState.current.moved){
+            // cancel drag, open save sheet
             dragState.current={active:false,fromId:null,overId:null,moved:false};
             setDragging(null); setDragOver(null);
-            if(navigator.vibrate) navigator.vibrate([30,40,30]);
-            const card=cards.find(c=>c.iconId===iconId);
-            if(card) setStickerShare(card);
+            stickerOpenRefs.current[iconId]&&stickerOpenRefs.current[iconId]();
           }
         },800);
       },400);
@@ -4591,7 +4501,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
     const cardEl=el.closest("[data-cardid]");
     if(!cardEl) return;
     const overId=cardEl.getAttribute("data-cardid");
-    if(overId && overId!==dragState.current.fromId && overId!==dragState.current.overId){
+    if(overId && overId!==dragState.current.fromId){
       dragState.current.overId=overId;
       setDragOver(overId);
     }
@@ -4610,16 +4520,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
   const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
 
   return(
-    <>
-    {stickerShare&&<StatStickerShareModal
-      card={stickerShare} data={data}
-      onGenerate={()=>{
-        const today=todayKey();
-        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-      }}
-      onClose={()=>{ setStickerShare(null); onStickerOpen&&onStickerOpen(false); }}
-    />}
     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
       {orderedCards.map(card=>{
         const {colSpan,rowSpan}=sizes[card.iconId]||{colSpan:1,rowSpan:1};
@@ -4697,6 +4597,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
               iconId={card.iconId} label={card.label} value={card.value}
               data={data} span={false}
               onStickerOpen={onStickerOpen}
+              onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
               onGenerate={()=>{
                 const today=todayKey();
                 const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
@@ -4734,13 +4635,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, show
         );
       })}
     </div>
-    {showGrow&&(
-      <div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3}}>
-        <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
-        <p style={{fontSize:data.logs.length<2?13:11,color:"rgba(255,255,255,0.3)"}}>Log a few more things to see your profile grow.</p>
-      </div>
-    )}
-    </>
   );
 }
 
@@ -4901,6 +4795,13 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
         const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
         const weekSteps=stepsLogs.filter(l=>new Date(l.customDate||l.date)>=weekAgo).reduce((s,l)=>s+(l.stepCount||0),0);
+        const visibleCount=[totalLogs,daysActiveCount,thisWeekCount,swipedRight.length,...(stepsLogs.length>0?[weekSteps]:[])].filter(v=>v>=1).length;
+        const savedSizes=data.statCardSizes||{};
+        const occupiedSlots=[totalLogs,daysActiveCount,thisWeekCount,swipedRight.length,...(stepsLogs.length>0?[weekSteps]:[])].filter(v=>v>=1).reduce((sum,_,i)=>{
+          const ids=["total","days","week","liked",...(stepsLogs.length>0?["steps"]:[])];
+          const s=savedSizes[ids[i]]||{colSpan:1,rowSpan:1};
+          return sum+s.colSpan*s.rowSpan;
+        },0);
         return(
       <div style={{marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
@@ -4927,14 +4828,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
           const visible=registry.filter(s=>s.value>=s.min);
 
           // Nothing to show — render nothing (the section header is still visible)
-          if(!visible.length) return null;
+          if(!visible.length) return(
+            <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
+              {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
+            </div>
+          );
 
           return(
             <StatGrid
               cards={visible} data={data} onChange={onChange}
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
-              showGrow={visible.length<=6}
             />
           );
         })()}
@@ -4985,6 +4889,10 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         </div>
       )}
 
+      <div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3,display:occupiedSlots>9?"none":"block"}}>
+        <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
+        <p style={{fontSize:data.logs.length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+      </div>
     </div>
   );
 }
@@ -5007,7 +4915,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const handleRedeem=()=>{
     if(redeemInput.trim().toLowerCase()==="beta"){
       onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null});
-      setRedeemMsg("✅ Beta mode activated — unlimited sticker saves!");
+      setRedeemMsg("✅ Beta activated — all limits removed!");
       setRedeemInput("");
     } else {
       setRedeemMsg("❌ Invalid code.");
@@ -5370,8 +5278,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
               <span style={{fontSize:18}}>🔓</span>
               <div>
-                <div style={{fontSize:14,fontWeight:700,color:th.accent}}>Beta mode active</div>
-                <div style={{fontSize:12,color:th.sub,marginTop:2}}>All limits removed</div>
+                <div style={{fontSize:14,fontWeight:700,color:th.accent}}>Beta active — all limits removed</div>
+                <div style={{fontSize:12,color:th.sub,marginTop:2}}>You have full access</div>
               </div>
             </div>
           )}
