@@ -4321,8 +4321,10 @@ function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, spa
     // it to the screen, so we always get real dimensions.
     let raf1, raf2;
     const ro=new ResizeObserver(()=>{
-      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
-      raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{ redraw(); }); });
+      ro.disconnect();
+      raf1=requestAnimationFrame(()=>{
+        raf2=requestAnimationFrame(()=>{ redraw(); });
+      });
     });
     ro.observe(wrap);
 
@@ -4342,7 +4344,7 @@ function StatSticker({iconId, label, value, data, onGenerate, onStickerOpen, spa
           width:"100%",height:"100%",minHeight:95,
           ...(span?{gridColumn:"span 3"}:{}),
         }}
-        onTouchStart={e=>{if(e.touches.length===1) e.currentTarget.style.transform="scale(0.96)"}}
+        onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
         onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}
         onTouchCancel={e=>e.currentTarget.style.transform="scale(1)"}
       >
@@ -4443,209 +4445,6 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
         color:"rgba(136,120,170,0.5)",fontSize:13,cursor:"pointer",letterSpacing:"0.4px"}}>
         Close
       </button>
-    </div>
-  );
-}
-
-// ─── STAT GRID ────────────────────────────────────────────────────────────────
-function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
-  const savedSizes = data.statCardSizes || {};
-  const savedOrder = data.statCardOrder || [];
-
-  const [order, setOrder] = useState(()=>{
-    const known = savedOrder.filter(id=>cards.find(c=>c.iconId===id));
-    const fresh  = cards.filter(c=>!known.includes(c.iconId)).map(c=>c.iconId);
-    return [...known,...fresh];
-  });
-  const [sizes, setSizes] = useState(()=>{
-    const s={};
-    cards.forEach(c=>{ s[c.iconId]=savedSizes[c.iconId]||{colSpan:1,rowSpan:1}; });
-    return s;
-  });
-
-  // drag state lives in refs so touch handlers always see current values
-  const dragState = useRef({active:false, fromId:null, overId:null});
-  const [dragging, setDragging] = useState(null);
-  const [dragOver, setDragOver] = useState(null);
-  const longTimer  = useRef(null);
-
-  function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
-
-  function resize(iconId,patch){
-    setSizes(prev=>{
-      const next={...prev,[iconId]:{...prev[iconId],...patch}};
-      persist(order,next);
-      return next;
-    });
-  }
-
-  function reorder(fromId,toId){
-    if(!fromId||!toId||fromId===toId) return;
-    setOrder(prev=>{
-      const a=[...prev];
-      const fi=a.indexOf(fromId), ti=a.indexOf(toId);
-      if(fi<0||ti<0) return prev;
-      a.splice(fi,1); a.splice(ti,0,fromId);
-      persist(a,sizes);
-      return a;
-    });
-  }
-
-  // Each card calls these up to StatGrid
-  function onCardTouchStart(iconId, e){
-    const t=e.touches;
-    if(t.length===1){
-      // start long-press for drag
-      longTimer.current=setTimeout(()=>{
-        dragState.current={active:true,fromId:iconId,overId:null};
-        setDragging(iconId);
-        if(navigator.vibrate) navigator.vibrate(25);
-      },500);
-    }
-    if(t.length===2) clearTimeout(longTimer.current);
-  }
-
-  function onCardTouchMove(iconId, e){
-    if(!dragState.current.active) return;
-    const t=e.touches[0];
-    const el=document.elementFromPoint(t.clientX,t.clientY);
-    if(!el) return;
-    const cardEl=el.closest("[data-cardid]");
-    if(!cardEl) return;
-    const overId=cardEl.getAttribute("data-cardid");
-    if(overId && overId!==dragState.current.fromId){
-      dragState.current.overId=overId;
-      setDragOver(overId);
-    }
-  }
-
-  function onCardTouchEnd(){
-    clearTimeout(longTimer.current);
-    if(dragState.current.active){
-      reorder(dragState.current.fromId, dragState.current.overId);
-      dragState.current={active:false,fromId:null,overId:null};
-      setDragging(null);
-      setDragOver(null);
-    }
-  }
-
-  const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
-
-  return(
-    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
-      {orderedCards.map(card=>{
-        const {colSpan,rowSpan}=sizes[card.iconId]||{colSpan:1,rowSpan:1};
-        const BASE_H=95;
-        const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
-        const area=colSpan*rowSpan;
-        const emojiSz=area>=4?30:area>=2?25:20;
-        const valSz=area>=4?32:area>=2?27:22;
-        const lblSz=area>=4?13:area>=2?12:11;
-        const pad=area>=4?"18px 16px":area>=2?"16px 13px":"14px 12px";
-        const isDrag=dragging===card.iconId;
-        const isOver=dragOver===card.iconId;
-
-        // pinch ref per card — stored on card object each render (safe, same ref)
-        if(!card._pinch) card._pinch={on:false,isH:false,dist0:0,col0:1,row0:1};
-        const pinch=card._pinch;
-
-        function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
-
-        function handleTouchStart(e){
-          onCardTouchStart(card.iconId,e);
-          if(e.touches.length===2){
-            e.preventDefault();
-            const t=e.touches;
-            const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
-            pinch.on=true; pinch.isH=Math.abs(dx)>=Math.abs(dy);
-            pinch.dist0=Math.hypot(dx,dy); pinch.col0=colSpan; pinch.row0=rowSpan;
-          }
-        }
-
-        function handleTouchMove(e){
-          onCardTouchMove(card.iconId,e);
-          if(!pinch.on||e.touches.length!==2) return;
-          e.preventDefault();
-          const ratio=d2(e)/pinch.dist0;
-          if(pinch.isH){
-            const next=ratio>1.28?Math.min(pinch.col0+1,2):ratio<0.78?Math.max(pinch.col0-1,1):pinch.col0;
-            if(next!==colSpan){ resize(card.iconId,{colSpan:next}); pinch.col0=next; pinch.dist0=d2(e); }
-          } else {
-            const next=ratio>1.28?Math.min(pinch.row0+1,2):ratio<0.78?Math.max(pinch.row0-1,1):pinch.row0;
-            if(next!==rowSpan){ resize(card.iconId,{rowSpan:next}); pinch.row0=next; pinch.dist0=d2(e); }
-          }
-        }
-
-        function handleTouchEnd(e){
-          pinch.on=false;
-          onCardTouchEnd();
-        }
-
-        const wrapStyle={
-          gridColumn:`span ${colSpan}`,
-          gridRow:`span ${rowSpan}`,
-          height:cardH,
-          transition:"height 0.28s ease, transform 0.22s ease, opacity 0.2s ease, box-shadow 0.2s ease",
-          transform:isDrag?"scale(1.04)":isOver?"scale(0.96)":"scale(1)",
-          opacity:isDrag?0.8:1,
-          boxShadow:isDrag?"0 14px 36px rgba(0,0,0,0.4)":"none",
-          zIndex:isDrag?20:1,
-          position:"relative",
-          WebkitUserSelect:"none",userSelect:"none",
-          WebkitTouchCallout:"none",
-          WebkitTapHighlightColor:"transparent",
-          touchAction:"pan-y",
-        };
-
-        if(isMN) return(
-          // MN: pinch/drag handlers on the outer wrapper, StatSticker keeps its own tap→modal
-          <div key={card.iconId} data-cardid={card.iconId}
-            style={wrapStyle}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-          >
-            <StatSticker
-              iconId={card.iconId} label={card.label} value={card.value}
-              data={data} span={false}
-              onStickerOpen={onStickerOpen}
-              onGenerate={()=>{
-                const today=todayKey();
-                const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-              }}
-            />
-          </div>
-        );
-
-        return(
-          <div key={card.iconId} data-cardid={card.iconId}
-            style={wrapStyle}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-          >
-            <div style={{
-              width:"100%",height:"100%",padding:pad,
-              borderRadius:14,background:th.card,border:`1px solid ${th.border}`,
-              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-              textAlign:"center",gap:rowSpan===2?8:4,boxSizing:"border-box",
-            }}>
-              <div style={{fontSize:emojiSz,lineHeight:1}}>{card.emoji}</div>
-              <div style={{fontSize:valSz,fontWeight:800,color:th.accent,lineHeight:1}}>
-                {card.iconId==="steps"?card.value.toLocaleString():card.value}
-              </div>
-              <div style={{fontSize:lblSz,color:th.sub,lineHeight:1.3,
-                letterSpacing:isHapon?"0.3px":undefined,
-                whiteSpace:colSpan===2?"nowrap":"normal",
-                overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
-              }}>{card.label}</div>
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -4840,11 +4639,33 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
           );
 
           return(
-            <StatGrid
-              cards={visible} data={data} onChange={onChange}
-              th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
-              onStickerOpen={onStickerOpen}
-            />
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+              {visible.map((s,i)=>{
+                // Orphan: last card on an incomplete row — span all 3 columns
+                const isOrphan=visible.length%3!==0 && i===visible.length-1;
+                const spanStyle=isOrphan?{gridColumn:"span 3"}:{};
+
+                return data.theme==="manila_nights"
+                  ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
+                      onStickerOpen={onStickerOpen}
+                      onGenerate={()=>{
+                        const today=todayKey();
+                        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+                        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
+                      }}/>
+                  :<div key={s.iconId} style={{
+                    padding:"14px 12px",borderRadius:14,
+                    background:th.card,border:`1px solid ${th.border}`,
+                    textAlign:"center",...spanStyle,
+                  }}>
+                    <div style={{fontSize:20}}>{s.emoji}</div>
+                    <div style={{fontSize:22,fontWeight:800,color:th.accent}}>
+                      {s.iconId==="steps"?s.value.toLocaleString():s.value}
+                    </div>
+                    <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{s.label}</div>
+                  </div>;
+              })}
+            </div>
           );
         })()}
 
