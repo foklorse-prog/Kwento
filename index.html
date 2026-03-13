@@ -4363,15 +4363,46 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
 function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
+  const overlayRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
   const [limitHit,setLimitHit]=useState(false);
 
-  // Lock body scroll for the lifetime of this modal — restored on unmount
-  // regardless of how the modal is closed (tap backdrop, Close button, etc.)
+  // Prevent ALL scrolling and pull-to-refresh while the modal is open.
+  // Two-pronged approach:
+  // 1. Find every scrollable div inside the profile page and freeze it
+  // 2. Add a non-passive touchmove listener on the overlay that calls
+  //    preventDefault() — this is what actually blocks iOS pull-to-refresh,
+  //    because that gesture is a touchmove at the viewport level. React's
+  //    synthetic events are always passive so they can't call preventDefault()
+  //    for touch events — we have to go through the native DOM API directly.
   useEffect(()=>{
-    const prev=document.body.style.overflow;
-    document.body.style.overflow="hidden";
-    return ()=>{ document.body.style.overflow=prev; };
+    const overlay=overlayRef.current;
+    if(!overlay) return;
+
+    // Freeze any inner scrollers that exist beneath the modal
+    const scrollers=document.querySelectorAll("[style*='overflow']");
+    const saved=[];
+    scrollers.forEach(el=>{
+      if(el===overlay) return;
+      saved.push({el, ov:el.style.overflow, ox:el.style.overflowX, oy:el.style.overflowY});
+      el.style.overflow="hidden";
+      el.style.overflowX="hidden";
+      el.style.overflowY="hidden";
+    });
+
+    // Block touchmove at the overlay — non-passive so preventDefault() works
+    const block=e=>e.preventDefault();
+    overlay.addEventListener("touchmove", block, {passive:false});
+
+    return ()=>{
+      overlay.removeEventListener("touchmove", block);
+      // Restore inner scrollers
+      saved.forEach(({el,ov,ox,oy})=>{
+        el.style.overflow=ov;
+        el.style.overflowX=ox;
+        el.style.overflowY=oy;
+      });
+    };
   },[]);
 
   // Larger canvas for the preview — 2× the profile card
@@ -4398,6 +4429,7 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
 
   return(
     <div
+      ref={overlayRef}
       onClick={e=>e.target===e.currentTarget&&onClose()}
       style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:200,
         display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
