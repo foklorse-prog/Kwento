@@ -1726,9 +1726,13 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 /* ── Hapon ── */
 @keyframes sunsetGlow{0%{opacity:0.0;transform:scale(0.85);}40%{opacity:0.25;}100%{opacity:0.0;transform:scale(1.4);}}
 @keyframes sunsetCloud{0%{transform:translateX(-30px);opacity:0;}20%{opacity:0.6;}80%{opacity:0.4;}100%{transform:translateX(calc(100vw + 30px));opacity:0;}}
-.hapon-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
+@keyframes haponLayer1{0%,100%{opacity:1;}40%,60%{opacity:0;}}
+@keyframes haponLayer2{0%,20%,80%,100%{opacity:0;}40%,60%{opacity:1;}}
+@keyframes haponLayer3{0%,30%,70%,100%{opacity:0;}50%{opacity:1;}}
+.hapon-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
 .sun-orb{position:absolute;border-radius:50%;animation:sunsetGlow ease-in-out infinite;}
 .cloud-streak{position:absolute;border-radius:40px;animation:sunsetCloud ease-in-out infinite;}
+@keyframes haponBounce{0%{transform:scale(0.85);opacity:0;}60%{transform:scale(1.18);}100%{transform:scale(1);opacity:1;}}
 
 /* ── Ulan ── */
 .ulan-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
@@ -1941,9 +1945,13 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
     return(<><div className="fiesta-blobs"><div className="fiesta-blob fiesta-blob1"/><div className="fiesta-blob fiesta-blob2"/><div className="fiesta-blob fiesta-blob3"/><div className="fiesta-blob fiesta-blob4"/></div><div className="festa-wrap">{bits.map((b,i)=><div key={i} className="confetti-bit" style={{left:b.l,background:b.c,width:b.w,height:b.h,animationDelay:`${b.d}s`,animationDuration:`${b.dur}s`}}/>)}</div></>);
   }
   if(theme==="hapon"){if(modalOpen)return null;
-    const orbs=[{left:"50%",top:"30%",size:120,c:"#ff8c42",d:0,dur:3.5},{left:"40%",top:"40%",size:200,c:"#f4a0c0",d:0.8,dur:4.2},{left:"60%",top:"25%",size:90,c:"#e8502a",d:1.6,dur:3.0}];
-    const clouds=[{top:"28%",h:12,w:120,c:"#f4c0a0",d:0,dur:8},{top:"38%",h:8,w:90,c:"#e8a0b0",d:2,dur:11},{top:"22%",h:10,w:70,c:"#f4d0c0",d:4,dur:9}];
-    return(<div className="hapon-wrap">{orbs.map((o,i)=><div key={i} className="sun-orb" style={{left:o.left,top:o.top,width:o.size,height:o.size,marginLeft:-o.size/2,marginTop:-o.size/2,background:o.c,animationDelay:`${o.d}s`,animationDuration:`${o.dur}s`}}/>)}{clouds.map((c,i)=><div key={i} className="cloud-streak" style={{top:c.top,left:-c.w,height:c.h,width:c.w,background:c.c,opacity:0,animationDelay:`${c.d}s`,animationDuration:`${c.dur}s`}}/>)}</div>);
+    return(
+      <div className="hapon-wrap">
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#ffe4d0 0%,#ffb8a0 30%,#ff8fa0 60%,#c86080 100%)",animation:"haponLayer1 20s ease-in-out infinite"}}/>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#ffecd0 0%,#ffd090 30%,#ffaa70 60%,#e87060 100%)",animation:"haponLayer2 20s ease-in-out infinite"}}/>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#fff0e0 0%,#ffc8a0 30%,#ffb0c0 60%,#e890a0 100%)",animation:"haponLayer3 20s ease-in-out infinite"}}/>
+      </div>
+    );
   }
   if(theme==="ulan") return modalOpen?null:<UlanRain/>;
   if(theme==="taho"){if(modalOpen)return null;
@@ -2772,6 +2780,100 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
               <div style={{position:"relative",zIndex:1,padding:"6px 12px",
                 opacity:active?1:0.45,transition:"opacity 0.25s ease",
               }}>{tb.icon}</div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if(data.theme==="hapon"){
+    const haponIcon=(id)=>{
+      const active=tab===id;
+      const stroke=active?"#ffffff":th.sub;
+      const fill=active?th.accent:"none";
+      const sw=active?"1.6":"1.8";
+      if(id==="home") return(
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" fill={fill} stroke={stroke} strokeWidth={sw}/>
+          <path d="M9 22V12h6v10" fill="none" stroke={stroke} strokeWidth={sw}/>
+        </svg>
+      );
+      if(id==="timeline") return(
+        <div style={{position:"relative",display:"inline-flex"}}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round"
+            style={{transition:"transform 0.2s",transform:flash?"scale(1.18)":"scale(1)"}}>
+            <rect x="3" y="4" width="18" height="18" rx="2" fill={fill} stroke={stroke} strokeWidth={sw}/>
+            <path d="M3 9h18M9 4v5M15 4v5M7 13h4M7 17h6" fill="none" stroke={stroke} strokeWidth={sw}/>
+          </svg>
+          {flash>0&&<span key={animKey} style={{
+            position:"absolute",top:-9,right:-11,
+            background:th.accent,color:"#fff",
+            fontSize:9,fontWeight:800,lineHeight:1,
+            padding:"2px 5px",borderRadius:10,
+            animation:"badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
+            pointerEvents:"none",whiteSpace:"nowrap",
+            boxShadow:"0 2px 8px rgba(0,0,0,0.3)"
+          }}>+{flash}</span>}
+        </div>
+      );
+      if(id==="profile") return active
+        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.4 2.4-7.4L2 9.4h7.6L12 2z" fill={fill} stroke={stroke} strokeWidth={sw}/></svg>
+        :<span style={{display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>;
+      if(id==="mystory") return(
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" fill={fill} stroke={stroke} strokeWidth={sw}/>
+          <path d="M12 8v4l3 3" fill="none" stroke={stroke} strokeWidth={active?"2":"1.8"}/>
+        </svg>
+      );
+      if(id==="settings") return(
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" fill={fill} stroke={stroke} strokeWidth={sw}/>
+          <circle cx="12" cy="12" r="3" fill={active?"#ffffff":"none"} stroke={stroke} strokeWidth={sw}/>
+        </svg>
+      );
+      return null;
+    };
+    return(
+      <div style={{
+        position:"fixed",bottom:0,left:0,right:0,
+        background:"rgba(255,240,232,0.88)",
+        backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",
+        borderTop:"1px solid rgba(232,80,42,0.12)",
+        display:"flex",padding:"8px 0 22px",
+        zIndex:50,maxWidth:500,margin:"0 auto",width:"100%",
+      }}>
+        {tabs.map(tb=>{
+          const active=tab===tb.id;
+          return(
+            <button key={tb.id} onClick={()=>setTab(tb.id)}
+              style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+                justifyContent:"center",gap:5,cursor:"pointer",
+                padding:"4px 0",border:"none",background:"transparent",
+                WebkitTapHighlightColor:"transparent",outline:"none",transition:"all 0.2s"}}>
+              <div style={{
+                position:"relative",zIndex:1,
+                padding:"5px 10px",
+                opacity:active?1:0.55,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                animation:active?"haponBounce 0.4s cubic-bezier(0.34,1.4,0.64,1) both":"none",
+              }}>
+                <div style={{
+                  filter:active?`drop-shadow(0 1px 4px ${th.accent}aa)`:`drop-shadow(0 1px 2px rgba(0,0,0,0.22))`,
+                  transition:"filter 0.2s",
+                  display:"flex",
+                }}>{haponIcon(tb.id)}</div>
+              </div>
+              {/* Rising sun dot */}
+              <span style={{
+                width:6,
+                height:6,
+                borderRadius:"50%",
+                background:active?th.accent:"transparent",
+                boxShadow:active?`0 1px 6px ${th.accent}88`:"none",
+                transition:"background 0.2s, box-shadow 0.2s",
+                display:"block",
+              }}/>
             </button>
           );
         })}
@@ -4097,6 +4199,7 @@ function ProfilePage({data,onChange}){
   const px=data.photoPos?.x||50;
   const py=data.photoPos?.y||50;
 
+  const isHapon=data.theme==="hapon";
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
@@ -4111,7 +4214,11 @@ function ProfilePage({data,onChange}){
       <div style={{textAlign:"center",marginBottom:24}}>
         {/* Avatar circle — shows pending state as live preview when picker is open */}
         <div style={{position:"relative",display:"inline-block",margin:"0 auto 12px"}}>
-          <div className={data._dx?"_dxav":""} style={{width:88,height:88,borderRadius:"50%",fontSize:50,background:th.accent+"22",border:"2px solid "+th.accent+"44",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",overflow:"hidden"}}
+          <div className={data._dx?"_dxav":""} style={{
+            width:88,height:88,borderRadius:"50%",fontSize:50,
+            background:th.accent+"22",
+            border:"2px solid "+th.accent+"44",
+            display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",overflow:"hidden"}}
             onClick={openPicker}>
             {(pickerOpen?pendingPhoto:data.customPhoto)
               ?<img src={pickerOpen?pendingPhoto:data.customPhoto} style={{width:(100*sc)+"%",height:(100*sc)+"%",objectFit:"cover",position:"absolute",left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",pointerEvents:"none"}}/>
@@ -4168,20 +4275,35 @@ function ProfilePage({data,onChange}){
             <button onClick={()=>setEditName(false)} style={{fontSize:20,color:th.sub}}>×</button>
           </div>
         ):(
-          <h1 onClick={()=>setEditName(true)} style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:th.text,marginBottom:4,cursor:"pointer"}}>{data.userName}</h1>
+          <h1 onClick={()=>setEditName(true)} style={{
+            fontFamily:"'Playfair Display',serif",
+            fontSize:isHapon?28:24,
+            fontWeight:700,
+            color:th.text,
+            marginBottom:isHapon?6:4,
+            cursor:"pointer",
+            letterSpacing:isHapon?"-0.3px":undefined,
+            lineHeight:1.2,
+          }}>{data.userName}</h1>
         )}
-        <p style={{color:th.sub,fontSize:13}}>{t.welcome_back} 🌟</p>
+        <p style={{
+          color:th.sub,
+          fontSize:isHapon?12:13,
+          letterSpacing:isHapon?"0.8px":undefined,
+          textTransform:isHapon?"uppercase":undefined,
+          fontWeight:isHapon?600:undefined,
+        }}>{t.welcome_back} {isHapon?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>:"🌟"}</p>
       </div>
 
       {/* Archetype */}
       {archetype&&(
         <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.accent+"15",border:`1px solid ${th.accent}44`}}>
-          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{t.archetype}</div>
+          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:8}}>{isHapon?"✦ "+t.archetype+" ✦":t.archetype}</div>
           <div style={{display:"flex",gap:14,alignItems:"center"}}>
             <span style={{fontSize:36}}>{archetype.emoji}</span>
             <div>
-              <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,color:th.text,marginBottom:4}}>{lang==="fil"?archetype.nameFil:archetype.name}</div>
-              <div style={{fontSize:12,color:th.sub,lineHeight:1.5}}>{lang==="fil"?archetype.descFil:archetype.desc}</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:isHapon?19:17,fontWeight:isHapon?700:400,color:th.text,marginBottom:4}}>{lang==="fil"?archetype.nameFil:archetype.name}</div>
+              <div style={{fontSize:12,color:th.sub,lineHeight:1.6}}>{lang==="fil"?archetype.descFil:archetype.desc}</div>
             </div>
           </div>
         </div>
@@ -4218,7 +4340,7 @@ function ProfilePage({data,onChange}){
         return(
       <div style={{marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1}}>{t.your_stats}</h2>
+          <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,fontFamily:isHapon?"'DM Sans',sans-serif":undefined}}>{isHapon?"✦ "+t.your_stats:t.your_stats}</h2>
           <div style={{position:"relative"}}>
             <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
               className={`tri-btn${showVisFilter?" open":""}`}
@@ -4259,10 +4381,15 @@ function ProfilePage({data,onChange}){
             ["📅",t.this_week,thisWeekCount],
             ["👍",lang==="fil"?"Na-like":"Liked",swipedRight.length],
           ].map(([emoji,label,val],i)=>(
-            <div key={i} style={{padding:"14px 12px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`,textAlign:"center"}}>
+            <div key={i} style={{
+              padding:"14px 12px",borderRadius:14,
+              background:th.card,
+              border:`1px solid ${th.border}`,
+              textAlign:"center",
+            }}>
               <div style={{fontSize:20}}>{emoji}</div>
               <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{val}</div>
-              <div style={{fontSize:11,color:th.sub,marginTop:2}}>{label}</div>
+              <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{label}</div>
             </div>
           ))}
           {stepsLogs.length>0&&!stepsHidden&&(
@@ -4282,7 +4409,7 @@ function ProfilePage({data,onChange}){
       {swipedRight.length>0&&(
         <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12}}>
-            <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1}}>👍 Liked</h2>
+            <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1}}>{isHapon?"✦ Liked":"👍 Liked"}</h2>
             <span style={{fontSize:11,color:th.sub}}>{swipedRight.length} total</span>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -4304,7 +4431,7 @@ function ProfilePage({data,onChange}){
       {/* Not for you */}
       {swipedLeft.length>0&&(
         <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-          <h2 style={{fontSize:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>👎 Not for You</h2>
+          <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:12}}>{isHapon?"✦ Not for You":"👎 Not for You"}</h2>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {[...new Set(swipedLeft)].slice(0,6).map((title,i)=>{
               let cat=null;
