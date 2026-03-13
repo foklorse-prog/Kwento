@@ -2183,6 +2183,22 @@ function Onboarding({onComplete}){
 }
 
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
+// ─── OMDB ─────────────────────────────────────────────────────────────────────
+const OMDB_KEY="24654217";
+async function fetchMovieMeta(title){
+  try{
+    const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&type=movie`);
+    const d=await res.json();
+    if(d.Response==="False") return null;
+    return {
+      director:d.Director&&d.Director!=="N/A"?d.Director:null,
+      actor:d.Actors?d.Actors.split(",")[0].trim():null,
+      year:d.Year?d.Year.slice(0,4):null,
+      poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
+    };
+  }catch(e){ return null; }
+}
+
 function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
 
@@ -2221,20 +2237,42 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     },80);
   },[cat]);
 
+  const omdbSearchTimer=useRef(null);
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
       const pool=cat?(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})):
         Object.entries(LIBRARY).flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
-      // starts-with first, then contains — dedupe
-      // starts-with title OR any word in title starts with query
       const wordStart=i=>{
         const t=i.title.toLowerCase();
         if(t.startsWith(lq)) return true;
         return t.split(/\s+/).some(w=>w.startsWith(lq));
       };
-      setResults(pool.filter(wordStart).slice(0,5));
-    } else setResults([]);
+      const local=pool.filter(wordStart).slice(0,5);
+      setResults(local);
+
+      // OMDB fallback — only for movies, only when local has no results
+      if(local.length===0&&(cat==="movies"||!cat)){
+        clearTimeout(omdbSearchTimer.current);
+        omdbSearchTimer.current=setTimeout(async()=>{
+          try{
+            const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(query)}&type=movie`);
+            const d=await res.json();
+            if(d.Search){
+              const omdbResults=d.Search.slice(0,5).map(m=>({
+                title:m.Title,year:m.Year?.slice(0,4)||null,
+                tags:[],genre:"Film",_cat:"movies",_fromOmdb:true,
+                poster:m.Poster!=="N/A"?m.Poster:null,
+              }));
+              setResults(omdbResults);
+            }
+          }catch(e){}
+        },400);
+      }
+    } else {
+      clearTimeout(omdbSearchTimer.current);
+      setResults([]);
+    }
   },[query,cat]);
 
   const getGenreForCat=(item,category)=>{
@@ -2270,18 +2308,22 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
 
   const removeFromQueue=idx=>setQueue(q=>q.filter((_,i)=>i!==idx));
 
-  const handleSave=()=>{
+  const handleSave=async()=>{
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     if(isEdit){
       if(!selected&&!query.trim())return;
       const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
-      onSave({...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])});
+      const entry={...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])};
+      if(cat==="movies"){
+        const meta=await fetchMovieMeta(entry.title);
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; }
+      }
+      onSave(entry);
       onClose();
       return;
     }
-    // Add whatever is typed as custom if cat selected
     let finalQueue=[...queue];
     if(query.trim()&&cat){
       const base={title:query.trim(),tags:[],genre:"Custom",year:null};
@@ -2289,7 +2331,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:null});
     }
     if(!finalQueue.length)return;
-    const toSave=finalQueue.map((item,i)=>({...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]}));
+    const toSave=await Promise.all(finalQueue.map(async(item,i)=>{
+      const entry={...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
+      if(item.category==="movies"||cat==="movies"){
+        const meta=await fetchMovieMeta(item.title);
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; }
+      }
+      return entry;
+    }));
     onSave(toSave);
     onClose();
   };
@@ -2426,6 +2475,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                       {item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:11,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}
                     </div>
                     {item.genre&&item.genre!=="Custom"&&item.genre!=="Film"&&<div style={{fontSize:11,color:th.sub,marginTop:1,opacity:0.75}}>{item.genre}</div>}
+                    {item._fromOmdb&&<div style={{fontSize:10,color:th.accent,opacity:0.7,marginTop:1}}>from OMDB</div>}
                   </div>
                 </div>
               ))}
@@ -3912,30 +3962,9 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
-      <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
-
-      {/* Archetype — tap to open shareable image */}
-      {archetype?(
-        <div style={{borderRadius:20,padding:"22px 20px",marginBottom:24,background:`linear-gradient(135deg,${th.accent}33,${th.accent2}22)`,border:`1px solid ${th.accent}55`}}>
-          <div style={{fontSize:44,marginBottom:10}}>{archetype.emoji}</div>
-          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginBottom:6}}>{t.archetype_this_week}</div>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:th.text,marginBottom:8}}>{lang==="fil"?archetype.nameFil:archetype.name}</h2>
-          <p style={{fontSize:14,color:th.sub,lineHeight:1.6,marginBottom:16}}>{lang==="fil"?archetype.descFil:archetype.desc}</p>
-          <button onClick={()=>setShowCard(true)} style={{padding:"11px 22px",borderRadius:12,background:th.accent,color:"#fff",fontWeight:700,fontSize:14,boxShadow:`0 6px 20px ${th.accent}44`,display:"flex",alignItems:"center",gap:8}}>
-            <span>📤</span> {t.share_my_story}
-          </button>
-        </div>
-      ):(
-        <div style={{borderRadius:20,padding:"22px",marginBottom:24,textAlign:"center",background:th.card,border:`1px solid ${th.border}`}}>
-          <div style={{fontSize:36,marginBottom:8}}>📖</div>
-          <p style={{color:th.sub,fontSize:14}}>{t.log_more_archetype}</p>
-        </div>
-      )}
-
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:20}}>Suggested for You ✨</h1>
       {/* Suggestions */}
       <div style={{marginBottom:32}}>
-        <h2 style={{fontSize:16,fontWeight:700,color:th.text,marginBottom:4}}>{t.suggestions}</h2>
         <p style={{fontSize:12,color:th.sub,marginBottom:6,lineHeight:1.5}}>
           {lang==="fil"?"10 picks sa isang araw · batay sa iyong panlasa":"10 picks a day · based on your taste profile"}
         </p>
