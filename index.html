@@ -4308,7 +4308,7 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
     function redraw(){
       const W=wrap.offsetWidth;
       const CARD_H=wrap.offsetHeight;
-      if(!W||!CARD_H) return; // not laid out yet
+      if(!W||!CARD_H) return;
       const H=CARD_H+BRAND_H;
       canvas.width=W*DPR; canvas.height=H*DPR;
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
@@ -4317,12 +4317,21 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
       drawSticker(ctx, W, H, CARD_H, label, value, iconId);
     }
 
-    // Use ResizeObserver so we draw AFTER layout is complete
-    const ro=new ResizeObserver(()=>{ redraw(); ro.disconnect(); });
+    // On mobile, offsetWidth/offsetHeight can still be 0 on first paint
+    // even inside a ResizeObserver callback, because the grid layout hasn't
+    // fully committed to the screen yet. A double rAF (two animation frames)
+    // guarantees we run after the browser has both calculated layout AND painted
+    // it to the screen, so we always get real dimensions.
+    let raf1, raf2;
+    const ro=new ResizeObserver(()=>{
+      ro.disconnect();
+      raf1=requestAnimationFrame(()=>{
+        raf2=requestAnimationFrame(()=>{ redraw(); });
+      });
+    });
     ro.observe(wrap);
-    // Also try immediately in case layout is already known
-    redraw();
-    return ()=>ro.disconnect();
+
+    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   },[value,label,iconId]);
 
   return(
@@ -5161,7 +5170,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.11</button></span>
       </div>
     </div>
   );
@@ -5488,11 +5497,11 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.11</span>
                       <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 12, 2026</span>
                     </div>
                     {[
-                      {v:"v6",date:"Mar 12, 2026",notes:[
+                      {v:"v5.11",date:"Mar 12, 2026",notes:[
                         "Tap any timeline entry to expand it — see your note, photos, and details in place",
                         "Edit directly from the expanded card — title, note, category, date, and photo removal, no modal needed",
                         "Title field suggests from the library as you type, just like when logging",
