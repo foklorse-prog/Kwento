@@ -1565,7 +1565,8 @@ function defaultData(){
     barkadaQueue:null,barkadaIndex:0,barkadaDate:null,
     locationEnabled:false,
     // Custom entry fuzzy match dismissals: {[entryId]:{skipped:[],never:false}}
-    dismissedSugg:{},
+    // Sticker generation tracking (freemium: 3/day free)
+    stickerGenCount:0,stickerGenDate:null,
   };
 }
 
@@ -4157,19 +4158,200 @@ function ShareCardModal({archetype,data,av,onClose}){
 
 // ─── PROFILE PAGE ────────────────────────────────────────────────────────────
 // ─── STAT STICKER — Manila Nights only ───────────────────────────────────────
-// Renders a frosted-glass sticker to canvas on long-press.
-// The canvas is taller than the visible card — the bottom "My week on Kwento"
-// branding is clipped via overflow:hidden on the wrapper div.
-function StatSticker({emoji,label,value,data,visible}){
+// Flow: tap card → modal preview (full sticker visible) → long-press preview → iOS share
+// Freemium: 3 generations per day for free users
+const STICKER_FREE_LIMIT=3;
+
+// Custom SVG icons for each stat — stroke-based, fits Manila Nights neon aesthetic
+function StickerIcon({id}){
+  const s={width:22,height:22,viewBox:"0 0 24 24",fill:"none",stroke:"#00cfff",strokeWidth:1.6,strokeLinecap:"round",strokeLinejoin:"round"};
+  if(id==="total") return <svg {...s}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
+  if(id==="days")  return <svg {...s}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 4v5M15 4v5"/></svg>;
+  if(id==="week")  return <svg {...s}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>;
+  if(id==="liked") return <svg {...s}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
+  return null;
+}
+
+// Draws the full sticker onto a canvas context.
+// CARD_H = visible height on profile. BRAND_H = extra strip inside card for "My week on Kwento".
+// On profile, the wrapper clips to CARD_H. In the modal preview, full height shows.
+function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
+  const th=THEMES.manila_nights;
+
+  ctx.clearRect(0,0,W,H);
+
+  // ── Rounded card background (full height including branding)
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(0,0,W,H,20);
+  ctx.clip();
+
+  // Dark glass fill
+  ctx.fillStyle="rgba(10,6,20,0.78)";
+  ctx.fillRect(0,0,W,H);
+
+  // Cyan glow — top left
+  const g1=ctx.createRadialGradient(W*0.15,0,0,W*0.15,0,W*0.75);
+  g1.addColorStop(0,"rgba(0,207,255,0.22)");
+  g1.addColorStop(1,"transparent");
+  ctx.fillStyle=g1; ctx.fillRect(0,0,W,H);
+
+  // Magenta glow — bottom right
+  const g2=ctx.createRadialGradient(W*0.88,CARD_H,0,W*0.88,CARD_H,W*0.65);
+  g2.addColorStop(0,"rgba(255,62,157,0.16)");
+  g2.addColorStop(1,"transparent");
+  ctx.fillStyle=g2; ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+
+  // ── Glass border (full card shape)
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(0.5,0.5,W-1,H-1,20);
+  ctx.strokeStyle="rgba(200,204,216,0.2)";
+  ctx.lineWidth=1;
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Stat content — centred in the CARD_H visible zone
+  // Icon rendered as image-from-SVG (we do this inline via Path2D approximations)
+  // For canvas we draw simplified vector shapes directly
+  const cx=W/2, iconY=CARD_H*0.24;
+  // Scale all sizes relative to card width so it looks right at any size
+  const iconScale=(W/160)*0.75;
+  const valueFontSize=Math.round(W*0.18);
+  const labelFontSize=Math.round(W*0.065);
+  const brandFontSize=Math.round(W*0.058);
+
+  ctx.save();
+  ctx.strokeStyle="#00cfff";
+  ctx.lineWidth=Math.max(1,1.5*iconScale);
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  ctx.translate(cx,iconY);
+  ctx.scale(iconScale,iconScale);
+  ctx.translate(-12,-12); // centre the 24×24 icon
+
+  if(iconId==="total"){
+    ctx.beginPath(); ctx.moveTo(12,20); ctx.lineTo(21,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16.5,3.5); ctx.bezierCurveTo(17.33,2.67,18.67,2.67,19.5,3.5); ctx.bezierCurveTo(20.33,4.33,20.33,5.67,19.5,6.5); ctx.lineTo(7,19); ctx.lineTo(3,20); ctx.lineTo(4,16); ctx.closePath(); ctx.stroke();
+  } else if(iconId==="days"){
+    ctx.beginPath(); ctx.roundRect(3,4,18,18,2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3,9); ctx.lineTo(21,9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9,4); ctx.lineTo(9,9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(15,4); ctx.lineTo(15,9); ctx.stroke();
+  } else if(iconId==="week"){
+    ctx.beginPath(); ctx.arc(12,12,9,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(12,7); ctx.lineTo(12,12); ctx.lineTo(15,15); ctx.stroke();
+  } else if(iconId==="liked"){
+    ctx.beginPath();
+    ctx.moveTo(12,21); ctx.lineTo(4.22,13.22);
+    const r=3.5;
+    ctx.arc(8.5,8.5,r,-Math.PI*0.25,-Math.PI,true);
+    ctx.arc(15.5,8.5,r,-Math.PI,0.1,false);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Value number
+  ctx.textAlign="center";
+  ctx.font=`bold ${valueFontSize}px 'DM Sans', sans-serif`;
+  ctx.fillStyle=th.accent;
+  ctx.shadowColor=th.accent;
+  ctx.shadowBlur=10;
+  ctx.fillText(String(value), cx, CARD_H*0.62);
+  ctx.shadowBlur=0;
+  ctx.fillText(String(value), cx, CARD_H*0.62);
+
+  // ── Label
+  ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
+  ctx.fillStyle="rgba(136,120,170,0.9)";
+  ctx.fillText(label.toUpperCase(), cx, CARD_H*0.82);
+
+  // ── Subtle divider
+  ctx.strokeStyle="rgba(200,204,216,0.08)";
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(16, CARD_H-1); ctx.lineTo(W-16, CARD_H-1);
+  ctx.stroke();
+
+  // ── "My week on Kwento" branding — clipped on profile, visible in export
+  ctx.font=`400 ${brandFontSize}px 'DM Sans', sans-serif`;
+  ctx.fillStyle="rgba(136,120,170,0.5)";
+  ctx.fillText("My week on Kwento", cx, CARD_H+16);
+}
+
+function StatSticker({iconId, label, value, data, onGenerate}){
+  const th=THEMES.manila_nights;
+  const canvasRef=useRef(null);
+  const wrapRef=useRef(null);
+  const [showPreview,setShowPreview]=useState(false);
+  const BRAND_H=26;
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current;
+    const wrap=wrapRef.current;
+    if(!canvas||!wrap) return;
+    // Measure actual rendered cell dimensions so canvas fills it exactly
+    const W=wrap.offsetWidth||160;
+    const CARD_H=wrap.offsetHeight||160;
+    const H=CARD_H+BRAND_H;
+    canvas.width=W*DPR; canvas.height=H*DPR;
+    canvas.style.width=W+"px"; canvas.style.height=H+"px";
+    const ctx=canvas.getContext("2d");
+    ctx.scale(DPR,DPR);
+    drawSticker(ctx, W, H, CARD_H, label, value, iconId);
+  },[value,label,iconId]);
+
+  return(
+    <>
+      <div
+        ref={wrapRef}
+        onClick={()=>setShowPreview(true)}
+        style={{
+          position:"relative",overflow:"hidden",
+          borderRadius:16,cursor:"pointer",
+          WebkitTapHighlightColor:"transparent",
+          transition:"transform 0.15s",
+          // Fill the grid cell completely
+          width:"100%",height:"100%",minHeight:95,
+        }}
+        onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
+        onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}
+        onTouchCancel={e=>e.currentTarget.style.transform="scale(1)"}
+      >
+        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
+      </div>
+
+      {showPreview&&<StickerPreviewModal
+        iconId={iconId} label={label} value={value} data={data}
+        onClose={()=>setShowPreview(false)}
+        onGenerate={onGenerate}
+      />}
+    </>
+  );
+}
+
+function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
   const longPressTimer=useRef(null);
   const [pressing,setPressing]=useState(false);
+  const [imgUrl,setImgUrl]=useState(null);
+  const [limitHit,setLimitHit]=useState(false);
 
-  // Card dimensions — visible portion is CARD_H, full canvas is CARD_H + BRAND_H
-  const CARD_W=160, CARD_H=120, BRAND_H=30, DPR=Math.min(window.devicePixelRatio||1,2);
+  // Larger canvas for the preview — 2× the profile card
+  const SCALE=1.5;
+  const CARD_W=160*SCALE, CARD_H=110*SCALE, BRAND_H=26*SCALE;
+  const DPR=Math.min(window.devicePixelRatio||1,2);
 
-  // Draw the full sticker (card + hidden branding strip) to canvas
+  // Check freemium limit
+  const today=todayKey();
+  const genCount=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+  const canGenerate=genCount<STICKER_FREE_LIMIT;
+
   useEffect(()=>{
     const canvas=canvasRef.current;
     if(!canvas) return;
@@ -4178,136 +4360,86 @@ function StatSticker({emoji,label,value,data,visible}){
     canvas.style.width=W+"px"; canvas.style.height=H+"px";
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
+    drawSticker(ctx, W, H, CARD_H, label, value, iconId);
+    setImgUrl(canvas.toDataURL("image/png"));
+  },[]);
 
-    // ── Transparent base — this is what makes it a sticker
-    ctx.clearRect(0,0,W,H);
-
-    // ── Frosted glass card background
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(0,0,W,CARD_H,18);
-    ctx.clip();
-
-    // Dark semi-transparent fill — like the reference image
-    ctx.fillStyle="rgba(10,6,20,0.72)";
-    ctx.fillRect(0,0,W,CARD_H);
-
-    // Subtle cyan glow top-left
-    const glow=ctx.createRadialGradient(W*0.2,0,0,W*0.2,0,W*0.7);
-    glow.addColorStop(0,"rgba(0,207,255,0.18)");
-    glow.addColorStop(1,"transparent");
-    ctx.fillStyle=glow; ctx.fillRect(0,0,W,CARD_H);
-
-    // Subtle magenta glow bottom-right
-    const glow2=ctx.createRadialGradient(W*0.85,CARD_H,0,W*0.85,CARD_H,W*0.6);
-    glow2.addColorStop(0,"rgba(255,62,157,0.14)");
-    glow2.addColorStop(1,"transparent");
-    ctx.fillStyle=glow2; ctx.fillRect(0,0,W,CARD_H);
-
-    ctx.restore();
-
-    // ── Glass edge border — thin, silver-white
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(0.5,0.5,W-1,CARD_H-1,18);
-    ctx.strokeStyle="rgba(200,204,216,0.18)";
-    ctx.lineWidth=1;
-    ctx.stroke();
-    ctx.restore();
-
-    // ── Emoji
-    ctx.font=`${22}px serif`;
-    ctx.textAlign="center";
-    ctx.fillText(emoji, W/2, 30);
-
-    // ── Value — big, cyan accent, DM Sans bold
-    ctx.font=`bold 32px 'DM Sans', sans-serif`;
-    ctx.fillStyle=th.accent;
-    ctx.textAlign="center";
-    ctx.fillText(String(value), W/2, 68);
-
-    // ── Neon glow on the value number
-    ctx.shadowColor=th.accent;
-    ctx.shadowBlur=12;
-    ctx.fillText(String(value), W/2, 68);
-    ctx.shadowBlur=0;
-
-    // ── Label — small, subdued
-    ctx.font=`500 10px 'DM Sans', sans-serif`;
-    ctx.fillStyle="rgba(136,120,170,0.9)";
-    ctx.letterSpacing="0.8px";
-    ctx.fillText(label.toUpperCase(), W/2, 88);
-    ctx.letterSpacing="0px";
-
-    // ── Thin separator between card and branding strip
-    ctx.strokeStyle="rgba(200,204,216,0.10)";
-    ctx.lineWidth=1;
-    ctx.beginPath();
-    ctx.moveTo(16,CARD_H); ctx.lineTo(W-16,CARD_H);
-    ctx.stroke();
-
-    // ── Branding strip — "My week on Kwento" (hidden on screen, shows in export)
-    ctx.font=`500 9px 'DM Sans', sans-serif`;
-    ctx.fillStyle="rgba(136,120,170,0.55)";
-    ctx.textAlign="center";
-    ctx.letterSpacing="0.6px";
-    ctx.fillText("MY WEEK ON KWENTO", W/2, CARD_H+18);
-    ctx.letterSpacing="0px";
-
-  },[value, label, emoji]); // re-draw whenever the stat value changes
-
-  // ── Share / download the full canvas PNG
-  const exportSticker=async()=>{
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    const dataUrl=canvas.toDataURL("image/png");
+  const shareSticker=async()=>{
+    if(!imgUrl) return;
+    if(!canGenerate){ setLimitHit(true); return; }
+    // Record the generation
+    onGenerate();
     try{
-      const res=await fetch(dataUrl);
+      const res=await fetch(imgUrl);
       const blob=await res.blob();
       const file=new File([blob],`kwento-${label.toLowerCase().replace(/\s+/g,"-")}.png`,{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:"My week on Kwento"});
       } else {
-        // Fallback: trigger download
         const a=document.createElement("a");
-        a.href=dataUrl;
-        a.download=file.name;
-        a.click();
+        a.href=imgUrl; a.download=file.name; a.click();
       }
     } catch(e){ console.warn("Share failed",e); }
   };
 
-  // ── Long-press detection (500ms threshold, cancels on move)
-  const onTouchStart=e=>{
+  const onTouchStart=()=>{
     setPressing(true);
     longPressTimer.current=setTimeout(()=>{
       setPressing(false);
-      exportSticker();
+      shareSticker();
     },500);
   };
   const onTouchEnd=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
   const onTouchMove=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
 
   return(
-    // Wrapper clips the branding strip — only CARD_H pixels are visible
     <div
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onTouchMove={onTouchMove}
-      style={{
-        position:"relative",
-        height:CARD_H,
-        overflow:"hidden",
-        borderRadius:18,
-        // Subtle press feedback
-        transform:pressing?"scale(0.96)":"scale(1)",
-        transition:"transform 0.15s",
-        cursor:"pointer",
-        // Hold hint ring on press
-        boxShadow:pressing?`0 0 0 2px ${THEMES.manila_nights.accent}88`:"none",
-      }}
-    >
-      <canvas ref={canvasRef} style={{display:"block"}}/>
+      onClick={e=>e.target===e.currentTarget&&onClose()}
+      style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:200,
+        display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+        backdropFilter:"blur(8px)",padding:32,
+        touchAction:"none",overflow:"hidden"}}>
+
+      {/* Label above */}
+      <p style={{color:"rgba(136,120,170,0.7)",fontSize:11,fontWeight:500,
+        letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:20}}>
+        Hold to save or share
+      </p>
+
+      {/* The sticker preview — long-press triggers share */}
+      <div
+        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchMove={onTouchMove}
+        onClick={shareSticker} // desktop fallback
+        style={{
+          borderRadius:24,overflow:"hidden",cursor:"pointer",
+          transform:pressing?"scale(0.96)":"scale(1)",
+          transition:"transform 0.15s",
+          boxShadow:pressing
+            ?`0 0 0 3px ${th.accent}99, 0 12px 48px rgba(0,207,255,0.25)`
+            :`0 12px 40px rgba(0,207,255,0.15)`,
+        }}>
+        <canvas ref={canvasRef} style={{display:"block"}}/>
+      </div>
+
+      {/* Freemium counter */}
+      {!limitHit?(
+        <p style={{color:"rgba(136,120,170,0.5)",fontSize:11,marginTop:20,letterSpacing:"0.4px"}}>
+          {canGenerate
+            ?`${STICKER_FREE_LIMIT-genCount} free ${STICKER_FREE_LIMIT-genCount===1?"save":"saves"} left today`
+            :"No free saves left today"}
+        </p>
+      ):(
+        <div style={{marginTop:20,textAlign:"center"}}>
+          <p style={{color:th.accent2,fontSize:13,fontWeight:600,marginBottom:4}}>Daily limit reached</p>
+          <p style={{color:"rgba(136,120,170,0.6)",fontSize:12}}>3 free stickers per day · Unlimited with Premium</p>
+        </div>
+      )}
+
+      {/* Close */}
+      <button onClick={onClose} style={{marginTop:24,background:"transparent",border:"none",
+        color:"rgba(136,120,170,0.5)",fontSize:13,cursor:"pointer",letterSpacing:"0.4px"}}>
+        Close
+      </button>
     </div>
   );
 }
@@ -4356,8 +4488,9 @@ function ProfilePage({data,onChange}){
   const py=data.photoPos?.y||50;
 
   const isHapon=data.theme==="hapon";
+  const isMN=data.theme==="manila_nights";
   return(
-    <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -4367,13 +4500,11 @@ function ProfilePage({data,onChange}){
         </div>
       )}
       {/* Avatar + name */}
-      <div style={{textAlign:"center",marginBottom:24}}>
-        {/* Avatar circle — shows pending state as live preview when picker is open */}
+      <div style={{textAlign:"center",marginBottom:20}}>
         <div style={{position:"relative",display:"inline-block",margin:"0 auto 12px"}}>
           <div className={data._dx?"_dxav":""} style={{
             width:88,height:88,borderRadius:"50%",fontSize:50,
-            background:th.accent+"22",
-            border:"2px solid "+th.accent+"44",
+            background:th.accent+"22",border:"2px solid "+th.accent+"44",
             display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",overflow:"hidden"}}
             onClick={openPicker}>
             {(pickerOpen?pendingPhoto:data.customPhoto)
@@ -4397,23 +4528,17 @@ function ProfilePage({data,onChange}){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
-    if(f.type==="image/gif"){
-      setPendingPhoto(ev.target.result);setPendingAvatar("custom");window._pdx=_ck(f.name);
-      return;
-    }
+    if(f.type==="image/gif"){setPendingPhoto(ev.target.result);setPendingAvatar("custom");window._pdx=_ck(f.name);return;}
     const img=new Image();
     img.onload=()=>{
-      const MAX=400;
-      const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+      const MAX=400;const scale=Math.min(1,MAX/Math.max(img.width,img.height));
       const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
       const c=document.createElement("canvas");c.width=w;c.height=h;
       c.getContext("2d").drawImage(img,0,0,w,h);
       const compressed=c.toDataURL("image/jpeg",0.75);
       setPendingPhoto(compressed);setPendingAvatar("custom");window._pdx=_ck(f.name);
-    };
-    img.src=ev.target.result;
-  };
-  r.readAsDataURL(f);
+    };img.src=ev.target.result;
+  };r.readAsDataURL(f);
 }} style={{display:"none"}}/>
             </label>
             {pendingPhoto&&<><br/><button onClick={()=>{donePicker();openCropper();}} style={{fontSize:12,color:th.accent,textDecoration:"underline",marginBottom:4}}>Reposition photo</button><br/></>}
@@ -4428,38 +4553,35 @@ function ProfilePage({data,onChange}){
           <div style={{display:"flex",gap:8,justifyContent:"center",alignItems:"center",marginBottom:6}}>
             <input value={nameVal} onChange={e=>setNameVal(e.target.value)} style={{padding:"8px 14px",borderRadius:10,fontSize:16,color:th.text,background:th.card,border:"1px solid "+th.border,textAlign:"center"}}/>
             <button onClick={()=>{onChange("userName",nameVal);setEditName(false);}} style={{padding:"8px 14px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:13}}>Save</button>
-            <button onClick={()=>setEditName(false)} style={{fontSize:20,color:th.sub}}>×</button>
+            <button onClick={()=>setEditName(false)} style={{fontSize:20,color:th.sub,background:"none",border:"none"}}>×</button>
           </div>
         ):(
           <h1 onClick={()=>setEditName(true)} style={{
             fontFamily:"'Playfair Display',serif",
-            fontSize:isHapon?28:24,
-            fontWeight:700,
-            color:th.text,
-            marginBottom:isHapon?6:4,
-            cursor:"pointer",
-            letterSpacing:isHapon?"-0.3px":undefined,
-            lineHeight:1.2,
+            fontSize:isHapon?28:24,fontWeight:700,
+            color:th.text,marginBottom:4,cursor:"pointer",
+            letterSpacing:isHapon?"-0.3px":undefined,lineHeight:1.2,
           }}>{data.userName}</h1>
         )}
         <p style={{
-          color:th.sub,
-          fontSize:isHapon?12:13,
+          color:th.sub,fontSize:isHapon?12:13,
           letterSpacing:isHapon?"0.8px":undefined,
           textTransform:isHapon?"uppercase":undefined,
           fontWeight:isHapon?600:undefined,
-        }}>{t.welcome_back} {isHapon?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>:"🌟"}</p>
+        }}>{t.welcome_back} {isHapon
+          ?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>
+          :"🌟"}</p>
       </div>
 
       {/* Archetype */}
       {archetype&&(
-        <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.accent+"15",border:`1px solid ${th.accent}44`}}>
-          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:8}}>{isHapon?"✦ "+t.archetype+" ✦":t.archetype}</div>
-          <div style={{display:"flex",gap:14,alignItems:"center"}}>
-            <span style={{fontSize:36}}>{archetype.emoji}</span>
+        <div style={{borderRadius:16,padding:"14px 16px",marginBottom:14,background:th.accent+"15",border:`1px solid ${th.accent}44`}}>
+          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:6}}>{isHapon?"✦ "+t.archetype+" ✦":t.archetype}</div>
+          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+            <span style={{fontSize:32,flexShrink:0}}>{archetype.emoji}</span>
             <div>
-              <div style={{fontFamily:"'Playfair Display',serif",fontSize:isHapon?19:17,fontWeight:isHapon?700:400,color:th.text,marginBottom:4}}>{lang==="fil"?archetype.nameFil:archetype.name}</div>
-              <div style={{fontSize:12,color:th.sub,lineHeight:1.6}}>{lang==="fil"?archetype.descFil:archetype.desc}</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:isHapon?17:16,fontWeight:isHapon?700:600,color:th.text,marginBottom:3}}>{lang==="fil"?archetype.nameFil:archetype.name}</div>
+              <div style={{fontSize:12,color:th.sub,lineHeight:1.55}}>{lang==="fil"?archetype.descFil:archetype.desc}</div>
             </div>
           </div>
         </div>
@@ -4532,20 +4654,25 @@ function ProfilePage({data,onChange}){
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
-            ["📝",t.total_logs,totalLogs],
-            ["🗓",t.days_active,daysActiveCount],
-            ["📅",t.this_week,thisWeekCount],
-            ["👍",lang==="fil"?"Na-like":"Liked",swipedRight.length],
-          ].map(([emoji,label,val],i)=>(
+            ["total",t.total_logs,totalLogs],
+            ["days",t.days_active,daysActiveCount],
+            ["week",t.this_week,thisWeekCount],
+            ["liked",lang==="fil"?"Na-like":"Liked",swipedRight.length],
+          ].map(([iconId,label,val],i)=>(
             data.theme==="manila_nights"
-              ?<StatSticker key={i} emoji={emoji} label={label} value={val} data={data}/>
+              ?<StatSticker key={i} iconId={iconId} label={label} value={val} data={data}
+                  onGenerate={()=>{
+                    const today=todayKey();
+                    const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
+                    onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
+                  }}/>
               :<div key={i} style={{
                 padding:"14px 12px",borderRadius:14,
                 background:th.card,
                 border:`1px solid ${th.border}`,
                 textAlign:"center",
               }}>
-                <div style={{fontSize:20}}>{emoji}</div>
+                <div style={{fontSize:20}}>{["📝","🗓","📅","👍"][i]}</div>
                 <div style={{fontSize:22,fontWeight:800,color:th.accent}}>{val}</div>
                 <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{label}</div>
               </div>
@@ -4565,9 +4692,9 @@ function ProfilePage({data,onChange}){
 
       {/* Liked */}
       {swipedRight.length>0&&(
-        <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12}}>
-            <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1}}>{isHapon?"✦ Liked":"👍 Liked"}</h2>
+        <div style={{borderRadius:16,padding:"14px 16px",marginBottom:14,background:th.card,border:`1px solid ${th.border}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
+            <h2 style={{fontSize:12,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1}}>{isHapon?"✦ Liked":"👍 Liked"}</h2>
             <span style={{fontSize:11,color:th.sub}}>{swipedRight.length} total</span>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -4575,8 +4702,8 @@ function ProfilePage({data,onChange}){
               let cat=null;
               Object.entries(LIBRARY).forEach(([cid,items])=>{if(items.find(x=>x.title===title))cat=CAT_MAP[cid];});
               return(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`}}>
-                  <span style={{fontSize:16}}>{cat?.emoji||"✨"}</span>
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,background:th.bg,border:`1px solid ${th.border}`}}>
+                  <span style={{fontSize:15}}>{cat?.emoji||"✨"}</span>
                   <span style={{fontSize:13,color:th.text,fontWeight:500,flex:1}}>{title}</span>
                 </div>
               );
@@ -4588,15 +4715,15 @@ function ProfilePage({data,onChange}){
 
       {/* Not for you */}
       {swipedLeft.length>0&&(
-        <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
-          <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:12}}>{isHapon?"✦ Not for You":"👎 Not for You"}</h2>
+        <div style={{borderRadius:16,padding:"14px 16px",marginBottom:14,background:th.card,border:`1px solid ${th.border}`}}>
+          <h2 style={{fontSize:12,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,marginBottom:10}}>{isHapon?"✦ Not for You":"👎 Not for You"}</h2>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {[...new Set(swipedLeft)].slice(0,6).map((title,i)=>{
               let cat=null;
               Object.entries(LIBRARY).forEach(([cid,items])=>{if(items.find(x=>x.title===title))cat=CAT_MAP[cid];});
               return(
                 <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,background:th.bg,opacity:0.7}}>
-                  <span style={{fontSize:16}}>{cat?.emoji||"✨"}</span>
+                  <span style={{fontSize:15}}>{cat?.emoji||"✨"}</span>
                   <span style={{fontSize:13,color:th.sub}}>{title}</span>
                 </div>
               );
