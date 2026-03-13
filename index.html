@@ -4230,67 +4230,49 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
 
   ctx.clearRect(0,0,W,H);
 
-  // ── Rounded card background (full height including branding)
+  // ── Background
   ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(0,0,W,H,20);
-  ctx.clip();
-
-  // Dark glass fill
-  ctx.fillStyle="rgba(10,6,20,0.78)";
-  ctx.fillRect(0,0,W,H);
-
-  // Cyan glow — top left
+  ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
+  ctx.fillStyle="rgba(10,6,20,0.78)"; ctx.fillRect(0,0,W,H);
   const g1=ctx.createRadialGradient(W*0.15,0,0,W*0.15,0,W*0.75);
-  g1.addColorStop(0,"rgba(0,207,255,0.22)");
-  g1.addColorStop(1,"transparent");
+  g1.addColorStop(0,"rgba(0,207,255,0.22)"); g1.addColorStop(1,"transparent");
   ctx.fillStyle=g1; ctx.fillRect(0,0,W,H);
-
-  // Magenta glow — bottom right
   const g2=ctx.createRadialGradient(W*0.88,CARD_H,0,W*0.88,CARD_H,W*0.65);
-  g2.addColorStop(0,"rgba(255,62,157,0.16)");
-  g2.addColorStop(1,"transparent");
+  g2.addColorStop(0,"rgba(255,62,157,0.16)"); g2.addColorStop(1,"transparent");
   ctx.fillStyle=g2; ctx.fillRect(0,0,W,H);
-
   ctx.restore();
 
-  // ── Glass border (full card shape)
+  // ── Border
   ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(0.5,0.5,W-1,H-1,20);
-  ctx.strokeStyle="rgba(200,204,216,0.2)";
-  ctx.lineWidth=1;
-  ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(0.5,0.5,W-1,H-1,20);
+  ctx.strokeStyle="rgba(200,204,216,0.2)"; ctx.lineWidth=1; ctx.stroke();
   ctx.restore();
 
-  // ── Stat content — centred in the CARD_H visible zone
-  // Icon rendered as image-from-SVG (we do this inline via Path2D approximations)
-  // For canvas we draw simplified vector shapes directly
-  // PAD mirrors what CSS `padding: 14px 12px` gives a div.
-  // All content is expressed relative to this inset area so nothing
-  // ever draws flush against the edge, regardless of card width.
+  // ── Layout constants
   const PAD=14;
-  const cW=W-PAD*2;       // content width
-  const cH=CARD_H-PAD*2;  // content height (visible zone only)
+  const cW=W-PAD*2;
+  const cH=CARD_H-PAD*2;
   const cx=W/2;
-  // Use the shorter content dimension as the type-size reference
-  // so a wide orphan card gets the same text weight as a normal card.
   const sizeRef=Math.min(cW,cH);
-  const iconScale=(sizeRef/100)*0.9;
-  const valueFontSize=Math.round(sizeRef*0.32);
-  const labelFontSize=Math.round(sizeRef*0.115);
-  const brandFontSize=Math.round(sizeRef*0.10);
-  // Vertical positions expressed as fractions of cH, offset by PAD
-  const iconY=PAD+cH*0.22;
 
+  // Cards where the value IS the identity — no separate label needed
+  const noLabel=["time_vibe","week_pulse"].includes(iconId);
+  // Cards that render value as stacked lines
+  const isMultiline=iconId==="week_breakdown";
+  const isNum=!isMultiline&&!noLabel&&(typeof value==="number"||!isNaN(Number(String(value))));
+
+  // ── Vertical layout: icon top, value middle, label bottom (unless noLabel)
+  const iconSize=Math.round(sizeRef*0.22);
+  const iconScale=(iconSize/24);
+  const iconY=noLabel||isMultiline ? PAD+cH*0.18 : PAD+cH*0.16;
+  const valueY=noLabel ? PAD+cH*0.62 : isMultiline ? PAD+cH*0.26 : PAD+cH*0.60;
+  const labelY=PAD+cH*0.88;
+
+  // ── Icon
   ctx.save();
-  ctx.strokeStyle="#00cfff";
-  ctx.lineWidth=Math.max(1,1.5*iconScale);
-  ctx.lineCap="round";
-  ctx.lineJoin="round";
-  ctx.translate(cx,iconY);
-  ctx.scale(iconScale,iconScale);
-  ctx.translate(-12,-12); // centre the 24×24 icon
+  ctx.strokeStyle="#00cfff"; ctx.lineWidth=Math.max(1,1.5*iconScale);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.translate(cx,iconY); ctx.scale(iconScale,iconScale); ctx.translate(-12,-12);
 
   if(iconId==="total"){
     ctx.beginPath(); ctx.moveTo(12,20); ctx.lineTo(21,20); ctx.stroke();
@@ -4298,110 +4280,103 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   } else if(iconId==="days"){
     ctx.beginPath(); ctx.roundRect(3,4,18,18,2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(3,9); ctx.lineTo(21,9); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(9,4); ctx.lineTo(9,9); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(15,4); ctx.lineTo(15,9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9,4); ctx.lineTo(9,9); ctx.moveTo(15,4); ctx.lineTo(15,9); ctx.stroke();
   } else if(iconId==="week"){
     ctx.beginPath(); ctx.arc(12,12,9,0,Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(12,7); ctx.lineTo(12,12); ctx.lineTo(15,15); ctx.stroke();
   } else if(iconId==="liked"){
     ctx.beginPath();
     ctx.moveTo(12,21); ctx.lineTo(4.22,13.22);
-    const r=3.5;
-    ctx.arc(8.5,8.5,r,-Math.PI*0.25,-Math.PI,true);
-    ctx.arc(15.5,8.5,r,-Math.PI,0.1,false);
-    ctx.closePath();
-    ctx.stroke();
+    ctx.arc(8.5,8.5,3.5,-Math.PI*0.25,-Math.PI,true);
+    ctx.arc(15.5,8.5,3.5,-Math.PI,0.1,false);
+    ctx.closePath(); ctx.stroke();
   } else if(iconId==="steps"){
-    ctx.beginPath(); ctx.arc(12,5,2,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(12,7); ctx.lineTo(10,13); ctx.lineTo(13,13); ctx.lineTo(11,20); ctx.stroke();
+    // Footstep pair
+    ctx.beginPath(); ctx.ellipse(9,8,2.5,3.5,0.3,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(15,14,2.5,3.5,-0.3,0,Math.PI*2); ctx.stroke();
   } else if(iconId==="top_cat"){
     ctx.beginPath(); ctx.moveTo(12,2); ctx.lineTo(15,9); ctx.lineTo(22,9); ctx.lineTo(17,14); ctx.lineTo(19,21); ctx.lineTo(12,17); ctx.lineTo(5,21); ctx.lineTo(7,14); ctx.lineTo(2,9); ctx.lineTo(9,9); ctx.closePath(); ctx.stroke();
   } else if(iconId==="time_vibe"){
-    ctx.beginPath(); ctx.arc(12,12,5,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(12,2); ctx.lineTo(12,4); ctx.moveTo(12,20); ctx.lineTo(12,22); ctx.moveTo(2,12); ctx.lineTo(4,12); ctx.moveTo(20,12); ctx.lineTo(22,12); ctx.stroke();
+    // Moon for night owl, sun for early bird
+    if(String(value).toLowerCase().includes("night")||String(value).toLowerCase().includes("owl")){
+      ctx.beginPath(); ctx.arc(12,12,8,Math.PI*0.6,Math.PI*2.4); ctx.stroke();
+      ctx.beginPath(); ctx.arc(8,8,6,Math.PI*1.2,Math.PI*2.8,true); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(12,12,5,0,Math.PI*2); ctx.stroke();
+      for(let a=0;a<8;a++){ const r=a*Math.PI/4; ctx.beginPath(); ctx.moveTo(12+8*Math.cos(r),12+8*Math.sin(r)); ctx.lineTo(12+10*Math.cos(r),12+10*Math.sin(r)); ctx.stroke(); }
+    }
   } else if(iconId==="most_logged"){
-    ctx.beginPath(); ctx.moveTo(17,1); ctx.lineTo(17,7); ctx.moveTo(14,4); ctx.lineTo(17,7); ctx.lineTo(20,4); ctx.stroke();
     ctx.beginPath(); ctx.roundRect(3,8,18,13,2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(7,13); ctx.lineTo(17,13); ctx.moveTo(7,17); ctx.lineTo(13,17); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(15,3); ctx.lineTo(15,8); ctx.moveTo(12,5); ctx.lineTo(15,2); ctx.lineTo(18,5); ctx.stroke();
   } else if(iconId==="top_director"){
     ctx.beginPath(); ctx.roundRect(2,7,20,14,2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(16,7); ctx.lineTo(22,3); ctx.lineTo(22,21); ctx.lineTo(16,17); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16,7); ctx.lineTo(22,4); ctx.lineTo(22,20); ctx.lineTo(16,17); ctx.stroke();
   } else if(iconId==="top_actor"){
     ctx.beginPath(); ctx.arc(12,7,4,0,Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(4,21); ctx.bezierCurveTo(4,17,8,14,12,14); ctx.bezierCurveTo(16,14,20,17,20,21); ctx.stroke();
-  } else if(iconId==="week_vibe_1"||iconId==="week_vibe_2"||iconId==="week_vibe_3"){
-    ctx.beginPath(); ctx.roundRect(2,7,8,10,2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(12,9); ctx.lineTo(22,9); ctx.moveTo(12,13); ctx.lineTo(19,13); ctx.moveTo(12,17); ctx.lineTo(16,17); ctx.stroke();
-  } else if(iconId==="local_global"){
-    ctx.beginPath(); ctx.arc(12,12,9,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(3,12); ctx.lineTo(21,12); ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(12,12,4.5,9,0,0,Math.PI*2); ctx.stroke();
+  } else if(iconId==="week_breakdown"){
+    ctx.beginPath(); ctx.moveTo(3,20); ctx.lineTo(3,13); ctx.lineTo(7,13); ctx.lineTo(7,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(10,20); ctx.lineTo(10,8); ctx.lineTo(14,8); ctx.lineTo(14,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(17,20); ctx.lineTo(17,11); ctx.lineTo(21,11); ctx.lineTo(21,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(2,20); ctx.lineTo(22,20); ctx.stroke();
   } else if(iconId==="week_pulse"){
     ctx.beginPath(); ctx.moveTo(2,12); ctx.lineTo(6,7); ctx.lineTo(10,14); ctx.lineTo(14,9); ctx.lineTo(18,12); ctx.lineTo(22,12); ctx.stroke();
-  } else if(iconId==="week_breakdown"){
-    ctx.beginPath(); ctx.moveTo(3,20); ctx.lineTo(3,10); ctx.lineTo(8,10); ctx.lineTo(8,20); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(10,20); ctx.lineTo(10,6); ctx.lineTo(15,6); ctx.lineTo(15,20); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(17,20); ctx.lineTo(17,13); ctx.lineTo(22,13); ctx.lineTo(22,20); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(2,20); ctx.lineTo(22,20); ctx.stroke();
   }
   ctx.restore();
 
-  // ── Value — consistent typography, multi-line for breakdown
+  // ── Value
   ctx.textAlign="center";
+  ctx.fillStyle=th.accent;
   ctx.shadowColor=th.accent;
-  ctx.shadowBlur=10;
 
-  const isNum=typeof value==="number"||!isNaN(Number(value));
-  if(isNum){
-    // Numeric cards — large bold accent number
-    ctx.font=`bold ${valueFontSize}px 'DM Sans', sans-serif`;
-    ctx.fillStyle=th.accent;
-    ctx.fillText(String(value), cx, PAD+cH*0.62);
-    ctx.shadowBlur=0;
-    ctx.fillText(String(value), cx, PAD+cH*0.62);
-  } else if(iconId==="week_breakdown"){
-    // Multi-line: each tag on its own line
+  if(isMultiline){
+    // Stacked lines — fit each line to available width
     const lines=String(value).split(" · ");
-    const lineH=Math.round(sizeRef*0.14);
-    const lineFontSize=Math.round(sizeRef*0.13);
-    ctx.font=`600 ${lineFontSize}px 'DM Sans', sans-serif`;
-    ctx.fillStyle=th.accent;
+    const availH=cH*0.68;
+    const lineH=availH/lines.length;
+    let fSize=Math.min(Math.round(sizeRef*0.14), Math.round(lineH*0.7));
+    // shrink until longest line fits
+    ctx.font=`600 ${fSize}px 'DM Sans', sans-serif`;
+    const longest=lines.reduce((a,b)=>ctx.measureText(a).width>ctx.measureText(b).width?a:b);
+    while(ctx.measureText(longest).width>cW*0.9&&fSize>8){ fSize--; ctx.font=`600 ${fSize}px 'DM Sans', sans-serif`; }
     const totalH=lines.length*lineH;
-    const startY=PAD+(cH-totalH)/2+lineH*0.8;
+    const startY=valueY+lineH*0.3;
     lines.forEach((line,i)=>{
-      ctx.shadowBlur=6;
-      ctx.fillText(line, cx, startY+i*lineH);
-      ctx.shadowBlur=0;
-      ctx.fillText(line, cx, startY+i*lineH);
+      ctx.shadowBlur=5; ctx.fillText(line,cx,startY+i*lineH);
+      ctx.shadowBlur=0; ctx.fillText(line,cx,startY+i*lineH);
     });
+  } else if(isNum){
+    const fSize=Math.round(sizeRef*0.32);
+    ctx.font=`bold ${fSize}px 'DM Sans', sans-serif`;
+    ctx.shadowBlur=10; ctx.fillText(String(value),cx,valueY);
+    ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
   } else {
-    // Short string — auto-shrink to fit
-    let vSize=Math.round(sizeRef*0.18);
-    ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`;
-    const maxW=cW*0.88;
-    while(ctx.measureText(String(value)).width>maxW&&vSize>9){ vSize--; ctx.font=`700 ${vSize}px 'DM Sans', sans-serif`; }
-    ctx.fillStyle=th.accent;
-    ctx.fillText(String(value), cx, PAD+cH*0.62);
-    ctx.shadowBlur=0;
-    ctx.fillText(String(value), cx, PAD+cH*0.62);
+    let fSize=Math.round(sizeRef*0.18);
+    ctx.font=`700 ${fSize}px 'DM Sans', sans-serif`;
+    while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){ fSize--; ctx.font=`700 ${fSize}px 'DM Sans', sans-serif`; }
+    ctx.shadowBlur=8; ctx.fillText(String(value),cx,valueY);
+    ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
   }
 
-  // ── Label
-  ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
-  ctx.fillStyle="rgba(136,120,170,0.9)";
-  ctx.fillText(label.toUpperCase(), cx, PAD+cH*0.84);
+  // ── Label — only for cards that have a separate label
+  if(!noLabel){
+    const labelFontSize=Math.round(sizeRef*0.10);
+    ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
+    ctx.fillStyle="rgba(136,120,170,0.75)";
+    ctx.shadowBlur=0;
+    ctx.fillText(label.toUpperCase(),cx,labelY);
+  }
 
-  // ── Subtle divider — inset by PAD horizontally
-  ctx.strokeStyle="rgba(200,204,216,0.08)";
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  ctx.moveTo(PAD, CARD_H-1); ctx.lineTo(W-PAD, CARD_H-1);
-  ctx.stroke();
+  // ── Divider
+  ctx.strokeStyle="rgba(200,204,216,0.08)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,CARD_H-1); ctx.lineTo(W-PAD,CARD_H-1); ctx.stroke();
 
-  // ── Branding strip — below the visible card area
+  // ── Branding
+  const brandFontSize=Math.round(sizeRef*0.09);
   ctx.font=`400 ${brandFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle="rgba(136,120,170,0.5)";
-  ctx.fillText("My week on Kwento", cx, CARD_H+16);
+  ctx.fillText("My week on Kwento",cx,CARD_H+16);
 }
 
 // Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
