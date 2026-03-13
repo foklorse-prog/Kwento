@@ -2749,7 +2749,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
       {id:"home",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="home"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="home"?mnEmboss:"none"}}><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>},
       {id:"timeline",icon:<TimelineTabIcon accent={tab==="timeline"?mnSilver:th.sub} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
       {id:"profile",icon:tab==="profile"
-        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mnSilver} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:mnEmboss}}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mnSilver} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{filter:mnEmboss}}><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>
         :<span style={{opacity:0.45,display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>},
       {id:"mystory",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="mystory"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="mystory"?mnEmboss:"none"}}><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/><path d="M9.5 9.5l5 5"/></svg>},
       {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="settings"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="settings"?mnEmboss:"none"}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>},
@@ -4363,8 +4363,6 @@ function StatSticker({iconId, label, value, data, onGenerate, span}){
 function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const th=THEMES.manila_nights;
   const canvasRef=useRef(null);
-  const longPressTimer=useRef(null);
-  const [pressing,setPressing]=useState(false);
   const [imgUrl,setImgUrl]=useState(null);
   const [limitHit,setLimitHit]=useState(false);
 
@@ -4390,41 +4388,13 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
     setImgUrl(canvas.toDataURL("image/png"));
   },[]);
 
-  const shareSticker=async()=>{
-    if(!imgUrl) return;
-    if(!canGenerate){ setLimitHit(true); return; }
-    // Record the generation
-    onGenerate();
-    try{
-      const res=await fetch(imgUrl);
-      const blob=await res.blob();
-      const file=new File([blob],`kwento-${label.toLowerCase().replace(/\s+/g,"-")}.png`,{type:"image/png"});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"My week on Kwento"});
-      } else {
-        const a=document.createElement("a");
-        a.href=imgUrl; a.download=file.name; a.click();
-      }
-    } catch(e){ console.warn("Share failed",e); }
-  };
-
-  const onTouchStart=()=>{
-    setPressing(true);
-    longPressTimer.current=setTimeout(()=>{
-      setPressing(false);
-      shareSticker();
-    },500);
-  };
-  const onTouchEnd=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
-  const onTouchMove=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
-
   return(
     <div
       onClick={e=>e.target===e.currentTarget&&onClose()}
       style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:200,
         display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
         backdropFilter:"blur(8px)",padding:32,
-        touchAction:"none",overflow:"hidden"}}>
+        overflow:"hidden"}}>
 
       {/* Label above */}
       <p style={{color:"rgba(136,120,170,0.7)",fontSize:11,fontWeight:500,
@@ -4432,20 +4402,24 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
         Hold to save or share
       </p>
 
-      {/* The sticker preview — long-press triggers share */}
-      <div
-        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchMove={onTouchMove}
-        onClick={shareSticker} // desktop fallback
-        style={{
-          borderRadius:24,overflow:"hidden",cursor:"pointer",
-          transform:pressing?"scale(0.96)":"scale(1)",
-          transition:"transform 0.15s",
-          boxShadow:pressing
-            ?`0 0 0 3px ${th.accent}99, 0 12px 48px rgba(0,207,255,0.25)`
-            :`0 12px 40px rgba(0,207,255,0.15)`,
-        }}>
-        <canvas ref={canvasRef} style={{display:"block"}}/>
-      </div>
+      {/* Hidden canvas — generates the image data only */}
+      <canvas ref={canvasRef} style={{display:"none"}}/>
+
+      {/* Visible img — iOS native long-press gives "Save to Photos / Share / Copy" */}
+      {imgUrl&&(
+        <img
+          src={imgUrl}
+          alt="Kwento stat sticker"
+          style={{
+            borderRadius:16,
+            boxShadow:`0 12px 40px rgba(0,207,255,0.15)`,
+            display:"block",
+            // Prevent browser default drag; we want long-press context menu only
+            WebkitTouchCallout:"default",
+            userSelect:"none",
+          }}
+        />
+      )}
 
       {/* Freemium counter */}
       {!limitHit?(
@@ -4479,7 +4453,7 @@ function ProfilePage({data,onChange}){
   const [editName,setEditName]=useState(false);
   const [nameVal,setNameVal]=useState(data.userName);
   const [showCropper,setShowCropper]=useState(false);
-  const [showVisFilter,setShowVisFilter]=useState(false);
+  const [showStatsShare,setShowStatsShare]=useState(false);
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   // local pending state for avatar picker — only saves on Done
   const [pickerOpen,setPickerOpen]=useState(false);
@@ -4617,20 +4591,7 @@ function ProfilePage({data,onChange}){
 
       {/* Stats */}
       {(()=>{
-        const allCats=CATEGORIES.map(c=>c.id);
-        const hidden=data.profileVisibility?.hidden||[];
-        const isHidden=cat=>hidden.includes(cat);
-        const toggleCat=cat=>{
-          const next=isHidden(cat)?hidden.filter(x=>x!==cat):[...hidden,cat];
-          onChange("profileVisibility",{...(data.profileVisibility||{}),hidden:next});
-        };
-        // Steps visibility: steps toggle overrides activities toggle
-        // If steps=shown, always show regardless of activities
-        // If steps=hidden, always hide regardless of activities
-        const stepsHidden=isHidden("steps");
-        // Total logs: all entries including steps
         const totalLogs=data.logs.length;
-        // Days active: manual entries only, only from date of first manual entry onward
         const manualLogs=data.logs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
         const firstManualDate=manualLogs.length
           ?manualLogs.map(l=>l.date?.split("T")[0]).filter(Boolean).sort()[0]
@@ -4638,7 +4599,6 @@ function ProfilePage({data,onChange}){
         const daysActiveCount=firstManualDate
           ?new Set(manualLogs.filter(l=>(l.date?.split("T")[0]||"")>=firstManualDate).map(l=>l.date?.split("T")[0])).size
           :0;
-        // This week: all entries including steps
         const thisWeekCount=weekLogs.length;
         const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
         const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
@@ -4647,51 +4607,20 @@ function ProfilePage({data,onChange}){
       <div style={{marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
           <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,fontFamily:isHapon?"'DM Sans',sans-serif":undefined}}>{isHapon?"✦ "+t.your_stats:t.your_stats}</h2>
-          <div style={{position:"relative"}}>
-            <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
-              className={`tri-btn${showVisFilter?" open":""}`}
-              style={{width:28,height:28,borderRadius:8,background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0}}>
-              <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 1L11 9H1L6 1Z" fill={th.sub} stroke={th.sub} strokeWidth="1" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            {showVisFilter&&<>
-              <div onClick={()=>setShowVisFilter(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
-              <div style={{position:"absolute",right:0,top:32,width:200,borderRadius:12,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:89,overflow:"hidden"}}>
-                <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:"10px 14px 6px"}}>{lang==="fil"?"Ipakita sa profile":"Show on profile"}</div>
-                <div style={{maxHeight:210,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-                {[...CATEGORIES,{id:"steps",emoji:"👟",labelEn:"Steps",label:"Mga Hakbang"}].map(c=>{
-                  const isCatHidden=isHidden(c.id);
-                  return(
-                    <div key={c.id} onClick={e=>{e.stopPropagation();toggleCat(c.id);}}
-                      style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 14px",cursor:"pointer",gap:10}}>
-                      <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{fontSize:15}}>{c.emoji}</span>
-                        <span style={{fontSize:13,color:isCatHidden?th.sub:th.text,fontWeight:isCatHidden?400:500}}>{lang==="fil"?c.label:c.labelEn}</span>
-                      </div>
-                      <div style={{width:18,height:18,borderRadius:4,border:`2px solid ${isCatHidden?th.border:th.accent}`,background:isCatHidden?"transparent":th.accent,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                        {!isCatHidden&&<span style={{fontSize:10,color:"#fff",fontWeight:700}}>✓</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-                </div>
-              </div>
-            </>}
-          </div>
+          <button onClick={()=>setShowStatsShare(true)}
+            style={{width:28,height:28,borderRadius:8,background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0,opacity:0.5}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </button>
         </div>
         {(()=>{
-          // ── Stats registry: each entry defines a stat candidate.
-          // Only stats whose value passes the threshold will render.
-          // This means the grid grows and shrinks with real data —
-          // no empty "0" cards taking up space.
           const registry=[
             {iconId:"total", emoji:"📝", label:t.total_logs,          value:totalLogs,        min:1},
             {iconId:"days",  emoji:"🗓", label:t.days_active,          value:daysActiveCount,  min:1},
             {iconId:"week",  emoji:"📅", label:t.this_week,            value:thisWeekCount,    min:1},
             {iconId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:swipedRight.length, min:1},
-            // Steps gets its own entry — only if steps category is visible and has data
-            ...(stepsLogs.length>0&&!stepsHidden
+            ...(stepsLogs.length>0
               ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
               :[]),
           ];
@@ -4782,12 +4711,10 @@ function ProfilePage({data,onChange}){
         </div>
       )}
 
-      {data.logs.length<2&&(
-        <div style={{textAlign:"center",padding:"24px",color:th.sub,fontSize:13}}>
-          <div style={{fontSize:36,marginBottom:8}}>🌱</div>
-          <p>Log a few more things to see your profile grow.</p>
-        </div>
-      )}
+      <div style={{textAlign:"center",padding:"20px 24px 4px",opacity:data.logs.length<2?1:0.3}}>
+        <div style={{fontSize:data.logs.length<2?32:20,marginBottom:4}}>🌱</div>
+        <p style={{fontSize:data.logs.length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+      </div>
     </div>
   );
 }
