@@ -4499,10 +4499,14 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen}){
     persist(newOrder, sizes);
   }
 
-  // ── Drag handlers
+  // ── Drag: track touch position globally while dragging, find card under finger
+  const dragTouchRef = useRef(null);
+
   function onLongPressStart(iconId, e){
+    const touch = e.touches[0];
     const t = setTimeout(()=>{
       setDragging(iconId);
+      dragTouchRef.current = {x:touch.clientX, y:touch.clientY};
       if(navigator.vibrate) navigator.vibrate(30);
     }, 450);
     longPressRef.current[iconId] = t;
@@ -4575,25 +4579,24 @@ function StatCardItem({card, size, onResize, dragging, dragOver, onLongPressStar
   const padV    = area>=4 ? 20 : area>=2 ? 17 : 14;
   const padH    = area>=4 ? 16 : area>=2 ? 14 : 12;
 
-  // ── Pinch gesture — first finger can land anywhere, second joins
   function getTouches(e){ return Array.from(e.touches); }
 
   function onTouchStart(e){
     onLongPressStart(e);
     const touches = getTouches(e);
+    pinchDidCommit.current = false;
     if(touches.length===2){
       e.preventDefault();
       const dx = touches[1].clientX - touches[0].clientX;
       const dy = touches[1].clientY - touches[0].clientY;
       const dist = Math.hypot(dx,dy);
-      const isH  = Math.abs(dx) >= Math.abs(dy); // horizontal or vertical spread
+      const isH  = Math.abs(dx) >= Math.abs(dy);
       pinchRef.current = {
         active:true,
         startDist:dist,
         isH,
         startColSpan:colSpan,
         startRowSpan:rowSpan,
-        committed:false,
       };
     }
   }
@@ -4639,6 +4642,42 @@ function StatCardItem({card, size, onResize, dragging, dragOver, onLongPressStar
 
   const isMNtheme = isMN;
 
+  const cardStyle = {
+    // Grid placement — CSS animates this via transition on the element
+    gridColumn:`span ${colSpan}`,
+    gridRow:`span ${rowSpan}`,
+    height: cardH,
+    // Drag feedback
+    transform: dragging?"scale(1.05)":dragOver?"scale(0.97)":"scale(1)",
+    opacity: dragging?0.85:1,
+    boxShadow: dragging?`0 16px 40px rgba(0,0,0,0.45)`:"none",
+    zIndex: dragging?10:1,
+    // Animate size changes
+    transition:"height 0.3s ease, transform 0.25s ease, box-shadow 0.2s ease, opacity 0.2s ease",
+    // Layout
+    borderRadius:14,
+    position:"relative",
+    // Safari: prevent text/element selection during touch
+    WebkitUserSelect:"none",
+    userSelect:"none",
+    WebkitTouchCallout:"none",
+    WebkitTapHighlightColor:"transparent",
+    // Allow vertical scroll on the page; we handle 2-finger pinch manually
+    touchAction:"pan-y",
+  };
+
+  const innerCardStyle = {
+    width:"100%", height:"100%",
+    padding:`${padV}px ${padH}px`,
+    borderRadius:14,
+    background:th.card,
+    border:`1px solid ${th.border}`,
+    textAlign:"center",
+    display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+    gap: rowSpan===2?8:4,
+    boxSizing:"border-box",
+  };
+
   return(
     <div
       ref={wrapRef}
@@ -4646,24 +4685,7 @@ function StatCardItem({card, size, onResize, dragging, dragOver, onLongPressStar
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
-      onPointerEnter={onDragEnter}
-      onPointerUp={onDrop}
-      style={{
-        gridColumn:`span ${colSpan}`,
-        gridRow:`span ${rowSpan}`,
-        height: cardH,
-        transition:"grid-column 0.3s ease, grid-row 0.3s ease, height 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease",
-        transform: dragging?"scale(1.05)":dragOver?"scale(0.97)":"scale(1)",
-        opacity: dragging?0.85:1,
-        boxShadow: dragging?`0 12px 32px rgba(0,0,0,0.4)`:"none",
-        zIndex: dragging?10:1,
-        borderRadius:14,
-        overflow:"hidden",
-        touchAction:"none",
-        WebkitTapHighlightColor:"transparent",
-        cursor: dragging?"grabbing":"grab",
-        position:"relative",
-      }}
+      style={cardStyle}
     >
       {isMNtheme
         ?<StatSticker
@@ -4681,28 +4703,17 @@ function StatCardItem({card, size, onResize, dragging, dragOver, onLongPressStar
               onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
             }}
           />
-        :<div style={{
-            width:"100%",height:"100%",
-            padding:`${padV}px ${padH}px`,
-            borderRadius:14,
-            background:th.card,
-            border:`1px solid ${th.border}`,
-            textAlign:"center",
-            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-            gap: rowSpan===2?8:4,
-            transition:"padding 0.3s ease",
-          }}>
-            <div style={{fontSize:emojiSz,transition:"font-size 0.3s ease",lineHeight:1}}>{card.emoji}</div>
-            <div style={{fontSize:valueSz,fontWeight:800,color:th.accent,transition:"font-size 0.3s ease",lineHeight:1}}>
+        :<div style={innerCardStyle}>
+            <div style={{fontSize:emojiSz,lineHeight:1}}>{card.emoji}</div>
+            <div style={{fontSize:valueSz,fontWeight:800,color:th.accent,lineHeight:1}}>
               {card.iconId==="steps"?card.value.toLocaleString():card.value}
             </div>
             <div style={{
               fontSize:labelSz,color:th.sub,
               letterSpacing:isHapon?"0.3px":undefined,
-              transition:"font-size 0.3s ease",
               lineHeight:1.3,
               maxWidth:"100%",
-              whiteSpace: colSpan===2?"nowrap":"normal",
+              whiteSpace:colSpan===2?"nowrap":"normal",
               overflow:"hidden",
               textOverflow:"ellipsis",
             }}>{card.label}</div>
