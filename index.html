@@ -3,18 +3,14 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
-v5.11 — 2026-03-12
-  - Timeline: inline card expand — tap entry to see details, tap Edit to edit in place
-  - Timeline: inline editing — title (with autocomplete), note, category, date, photo removal
-  - Timeline: steps entries no longer expandable — swipe to delete only
-  - Timeline: per-theme card depth — glow for dark themes, shadows for light themes
-  - Timeline: fixed bug where editing one entry updated all entries with same title (duplicate IDs from Letterboxd import)
-  - Steps: title now uses en dash (Steps – 214), no redundant step count label
-  - Updates: app now checks for new version on every launch — persistent banner appears if update is ready, tap to reload instantly
-  - Nav: profile and suggestions tabs swapped
-  - Nav: profile tab shows your avatar when away, star when on profile
-  - Nav: suggestions tab has new icon
-  - Nav: Ulan theme gets a floating bubble menu tab bar
+v6.0 — 2026-03-13
+  - Profile: Manila Nights stat sticker cards — canvas-rendered, neon glass design
+  - Profile: tap any stat card to preview as a shareable sticker (hold to save/share)
+  - Profile: 3-column stat grid with smart orphan spanning
+  - Profile: stats are data-driven — only cards with real data are shown
+  - Profile: canvas border-radius fix for high-DPR phones (baked into bitmap, not CSS clip)
+  - Profile: canvas sizing uses double-rAF to guarantee correct dimensions on first mobile load
+  - Settings: beta redeem code — enter "beta" to unlock unlimited sticker saves
 
 ================================================================
 -->
@@ -1567,6 +1563,7 @@ function defaultData(){
     // Custom entry fuzzy match dismissals: {[entryId]:{skipped:[],never:false}}
     // Sticker generation tracking (freemium: 3/day free)
     stickerGenCount:0,stickerGenDate:null,
+    betaMode:false,
   };
 }
 
@@ -4376,10 +4373,10 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const CARD_W=160*SCALE, CARD_H=110*SCALE, BRAND_H=26*SCALE;
   const DPR=Math.min(window.devicePixelRatio||1,2);
 
-  // Check freemium limit
+  // Check freemium limit — beta mode bypasses entirely
   const today=todayKey();
   const genCount=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-  const canGenerate=genCount<STICKER_FREE_LIMIT;
+  const canGenerate=data.betaMode||genCount<STICKER_FREE_LIMIT;
 
   useEffect(()=>{
     const canvas=canvasRef.current;
@@ -4453,9 +4450,11 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
       {/* Freemium counter */}
       {!limitHit?(
         <p style={{color:"rgba(136,120,170,0.5)",fontSize:11,marginTop:20,letterSpacing:"0.4px"}}>
-          {canGenerate
-            ?`${STICKER_FREE_LIMIT-genCount} free ${STICKER_FREE_LIMIT-genCount===1?"save":"saves"} left today`
-            :"No free saves left today"}
+          {data.betaMode
+            ?"🔓 Beta — unlimited saves"
+            :canGenerate
+              ?`${STICKER_FREE_LIMIT-genCount} free ${STICKER_FREE_LIMIT-genCount===1?"save":"saves"} left today`
+              :"No free saves left today"}
         </p>
       ):(
         <div style={{marginTop:20,textAlign:"center"}}>
@@ -4805,6 +4804,19 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [lbMsg,setLbMsg]=useState("");
   const [importLoading,setImportLoading]=useState(false);
   const [showImportInfo,setShowImportInfo]=useState(false);
+  const [redeemInput,setRedeemInput]=useState("");
+  const [redeemMsg,setRedeemMsg]=useState("");
+
+  const handleRedeem=()=>{
+    if(redeemInput.trim().toLowerCase()==="beta"){
+      onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null});
+      setRedeemMsg("✅ Beta mode activated — unlimited sticker saves!");
+      setRedeemInput("");
+    } else {
+      setRedeemMsg("❌ Invalid code.");
+    }
+    setTimeout(()=>setRedeemMsg(""),3000);
+  };
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -5153,6 +5165,39 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         {lbMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:lbMsg.startsWith("✅")?th.accent:lbMsg.startsWith("⚠️")?"#f59e0b":"#ef4444"}}>{lbMsg}</p>}
       </div>
 
+      {/* Beta Redeem */}
+      <div style={{marginBottom:24}}>
+        <h2 style={{fontSize:12,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Redeem Code</h2>
+        <div style={{padding:"14px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
+          {data.betaMode?(
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:18}}>🔓</span>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:th.accent}}>Beta mode active</div>
+                <div style={{fontSize:12,color:th.sub,marginTop:2}}>Unlimited sticker saves enabled</div>
+              </div>
+            </div>
+          ):(
+            <>
+              <div style={{fontSize:13,color:th.sub,marginBottom:10}}>Have a code? Enter it below.</div>
+              <div style={{display:"flex",gap:8}}>
+                <input
+                  value={redeemInput}
+                  onChange={e=>setRedeemInput(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&handleRedeem()}
+                  placeholder="Enter code…"
+                  style={{flex:1,background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"10px 12px",fontSize:14,color:th.text,outline:"none"}}
+                />
+                <button onClick={handleRedeem} style={{padding:"10px 16px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:700,fontSize:13,flexShrink:0}}>
+                  Redeem
+                </button>
+              </div>
+              {redeemMsg&&<p style={{marginTop:8,fontSize:13,color:redeemMsg.startsWith("✅")?th.accent:"#ef4444"}}>{redeemMsg}</p>}
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Reset */}
       <div style={{marginBottom:24}}>
         {!confirmReset?(
@@ -5170,7 +5215,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v5.11</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.0</button></span>
       </div>
     </div>
   );
@@ -5497,20 +5542,18 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v5.11</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 12, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.0</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 13, 2026</span>
                     </div>
                     {[
-                      {v:"v5.11",date:"Mar 12, 2026",notes:[
-                        "Tap any timeline entry to expand it — see your note, photos, and details in place",
-                        "Edit directly from the expanded card — title, note, category, date, and photo removal, no modal needed",
-                        "Title field suggests from the library as you type, just like when logging",
-                        "Fixed a bug where editing one entry could update all entries with the same title",
-                        "Steps entries are simpler now — just the title and swipe to delete",
-                        "App checks for updates on every launch — a tap-to-reload banner appears if a new version is ready",
-                        "Profile and Suggestions tabs have switched positions",
-                        "Profile tab now shows your avatar when you're elsewhere, and a star when you're on it",
-                        "Ulan theme gets a floating bubble menu navigation bar",
+                      {v:"v6.0",date:"Mar 13, 2026",notes:[
+                        "Manila Nights stat cards are now canvas-rendered neon glass stickers",
+                        "Tap any stat card to preview it as a shareable sticker — hold to save or share",
+                        "Stats grid is now 3 columns with smart layout so solo cards span the full width",
+                        "Only stats with real data are shown — no empty cards",
+                        "Border-radius on stat cards now baked into the canvas bitmap, fixing rounding on high-DPR phones",
+                        "Canvas sizing now waits for the browser to fully paint before drawing, so first load always looks correct",
+                        "Settings: enter a redeem code to unlock beta perks",
                       ]},
                     ].map((rel,ri)=>(
                       <div key={ri}>
