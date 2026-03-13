@@ -4366,6 +4366,14 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
   const [imgUrl,setImgUrl]=useState(null);
   const [limitHit,setLimitHit]=useState(false);
 
+  // Lock body scroll for the lifetime of this modal — restored on unmount
+  // regardless of how the modal is closed (tap backdrop, Close button, etc.)
+  useEffect(()=>{
+    const prev=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    return ()=>{ document.body.style.overflow=prev; };
+  },[]);
+
   // Larger canvas for the preview — 2× the profile card
   const SCALE=1.5;
   const CARD_W=160*SCALE, CARD_H=110*SCALE, BRAND_H=26*SCALE;
@@ -4411,10 +4419,13 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
           src={imgUrl}
           alt="Kwento stat sticker"
           style={{
+            // Match the canvas CSS dimensions (CARD_W=240, CARD_H=165, BRAND_H=39)
+            // so the img renders at intended sticker size, not raw bitmap resolution
+            width:240,
+            height:204,
             borderRadius:16,
-            boxShadow:`0 12px 40px rgba(0,207,255,0.15)`,
+            boxShadow:`0 12px 40px rgba(0,207,255,0.2)`,
             display:"block",
-            // Prevent browser default drag; we want long-press context menu only
             WebkitTouchCallout:"default",
             userSelect:"none",
           }}
