@@ -4391,28 +4391,19 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span}){
     const canvas=canvasRef.current;
     const wrap=wrapRef.current;
     if(!canvas||!wrap) return;
-    let lastW=0, lastH=0;
-    function redraw(){
-      const W=wrap.offsetWidth;
-      const CARD_H=wrap.offsetHeight;
+    // Draw once after layout commits — no ResizeObserver, no continuous redraws
+    let raf1,raf2;
+    raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{
+      const W=wrap.offsetWidth, CARD_H=wrap.offsetHeight;
       if(!W||!CARD_H) return;
-      // Only redraw if dimensions actually changed — prevents thrashing
-      if(W===lastW && CARD_H===lastH) return;
-      lastW=W; lastH=CARD_H;
       const H=CARD_H+BRAND_H;
       canvas.width=W*DPR; canvas.height=H*DPR;
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
       const ctx=canvas.getContext("2d");
       ctx.scale(DPR,DPR);
       drawSticker(ctx,W,H,CARD_H,label,value,iconId);
-    }
-    let raf1,raf2;
-    const ro=new ResizeObserver(()=>{
-      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
-      raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{ redraw(); }); });
-    });
-    ro.observe(wrap);
-    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+    }); });
+    return ()=>{ cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   },[value,label,iconId]);
 
   return(
