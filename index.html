@@ -4767,7 +4767,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={e=>{
-              // Capture moved BEFORE handleTouchEnd resets dragState
               const wasMoved=dragState.current.moved;
               const wasActive=dragState.current.active;
               handleTouchEnd(e);
@@ -5025,14 +5024,11 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
     <>
     <div ref={profileScrollRef} className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,touchAction:"none"}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
           <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent}/>
-          <div style={{display:"flex",gap:12,marginTop:36}}>
-            <button onClick={()=>setShowCropper(false)} style={{padding:"14px 28px",borderRadius:14,background:"transparent",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.6)",fontWeight:600,fontSize:15,cursor:"pointer"}}>Cancel</button>
-            <button onClick={doneCropper} style={{padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16,border:"none",cursor:"pointer"}}>Done</button>
-          </div>
+          <button onClick={doneCropper} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
         </div>
       )}
       {/* Avatar + name */}
