@@ -2200,7 +2200,7 @@ async function fetchMovieMeta(title){
   }catch(e){ return null; }
 }
 
-function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
+function LogModal({data,onChange,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
 
   const t=T[data.language]||T.en;
@@ -2224,6 +2224,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [results,setResults]=useState([]);
   const [queue,setQueue]=useState([]);
   const [actPhotos,setActPhotos]=useState(editEntry?.actPhotos||[]);
+  const [pinOnSave,setPinOnSave]=useState(false);
   const [previewIdx,setPreviewIdx]=useState(0);
   const actPhotoRef=useRef(null);
   const inputRef=useRef(null);
@@ -2322,6 +2323,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
         if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
       }
       onSave(entry);
+      if(pinOnSave&&entry.actPhotos?.length){
+        const cur=data.profilePhotoIds||[];
+        const already=cur.includes(entry.id);
+        if(!already&&cur.length<3) onChange("profilePhotoIds",[...cur,entry.id]);
+      }
       onClose();
       return;
     }
@@ -2341,6 +2347,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       return entry;
     }));
     onSave(toSave);
+    // Pin first entry's photo to profile if requested
+    if(pinOnSave&&toSave[0]&&toSave[0].actPhotos?.length){
+      const cur=data.profilePhotoIds||[];
+      if(cur.length<3) onChange("profilePhotoIds",[...cur,toSave[0].id]);
+    }
     onClose();
   };
 
@@ -2397,8 +2408,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
             <button onClick={closeWithAnim} style={{fontSize:20,color:th.sub,lineHeight:1,background:"none",border:"none",cursor:"pointer",padding:"4px 2px",opacity:0.7}}>×</button>
           </div>
 
-          {/* Category chips — DM Sans 12, navigation level */}
-          <div ref={catRowRef} style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:18}}>
+          {/* Category chips — horizontal scroll */}
+          <div ref={catRowRef} style={{display:"flex",gap:6,overflowX:"auto",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
             {CATEGORIES.map(c=>{
               const active=cat===c.id;
               return(
@@ -2586,13 +2597,31 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                 };r.readAsDataURL(f);
               }}/>
               {actPhotos.length>0?(
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:32,height:32,borderRadius:7,overflow:"hidden",flexShrink:0}}>
-                    <img src={actPhotos[0]} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{width:32,height:32,borderRadius:7,overflow:"hidden",flexShrink:0}}>
+                      <img src={actPhotos[0]} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                    </div>
+                    <span style={{fontSize:13,color:th.sub,flex:1}}>Photo attached</span>
+                    <button onMouseDown={e=>e.preventDefault()} onClick={()=>{setActPhotos([]);setPinOnSave(false);}}
+                      style={{background:"none",border:"none",color:th.sub,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1,opacity:0.6}}>×</button>
                   </div>
-                  <span style={{fontSize:13,color:th.sub,flex:1}}>Photo attached</span>
-                  <button onMouseDown={e=>e.preventDefault()} onClick={()=>setActPhotos([])}
-                    style={{background:"none",border:"none",color:th.sub,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1,opacity:0.6}}>×</button>
+                  {(()=>{
+                    const cur=data.profilePhotoIds||[];
+                    const canPin=pinOnSave||cur.length<3;
+                    if(!canPin) return null;
+                    return(
+                      <div onClick={()=>setPinOnSave(p=>!p)}
+                        style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
+                          background:pinOnSave?th.accent+"22":"none",
+                          border:`1px solid ${pinOnSave?th.accent:th.border}`,
+                          cursor:"pointer",color:pinOnSave?th.accent:th.sub,
+                          fontSize:11,fontWeight:pinOnSave?600:400,alignSelf:"flex-start"}}>
+                        <span style={{fontSize:10}}>{pinOnSave?"✦":"○"}</span>
+                        {pinOnSave?"On profile":"Show on profile"}
+                      </div>
+                    );
+                  })()}
                 </div>
               ):(
                 <button onMouseDown={e=>e.preventDefault()} onClick={()=>actPhotoRef.current?.click()}
@@ -3388,11 +3417,16 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
 
           {/* Category picker */}
           {editing&&showCatPicker&&(
-            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",flexWrap:"wrap",gap:6}}>
+            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
               {CATEGORIES.map(c=>(
-                <button key={c.id} onClick={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
-                  style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,cursor:"pointer",
-                    border:"none",background:editCat===c.id?c.color:th.bg,color:editCat===c.id?"#fff":th.sub}}>
+                <button key={c.id}
+                  onTouchEnd={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
+                  onClick={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
+                  style={{padding:"5px 12px",borderRadius:99,fontSize:11,fontWeight:600,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",
+                    border:`1.5px solid ${editCat===c.id?c.color:th.border}`,
+                    background:editCat===c.id?c.color:"transparent",
+                    color:editCat===c.id?"#fff":th.sub,
+                    boxShadow:editCat===c.id?`0 2px 8px ${c.color}40`:"none"}}>
                   {c.emoji} {c.labelEn}
                 </button>
               ))}
@@ -3466,21 +3500,28 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
               {editing&&editPhotos.length>0&&(()=>{
                 const pinned=data.profilePhotoIds||[];
                 const isPinned=pinned.includes(log.id);
-                const canPin=isPinned||pinned.length<3;
                 return(
-                  <div onMouseDown={e=>e.stopPropagation()} onClick={e=>{
-                    e.stopPropagation();
-                    if(!canPin) return;
-                    const cur=data.profilePhotoIds||[];
-                    if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
-                    else onChange("profilePhotoIds",[...cur,log.id]);
-                  }} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
-                    background:isPinned?th.accent+"22":"none",
-                    border:`1px solid ${isPinned?th.accent:th.border}`,
-                    cursor:canPin?"pointer":"default",opacity:canPin?1:0.4,
-                    color:isPinned?th.accent:th.sub,fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start"}}>
+                  <div
+                    onTouchStart={e=>e.stopPropagation()}
+                    onTouchEnd={e=>{
+                      e.stopPropagation();
+                      const cur=data.profilePhotoIds||[];
+                      if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
+                      else if(cur.length<3) onChange("profilePhotoIds",[...cur,log.id]);
+                    }}
+                    onClick={e=>{
+                      e.stopPropagation();
+                      const cur=data.profilePhotoIds||[];
+                      if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
+                      else if(cur.length<3) onChange("profilePhotoIds",[...cur,log.id]);
+                    }}
+                    style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
+                      background:isPinned?th.accent+"22":"none",
+                      border:`1px solid ${isPinned?th.accent:th.border}`,
+                      cursor:"pointer",color:isPinned?th.accent:th.sub,
+                      fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start"}}>
                     <span style={{fontSize:10}}>{isPinned?"✦":"○"}</span>
-                    {isPinned?"On profile":canPin?"Show on profile":"Profile full (3 max)"}
+                    {isPinned?"On profile":"Show on profile"}
                   </div>
                 );
               })()}
@@ -5911,7 +5952,7 @@ function App(){
                   </div>
                 </div>
               )}
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
+              {showLog&&<LogModal data={data} onChange={onChange} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme} modalOpen={showLog} animationsOff={data.animationsOff||false}/>
             </>
           )}
