@@ -4575,7 +4575,7 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
 }
 
 // ─── STAT GRID ────────────────────────────────────────────────────────────────
-function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap}){
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef}){
   const savedSizes = data.statCardSizes || {};
   const savedOrder = data.statCardOrder || [];
 
@@ -4595,6 +4595,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
+  const lastTouchY = useRef(null); // for manual scroll forwarding
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4693,6 +4694,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
 
         function handleTouchStart(e){
+          lastTouchY.current=e.touches[0].clientY;
           onCardTouchStart(card.iconId,e);
           if(e.touches.length===2){
             e.preventDefault();
@@ -4704,6 +4706,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         }
 
         function handleTouchMove(e){
+          // If not yet dragging, forward vertical movement as scroll
+          if(!dragState.current.active&&lastTouchY.current!==null&&scrollRef&&scrollRef.current){
+            const dy=lastTouchY.current-e.touches[0].clientY;
+            scrollRef.current.scrollTop+=dy;
+            lastTouchY.current=e.touches[0].clientY;
+          }
           onCardTouchMove(card.iconId,e);
           if(!pinch.on||e.touches.length!==2) return;
           e.preventDefault();
@@ -4735,7 +4743,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          touchAction:isDrag?"none":"pan-y",
+          touchAction:"none",
         };
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
@@ -4819,7 +4827,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   );
 }
 
-function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -4867,9 +4875,10 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
 
   const isHapon=data.theme==="hapon";
   const isMN=data.theme==="manila_nights";
+  const profileScrollRef=useRef(null);
   return(
     <>
-    <div className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
+    <div ref={profileScrollRef} className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
@@ -5122,7 +5131,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
             ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Actor", value:topActor, min:1}]:[]),
             ...(weekBreakdownValue?[{iconId:"week_breakdown", emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:{colSpan:2,rowSpan:1}}]:[]),
             ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"Pace", value:weekPulse, min:1}]:[]),
-            ...((data.profilePhotoIds||[]).map((id,i)=>{
+            ...((photosReady?(data.profilePhotoIds||[]):[]).map((id,i)=>{
               const entry=data.logs.find(l=>l.id===id);
               const photo=entry?.actPhotos?.[0];
               if(!photo) return null;
@@ -5150,6 +5159,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
               onPhotoTap={(id,pos,colSpan,rowSpan)=>{ setCropPhotoId(id); setPhotoCropPos(pos||{x:50,y:50,scale:1}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2}); }}
+              scrollRef={profileScrollRef}
             />
             {weekNarrative&&false&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
               <p style={{fontSize:13,color:th.sub,lineHeight:1.6,fontStyle:"italic"}}>{weekNarrative}</p>
@@ -5968,7 +5978,7 @@ function App(){
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
