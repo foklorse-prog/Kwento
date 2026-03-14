@@ -4767,14 +4767,15 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={e=>{
-              const wasMoved=dragState.current.moved;
-              const wasActive=dragState.current.active;
+              // Run normal drag-end logic first
               handleTouchEnd(e);
-              if(wasActive||wasMoved) return;
+              // Then check for double-tap — only on clean stationary taps
+              if(dragState.current.active||dragState.current.moved) return;
               const now=Date.now();
               const last=lastTapTime.current[card.iconId]||0;
               if(now-last<350){
                 lastTapTime.current[card.iconId]=0;
+                // Measure real card pixel width from DOM
                 const cardEl=cardRefs.current[card.iconId];
                 const realW=cardEl?cardEl.offsetWidth:null;
                 onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan, cardH, realW);
@@ -5302,7 +5303,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               cards={visible} data={data} onChange={onChange}
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
-              onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos(pos||{x:50,y:50,scale:1}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
+              onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
               scrollRef={profileScrollRef}
             />
             {weekNarrative&&false&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
