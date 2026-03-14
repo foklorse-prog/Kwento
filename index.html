@@ -3134,8 +3134,12 @@ function _wordOverlap(a, b) {
 function _substringScore(custom, libTitle) {
   const a = custom.toLowerCase().trim();
   const b = libTitle.toLowerCase().trim();
+  // Don't match if custom title is too short to be meaningful
+  if(a.length < 3) return 0;
+  // Don't match if custom title is less than 40% of library title length (e.g. "T" vs "Concert")
+  if(a.length < b.length * 0.4) return 0;
   if(b === a) return 1.0;
-  if(b.includes(a)) return 0.85; // "Manok" in "Lechon Manok"
+  if(b.includes(a)) return 0.85;
   if(a.includes(b)) return 0.7;
   return 0;
 }
@@ -3172,7 +3176,7 @@ function getBestLibrarySuggestion(log, dismissedSugg) {
   if(dismissed.never){ _suggCache[log.id]=null; return null; }
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
-  let best = null, bestScore = 0.32;
+  let best = null, bestScore = 0.45;
   lib.forEach(item => {
     if(skipped.has(item.title)) return;
     const score = _fuzzyScore(log.title, item.title);
@@ -5900,23 +5904,41 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
     const arr=Array.isArray(entries)?entries:[entries];
-    // Handle pinOnProfile flag — add to profilePhotoIds if room
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
     const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
     if(editEntry&&cleanArr.length===1){
       update({logs:data.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l)});
     } else {
       setData(d=>{
         const cur=d.profilePhotoIds||[];
-        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
-        return {...d,logs:[...cleanArr,...d.logs],profilePhotoIds:newPins};
+        // Only add pins that don't exceed 3 for their Sun-Sat calendar week
+        const newLogs=[...cleanArr,...d.logs];
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=newLogs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=newLogs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
+        return {...d,logs:newLogs,profilePhotoIds:newPins};
       });
       return;
     }
     if(pinIds.length){
       setData(d=>{
         const cur=d.profilePhotoIds||[];
-        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=d.logs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=d.logs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
         return {...d,profilePhotoIds:newPins};
       });
     }
