@@ -1571,11 +1571,26 @@ function defaultData(){
 
 // ─── CSS ─────────────────────────────────────────────────────────────────────
 const CSS=`
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body,#root{height:100%;overflow:hidden;}
-html{background:#000 !important;}
-body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body,#root{height:100%;overflow:hidden;}
+  html{background:#000 !important;}
+  :root{
+    --font-display:'Playfair Display',serif;
+    --font-body:'DM Sans',sans-serif;
+    --font-mono:'Space Mono',monospace;
+    --stat-xl:clamp(26px,6.2vw,34px);
+    --stat-lg:clamp(20px,4.6vw,28px);
+    --stat-md:clamp(16px,3.6vw,22px);
+    --stat-label-lg:clamp(12px,2.2vw,14px);
+    --stat-label-md:clamp(11px,2vw,13px);
+    --stat-label-sm:clamp(10px,1.8vw,12px);
+    --stat-emoji-lg:clamp(26px,6vw,32px);
+    --stat-emoji-md:clamp(22px,5vw,28px);
+    --stat-emoji-sm:clamp(18px,4vw,22px);
+    --stat-note:clamp(11px,2vw,13px);
+  }
+  body{font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{display:none;}
 *{-ms-overflow-style:none;scrollbar-width:none;}
 input,textarea{outline:none;border:none;background:none;font-family:inherit;}
@@ -4710,10 +4725,15 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const BASE_H=95;
         const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
         const area=colSpan*rowSpan;
-        const emojiSz=area>=4?30:area>=2?25:20;
-        const valSz=area>=4?32:area>=2?27:22;
-        const lblSz=area>=4?13:area>=2?12:11;
-        const pad=area>=4?"18px 16px":area>=2?"16px 13px":"14px 12px";
+        const emojiSz=area>=4?"var(--stat-emoji-lg)":area>=2?"var(--stat-emoji-md)":"var(--stat-emoji-sm)";
+        const valSz=area>=4?"var(--stat-xl)":area>=2?"var(--stat-lg)":"var(--stat-md)";
+        const lblSz=area>=4?"var(--stat-label-lg)":area>=2?"var(--stat-label-md)":"var(--stat-label-sm)";
+        const pad=area>=4
+          ?"clamp(14px,3vw,20px) clamp(12px,2.6vw,18px)"
+          :area>=2
+            ?"clamp(12px,2.6vw,18px) clamp(10px,2.2vw,16px)"
+            :"clamp(10px,2.2vw,16px) clamp(9px,2vw,14px)";
+        const gapSize=area>=4?"clamp(8px,1.8vw,12px)":area>=2?"clamp(6px,1.4vw,10px)":"clamp(4px,1vw,8px)";
         const isDrag=dragging===card.iconId;
         const isOver=dragOver===card.iconId;
 
@@ -4852,7 +4872,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               width:"100%",height:"100%",padding:pad,
               borderRadius:14,background:th.card,border:`1px solid ${th.border}`,
               display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-              textAlign:"center",gap:rowSpan===2?8:4,boxSizing:"border-box",
+              textAlign:"center",gap:gapSize,boxSizing:"border-box",
             }}>
               <div style={{fontSize:emojiSz,lineHeight:1}}>{card.emoji}</div>
               <div style={{fontSize:valSz,fontWeight:800,color:th.accent,lineHeight:1}}>
