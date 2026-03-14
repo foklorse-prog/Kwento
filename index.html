@@ -2981,7 +2981,14 @@ function HomePage({data,onOpenLog,onRelog}){
   const t=T[data.language]||T.en;
   const h=new Date().getHours();
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
-  const weekLogs=getWeekLogs(data.logs);
+        // Calendar week (Sun–Sat) for vibe breakdown.
+        // NOTE: For now, use a fixed range requested by user.
+        const weekStart=new Date("2026-03-08T00:00:00");
+        const weekEnd=new Date("2026-03-15T00:00:00"); // exclusive
+        const weekLogs=data.logs.filter(l=>{
+          const d=new Date(l.date);
+          return d>=weekStart&&d<weekEnd;
+        });
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
   const totalWeek=weekLogs.length;
 
@@ -5230,10 +5237,14 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         let weekBreakdownValue=null;
         if(weekLogs.length>=3){
           const wTagCount={};
-          weekLogs.forEach(l=>(l.tags||[]).forEach(tag=>{ wTagCount[tag]=(wTagCount[tag]||0)+1; }));
+          weekLogs.forEach(l=>(l.tags||[]).forEach(tag=>{
+            const t=(tag||"").toLowerCase();
+            if(t==="global"||t==="filipino") return;
+            wTagCount[tag]=(wTagCount[tag]||0)+1;
+          }));
           const wTagTotal=Object.values(wTagCount).reduce((s,c)=>s+c,0);
           if(wTagTotal>0){
-            const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
+            const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
             const pcts=topTags.map(([tag,cnt])=>({tag,pct:Math.round(cnt/wTagTotal*100)}));
             const sum=pcts.reduce((s,c)=>s+c.pct,0);
             if(pcts.length>0) pcts[0].pct+=100-sum;
@@ -5271,7 +5282,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         </div>
         {(()=>{
           const registry=[
-            {iconId:"total", emoji:"📝", label:"Total Logs",           value:totalLogs,        min:1},
             {iconId:"days",  emoji:"🗓", label:"Days Active",           value:daysActiveCount,  min:1},
             {iconId:"week",  emoji:"📅", label:"Entries",               value:thisWeekCount,    min:1},
             {iconId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:swipedRight.length, min:1},
