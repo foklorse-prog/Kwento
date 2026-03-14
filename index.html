@@ -2604,17 +2604,18 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                     const entryWeekStart=getWeekStart(useCustomDate?new Date(customDate+"T12:00:00"):new Date());
                     const cur=data.profilePhotoIds||[];
                     const pinnedThisWeek=cur.filter(id=>{const e=data.logs.find(l=>l.id===id);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeekStart;});
-                    const canPin=pinOnSave||pinnedThisWeek.length<3;
-                    if(!canPin) return null;
+                    const weekFull=!pinOnSave&&pinnedThisWeek.length>=3;
                     return(
-                      <div onClick={()=>setPinOnSave(p=>!p)}
+                      <div onClick={()=>{ if(!weekFull) setPinOnSave(p=>!p); }}
                         style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
                           background:pinOnSave?th.accent+"22":"none",
-                          border:`1px solid ${pinOnSave?th.accent:th.border}`,
-                          cursor:"pointer",color:pinOnSave?th.accent:th.sub,
+                          border:`1px solid ${pinOnSave?th.accent:weekFull?"transparent":th.border}`,
+                          cursor:weekFull?"default":"pointer",
+                          color:pinOnSave?th.accent:weekFull?th.sub:th.sub,
+                          opacity:weekFull?0.45:1,
                           fontSize:11,fontWeight:pinOnSave?600:400,alignSelf:"flex-start"}}>
                         <span style={{fontSize:10}}>{pinOnSave?"✦":"○"}</span>
-                        {pinOnSave?"On profile":"Show on profile"}
+                        {pinOnSave?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                       </div>
                     );
                   })()}
@@ -3548,7 +3549,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                 return(
                   <div
                     onTouchStart={e=>e.stopPropagation()}
-                    onTouchEnd={e=>{e.stopPropagation();if(!weekFull)toggle();}}
+                    onTouchEnd={e=>{e.stopPropagation();e.preventDefault();if(!weekFull)toggle();}}
                     onClick={e=>{e.stopPropagation();if(!weekFull)toggle();}}
                     style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
                       background:isPinned?th.accent+"22":"none",
@@ -3558,7 +3559,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                       fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start",
                       userSelect:"none",WebkitUserSelect:"none",WebkitTouchCallout:"none"}}>
                     <span style={{fontSize:10}}>{isPinned?"✦":"○"}</span>
-                    {isPinned?"On profile":weekFull?"Week full":"Show on profile"}
+                    {isPinned?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                   </div>
                 );
               })()}
