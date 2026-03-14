@@ -1970,10 +1970,10 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
 }
 
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
-function PhotoCropper({photo,pos,setPos,size=100,width,height,accent,borderRadius="50%"}){
+function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,borderRadius="50%",aspectRatio="1/1"}){
   const ref=useRef(null);
-  const cropW=width||size;
-  const cropH=height||size;
+  const W=cropWidth||size;
+  const H=cropHeight||size;
   // working copy lives purely in a ref - never read pos prop mid-gesture
   const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
   const gesture=useRef({mode:null,drag:null,pinch0:0,scale0:1});
@@ -2016,8 +2016,8 @@ function PhotoCropper({photo,pos,setPos,size=100,width,height,accent,borderRadiu
       const dx=t.clientX-gesture.current.drag.x;
       const dy=t.clientY-gesture.current.drag.y;
       gesture.current.drag={x:t.clientX,y:t.clientY};
-      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/cropW*100));
-      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/cropH*100));
+      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/W*100));
+      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/H*100));
       commit();
     }
   };
@@ -2036,59 +2036,19 @@ function PhotoCropper({photo,pos,setPos,size=100,width,height,accent,borderRadiu
   const sc=pos.scale||1;
   const px=pos.x||50;
   const py=pos.y||50;
-
-  // The cropper shows the FULL image — user drags to choose which part fills the card.
-  // Image is displayed at natural size (contain), crop frame overlays it.
-  // We use a larger container so the full image is visible beyond the crop frame.
-  const frameW=cropW;
-  const frameH=cropH;
-  const containerW=frameW*2;
-  const containerH=frameH*2;
-
   return(
-    <div style={{position:"relative",width:containerW,height:containerH,flexShrink:0}}>
-      {/* Full image — drag/pinch on this layer */}
-      <div ref={ref}
-        onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
-        onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-        style={{width:"100%",height:"100%",position:"relative",
-                userSelect:"none",touchAction:"none",cursor:"move",overflow:"hidden",
-                background:"rgba(0,0,0,0.5)"}}>
-        <img src={photo} draggable={false} style={{
-          width:(100*sc)+"%",
-          height:"auto",
-          minHeight:(100*sc)+"%",
-          position:"absolute",
-          left:((1-sc)*(px/100)*containerW)+"px",
-          top:((1-sc)*(py/100)*containerH)+"px",
-          objectFit:"contain",
-          pointerEvents:"none",
-          opacity:0.5,
-        }}/>
-      </div>
-      {/* Crop frame overlay — shows what will actually appear on the card */}
-      <div style={{
+    <div ref={ref}
+      onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
+      onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+      style={{width:W,height:H,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
+              position:"relative",userSelect:"none",touchAction:"none",
+              border:"3px solid "+accent,flexShrink:0}}>
+      <img src={photo} draggable={false} style={{
+        width:(100*sc)+"%",height:(100*sc)+"%",
         position:"absolute",
-        left:"50%",top:"50%",
-        transform:"translate(-50%,-50%)",
-        width:frameW,height:frameH,
-        borderRadius:borderRadius,
-        border:"3px solid "+accent,
-        overflow:"hidden",
-        pointerEvents:"none",
-        boxShadow:`0 0 0 9999px rgba(0,0,0,0.55)`,
-      }}>
-        <img src={photo} draggable={false} style={{
-          width:(100*sc)+"%",
-          height:"auto",
-          minHeight:(100*sc)+"%",
-          position:"absolute",
-          left:((1-sc)*(px/100)*frameW)+"px",
-          top:((1-sc)*(py/100)*frameH)+"px",
-          objectFit:"contain",
-          pointerEvents:"none",
-        }}/>
-      </div>
+        left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",
+        objectFit:"cover",pointerEvents:"none"
+      }}/>
     </div>
   );
 }
@@ -2640,18 +2600,22 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                       style={{background:"none",border:"none",color:th.sub,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1,opacity:0.6}}>×</button>
                   </div>
                   {(()=>{
+                    const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
+                    const entryWeekStart=getWeekStart(useCustomDate?new Date(customDate+"T12:00:00"):new Date());
                     const cur=data.profilePhotoIds||[];
-                    const canPin=pinOnSave||cur.length<3;
-                    if(!canPin) return null;
+                    const pinnedThisWeek=cur.filter(id=>{const e=data.logs.find(l=>l.id===id);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeekStart;});
+                    const weekFull=!pinOnSave&&pinnedThisWeek.length>=3;
                     return(
-                      <div onClick={()=>setPinOnSave(p=>!p)}
+                      <div onClick={()=>{ if(!weekFull) setPinOnSave(p=>!p); }}
                         style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
                           background:pinOnSave?th.accent+"22":"none",
-                          border:`1px solid ${pinOnSave?th.accent:th.border}`,
-                          cursor:"pointer",color:pinOnSave?th.accent:th.sub,
+                          border:`1px solid ${pinOnSave?th.accent:weekFull?"transparent":th.border}`,
+                          cursor:weekFull?"default":"pointer",
+                          color:pinOnSave?th.accent:weekFull?th.sub:th.sub,
+                          opacity:weekFull?0.45:1,
                           fontSize:11,fontWeight:pinOnSave?600:400,alignSelf:"flex-start"}}>
                         <span style={{fontSize:10}}>{pinOnSave?"✦":"○"}</span>
-                        {pinOnSave?"On profile":"Show on profile"}
+                        {pinOnSave?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                       </div>
                     );
                   })()}
@@ -3171,8 +3135,12 @@ function _wordOverlap(a, b) {
 function _substringScore(custom, libTitle) {
   const a = custom.toLowerCase().trim();
   const b = libTitle.toLowerCase().trim();
+  // Don't match if custom title is too short to be meaningful
+  if(a.length < 3) return 0;
+  // Don't match if custom title is less than 40% of library title length (e.g. "T" vs "Concert")
+  if(a.length < b.length * 0.4) return 0;
   if(b === a) return 1.0;
-  if(b.includes(a)) return 0.85; // "Manok" in "Lechon Manok"
+  if(b.includes(a)) return 0.85;
   if(a.includes(b)) return 0.7;
   return 0;
 }
@@ -3209,7 +3177,7 @@ function getBestLibrarySuggestion(log, dismissedSugg) {
   if(dismissed.never){ _suggCache[log.id]=null; return null; }
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
-  let best = null, bestScore = 0.32;
+  let best = null, bestScore = 0.45;
   lib.forEach(item => {
     if(skipped.has(item.title)) return;
     const score = _fuzzyScore(log.title, item.title);
@@ -3280,16 +3248,13 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
     setTitleResults(pool.filter(wordStart).slice(0,5));
   },[editTitle,editCat,editing,titleEdited]);
 
-  const [pinChanged,setPinChanged]=useState(false);
-
   const dirty=editing&&(
     editTitle.trim()!==log.title||
     editNote.trim()!==(log.note||"").trim()||
     editRating!==(log.rating||null)||
     editCat!==log.category||
     editDate!==((log.customDate||(log.date||"").split("T")[0])||"")||
-    editPhotos.length!==((log.actPhotos||[]).length)||
-    pinChanged
+    editPhotos.length!==((log.actPhotos||[]).length)
   );
 
   const handleTap=()=>{
@@ -3319,7 +3284,6 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
     setShowCatPicker(false);
     setTitleResults([]);
     setTitleEdited(false);
-    setPinChanged(false);
   };
 
   const saveEdit=e=>{
@@ -3534,8 +3498,8 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                   ))}
                 </div>
               )}
-              {/* Add photo button — always visible in edit mode */}
-              {editing&&(
+              {/* Add photo button — only when no photo yet (1 photo max) */}
+              {editing&&editPhotos.length===0&&(
                 <>
                   <input ref={editPhotoRef} type="file" accept="image/*" style={{display:"none"}}
                     onClick={e=>e.stopPropagation()}
@@ -3573,25 +3537,29 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
               {editing&&editPhotos.length>0&&(()=>{
                 const pinned=data.profilePhotoIds||[];
                 const isPinned=pinned.includes(log.id);
+                const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
+                const entryWeekStart=getWeekStart(new Date(log.customDate?log.customDate+"T12:00:00":log.date));
+                const pinnedThisWeek=pinned.filter(id=>{const e=data.logs.find(l=>l.id===id);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeekStart;});
+                const weekFull=!isPinned&&pinnedThisWeek.length>=3;
                 const toggle=()=>{
                   const cur=data.profilePhotoIds||[];
-                  const next=isPinned?cur.filter(id=>id!==log.id):[...cur,log.id].slice(0,3);
+                  const next=isPinned?cur.filter(id=>id!==log.id):[...cur,log.id];
                   onChange({profilePhotoIds:next});
-                  setPinChanged(true);
                 };
                 return(
                   <div
                     onTouchStart={e=>e.stopPropagation()}
-                    onTouchEnd={e=>{e.stopPropagation();if(!isPinned&&(data.profilePhotoIds||[]).length>=3)return;toggle();}}
-                    onClick={e=>{e.stopPropagation();if(!isPinned&&(data.profilePhotoIds||[]).length>=3)return;toggle();}}
+                    onTouchEnd={e=>{e.stopPropagation();e.preventDefault();if(!weekFull)toggle();}}
+                    onClick={e=>{e.stopPropagation();if(!weekFull)toggle();}}
                     style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
                       background:isPinned?th.accent+"22":"none",
                       border:`1px solid ${isPinned?th.accent:th.border}`,
-                      cursor:"pointer",color:isPinned?th.accent:th.sub,
+                      cursor:weekFull?"default":"pointer",color:isPinned?th.accent:th.sub,
+                      opacity:weekFull?0.4:1,
                       fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start",
                       userSelect:"none",WebkitUserSelect:"none",WebkitTouchCallout:"none"}}>
                     <span style={{fontSize:10}}>{isPinned?"✦":"○"}</span>
-                    {isPinned?"On profile":"Show on profile"}
+                    {isPinned?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                   </div>
                 );
               })()}
@@ -4642,7 +4610,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
-  const cardWrapRefs = useRef({}); // DOM refs for dynamic touchAction switching
+  const lastTouchY = useRef(null); // for manual scroll forwarding
+  const lastTapTime = useRef({}); // iconId → timestamp of last tap
+  const cardRefs = useRef({});   // iconId → DOM node, for measuring real width
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4677,8 +4647,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
       longTimer.current=setTimeout(()=>{
         dragState.current={active:true,fromId:iconId,overId:null};
         setDragging(iconId);
-        // Switch touchAction to none directly on DOM — works for next gesture
-        if(cardWrapRefs.current[iconId]) cardWrapRefs.current[iconId].style.touchAction="none";
+        lastTapTime.current[iconId]=0; // reset double-tap tracking on drag start
         if(navigator.vibrate) navigator.vibrate(25);
 
         // 1200ms total → save sheet (only if still not moved)
@@ -4713,10 +4682,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   function onCardTouchEnd(){
     clearTimeout(longTimer.current);
     if(dragState.current.active){
-      // Restore scrolling touchAction
-      const fromId=dragState.current.fromId;
-      if(fromId&&cardWrapRefs.current[fromId]) cardWrapRefs.current[fromId].style.touchAction="pan-y";
-      reorder(fromId, dragState.current.overId);
+      reorder(dragState.current.fromId, dragState.current.overId);
       dragState.current={active:false,fromId:null,overId:null};
       setDragging(null);
       setDragOver(null);
@@ -4789,30 +4755,34 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          touchAction:"pan-y",
+          touchAction:"none",
         };
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
-            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
+            ref={el=>{ if(el) cardRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            onTouchEnd={e=>{
+              // Run normal drag-end logic first
+              handleTouchEnd(e);
+              // Then check for double-tap — only on clean stationary taps
+              if(dragState.current.active||dragState.current.moved) return;
+              const now=Date.now();
+              const last=lastTapTime.current[card.iconId]||0;
+              if(now-last<350){
+                lastTapTime.current[card.iconId]=0;
+                // Measure real card pixel width from DOM
+                const cardEl=cardRefs.current[card.iconId];
+                const realW=cardEl?cardEl.offsetWidth:null;
+                onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan, cardH, realW);
+              } else {
+                lastTapTime.current[card.iconId]=now;
+              }
+            }}
             onTouchCancel={handleTouchEnd}
           >
-            <div
-              onTouchEnd={e=>{
-                // Double-tap to reposition — ignore if drag just happened
-                if(dragState.current.moved) return;
-                const now=Date.now();
-                const last=card._lastTap||0;
-                card._lastTap=now;
-                if(now-last<300){
-                  e.stopPropagation();
-                  onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan);
-                }
-              }}
-              style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative",cursor:"pointer"}}>
+            <div style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative"}}>
               <img src={card._photoSrc} style={{
                 width:(100*(card._photoPos.scale||1))+"%",
                 height:(100*(card._photoPos.scale||1))+"%",
@@ -4834,7 +4804,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         if(isMN) return(
           <div key={card.iconId} data-cardid={card.iconId}
-            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -4857,7 +4826,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         return(
           <div key={card.iconId} data-cardid={card.iconId}
-            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -5191,7 +5159,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             ...(topActor?[{iconId:"top_actor", emoji:"🎭", label:"Actor", value:topActor, min:1}]:[]),
             ...(weekBreakdownValue?[{iconId:"week_breakdown", emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:{colSpan:2,rowSpan:1}}]:[]),
             ...(weekPulse?[{iconId:"week_pulse", emoji:weekPulseEmoji, label:"Pace", value:weekPulse, min:1}]:[]),
-            ...((data.profilePhotoIds||[]).map((id,i)=>{
+            ...((photosReady?(data.profilePhotoIds||[]):[]).map((id,i)=>{
               const entry=data.logs.find(l=>l.id===id);
               const photo=entry?.actPhotos?.[0];
               if(!photo) return null;
@@ -5218,7 +5186,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               cards={visible} data={data} onChange={onChange}
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
-              onPhotoTap={(id,pos,colSpan,rowSpan)=>{ setCropPhotoId(id); setPhotoCropPos({x:50,y:50,scale:1}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2}); }}
+              onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos(pos||{x:50,y:50,scale:1}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
               scrollRef={profileScrollRef}
             />
             {weekNarrative&&false&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
@@ -5290,8 +5258,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
           <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
           <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
-            width={cropShape.colSpan===2?300:160}
-            height={cropShape.rowSpan===2?300:160}
+            cropWidth={cropShape.cardW||280}
+            cropHeight={cropShape.cardH||95}
             accent={th.accent}
             borderRadius="14px"
           />
@@ -5937,23 +5905,41 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
     const arr=Array.isArray(entries)?entries:[entries];
-    // Handle pinOnProfile flag — add to profilePhotoIds if room
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
     const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
     if(editEntry&&cleanArr.length===1){
       update({logs:data.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l)});
     } else {
       setData(d=>{
         const cur=d.profilePhotoIds||[];
-        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
-        return {...d,logs:[...cleanArr,...d.logs],profilePhotoIds:newPins};
+        // Only add pins that don't exceed 3 for their Sun-Sat calendar week
+        const newLogs=[...cleanArr,...d.logs];
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=newLogs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=newLogs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
+        return {...d,logs:newLogs,profilePhotoIds:newPins};
       });
       return;
     }
     if(pinIds.length){
       setData(d=>{
         const cur=d.profilePhotoIds||[];
-        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=d.logs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=d.logs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
         return {...d,profilePhotoIds:newPins};
       });
     }
