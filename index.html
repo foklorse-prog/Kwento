@@ -34,7 +34,7 @@ v6.0 — 2026-03-13
       document.documentElement.style.backgroundColor=bg;
       // Register service worker
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js");
+        navigator.serviceWorker.register("./sw.js?v=20260315");
       }
     })();
   </script>
@@ -6013,6 +6013,7 @@ function App(){
     // On launch: check for update after SW is ready
     const launchCheck = setTimeout(()=>{
       if(navigator.serviceWorker.controller){
+        navigator.serviceWorker.getRegistration().then(reg=>{ if(reg) reg.update(); });
         navigator.serviceWorker.controller.postMessage("CHECK_UPDATE");
       }
     }, 1500);
