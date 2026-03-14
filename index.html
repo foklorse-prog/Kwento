@@ -1970,15 +1970,17 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
 }
 
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
-function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,borderRadius="50%",aspectRatio="1/1"}){
+function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,borderRadius="50%"}){
   const ref=useRef(null);
-  const W=cropWidth||size;
-  const H=cropHeight||size;
-  // working copy lives purely in a ref - never read pos prop mid-gesture
+  const W=cropWidth||size;  // card width in px
+  const H=cropHeight||size; // card height in px
+  const PAD=60; // extra space around crop frame so full image is visible
+  const outerW=W+PAD*2;
+  const outerH=H+PAD*2;
+
   const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
   const gesture=useRef({mode:null,drag:null,pinch0:0,scale0:1});
 
-  // sync work ref when pos prop changes from outside (e.g. reset)
   useEffect(()=>{
     work.current={x:pos.x||50,y:pos.y||50,scale:pos.scale||1};
   },[pos.x,pos.y,pos.scale]);
@@ -2016,6 +2018,7 @@ function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,bor
       const dx=t.clientX-gesture.current.drag.x;
       const dy=t.clientY-gesture.current.drag.y;
       gesture.current.drag={x:t.clientX,y:t.clientY};
+      // Drag moves relative to the card dimensions (W/H) — same as card rendering
       work.current.x=Math.max(0,Math.min(100,work.current.x-dx/W*100));
       work.current.y=Math.max(0,Math.min(100,work.current.y-dy/H*100));
       commit();
@@ -2027,7 +2030,6 @@ function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,bor
       gesture.current.mode=null;
       gesture.current.drag=null;
     } else if(e.touches.length===1){
-      // finger lifted from pinch — switch to drag without resetting position
       gesture.current.mode="drag";
       gesture.current.drag={x:e.touches[0].clientX,y:e.touches[0].clientY};
     }
@@ -2036,19 +2038,52 @@ function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,bor
   const sc=pos.scale||1;
   const px=pos.x||50;
   const py=pos.y||50;
+
+  // Image position — identical math to the card renderer
+  // The image is rendered in the outer container (outerW × outerH)
+  // but the card frame sits at PAD offset, so we shift image by PAD too
+  const imgW=outerW*sc;
+  const imgH=outerH*sc;
+  const imgLeft=PAD + (1-sc)*px/100*W;
+  const imgTop=PAD + (1-sc)*py/100*H;
+
   return(
     <div ref={ref}
       onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:W,height:H,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
-              position:"relative",userSelect:"none",touchAction:"none",
-              border:"3px solid "+accent,flexShrink:0}}>
+      style={{width:outerW,height:outerH,position:"relative",
+              userSelect:"none",touchAction:"none",cursor:"move",
+              flexShrink:0,overflow:"hidden"}}>
+
+      {/* Full image — visible beyond the crop frame */}
       <img src={photo} draggable={false} style={{
-        width:(100*sc)+"%",height:(100*sc)+"%",
+        width:imgW,height:imgH,
         position:"absolute",
-        left:((1-sc)*px)+"%",top:((1-sc)*py)+"%",
-        objectFit:"cover",pointerEvents:"none"
+        left:imgLeft,top:imgTop,
+        objectFit:"cover",pointerEvents:"none",
+        opacity:0.35, // dimmed outside the frame
       }}/>
+
+      {/* Crop frame — clips to show exactly what the card will show */}
+      <div style={{
+        position:"absolute",
+        left:PAD,top:PAD,
+        width:W,height:H,
+        borderRadius:borderRadius,
+        overflow:"hidden",
+        border:"2.5px solid "+accent,
+        boxShadow:"0 0 0 9999px rgba(0,0,0,0.55)",
+        pointerEvents:"none",
+      }}>
+        <img src={photo} draggable={false} style={{
+          width:W*sc,height:H*sc,
+          position:"absolute",
+          // Same math as card: left = (1-sc)*px/100 * 100% of W
+          left:(1-sc)*px/100*W,
+          top:(1-sc)*py/100*H,
+          objectFit:"cover",pointerEvents:"none",
+        }}/>
+      </div>
     </div>
   );
 }
@@ -3236,6 +3271,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   const [useToday,setUseToday]=useState(false);
   const [titleResults,setTitleResults]=useState([]);
   const [titleEdited,setTitleEdited]=useState(false);
+  const [pinChanged,setPinChanged]=useState(false);
   const editPhotoRef=useRef(null);
 
   // Autocomplete: only fires after user has actually changed the title
@@ -3254,7 +3290,8 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
     editRating!==(log.rating||null)||
     editCat!==log.category||
     editDate!==((log.customDate||(log.date||"").split("T")[0])||"")||
-    editPhotos.length!==((log.actPhotos||[]).length)
+    editPhotos.length!==((log.actPhotos||[]).length)||
+    pinChanged
   );
 
   const handleTap=()=>{
@@ -3274,6 +3311,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
     setUseToday(false);
     setTitleEdited(false);
     setTitleResults([]);
+    setPinChanged(false);
     setEditing(true);
     setExpanded(true);
   };
@@ -3284,6 +3322,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
     setShowCatPicker(false);
     setTitleResults([]);
     setTitleEdited(false);
+    setPinChanged(false);
   };
 
   const saveEdit=e=>{
@@ -3545,6 +3584,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                   const cur=data.profilePhotoIds||[];
                   const next=isPinned?cur.filter(id=>id!==log.id):[...cur,log.id];
                   onChange({profilePhotoIds:next});
+                  setPinChanged(p=>!p);
                 };
                 return(
                   <div
