@@ -2200,7 +2200,7 @@ async function fetchMovieMeta(title){
   }catch(e){ return null; }
 }
 
-function LogModal({data,onChange,onClose,onSave,editEntry=null,initialCat=null}){
+function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
 
   const t=T[data.language]||T.en;
@@ -2322,12 +2322,7 @@ function LogModal({data,onChange,onClose,onSave,editEntry=null,initialCat=null})
         const meta=await fetchMovieMeta(entry.title);
         if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
       }
-      onSave(entry);
-      if(pinOnSave&&entry.actPhotos?.length){
-        const cur=data.profilePhotoIds||[];
-        const already=cur.includes(entry.id);
-        if(!already&&cur.length<3) onChange("profilePhotoIds",[...cur,entry.id]);
-      }
+      onSave({...entry, pinOnProfile: pinOnSave&&entry.actPhotos?.length>0});
       onClose();
       return;
     }
@@ -2346,12 +2341,8 @@ function LogModal({data,onChange,onClose,onSave,editEntry=null,initialCat=null})
       }
       return entry;
     }));
-    onSave(toSave);
-    // Pin first entry's photo to profile if requested
-    if(pinOnSave&&toSave[0]&&toSave[0].actPhotos?.length){
-      const cur=data.profilePhotoIds||[];
-      if(cur.length<3) onChange("profilePhotoIds",[...cur,toSave[0].id]);
-    }
+    const toSaveWithPin=toSave.map((e,i)=>i===0&&pinOnSave&&e.actPhotos?.length>0?{...e,pinOnProfile:true}:e);
+    onSave(toSaveWithPin);
     onClose();
   };
 
@@ -3213,7 +3204,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
-function SwipeableEntry({log, th, onDelete, onSave, data}){
+function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   const [drag,setDrag]=useState(0);
   const [confirmed,setConfirmed]=useState(false);
   const startX=useRef(null);
@@ -3500,21 +3491,16 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
               {editing&&editPhotos.length>0&&(()=>{
                 const pinned=data.profilePhotoIds||[];
                 const isPinned=pinned.includes(log.id);
+                const toggle=()=>{
+                  const cur=data.profilePhotoIds||[];
+                  const next=isPinned?cur.filter(id=>id!==log.id):[...cur,log.id].slice(0,3);
+                  onChange({profilePhotoIds:next});
+                };
                 return(
                   <div
                     onTouchStart={e=>e.stopPropagation()}
-                    onTouchEnd={e=>{
-                      e.stopPropagation();
-                      const cur=data.profilePhotoIds||[];
-                      if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
-                      else if(cur.length<3) onChange("profilePhotoIds",[...cur,log.id]);
-                    }}
-                    onClick={e=>{
-                      e.stopPropagation();
-                      const cur=data.profilePhotoIds||[];
-                      if(isPinned) onChange("profilePhotoIds",cur.filter(id=>id!==log.id));
-                      else if(cur.length<3) onChange("profilePhotoIds",[...cur,log.id]);
-                    }}
+                    onTouchEnd={e=>{e.stopPropagation();if(!isPinned&&(data.profilePhotoIds||[]).length>=3)return;toggle();}}
+                    onClick={e=>{e.stopPropagation();if(!isPinned&&(data.profilePhotoIds||[]).length>=3)return;toggle();}}
                     style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
                       background:isPinned?th.accent+"22":"none",
                       border:`1px solid ${isPinned?th.accent:th.border}`,
@@ -3712,6 +3698,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
     <SwipeableEntry key={log.id||i} log={log} th={th} data={data}
       onDelete={()=>handleSoftDelete(log)}
       onSave={onSave}
+      onChange={onUpdateData}
     />
   );
 
@@ -5797,11 +5784,25 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
     const arr=Array.isArray(entries)?entries:[entries];
-    if(editEntry&&arr.length===1){
-      update({logs:data.logs.map(l=>l.id===arr[0].id?arr[0]:l)});
+    // Handle pinOnProfile flag — add to profilePhotoIds if room
+    const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
+    const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    if(editEntry&&cleanArr.length===1){
+      update({logs:data.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l)});
     } else {
-      // Use functional update so all entries are prepended at once
-      setData(d=>({...d,logs:[...arr,...d.logs]}));
+      setData(d=>{
+        const cur=d.profilePhotoIds||[];
+        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
+        return {...d,logs:[...cleanArr,...d.logs],profilePhotoIds:newPins};
+      });
+      return;
+    }
+    if(pinIds.length){
+      setData(d=>{
+        const cur=d.profilePhotoIds||[];
+        const newPins=[...cur,...pinIds.filter(id=>!cur.includes(id))].slice(0,3);
+        return {...d,profilePhotoIds:newPins};
+      });
     }
     setEditEntry(null);
   };
@@ -5952,7 +5953,7 @@ function App(){
                   </div>
                 </div>
               )}
-              {showLog&&<LogModal data={data} onChange={onChange} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
               <ThemeAnimations theme={data.theme} modalOpen={showLog} animationsOff={data.animationsOff||false}/>
             </>
           )}
