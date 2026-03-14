@@ -5437,8 +5437,14 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         }
 
         const weekMap={};
+        const entryDateForWeek=l=>{
+          if(l?.customDate) return new Date(l.customDate+"T12:00:00");
+          return l?.date?new Date(l.date):null;
+        };
         allLogs.forEach(l=>{
-          const wk=phWeekStartKey(new Date(l.date));
+          const d=entryDateForWeek(l);
+          if(!d||isNaN(d)) return;
+          const wk=phWeekStartKey(d);
           if(!weekMap[wk]) weekMap[wk]=[];
           weekMap[wk].push(l);
         });
@@ -5448,6 +5454,19 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           .sort((a,b)=>new Date(`${b}T00:00:00+08:00`)-new Date(`${a}T00:00:00+08:00`));
 
         const manualLogs=allLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+        const cumulativeDaysActive=weekKey=>{
+          const end=new Date(weekKey+"T00:00:00");
+          end.setDate(end.getDate()+6);
+          const endKey=phDateKey(end);
+          const days=new Set();
+          manualLogs.forEach(l=>{
+            const d=entryDateForWeek(l);
+            if(!d||isNaN(d)) return;
+            const k=phDateKey(d);
+            if(k>=TIMELINE_START_KEY && k<=endKey) days.add(k);
+          });
+          return days.size;
+        };
         const manualWeekCounts={};
         manualLogs.forEach(l=>{
           const wk=phWeekStartKey(new Date(l.date));
@@ -5472,7 +5491,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           const stepsLogs=weekLogs.filter(l=>l.fromHealthKit&&l.category==="activities");
           const weekSteps=stepsLogs.reduce((s,l)=>s+(l.stepCount||0),0);
           const thisWeekCount=weekLogs.length;
-          const daysActiveCount=new Set(weekManualLogs.map(l=>phDateKey(new Date(l.date)))).size;
+          const daysActiveCount=cumulativeDaysActive(weekKey);
           const weekLikedCount=weekManualLogs.filter(l=>swipedRightSet.has(l.title)).length;
 
           // Top category
