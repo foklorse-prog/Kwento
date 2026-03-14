@@ -4332,31 +4332,27 @@ function StickerIcon({id}){
 // Draws the full sticker onto a canvas context.
 // CARD_H = visible height on profile. BRAND_H = extra strip inside card for "My week on Kwento".
 // On profile, the wrapper clips to CARD_H. In the modal preview, full height shows.
-function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout){
+function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlass){
   const th=THEMES.manila_nights;
 
   ctx.clearRect(0,0,W,H);
 
-  // ── Background
-  ctx.save();
-  ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
-  ctx.fillStyle="rgba(10,6,20,0.78)"; ctx.fillRect(0,0,W,H);
-  const g1=ctx.createRadialGradient(W*0.15,0,0,W*0.15,0,W*0.75);
-  g1.addColorStop(0,"rgba(0,207,255,0.22)"); g1.addColorStop(1,"transparent");
-  ctx.fillStyle=g1; ctx.fillRect(0,0,W,H);
-  const g2=ctx.createRadialGradient(W*0.88,CARD_H,0,W*0.88,CARD_H,W*0.65);
-  g2.addColorStop(0,"rgba(255,62,157,0.16)"); g2.addColorStop(1,"transparent");
-  ctx.fillStyle=g2; ctx.fillRect(0,0,W,H);
-  ctx.restore();
+  // ── Background (skip when using shared glass)
+  if(!sharedGlass){
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
+    ctx.fillStyle="rgba(10,6,20,0.85)"; ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
 
   // ── Border
   ctx.save();
   ctx.beginPath(); ctx.roundRect(0.5,0.5,W-1,H-1,20);
-  ctx.strokeStyle="rgba(200,204,216,0.2)"; ctx.lineWidth=1; ctx.stroke();
+  ctx.strokeStyle="rgba(200,204,216,0.22)"; ctx.lineWidth=1; ctx.stroke();
   ctx.restore();
 
   // ── Layout constants
-  const PAD=14;
+  const PAD=12;
   const cW=W-PAD*2;
   const cH=CARD_H-PAD*2;
   const cx=W/2;
@@ -4375,9 +4371,9 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout){
   // ── Vertical layout: icon top, value middle, label bottom (unless noLabel)
   const iconSize=Math.round(sizeRef*0.22);
   const iconScale=(iconSize/24);
-  const iconY=noLabel||isMultiline ? PAD+cH*0.18 : PAD+cH*0.16;
-  const valueY=noLabel ? PAD+cH*0.62 : isMultiline ? PAD+cH*0.26 : PAD+cH*0.60;
-  const labelY=PAD+cH*0.88;
+  const iconY=noLabel||isMultiline ? PAD+cH*0.17 : PAD+cH*0.14;
+  const valueY=noLabel ? PAD+cH*0.60 : isMultiline ? PAD+cH*0.24 : PAD+cH*0.58;
+  const labelY=PAD+cH*0.90;
 
   // ── Icon
   ctx.save();
@@ -4448,7 +4444,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout){
       :breakdownMode==="compact"
         ?[parts[0]||String(value)]
         :parts;
-    const availH=breakdownMode==="wide"?cH*0.38:cH*0.68;
+    const availH=breakdownMode==="wide"?cH*0.34:cH*0.64;
     const lineH=availH/lines.length;
     let fSize=Math.min(Math.round(sizeRef*(breakdownMode==="wide"?0.12:0.14)), Math.round(lineH*0.72));
     ctx.font=`600 ${fSize}px 'Space Mono', monospace`;
@@ -4493,7 +4489,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout){
 }
 
 // Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
-function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,rowSpan}){
+function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,rowSpan,sharedGlass}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
   const CARD_W=240, CARD_H=165, BRAND_H=39;
@@ -4510,7 +4506,7 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,ro
     canvas.style.width=W+"px"; canvas.style.height=H+"px";
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
-    drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1});
+    drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass);
     setImgUrl(canvas.toDataURL("image/png"));
     if(canGenerate) onGenerate&&onGenerate();
   },[]);
@@ -4564,7 +4560,7 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,ro
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
   const [showSheet,setShowSheet]=useState(false);
@@ -4584,7 +4580,7 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
       const ctx=canvas.getContext("2d");
       ctx.scale(DPR,DPR);
-      drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1});
+      drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass);
     }
     let raf1,raf2;
     const ro=new ResizeObserver(()=>{
@@ -4617,14 +4613,31 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
         iconId={iconId} label={label} value={value} data={data}
         onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
         onGenerate={onGenerate}
-        colSpan={colSpan} rowSpan={rowSpan}
+        colSpan={colSpan} rowSpan={rowSpan} sharedGlass={sharedGlass}
       />}
     </>
   );
 }
 
 // ─── STAT GRID ────────────────────────────────────────────────────────────────
-function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef}){
+function _clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function _hexToRgb(hex){
+  const h=hex.replace("#","").trim();
+  if(h.length===3){
+    const r=parseInt(h[0]+h[0],16),g=parseInt(h[1]+h[1],16),b=parseInt(h[2]+h[2],16);
+    return {r,g,b};
+  }
+  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return {r,g,b};
+}
+function _rgbToHex({r,g,b}){
+  const to=v=>v.toString(16).padStart(2,"0");
+  return "#"+to(_clamp(Math.round(r),0,255))+to(_clamp(Math.round(g),0,255))+to(_clamp(Math.round(b),0,255));
+}
+function _mix(a,b,t){return {r:a.r+(b.r-a.r)*t,g:a.g+(b.g-a.g)*t,b:a.b+(b.b-a.b)*t};}
+function _lum({r,g,b}){const sr=[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*sr[0]+0.7152*sr[1]+0.0722*sr[2];}
+
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef, sharedGlass}){
   const savedSizes = data.statCardSizes || {};
   const savedOrder = data.statCardOrder || [];
 
@@ -4638,6 +4651,21 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
     cards.forEach(c=>{ s[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1}); });
     return s;
   });
+  useEffect(()=>{
+    const ids=cards.map(c=>c.iconId);
+    setOrder(prev=>{
+      const keep=prev.filter(id=>ids.includes(id));
+      const add=ids.filter(id=>!keep.includes(id));
+      return [...keep,...add];
+    });
+    setSizes(prev=>{
+      const next={...prev};
+      cards.forEach(c=>{
+        if(!next[c.iconId]) next[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1});
+      });
+      return next;
+    });
+  },[cards.map(c=>c.iconId).join("|")]);
 
   // drag state lives in refs so touch handlers always see current values
   const dragState = useRef({active:false, fromId:null, overId:null});
@@ -4647,6 +4675,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const lastTouchY = useRef(null); // for manual scroll forwarding
   const lastTapTime = useRef({}); // iconId → timestamp of last tap
   const cardRefs = useRef({});   // iconId → DOM node, for measuring real width
+  const [paletteMap, setPaletteMap] = useState({});
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4726,6 +4755,102 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
   const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
 
+  // --- Palette extraction for photo cards (Manila Nights only) ---
+  useEffect(()=>{
+    if(!isMN) return;
+    const photoCards=orderedCards.filter(c=>c._photo && c._photoSrc);
+    const missing=photoCards.filter(c=>!paletteMap[c._entryId]);
+    if(!missing.length) return;
+    missing.forEach(c=>{
+      const img=new Image();
+      img.crossOrigin="anonymous";
+      img.onload=()=>{
+        try{
+          const size=24;
+          const canvas=document.createElement("canvas");
+          canvas.width=size;canvas.height=size;
+          const ctx=canvas.getContext("2d");
+          ctx.drawImage(img,0,0,size,size);
+          const data=ctx.getImageData(0,0,size,size).data;
+          let sum={r:0,g:0,b:0},count=0;
+          let bestSat=-1, accent={r:0,g:0,b:0};
+          for(let i=0;i<data.length;i+=4){
+            const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+            if(a<40) continue;
+            sum.r+=r;sum.g+=g;sum.b+=b;count++;
+            const max=Math.max(r,g,b),min=Math.min(r,g,b);
+            const sat=max===0?0:(max-min)/max;
+            if(sat>bestSat && max>40){
+              bestSat=sat;accent={r,g,b};
+            }
+          }
+          const avg={r:sum.r/(count||1),g:sum.g/(count||1),b:sum.b/(count||1)};
+          if(bestSat<0) accent=avg;
+          const soft=_mix(avg,{r:255,g:255,b:255},0.35);
+          const dark=_mix(avg,{r:0,g:0,b:0},0.35);
+          setPaletteMap(prev=>({...prev,[c._entryId]:{accent,avg,soft,dark}}));
+        }catch(e){
+          const fallback=_hexToRgb(th.accent||"#00cfff");
+          const avg=fallback;
+          const soft=_mix(avg,{r:255,g:255,b:255},0.35);
+          const dark=_mix(avg,{r:0,g:0,b:0},0.35);
+          setPaletteMap(prev=>({...prev,[c._entryId]:{accent:avg,avg,soft,dark}}));
+        }
+      };
+      img.onerror=()=>{
+        const fallback=_hexToRgb(th.accent||"#00cfff");
+        const avg=fallback;
+        const soft=_mix(avg,{r:255,g:255,b:255},0.35);
+        const dark=_mix(avg,{r:0,g:0,b:0},0.35);
+        setPaletteMap(prev=>({...prev,[c._entryId]:{accent:avg,avg,soft,dark}}));
+      };
+      img.src=c._photoSrc;
+    });
+  },[orderedCards,isMN]);
+
+  // --- Grid placement (3 columns) for proximity blending ---
+  const layout = useMemo(()=>{
+    const cols=3;
+    const occ=[];
+    const place={};
+    function fits(r,c,cs,rs){
+      if(c+cs>cols) return false;
+      for(let rr=r;rr<r+rs;rr++){
+        if(!occ[rr]) occ[rr]=Array(cols).fill(false);
+        for(let cc=c;cc<c+cs;cc++) if(occ[rr][cc]) return false;
+      }
+      return true;
+    }
+    function mark(r,c,cs,rs){
+      for(let rr=r;rr<r+rs;rr++){
+        if(!occ[rr]) occ[rr]=Array(cols).fill(false);
+        for(let cc=c;cc<c+cs;cc++) occ[rr][cc]=true;
+      }
+    }
+    let row=0,col=0;
+    orderedCards.forEach(card=>{
+      const span=sizes[card.iconId]||{colSpan:1,rowSpan:1};
+      const cs=span.colSpan||1, rs=span.rowSpan||1;
+      let placed=false;
+      for(let r=0;!placed;r++){
+        for(let c=0;c<cols;c++){
+          if(fits(r,c,cs,rs)){
+            mark(r,c,cs,rs);
+            place[card.iconId]={r,c,cs,rs,cx:c+cs/2,cy:r+rs/2};
+            placed=true;break;
+          }
+        }
+      }
+    });
+    return place;
+  },[orderedCards,sizes]);
+
+  const photoPositions = useMemo(()=>{
+    return orderedCards
+      .filter(c=>c._photo && c._entryId && layout[c.iconId] && paletteMap[c._entryId])
+      .map(c=>({id:c._entryId, pos:layout[c.iconId], pal:paletteMap[c._entryId]}));
+  },[orderedCards,layout,paletteMap]);
+
   return(
     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
       {orderedCards.map(card=>{
@@ -4737,11 +4862,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const valSz=area>=4?"var(--stat-xl)":area>=2?"var(--stat-lg)":"var(--stat-md)";
         const lblSz=area>=4?"var(--stat-label-lg)":area>=2?"var(--stat-label-md)":"var(--stat-label-sm)";
         const pad=area>=4
-          ?"clamp(12px,2.4vw,16px) clamp(10px,2vw,14px)"
+          ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
           :area>=2
-            ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
-            :"clamp(9px,1.8vw,12px) clamp(8px,1.6vw,10px)";
-        const gapSize=area>=4?"clamp(6px,1.4vw,9px)":area>=2?"clamp(5px,1.2vw,8px)":"clamp(4px,1vw,7px)";
+            ?"clamp(9px,1.8vw,12px) clamp(8px,1.6vw,10px)"
+            :"clamp(8px,1.6vw,10px) clamp(7px,1.4vw,9px)";
+        const gapSize=area>=4?"clamp(4px,1vw,7px)":area>=2?"clamp(4px,0.9vw,6px)":"clamp(3px,0.8vw,5px)";
         const isDrag=dragging===card.iconId;
         const isOver=dragOver===card.iconId;
 
@@ -4797,6 +4922,35 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitTapHighlightColor:"transparent",
           touchAction:"none",
         };
+
+        // --- Photo-influenced colors (Manila Nights) ---
+        let accentColor=th.accent;
+        let labelColor=th.sub;
+        let borderColor=th.border;
+        let glowColor=null;
+        let bgTint=null;
+        if(isMN && !card._photo && photoPositions.length){
+          const myPos=layout[card.iconId];
+          if(myPos){
+            let acc={r:0,g:0,b:0}, wSum=0;
+            photoPositions.forEach(p=>{
+              const d=Math.abs(myPos.cx-p.pos.cx)+Math.abs(myPos.cy-p.pos.cy);
+              const w=1/(d+0.5);
+              acc.r+=p.pal.accent.r*w;
+              acc.g+=p.pal.accent.g*w;
+              acc.b+=p.pal.accent.b*w;
+              wSum+=w;
+            });
+            const blended={r:acc.r/(wSum||1),g:acc.g/(wSum||1),b:acc.b/(wSum||1)};
+            accentColor=_rgbToHex(blended);
+            const subMix=_mix(blended,_hexToRgb(th.sub),0.45);
+            labelColor=_rgbToHex(subMix);
+            const bMix=_mix(blended,_hexToRgb("#c8ccd8"),0.55);
+            borderColor=_rgbToHex(bMix)+"80";
+            glowColor=accentColor+"55";
+            bgTint=`linear-gradient(135deg, ${accentColor}1a 0%, rgba(12,8,22,0.4) 45%, ${accentColor}14 100%)`;
+          }
+        }
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
             ref={el=>{ if(el) cardRefs.current[card.iconId]=el; }}
@@ -4856,7 +5010,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           >
             <StatSticker
               iconId={card.iconId} label={card.label} value={card.value}
-              data={data} span={false} colSpan={colSpan} rowSpan={rowSpan}
+              data={data} span={false} colSpan={colSpan} rowSpan={rowSpan} sharedGlass={!!sharedGlass}
               onStickerOpen={onStickerOpen}
               onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
               onGenerate={()=>{
@@ -4889,14 +5043,17 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           >
             <div style={{
               width:"100%",height:"100%",padding:pad,
-              borderRadius:14,background:th.card,border:`1px solid ${th.border}`,
+              borderRadius:14,
+              background:isMN&&bgTint?bgTint:th.card,
+              border:`1px solid ${borderColor}`,
+              boxShadow:glowColor?`0 6px 18px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.06)`:"none",
               display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
             }}>
               <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)"}}>{card.emoji}</div>
               <div style={{
-                fontSize:valSz,fontWeight:800,color:th.accent,
-                lineHeight:isVibe?1.25:1,whiteSpace:vibeWhiteSpace,
+                fontSize:valSz,fontWeight:800,color:accentColor,
+                lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
                 fontFamily:valueFont
               }}>
@@ -4904,11 +5061,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                   ?card.value.toLocaleString()
                   :vibeDisplay}
               </div>
-              <div style={{fontSize:lblSz,color:th.sub,lineHeight:1.3,
-                letterSpacing:isHapon?"0.3px":undefined,
+              <div style={{fontSize:lblSz,color:labelColor,lineHeight:1.3,
+                letterSpacing:isHapon?"0.3px":0.8,
                 whiteSpace:colSpan===2?"nowrap":"normal",
                 overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
-                fontFamily:"var(--font-body)",
+                fontFamily:"var(--font-body)",textTransform:"uppercase",
               }}>{card.label}</div>
             </div>
           </div>
@@ -5355,15 +5512,16 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
 
           const visible=registry.filter(s=>s.show!==false&&s.value!==null&&s.value!==undefined&&s.value!==""&&(typeof s.value!=="number"||s.value>=s.min));
 
-          const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
-            const entry=data.logs.find(l=>l.id===id);
-            if(!entry||!entry.date) return null;
-            if(phWeekStartKey(new Date(entry.date))!==weekKey) return null;
-            const photo=entry?.actPhotos?.[0];
-            if(!photo) return null;
-            const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-            return {iconId:`profile_photo_${id}`, label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
-          }).filter(Boolean);
+            const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
+              const entry=data.logs.find(l=>l.id===id);
+              const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
+              if(!entry||!entryDate||isNaN(entryDate)) return null;
+              if(phWeekStartKey(entryDate)!==weekKey) return null;
+              const photo=entry?.actPhotos?.[0];
+              if(!photo) return null;
+              const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
+              return {iconId:`profile_photo_${id}`, label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
+            }).filter(Boolean);
 
           const cards=[...visible, ...weekPhotoCards];
           const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
@@ -5412,21 +5570,22 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                       </div>
                     )}
                   </div>
-                  {isOpen&&(
-                    <>
-                      <StatGrid
-                        cards={cards} data={data} onChange={onChange}
-                        th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
-                        onStickerOpen={onStickerOpen}
-                        onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
-                        scrollRef={profileScrollRef}
-                      />
-                      {slots<=9&&<div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
-                        <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
-                        <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
-                      </div>}
-                    </>
-                  )}
+                    {isOpen&&(
+                      <>
+                        <StatGrid
+                          cards={cards} data={data} onChange={onChange}
+                          th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
+                          onStickerOpen={onStickerOpen}
+                          onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
+                          scrollRef={profileScrollRef}
+                          sharedGlass={false}
+                        />
+                        {slots<=9&&<div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
+                          <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
+                          <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+                        </div>}
+                      </>
+                    )}
                 </div>
               );
             })}
