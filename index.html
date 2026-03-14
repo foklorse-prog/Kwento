@@ -5242,12 +5242,32 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             if(t==="global"||t==="filipino") return;
             wTagCount[tag]=(wTagCount[tag]||0)+1;
           }));
-          const wTagTotal=Object.values(wTagCount).reduce((s,c)=>s+c,0);
-          if(wTagTotal>0){
+          if(Object.keys(wTagCount).length>0){
             const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
-            const pcts=topTags.map(([tag,cnt])=>({tag,pct:Math.round(cnt/wTagTotal*100)}));
+            const topTotal=topTags.reduce((s,[,cnt])=>s+cnt,0);
+            const pcts=topTags.map(([tag,cnt])=>({tag,pct:Math.round(cnt/topTotal*100)}));
             const sum=pcts.reduce((s,c)=>s+c.pct,0);
-            if(pcts.length>0) pcts[0].pct+=100-sum;
+            const remainder=100-sum;
+            if(pcts.length>0&&remainder!==0){
+              // If there's a tie in counts, give the rounding remainder to the most recently used tag.
+              const maxCount=Math.max(...topTags.map(([,cnt])=>cnt));
+              const tied=topTags.map(([tag,cnt],i)=>({tag,cnt,i})).filter(t=>t.cnt===maxCount);
+              let targetIndex=tied[0]?.i??0;
+              if(tied.length>1){
+                let bestTime=-Infinity;
+                tied.forEach(t=>{
+                  const last=weekLogs.reduce((acc,l)=>{
+                    if((l.tags||[]).includes(t.tag)){
+                      const ts=new Date(l.date).getTime();
+                      return ts>acc?ts:acc;
+                    }
+                    return acc;
+                  },-Infinity);
+                  if(last>bestTime){bestTime=last;targetIndex=t.i;}
+                });
+              }
+              pcts[targetIndex].pct+=remainder;
+            }
             weekBreakdownValue=pcts.map(c=>`${c.pct}% ${c.tag}`).join(" · ");
           }
         }
