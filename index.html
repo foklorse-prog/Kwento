@@ -4595,7 +4595,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
-  const lastTouchY = useRef(null); // for manual scroll forwarding
+  // double-tap tracking per card: iconId → lastTapTime
+  const lastTap = useRef({});
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4694,7 +4695,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
 
         function handleTouchStart(e){
-          lastTouchY.current=e.touches[0].clientY;
           onCardTouchStart(card.iconId,e);
           if(e.touches.length===2){
             e.preventDefault();
@@ -4706,13 +4706,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         }
 
         function handleTouchMove(e){
-          // If not yet dragging, forward vertical movement as scroll
-          if(!dragState.current.active&&lastTouchY.current!==null&&scrollRef&&scrollRef.current){
-            const dy=lastTouchY.current-e.touches[0].clientY;
-            scrollRef.current.scrollTop+=dy;
-            lastTouchY.current=e.touches[0].clientY;
+          // Only intercept if actively dragging or pinching — otherwise let native scroll work
+          if(dragState.current.active){
+            e.preventDefault();
+            onCardTouchMove(card.iconId,e);
           }
-          onCardTouchMove(card.iconId,e);
           if(!pinch.on||e.touches.length!==2) return;
           e.preventDefault();
           const ratio=d2(e)/pinch.dist0;
@@ -4743,7 +4741,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          touchAction:"none",
+          // pan-y lets native scroll work; only lock to none once drag is confirmed
+          touchAction:isDrag?"none":"pan-y",
         };
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
@@ -4753,7 +4752,18 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
           >
-            <div onClick={()=>onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan)}
+            <div
+              onTouchEnd={e=>{
+                // Double-tap detection: two taps within 300ms opens reposition
+                const now=Date.now();
+                const last=lastTap.current[card.iconId]||0;
+                if(now-last<300){
+                  lastTap.current[card.iconId]=0;
+                  if(!dragState.current.active) onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan);
+                } else {
+                  lastTap.current[card.iconId]=now;
+                }
+              }}
               style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative",cursor:"pointer"}}>
               <img src={card._photoSrc} style={{
                 width:(100*(card._photoPos.scale||1))+"%",
@@ -4883,7 +4893,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
-          <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent}/>
+          <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent} borderRadius="50%"/>
           <button onClick={doneCropper} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
         </div>
       )}
@@ -6059,59 +6069,5 @@ function App(){
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(App));
 </script>
-
-<script>
-(function(){
-let dragActive=false;
-let pressTimer=null;
-let lastTap=0;
-
-function isCard(el){
-  return el.closest(".card, .tile, [data-card]");
-}
-
-document.addEventListener("touchstart",function(e){
-  const card=isCard(e.target);
-  if(!card) return;
-
-  dragActive=false;
-
-  pressTimer=setTimeout(()=>{
-    dragActive=true;
-    card.classList.add("drag-active");
-  },250);
-},{passive:true});
-
-document.addEventListener("touchmove",function(e){
-  if(!dragActive) return;
-  e.preventDefault();
-},{passive:false});
-
-document.addEventListener("touchend",function(e){
-
-  clearTimeout(pressTimer);
-
-  const card=isCard(e.target);
-  if(!card) return;
-
-  const now=Date.now();
-
-  if(!dragActive){
-    if(now-lastTap<300){
-      if(window.openReposition){
-        window.openReposition(card);
-      }
-    }
-    lastTap=now;
-  }
-
-  dragActive=false;
-  card.classList.remove("drag-active");
-
-},{passive:true});
-
-})();
-</script>
-
 </body>
 </html>
