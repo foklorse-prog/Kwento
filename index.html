@@ -1567,6 +1567,8 @@ function defaultData(){
     // Sticker generation tracking (freemium: 3/day free)
     stickerGenCount:0,stickerGenDate:null,
     betaMode:false,
+    omdbLibrary:[],   // movies fetched from OMDB enrichment
+    omdbCursor:{},    // {term: nextPage} — tracks progress across days
   };
 }
 
@@ -2217,6 +2219,40 @@ async function fetchMovieMeta(title){
   }catch(e){ return null; }
 }
 
+// Derive tags from OMDB metadata — used when enriching the library
+function buildTagsFromOmdb(d){
+  const tags=[];
+  const genre=(d.Genre||"").toLowerCase();
+  const plot=(d.Plot||"").toLowerCase();
+  if(genre.includes("drama")) tags.push("dramatic","emotional");
+  if(genre.includes("romance")||genre.includes("romantic")) tags.push("romantic");
+  if(genre.includes("thriller")) tags.push("intense","suspenseful");
+  if(genre.includes("horror")) tags.push("scary","dark");
+  if(genre.includes("comedy")) tags.push("fun","lighthearted");
+  if(genre.includes("action")) tags.push("action","fast-paced");
+  if(genre.includes("animation")) tags.push("animated","family");
+  if(genre.includes("crime")) tags.push("crime","gritty");
+  if(genre.includes("mystery")) tags.push("mysterious");
+  if(genre.includes("sci-fi")||genre.includes("science fiction")) tags.push("sci-fi","futuristic");
+  if(genre.includes("fantasy")) tags.push("fantasy","magical");
+  if(genre.includes("biography")||genre.includes("biographical")) tags.push("biographical","inspiring");
+  if(genre.includes("musical")) tags.push("musical");
+  if(genre.includes("documentary")) tags.push("documentary","informative");
+  if(genre.includes("war")) tags.push("war","epic");
+  if(genre.includes("history")||genre.includes("historical")) tags.push("historical");
+  const country=(d.Country||"").toLowerCase();
+  if(country.includes("philippines")) tags.push("Filipino");
+  if(country.includes("korea")) tags.push("Korean");
+  if(country.includes("japan")) tags.push("Japanese");
+  if(country.includes("france")) tags.push("French");
+  if(country.includes("india")) tags.push("Indian");
+  const rated=d.Rated||"";
+  if(rated==="G"||rated==="PG") tags.push("family");
+  if(plot.includes("love")||plot.includes("relationship")) tags.push("romantic");
+  if(plot.includes("friend")) tags.push("friendship");
+  return [...new Set(tags)]; // deduplicate
+}
+
 function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
 
@@ -2262,12 +2298,17 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       const lq=query.toLowerCase();
       const pool=cat?(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})):
         Object.entries(LIBRARY).flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
+      // Merge OMDB-fetched movies into the movie search pool
+      const omdbMovies=(data.omdbLibrary||[]).map(m=>({...m,_cat:"movies"}));
+      const omdbTitlesInLib=new Set((LIBRARY.movies||[]).map(m=>m.title.toLowerCase()));
+      const freshOmdb=omdbMovies.filter(m=>!omdbTitlesInLib.has(m.title.toLowerCase()));
+      const fullPool=cat==="movies"||!cat?[...pool,...freshOmdb]:pool;
       const wordStart=i=>{
         const t=i.title.toLowerCase();
         if(t.startsWith(lq)) return true;
         return t.split(/\s+/).some(w=>w.startsWith(lq));
       };
-      const local=pool.filter(wordStart).slice(0,5);
+      const local=fullPool.filter(wordStart).slice(0,5);
       setResults(local);
 
       // OMDB fallback — only for movies, only when local has no results
@@ -6220,6 +6261,97 @@ function App(){
     })();
   },[]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
+
+  // ── OMDB library enrichment — runs silently in background, resumes daily ────
+  // Each app open checks if there are remaining search terms to process.
+  // Fetches up to DAILY_LIMIT pages per session, stores results in data.omdbLibrary.
+  // data.omdbCursor tracks which terms are done and which page to resume from.
+  useEffect(()=>{
+    const DAILY_LIMIT=80; // max API calls per session (~800 movies)
+    const TERMS=[
+      // Genres
+      "drama","romance","thriller","horror","comedy","action","crime","animation",
+      "documentary","mystery","adventure","fantasy","sci-fi","biography","musical",
+      // Moods & styles
+      "indie","arthouse","coming of age","road trip","heist","psychological",
+      // Nationalities & regions
+      "Filipino","Korean","Japanese","French","Italian","Spanish","Indian",
+      "Chinese","Thai","Indonesian","Vietnamese","British","Australian",
+      // Decades
+      "2024","2023","2022","2021","2020","2019","2018","2017","2016","2015",
+      "2010","2005","2000","1995","1990","1985","1980",
+      // Popular searches
+      "love","family","war","based on true story","Oscar","award","classic",
+    ];
+    (async()=>{
+      try{
+        const cursor={...(data.omdbCursor||{})};
+        const existing=new Set((data.omdbLibrary||[]).map(m=>m.title.toLowerCase()));
+        const newMovies=[];
+        let calls=0;
+
+        for(const term of TERMS){
+          if(calls>=DAILY_LIMIT) break;
+          // Skip terms that are fully exhausted (page set to null)
+          if(cursor[term]===null) continue;
+          const startPage=cursor[term]||1;
+
+          for(let page=startPage;page<=10;page++){
+            if(calls>=DAILY_LIMIT) break;
+            try{
+              const res=await fetch(
+                `https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(term)}&type=movie&page=${page}`
+              );
+              calls++;
+              const json=await res.json();
+              if(json.Response==="False"||!json.Search){
+                // No more results for this term
+                cursor[term]=null;
+                break;
+              }
+              // Fetch full details for each result to get director/actor
+              for(const m of json.Search){
+                if(calls>=DAILY_LIMIT) break;
+                if(existing.has(m.Title.toLowerCase())) continue;
+                // Skip clearly non-movie results
+                if(m.Type&&m.Type!=="movie") continue;
+                try{
+                  const detail=await fetch(
+                    `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${m.imdbID}&plot=none`
+                  );
+                  calls++;
+                  const d=await detail.json();
+                  if(d.Response==="False") continue;
+                  const movie={
+                    title:d.Title,
+                    year:d.Year?d.Year.slice(0,4):null,
+                    genre:d.Genre?d.Genre.split(",")[0].trim():"Film",
+                    director:d.Director&&d.Director!=="N/A"?d.Director:null,
+                    actor:d.Actors?d.Actors.split(",")[0].trim():null,
+                    tags:buildTagsFromOmdb(d),
+                    ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
+                    _fromOmdb:true,
+                  };
+                  existing.add(movie.title.toLowerCase());
+                  newMovies.push(movie);
+                }catch(_){}
+              }
+              // Store the next page to resume from
+              cursor[term]=page+1;
+            }catch(_){ break; }
+          }
+        }
+
+        if(newMovies.length>0||JSON.stringify(cursor)!==JSON.stringify(data.omdbCursor||{})){
+          setData(d=>({
+            ...d,
+            omdbLibrary:[...(d.omdbLibrary||[]),...newMovies],
+            omdbCursor:cursor,
+          }));
+        }
+      }catch(_){}
+    })();
+  },[]); // runs once per app mount;
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [timelineUnread,setTimelineUnread]=useState(0);
