@@ -4857,6 +4857,130 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   );
 }
 
+// ─── PROFILE PHOTO CROPPER ───────────────────────────────────────────────────
+// Separate from PhotoCropper (avatar). Full image, draggable behind a fixed frame.
+// The image is NEVER clipped during editing — the frame is just a visual overlay.
+function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent, borderRadius}){
+  const imgRef=useRef(null);
+  const containerRef=useRef(null);
+  const drag=useRef(null);
+  const pinch=useRef(null);
+
+  // imgOffset: where the top-left of the image is, in px relative to container
+  const [imgOffset, setImgOffset]=useState(()=>{
+    const sc=pos.scale||2;
+    const cW=frameW+120, cH=frameH+120;
+    return {
+      x: (cW - frameW*sc)/2 + (1-sc)*(pos.x||50)/100*frameW,
+      y: (cH - frameH*sc)/2 + (1-sc)*(pos.y||50)/100*frameH,
+      sc,
+    };
+  });
+
+  const cW=frameW+120;
+  const cH=frameH+120;
+
+  // Convert imgOffset back to pos (x, y, scale) matching card math
+  const commitFromOffset=(off)=>{
+    const sc=off.sc;
+    // Card math: left = (1-sc)*(x/100)*100% of frameW
+    // So: off.x - (cW-frameW*sc)/2 = (1-sc)*(x/100)*frameW
+    const frameOriginX=(cW-frameW*sc)/2;
+    const frameOriginY=(cH-frameH*sc)/2;
+    const relX=off.x - frameOriginX;
+    const relY=off.y - frameOriginY;
+    const x=sc===1?50:Math.max(0,Math.min(100, relX/((1-sc)*frameW)*100));
+    const y=sc===1?50:Math.max(0,Math.min(100, relY/((1-sc)*frameH)*100));
+    setPos({x, y, scale:sc});
+  };
+
+  const onStart=(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if(e.touches&&e.touches.length>=2){
+      pinch.current={
+        dist0:Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY),
+        sc0:imgOffset.sc,
+        mx:(e.touches[0].clientX+e.touches[1].clientX)/2,
+        my:(e.touches[0].clientY+e.touches[1].clientY)/2,
+      };
+      drag.current=null;
+    } else {
+      const t=e.touches?e.touches[0]:e;
+      drag.current={startX:t.clientX, startY:t.clientY, ox:imgOffset.x, oy:imgOffset.y};
+      pinch.current=null;
+    }
+  };
+
+  const onMove=(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if(e.touches&&e.touches.length>=2&&pinch.current){
+      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+      const newSc=Math.max(1,Math.min(5, pinch.current.sc0*(dist/pinch.current.dist0)));
+      // Keep pinch midpoint fixed
+      const off={
+        x: pinch.current.mx - (pinch.current.mx - imgOffset.x)*(newSc/imgOffset.sc),
+        y: pinch.current.my - (pinch.current.my - imgOffset.y)*(newSc/imgOffset.sc),
+        sc: newSc,
+      };
+      setImgOffset(off);
+      commitFromOffset(off);
+    } else if(drag.current&&e.touches?.length!==2){
+      const t=e.touches?e.touches[0]:e;
+      const dx=t.clientX-drag.current.startX;
+      const dy=t.clientY-drag.current.startY;
+      const off={...imgOffset, x:drag.current.ox+dx, y:drag.current.oy+dy};
+      setImgOffset(off);
+      commitFromOffset(off);
+    }
+  };
+
+  const onEnd=(e)=>{
+    if(!e.touches||e.touches.length===0){ drag.current=null; pinch.current=null; }
+    else if(e.touches.length===1&&pinch.current){
+      const t=e.touches[0];
+      drag.current={startX:t.clientX,startY:t.clientY,ox:imgOffset.x,oy:imgOffset.y};
+      pinch.current=null;
+    }
+  };
+
+  return(
+    <div ref={containerRef}
+      onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
+      onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+      style={{width:cW,height:cH,position:"relative",overflow:"hidden",
+              cursor:"move",userSelect:"none",touchAction:"none",flexShrink:0,
+              background:"transparent"}}>
+
+      {/* The full image — never clipped, just moves around */}
+      <img ref={imgRef} src={photo} draggable={false}
+        style={{
+          width:frameW*imgOffset.sc,
+          height:frameH*imgOffset.sc,
+          position:"absolute",
+          left:imgOffset.x,
+          top:imgOffset.y,
+          objectFit:"cover",
+          pointerEvents:"none",
+          borderRadius:4,
+        }}
+      />
+
+      {/* Dark overlay with hole — shows the crop frame */}
+      <svg style={{position:"absolute",inset:0,pointerEvents:"none"}} width={cW} height={cH}>
+        <defs>
+          <mask id="cropMask">
+            <rect width={cW} height={cH} fill="white"/>
+            <rect x={(cW-frameW)/2} y={(cH-frameH)/2} width={frameW} height={frameH} rx={14} fill="black"/>
+          </mask>
+        </defs>
+        <rect width={cW} height={cH} fill="rgba(0,0,0,0.6)" mask="url(#cropMask)"/>
+        <rect x={(cW-frameW)/2} y={(cH-frameH)/2} width={frameW} height={frameH} rx={14}
+          fill="none" stroke={accent} strokeWidth={3}/>
+      </svg>
+    </div>
+  );
+}
+
 function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
@@ -5259,9 +5383,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,touchAction:"none"}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
           <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
-          <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
-            cropWidth={cropShape.cardW||280}
-            cropHeight={cropShape.cardH||95}
+          <ProfilePhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
+            frameW={cropShape.cardW||280}
+            frameH={cropShape.cardH||95}
             accent={th.accent}
             borderRadius="14px"
           />
