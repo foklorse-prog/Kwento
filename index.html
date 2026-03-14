@@ -4993,6 +4993,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const [nameVal,setNameVal]=useState(data.userName);
   const [showCropper,setShowCropper]=useState(false);
   const [showStatsShare,setShowStatsShare]=useState(false);
+  const [weekOpen,setWeekOpen]=useState({});
+  const [weekDetailsOpen,setWeekDetailsOpen]=useState({});
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
   const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
@@ -5194,14 +5196,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           </svg>
         );
 
-        const photoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
-          const entry=data.logs.find(l=>l.id===id);
-          const photo=entry?.actPhotos?.[0];
-          if(!photo) return null;
-          const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-          return {iconId:`profile_photo_${id}`, label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
-        }).filter(Boolean);
-
         const buildWeekCards=weekKey=>{
           const weekLogs=weekMap[weekKey]||[];
           const weekManualLogs=weekLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
@@ -5313,53 +5307,82 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           ];
 
           const visible=registry.filter(s=>s.show!==false&&s.value!==null&&s.value!==undefined&&s.value!==""&&(typeof s.value!=="number"||s.value>=s.min));
-          const slots=visible.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
-          return {visible, slots};
+
+          const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
+            const entry=data.logs.find(l=>l.id===id);
+            if(!entry||!entry.date) return null;
+            if(phWeekStartKey(new Date(entry.date))!==weekKey) return null;
+            const photo=entry?.actPhotos?.[0];
+            if(!photo) return null;
+            const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
+            return {iconId:`profile_photo_${id}`, label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
+          }).filter(Boolean);
+
+          const cards=[...visible, ...weekPhotoCards];
+          const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
+          return {cards, slots};
+        };
+
+        const rangeFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,month:"short",day:"numeric"});
+        const formatWeekRange=weekKey=>{
+          const start=new Date(`${weekKey}T00:00:00+08:00`);
+          const end=new Date(start); end.setDate(end.getDate()+6);
+          return `${rangeFmt.format(start)}–${rangeFmt.format(end)}`;
         };
 
         return(
           <div style={{marginBottom:16}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"flex-end",marginBottom:10}}>
-              <button onClick={()=>setShowStatsShare(true)}
-                style={{width:28,height:28,borderRadius:8,background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0,opacity:0.5}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-                </svg>
-              </button>
-            </div>
             {weekKeys.map(weekKey=>{
-              const {visible, slots}=buildWeekCards(weekKey);
-              if(!visible.length) return null;
+              const {cards, slots}=buildWeekCards(weekKey);
+              if(!cards.length) return null;
+              const isOpen=weekOpen[weekKey]!==false;
+              const showDetails=weekDetailsOpen[weekKey]===true;
               return(
                 <div key={weekKey} style={{marginBottom:16}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-                    <WeekStar/>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                    <button
+                      onClick={()=>setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}))}
+                      style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:0.7}}
+                      aria-label="Toggle week details"
+                    >
+                      <WeekStar/>
+                    </button>
+                    {showDetails&&(
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{formatWeekRange(weekKey)}</span>
+                        <button
+                          onClick={()=>setWeekOpen(prev=>({...prev,[weekKey]:!isOpen}))}
+                          style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",cursor:"pointer"}}
+                        >
+                          {isOpen?"Hide":"Show"}
+                        </button>
+                        <button
+                          disabled
+                          style={{fontSize:11,color:th.sub,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",opacity:0.5,cursor:"default"}}
+                        >
+                          Share
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <StatGrid
-                    cards={visible} data={data} onChange={onChange}
-                    th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
-                    onStickerOpen={onStickerOpen}
-                    onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
-                    scrollRef={profileScrollRef}
-                  />
-                  {slots<=9&&<div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
-                    <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
-                    <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
-                  </div>}
+                  {isOpen&&(
+                    <>
+                      <StatGrid
+                        cards={cards} data={data} onChange={onChange}
+                        th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
+                        onStickerOpen={onStickerOpen}
+                        onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
+                        scrollRef={profileScrollRef}
+                      />
+                      {slots<=9&&<div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
+                        <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
+                        <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+                      </div>}
+                    </>
+                  )}
                 </div>
               );
             })}
-            {photoCards.length>0&&(
-              <div style={{marginTop:6}}>
-                <StatGrid
-                  cards={photoCards} data={data} onChange={onChange}
-                  th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
-                  onStickerOpen={onStickerOpen}
-                  onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
-                  scrollRef={profileScrollRef}
-                />
-              </div>
-            )}
           </div>
         );
       })()}
