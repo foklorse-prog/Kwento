@@ -1970,8 +1970,11 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
 }
 
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
-function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspectRatio="1/1"}){
+function PhotoCropper({photo,pos,setPos,size=100,cropWidth,cropHeight,accent,borderRadius="50%",aspectRatio="1/1"}){
   const ref=useRef(null);
+  // Use cropWidth/cropHeight if provided, otherwise fall back to square size
+  const W=cropWidth||size;
+  const H=cropHeight||size;
   // working copy lives purely in a ref - never read pos prop mid-gesture
   const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
   const gesture=useRef({mode:null,drag:null,pinch0:0,scale0:1});
@@ -2014,8 +2017,9 @@ function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspec
       const dx=t.clientX-gesture.current.drag.x;
       const dy=t.clientY-gesture.current.drag.y;
       gesture.current.drag={x:t.clientX,y:t.clientY};
-      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/size*100));
-      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/size*100));
+      // Use the appropriate dimension for each axis so dragging feels proportional
+      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/W*100));
+      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/H*100));
       commit();
     }
   };
@@ -2038,7 +2042,7 @@ function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspec
     <div ref={ref}
       onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:size,height:size,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
+      style={{width:W,height:H,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
               position:"relative",userSelect:"none",touchAction:"none",
               border:"3px solid "+accent,flexShrink:0}}>
       <img src={photo} draggable={false} style={{
@@ -4595,8 +4599,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
-  // double-tap tracking per card: iconId → lastTapTime
-  const lastTap = useRef({});
+  const lastTouchY = useRef(null); // for manual scroll forwarding
+  // Track whether the touch moved enough to suppress photo card click
+  const touchMoved = useRef(false);
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4626,6 +4631,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
   function onCardTouchStart(iconId, e){
     const t=e.touches;
+    touchMoved.current=false; // reset on each new touch
     if(t.length===1){
       // 400ms → drag mode
       longTimer.current=setTimeout(()=>{
@@ -4648,6 +4654,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   }
 
   function onCardTouchMove(iconId, e){
+    touchMoved.current=true; // finger moved — suppress any click that follows
     if(!dragState.current.active) return;
     dragState.current.moved=true;
     const t=e.touches[0];
@@ -4695,6 +4702,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
 
         function handleTouchStart(e){
+          lastTouchY.current=e.touches[0].clientY;
           onCardTouchStart(card.iconId,e);
           if(e.touches.length===2){
             e.preventDefault();
@@ -4706,11 +4714,13 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         }
 
         function handleTouchMove(e){
-          // Only intercept if actively dragging or pinching — otherwise let native scroll work
-          if(dragState.current.active){
-            e.preventDefault();
-            onCardTouchMove(card.iconId,e);
+          // If not yet dragging, forward vertical movement as scroll
+          if(!dragState.current.active&&lastTouchY.current!==null&&scrollRef&&scrollRef.current){
+            const dy=lastTouchY.current-e.touches[0].clientY;
+            scrollRef.current.scrollTop+=dy;
+            lastTouchY.current=e.touches[0].clientY;
           }
+          onCardTouchMove(card.iconId,e);
           if(!pinch.on||e.touches.length!==2) return;
           e.preventDefault();
           const ratio=d2(e)/pinch.dist0;
@@ -4741,7 +4751,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          // pan-y lets native scroll work; only lock to none once drag is confirmed
           touchAction:isDrag?"none":"pan-y",
         };
         if(card._photo) return(
@@ -4752,18 +4761,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
           >
-            <div
-              onTouchEnd={e=>{
-                // Double-tap detection: two taps within 300ms opens reposition
-                const now=Date.now();
-                const last=lastTap.current[card.iconId]||0;
-                if(now-last<300){
-                  lastTap.current[card.iconId]=0;
-                  if(!dragState.current.active) onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan);
-                } else {
-                  lastTap.current[card.iconId]=now;
-                }
-              }}
+            <div onClick={()=>{ if(!touchMoved.current) onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan); }}
               style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative",cursor:"pointer"}}>
               <img src={card._photoSrc} style={{
                 width:(100*(card._photoPos.scale||1))+"%",
@@ -4893,7 +4891,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
-          <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent} borderRadius="50%"/>
+          <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent}/>
           <button onClick={doneCropper} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
         </div>
       )}
@@ -5240,7 +5238,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
           <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
           <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
-            size={cropShape.colSpan===2&&cropShape.rowSpan===2?260:cropShape.colSpan===2?320:200}
+            cropWidth={cropShape.colSpan===2?320:200}
+            cropHeight={cropShape.rowSpan===2?200:160}
             accent={th.accent}
             borderRadius="14px"
           />
