@@ -1970,7 +1970,7 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
 }
 
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
-function PhotoCropper({photo,pos,setPos,size=100,accent}){
+function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspectRatio="1/1"}){
   const ref=useRef(null);
   // working copy lives purely in a ref - never read pos prop mid-gesture
   const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
@@ -2038,7 +2038,7 @@ function PhotoCropper({photo,pos,setPos,size=100,accent}){
     <div ref={ref}
       onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",cursor:"move",
+      style={{width:size,height:size,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
               position:"relative",userSelect:"none",touchAction:"none",
               border:"3px solid "+accent,flexShrink:0}}>
       <img src={photo} draggable={false} style={{
@@ -3226,6 +3226,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   const [useToday,setUseToday]=useState(false);
   const [titleResults,setTitleResults]=useState([]);
   const [titleEdited,setTitleEdited]=useState(false);
+  const editPhotoRef=useRef(null);
 
   // Autocomplete: only fires after user has actually changed the title
   useEffect(()=>{
@@ -3486,6 +3487,41 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                     </div>
                   ))}
                 </div>
+              )}
+              {/* Add photo button — always visible in edit mode */}
+              {editing&&(
+                <>
+                  <input ref={editPhotoRef} type="file" accept="image/*" style={{display:"none"}}
+                    onClick={e=>e.stopPropagation()}
+                    onChange={e=>{
+                      e.stopPropagation();
+                      const f=e.target.files[0]; if(!f) return;
+                      const r=new FileReader();
+                      r.onload=ev=>{
+                        const img=new Image();
+                        img.onload=()=>{
+                          const MAX=800; const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+                          const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+                          const c=document.createElement("canvas");c.width=w;c.height=h;
+                          c.getContext("2d").drawImage(img,0,0,w,h);
+                          setEditPhotos(p=>[...p,c.toDataURL("image/jpeg",0.8)]);
+                        };
+                        img.src=ev.target.result;
+                      };
+                      r.readAsDataURL(f);
+                      e.target.value="";
+                    }}
+                  />
+                  <button
+                    onMouseDown={e=>e.preventDefault()}
+                    onClick={e=>{e.stopPropagation();editPhotoRef.current?.click();}}
+                    style={{background:"none",border:`1px dashed ${th.border}`,borderRadius:8,
+                      cursor:"pointer",color:th.sub,fontSize:11,
+                      display:"flex",alignItems:"center",gap:6,padding:"6px 10px",alignSelf:"flex-start"}}>
+                    <span style={{fontSize:13,opacity:0.7}}>📷</span>
+                    <span>{editPhotos.length>0?"Add another photo":"Attach a photo"}</span>
+                  </button>
+                </>
               )}
               {/* Show on profile toggle — only when entry has photos */}
               {editing&&editPhotos.length>0&&(()=>{
@@ -4699,10 +4735,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          touchAction:"pan-y",
+          touchAction:isDrag?"none":"pan-y",
         };
-
-        // ── Photo card — renders the actual image, tappable to reposition
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
             style={wrapStyle}
@@ -4711,7 +4745,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
           >
-            <div onClick={()=>onPhotoTap&&onPhotoTap(card._entryId, card._photoPos)}
+            <div onClick={()=>onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan)}
               style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative",cursor:"pointer"}}>
               <img src={card._photoSrc} style={{
                 width:(100*(card._photoPos.scale||1))+"%",
@@ -4796,6 +4830,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
   const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
+  const [cropShape,setCropShape]=useState({colSpan:2,rowSpan:2});
   // local pending state for avatar picker — only saves on Done
   const [pickerOpen,setPickerOpen]=useState(false);
   const [pendingAvatar,setPendingAvatar]=useState(data.avatar);
@@ -5114,7 +5149,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
               cards={visible} data={data} onChange={onChange}
               th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
               onStickerOpen={onStickerOpen}
-              onPhotoTap={(id,pos)=>{ setCropPhotoId(id); setPhotoCropPos(pos||{x:50,y:50,scale:1}); }}
+              onPhotoTap={(id,pos,colSpan,rowSpan)=>{ setCropPhotoId(id); setPhotoCropPos(pos||{x:50,y:50,scale:1}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2}); }}
             />
             {weekNarrative&&false&&<div style={{marginTop:14,padding:"12px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
               <p style={{fontSize:13,color:th.sub,lineHeight:1.6,fontStyle:"italic"}}>{weekNarrative}</p>
@@ -5184,7 +5219,11 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen}){
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,touchAction:"none"}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
           <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
-          <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos} size={260} accent={th.accent}/>
+          <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
+            size={cropShape.colSpan===2&&cropShape.rowSpan===2?260:cropShape.colSpan===2?320:200}
+            accent={th.accent}
+            borderRadius="14px"
+          />
           <div style={{display:"flex",gap:12,marginTop:36}}>
             <button onClick={()=>setCropPhotoId(null)}
               style={{padding:"12px 28px",borderRadius:12,background:"transparent",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.6)",fontSize:14,cursor:"pointer"}}>
