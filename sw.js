@@ -1,4 +1,5 @@
-const CACHE = "kwento-v2";
+const CACHE = "kwento-v4";
+const META_CACHE = "kwento-meta";
 const ASSETS = [
   "./",
   "./index.html",
@@ -13,7 +14,19 @@ self.addEventListener("install", e => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(ASSETS))
-    .then(() => caches.open("kwento-fonts").then(fc => fc.add(FONT_URL).catch(()=>{})))
+    .then(async () => {
+      const fc = await caches.open("kwento-fonts-v2");
+      try {
+        const cssRes = await fetch(FONT_URL, {cache:"no-store"});
+        const cssText = await cssRes.text();
+        await fc.put(FONT_URL, new Response(cssText, {headers:{"Content-Type":"text/css"}}));
+        const matches = Array.from(cssText.matchAll(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/g));
+        const fontUrls = matches.map(m => m[1]);
+        await Promise.all(fontUrls.map(u => fetch(u).then(res => fc.put(u, res.clone())).catch(()=>{})));
+      } catch(e) {
+        // best effort; fonts will still be cached on-demand via fetch handler
+      }
+    })
   );
 });
 
@@ -21,7 +34,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE && k !== "kwento-fonts").map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== "kwento-fonts-v2" && k !== META_CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -32,7 +45,7 @@ self.addEventListener("fetch", e => {
 
   if(url.includes("fonts.googleapis.com") || url.includes("fonts.gstatic.com")){
     e.respondWith(
-      caches.open("kwento-fonts").then(fc =>
+      caches.open("kwento-fonts-v2").then(fc =>
         fc.match(e.request).then(cached => {
           if(cached) return cached;
           return fetch(e.request).then(res => {
@@ -68,14 +81,30 @@ async function checkUpdate(client) {
   try {
     const freshRes = await fetch("./index.html", {cache:"no-store"});
     const freshHtml = await freshRes.text();
+    const buildMatch = freshHtml.match(/name=["']kwento-build["']\s+content=["']([^"']+)["']/i);
+    const freshBuild = buildMatch ? buildMatch[1] : "";
+    const meta = await caches.open(META_CACHE);
+    const cachedBuildRes = await meta.match("kwento-build");
+    const cachedBuild = cachedBuildRes ? await cachedBuildRes.text() : "";
+
     const cache = await caches.open(CACHE);
     const cached = await cache.match("./index.html");
     const cachedHtml = cached ? await cached.text() : "";
+    if(freshBuild && freshBuild === cachedBuild){
+      client.postMessage("UP_TO_DATE");
+      return;
+    }
     if(freshHtml !== cachedHtml){
       // Store fresh version so next reload gets it
       await cache.put("./index.html", new Response(freshHtml, {headers:{"Content-Type":"text/html"}}));
+      if(freshBuild){
+        await meta.put("kwento-build", new Response(freshBuild, {headers:{"Content-Type":"text/plain"}}));
+      }
       client.postMessage("UPDATE_READY");
     } else {
+      if(freshBuild && freshBuild !== cachedBuild){
+        await meta.put("kwento-build", new Response(freshBuild, {headers:{"Content-Type":"text/plain"}}));
+      }
       client.postMessage("UP_TO_DATE");
     }
   } catch(e) {
