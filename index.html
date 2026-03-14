@@ -5665,10 +5665,24 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                           scrollRef={profileScrollRef}
                           sharedGlass={false}
                         />
-                        {slots<=9&&<div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
-                          <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
-                          <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
-                        </div>}
+                        {slots<=9&&(()=>{
+                          const allLogs=data.logs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+                          const firstDate=allLogs.length?new Date(allLogs.map(l=>l.date).filter(Boolean).sort()[0]):null;
+                          if(!firstDate) return null;
+                          // Sun–Sat calendar week: find the Sunday that starts the current week
+                          const now=new Date();
+                          const startOfWeek=new Date(now);
+                          startOfWeek.setDate(now.getDate()-now.getDay()); // getDay() 0=Sun, so this always lands on Sunday
+                          startOfWeek.setHours(0,0,0,0);
+                          // Only show if the user's very first log happened on or after this week's Sunday
+                          if(firstDate<startOfWeek) return null;
+                          return(
+                            <div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
+                              <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
+                              <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+                            </div>
+                          );
+                        })()}
                       </>
                     )}
                 </div>
