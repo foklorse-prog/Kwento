@@ -8,7 +8,6 @@ const ASSETS = [
 ];
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap";
 
-// Install: cache everything
 self.addEventListener("install", e => {
   self.skipWaiting();
   e.waitUntil(
@@ -17,7 +16,6 @@ self.addEventListener("install", e => {
   );
 });
 
-// Activate: clean old caches
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -45,14 +43,12 @@ self.addEventListener("fetch", e => {
   }
 
   if(url.endsWith("/") || url.endsWith("index.html") || url === self.registration.scope){
+    // Serve fresh from network, fall back to cache if offline.
+    // NOT writing back to cache here — checkUpdate owns that responsibility
+    // so the cached version always holds the last-notified baseline.
     e.respondWith(
-      // Always serve fresh index.html from the network when online.
-      // Crucially, we do NOT write it back to cache here — that's checkUpdate's job.
-      // This keeps the cache holding the "last known" version so the comparison
-      // in checkUpdate always has something meaningful to diff against.
       fetch(e.request, {cache:"no-store"})
-        .then(res => res)
-        .catch(() => caches.match(e.request)) // offline fallback
+        .catch(() => caches.match(e.request))
     );
     return;
   }
@@ -63,8 +59,8 @@ self.addEventListener("fetch", e => {
 });
 
 // checkUpdate: fetch fresh index.html and compare against the cached version.
-// Because the fetch handler above never updates the cache, the cached version
-// always represents what the user last saw — so a difference means a real update.
+// Because the fetch handler never updates the cache, the cached version always
+// holds the last version the user was notified about — so any difference is real.
 async function checkUpdate(client) {
   try {
     const freshRes = await fetch("./index.html", {cache:"no-store"});
@@ -72,10 +68,7 @@ async function checkUpdate(client) {
     const cache = await caches.open(CACHE);
     const cached = await cache.match("./index.html");
     const cachedHtml = cached ? await cached.text() : "";
-
     if(freshHtml !== cachedHtml){
-      // New version found — store it so the next reload serves it from cache
-      // and so future checkUpdate calls see this version as the new baseline.
       await cache.put("./index.html", new Response(freshHtml, {headers:{"Content-Type":"text/html"}}));
       client.postMessage("UPDATE_READY");
     } else {
