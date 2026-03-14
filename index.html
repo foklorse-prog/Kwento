@@ -4636,6 +4636,12 @@ function _rgbToHex({r,g,b}){
 }
 function _mix(a,b,t){return {r:a.r+(b.r-a.r)*t,g:a.g+(b.g-a.g)*t,b:a.b+(b.b-a.b)*t};}
 function _lum({r,g,b}){const sr=[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*sr[0]+0.7152*sr[1]+0.0722*sr[2];}
+function _hashColor(str){
+  let h=0;
+  for(let i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))|0; }
+  const r=(h>>16)&255, g=(h>>8)&255, b=h&255;
+  return {r:Math.abs(r),g:Math.abs(g),b:Math.abs(b)};
+}
 
 function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef, sharedGlass}){
   const savedSizes = data.statCardSizes || {};
@@ -4676,6 +4682,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const lastTapTime = useRef({}); // iconId → timestamp of last tap
   const cardRefs = useRef({});   // iconId → DOM node, for measuring real width
   const [paletteMap, setPaletteMap] = useState({});
+  const [globalPalette, setGlobalPalette] = useState([]);
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4758,6 +4765,56 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   // --- Palette extraction for photo cards (Manila Nights only) ---
   useEffect(()=>{
     if(!isMN) return;
+    const fromCards=orderedCards.filter(c=>c._photo && c._photoSrc).map(c=>c._photoSrc);
+    const fromPins=(data.profilePhotoIds||[])
+      .map(id=>data.logs.find(l=>l.id===id))
+      .map(e=>e?.actPhotos?.[0])
+      .filter(Boolean);
+    const photoSources=[...new Set([...fromCards,...fromPins])];
+    if(photoSources.length){
+      const limit=photoSources.slice(0,3);
+      const next=[];
+      const pending=limit.length;
+      let done=0;
+      limit.forEach(src=>{
+        const img=new Image();
+        img.crossOrigin="anonymous";
+        img.onload=()=>{
+          try{
+            const size=24;
+            const canvas=document.createElement("canvas");
+            canvas.width=size;canvas.height=size;
+            const ctx=canvas.getContext("2d");
+            ctx.drawImage(img,0,0,size,size);
+            const data=ctx.getImageData(0,0,size,size).data;
+            let bestSat=-1, accent={r:0,g:0,b:0};
+            for(let i=0;i<data.length;i+=4){
+              const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+              if(a<40) continue;
+              const max=Math.max(r,g,b),min=Math.min(r,g,b);
+              const sat=max===0?0:(max-min)/max;
+              if(sat>bestSat && max>40){
+                bestSat=sat;accent={r,g,b};
+              }
+            }
+            if(bestSat<0) accent=_hashColor(src);
+            next.push(_rgbToHex(accent));
+          }catch(e){
+            next.push(_rgbToHex(_hashColor(src)));
+          }
+          done++;
+          if(done===pending) setGlobalPalette(next);
+        };
+        img.onerror=()=>{
+          next.push(_rgbToHex(_hashColor(src)));
+          done++;
+          if(done===pending) setGlobalPalette(next);
+        };
+        img.src=src;
+      });
+    } else {
+      setGlobalPalette([]);
+    }
     const photoCards=orderedCards.filter(c=>c._photo && c._photoSrc);
     const missing=photoCards.filter(c=>!paletteMap[c._entryId]);
     if(!missing.length) return;
@@ -4790,7 +4847,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           const dark=_mix(avg,{r:0,g:0,b:0},0.35);
           setPaletteMap(prev=>({...prev,[c._entryId]:{accent,avg,soft,dark}}));
         }catch(e){
-          const fallback=_hexToRgb(th.accent||"#00cfff");
+          const fallback=_hashColor(c._photoSrc||c._entryId||"");
           const avg=fallback;
           const soft=_mix(avg,{r:255,g:255,b:255},0.35);
           const dark=_mix(avg,{r:0,g:0,b:0},0.35);
@@ -4798,7 +4855,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         }
       };
       img.onerror=()=>{
-        const fallback=_hexToRgb(th.accent||"#00cfff");
+        const fallback=_hashColor(c._photoSrc||c._entryId||"");
         const avg=fallback;
         const soft=_mix(avg,{r:255,g:255,b:255},0.35);
         const dark=_mix(avg,{r:0,g:0,b:0},0.35);
@@ -4806,7 +4863,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
       };
       img.src=c._photoSrc;
     });
-  },[orderedCards,isMN]);
+  },[orderedCards,isMN,data.profilePhotoIds,data.logs]);
 
   // --- Grid placement (3 columns) for proximity blending ---
   const layout = useMemo(()=>{
@@ -4929,9 +4986,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         let borderColor=th.border;
         let glowColor=null;
         let bgTint=null;
-        if(isMN && !card._photo && photoPositions.length){
+        if(isMN && !card._photo && (photoPositions.length || globalPalette.length)){
           const myPos=layout[card.iconId];
-          if(myPos){
+          if(myPos && photoPositions.length){
             let acc={r:0,g:0,b:0}, wSum=0;
             photoPositions.forEach(p=>{
               const d=Math.abs(myPos.cx-p.pos.cx)+Math.abs(myPos.cy-p.pos.cy);
@@ -4943,12 +5000,21 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             });
             const blended={r:acc.r/(wSum||1),g:acc.g/(wSum||1),b:acc.b/(wSum||1)};
             accentColor=_rgbToHex(blended);
-            const subMix=_mix(blended,_hexToRgb(th.sub),0.45);
+            const subMix=_mix(blended,_hexToRgb(th.sub),0.25);
             labelColor=_rgbToHex(subMix);
-            const bMix=_mix(blended,_hexToRgb("#c8ccd8"),0.55);
+            const bMix=_mix(blended,_hexToRgb("#c8ccd8"),0.4);
             borderColor=_rgbToHex(bMix)+"80";
             glowColor=accentColor+"55";
-            bgTint=`linear-gradient(135deg, ${accentColor}1a 0%, rgba(12,8,22,0.4) 45%, ${accentColor}14 100%)`;
+            bgTint=`linear-gradient(135deg, ${accentColor}26 0%, rgba(12,8,22,0.35) 45%, ${accentColor}20 100%)`;
+          } else if(globalPalette.length){
+            const idx=myPos?(Math.round(myPos.r+myPos.c)%globalPalette.length):0;
+            accentColor=globalPalette[idx];
+            const subMix=_mix(_hexToRgb(accentColor),_hexToRgb(th.sub),0.25);
+            labelColor=_rgbToHex(subMix);
+            const bMix=_mix(_hexToRgb(accentColor),_hexToRgb("#c8ccd8"),0.4);
+            borderColor=_rgbToHex(bMix)+"80";
+            glowColor=accentColor+"55";
+            bgTint=`linear-gradient(135deg, ${accentColor}26 0%, rgba(12,8,22,0.35) 45%, ${accentColor}20 100%)`;
           }
         }
         if(card._photo) return(
