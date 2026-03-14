@@ -1,4 +1,4 @@
-const CACHE = "kwento-v4";
+const CACHE = "kwento-v5";
 const META_CACHE = "kwento-meta";
 const ASSETS = [
   "./",
@@ -90,6 +90,11 @@ async function checkUpdate(client) {
     const cache = await caches.open(CACHE);
     const cached = await cache.match("./index.html");
     const cachedHtml = cached ? await cached.text() : "";
+    if(freshBuild && !cachedBuild){
+      await meta.put("kwento-build", new Response(freshBuild, {headers:{"Content-Type":"text/plain"}}));
+      client.postMessage("UP_TO_DATE");
+      return;
+    }
     if(freshBuild && freshBuild === cachedBuild){
       client.postMessage("UP_TO_DATE");
       return;
