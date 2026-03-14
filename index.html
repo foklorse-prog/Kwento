@@ -1970,8 +1970,10 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
 }
 
 // ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
-function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspectRatio="1/1"}){
+function PhotoCropper({photo,pos,setPos,size=100,width,height,accent,borderRadius="50%"}){
   const ref=useRef(null);
+  const cropW=width||size;
+  const cropH=height||size;
   // working copy lives purely in a ref - never read pos prop mid-gesture
   const work=useRef({x:pos.x||50,y:pos.y||50,scale:pos.scale||1});
   const gesture=useRef({mode:null,drag:null,pinch0:0,scale0:1});
@@ -2014,8 +2016,8 @@ function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspec
       const dx=t.clientX-gesture.current.drag.x;
       const dy=t.clientY-gesture.current.drag.y;
       gesture.current.drag={x:t.clientX,y:t.clientY};
-      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/size*100));
-      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/size*100));
+      work.current.x=Math.max(0,Math.min(100,work.current.x-dx/cropW*100));
+      work.current.y=Math.max(0,Math.min(100,work.current.y-dy/cropH*100));
       commit();
     }
   };
@@ -2038,7 +2040,7 @@ function PhotoCropper({photo,pos,setPos,size=100,accent,borderRadius="50%",aspec
     <div ref={ref}
       onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
       onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-      style={{width:size,height:size,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
+      style={{width:cropW,height:cropH,borderRadius:borderRadius,overflow:"hidden",cursor:"move",
               position:"relative",userSelect:"none",touchAction:"none",
               border:"3px solid "+accent,flexShrink:0}}>
       <img src={photo} draggable={false} style={{
@@ -4595,7 +4597,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
   const longTimer  = useRef(null);
-  const lastTouchY = useRef(null); // for manual scroll forwarding
+  const cardWrapRefs = useRef({}); // DOM refs for dynamic touchAction switching
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4630,6 +4632,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
       longTimer.current=setTimeout(()=>{
         dragState.current={active:true,fromId:iconId,overId:null};
         setDragging(iconId);
+        // Switch touchAction to none directly on DOM — works for next gesture
+        if(cardWrapRefs.current[iconId]) cardWrapRefs.current[iconId].style.touchAction="none";
         if(navigator.vibrate) navigator.vibrate(25);
 
         // 1200ms total → save sheet (only if still not moved)
@@ -4664,7 +4668,10 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   function onCardTouchEnd(){
     clearTimeout(longTimer.current);
     if(dragState.current.active){
-      reorder(dragState.current.fromId, dragState.current.overId);
+      // Restore scrolling touchAction
+      const fromId=dragState.current.fromId;
+      if(fromId&&cardWrapRefs.current[fromId]) cardWrapRefs.current[fromId].style.touchAction="pan-y";
+      reorder(fromId, dragState.current.overId);
       dragState.current={active:false,fromId:null,overId:null};
       setDragging(null);
       setDragOver(null);
@@ -4706,12 +4713,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         }
 
         function handleTouchMove(e){
-          // If not yet dragging, forward vertical movement as scroll
-          if(!dragState.current.active&&lastTouchY.current!==null&&scrollRef&&scrollRef.current){
-            const dy=lastTouchY.current-e.touches[0].clientY;
-            scrollRef.current.scrollTop+=dy;
-            lastTouchY.current=e.touches[0].clientY;
-          }
           onCardTouchMove(card.iconId,e);
           if(!pinch.on||e.touches.length!==2) return;
           e.preventDefault();
@@ -4743,17 +4744,29 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           WebkitUserSelect:"none",userSelect:"none",
           WebkitTouchCallout:"none",
           WebkitTapHighlightColor:"transparent",
-          touchAction:"none",
+          touchAction:"pan-y",
         };
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
+            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
           >
-            <div onClick={()=>onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan)}
+            <div
+              onTouchEnd={e=>{
+                // Double-tap to reposition — ignore if drag just happened
+                if(dragState.current.moved) return;
+                const now=Date.now();
+                const last=card._lastTap||0;
+                card._lastTap=now;
+                if(now-last<300){
+                  e.stopPropagation();
+                  onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan);
+                }
+              }}
               style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative",cursor:"pointer"}}>
               <img src={card._photoSrc} style={{
                 width:(100*(card._photoPos.scale||1))+"%",
@@ -4776,6 +4789,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         if(isMN) return(
           <div key={card.iconId} data-cardid={card.iconId}
+            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -4798,6 +4812,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         return(
           <div key={card.iconId} data-cardid={card.iconId}
+            ref={el=>{ if(el) cardWrapRefs.current[card.iconId]=el; }}
             style={wrapStyle}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -5230,7 +5245,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
           <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
           <PhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
-            size={cropShape.colSpan===2&&cropShape.rowSpan===2?260:cropShape.colSpan===2?320:200}
+            width={cropShape.colSpan===2?300:160}
+            height={cropShape.rowSpan===2?300:160}
             accent={th.accent}
             borderRadius="14px"
           />
