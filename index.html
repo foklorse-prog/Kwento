@@ -2275,6 +2275,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
+  const [omdbError,setOmdbError]=useState("");
   const [queue,setQueue]=useState([]);
   const [actPhotos,setActPhotos]=useState(editEntry?.actPhotos||[]);
   const [pinOnSave,setPinOnSave]=useState(false);
@@ -2310,6 +2311,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       };
       const local=fullPool.filter(wordStart).slice(0,5);
       setResults(local);
+      if(local.length>0) setOmdbError("");
 
       // OMDB fallback — only for movies, only when local has no results
       if(local.length===0&&(cat==="movies"||!cat)){
@@ -2325,13 +2327,19 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                 poster:m.Poster!=="N/A"?m.Poster:null,
               }));
               setResults(omdbResults);
+              setOmdbError("");
+            } else if(d && d.Error){
+              setOmdbError(d.Error);
             }
-          }catch(e){}
+          }catch(e){
+            setOmdbError("OMDB request failed.");
+          }
         },400);
       }
     } else {
       clearTimeout(omdbSearchTimer.current);
       setResults([]);
+      setOmdbError("");
     }
   },[query,cat]);
 
@@ -2540,6 +2548,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {omdbError&&results.length===0&&(
+            <div style={{fontSize:11,color:"#ef4444",marginTop:4,marginBottom:8}}>
+              {`OMDB: ${omdbError}`}
             </div>
           )}
 
@@ -4661,28 +4674,6 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
 }
 
 // ─── STAT GRID ────────────────────────────────────────────────────────────────
-function _clamp(v,min,max){return Math.max(min,Math.min(max,v));}
-function _hexToRgb(hex){
-  const h=hex.replace("#","").trim();
-  if(h.length===3){
-    const r=parseInt(h[0]+h[0],16),g=parseInt(h[1]+h[1],16),b=parseInt(h[2]+h[2],16);
-    return {r,g,b};
-  }
-  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
-  return {r,g,b};
-}
-function _rgbToHex({r,g,b}){
-  const to=v=>v.toString(16).padStart(2,"0");
-  return "#"+to(_clamp(Math.round(r),0,255))+to(_clamp(Math.round(g),0,255))+to(_clamp(Math.round(b),0,255));
-}
-function _mix(a,b,t){return {r:a.r+(b.r-a.r)*t,g:a.g+(b.g-a.g)*t,b:a.b+(b.b-a.b)*t};}
-function _lum({r,g,b}){const sr=[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*sr[0]+0.7152*sr[1]+0.0722*sr[2];}
-function _hashColor(str){
-  let h=0;
-  for(let i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))|0; }
-  const r=(h>>16)&255, g=(h>>8)&255, b=h&255;
-  return {r:Math.abs(r),g:Math.abs(g),b:Math.abs(b)};
-}
 
 function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef, sharedGlass}){
   const savedSizes = data.statCardSizes || {};
@@ -4695,7 +4686,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   });
   const [sizes, setSizes] = useState(()=>{
     const s={};
-    cards.forEach(c=>{ s[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1}); });
+    cards.forEach(c=>{
+      s[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1});
+    });
     return s;
   });
   useEffect(()=>{
@@ -4722,8 +4715,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   const lastTouchY = useRef(null); // for manual scroll forwarding
   const lastTapTime = useRef({}); // iconId → timestamp of last tap
   const cardRefs = useRef({});   // iconId → DOM node, for measuring real width
-  const [paletteMap, setPaletteMap] = useState({});
-  const [globalPalette, setGlobalPalette] = useState([]);
 
   function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
 
@@ -4803,108 +4794,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
   const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
 
-  // --- Palette extraction for photo cards (Manila Nights only) ---
-  useEffect(()=>{
-    if(!isMN) return;
-    const fromCards=orderedCards.filter(c=>c._photo && c._photoSrc).map(c=>c._photoSrc);
-    const fromPins=(data.profilePhotoIds||[])
-      .map(id=>data.logs.find(l=>l.id===id))
-      .map(e=>e?.actPhotos?.[0])
-      .filter(Boolean);
-    const photoSources=[...new Set([...fromCards,...fromPins])];
-    if(photoSources.length){
-      const limit=photoSources.slice(0,3);
-      const next=[];
-      const pending=limit.length;
-      let done=0;
-      limit.forEach(src=>{
-        const img=new Image();
-        img.crossOrigin="anonymous";
-        img.onload=()=>{
-          try{
-            const size=24;
-            const canvas=document.createElement("canvas");
-            canvas.width=size;canvas.height=size;
-            const ctx=canvas.getContext("2d");
-            ctx.drawImage(img,0,0,size,size);
-            const data=ctx.getImageData(0,0,size,size).data;
-            let bestSat=-1, accent={r:0,g:0,b:0};
-            for(let i=0;i<data.length;i+=4){
-              const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
-              if(a<40) continue;
-              const max=Math.max(r,g,b),min=Math.min(r,g,b);
-              const sat=max===0?0:(max-min)/max;
-              if(sat>bestSat && max>40){
-                bestSat=sat;accent={r,g,b};
-              }
-            }
-            if(bestSat<0) accent=_hashColor(src);
-            next.push(_rgbToHex(accent));
-          }catch(e){
-            next.push(_rgbToHex(_hashColor(src)));
-          }
-          done++;
-          if(done===pending) setGlobalPalette(next);
-        };
-        img.onerror=()=>{
-          next.push(_rgbToHex(_hashColor(src)));
-          done++;
-          if(done===pending) setGlobalPalette(next);
-        };
-        img.src=src;
-      });
-    } else {
-      setGlobalPalette([]);
-    }
-    const photoCards=orderedCards.filter(c=>c._photo && c._photoSrc);
-    const missing=photoCards.filter(c=>!paletteMap[c._entryId]);
-    if(!missing.length) return;
-    missing.forEach(c=>{
-      const img=new Image();
-      img.crossOrigin="anonymous";
-      img.onload=()=>{
-        try{
-          const size=24;
-          const canvas=document.createElement("canvas");
-          canvas.width=size;canvas.height=size;
-          const ctx=canvas.getContext("2d");
-          ctx.drawImage(img,0,0,size,size);
-          const data=ctx.getImageData(0,0,size,size).data;
-          let sum={r:0,g:0,b:0},count=0;
-          let bestSat=-1, accent={r:0,g:0,b:0};
-          for(let i=0;i<data.length;i+=4){
-            const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
-            if(a<40) continue;
-            sum.r+=r;sum.g+=g;sum.b+=b;count++;
-            const max=Math.max(r,g,b),min=Math.min(r,g,b);
-            const sat=max===0?0:(max-min)/max;
-            if(sat>bestSat && max>40){
-              bestSat=sat;accent={r,g,b};
-            }
-          }
-          const avg={r:sum.r/(count||1),g:sum.g/(count||1),b:sum.b/(count||1)};
-          if(bestSat<0) accent=avg;
-          const soft=_mix(avg,{r:255,g:255,b:255},0.35);
-          const dark=_mix(avg,{r:0,g:0,b:0},0.35);
-          setPaletteMap(prev=>({...prev,[c._entryId]:{accent,avg,soft,dark}}));
-        }catch(e){
-          const fallback=_hashColor(c._photoSrc||c._entryId||"");
-          const avg=fallback;
-          const soft=_mix(avg,{r:255,g:255,b:255},0.35);
-          const dark=_mix(avg,{r:0,g:0,b:0},0.35);
-          setPaletteMap(prev=>({...prev,[c._entryId]:{accent:avg,avg,soft,dark}}));
-        }
-      };
-      img.onerror=()=>{
-        const fallback=_hashColor(c._photoSrc||c._entryId||"");
-        const avg=fallback;
-        const soft=_mix(avg,{r:255,g:255,b:255},0.35);
-        const dark=_mix(avg,{r:0,g:0,b:0},0.35);
-        setPaletteMap(prev=>({...prev,[c._entryId]:{accent:avg,avg,soft,dark}}));
-      };
-      img.src=c._photoSrc;
-    });
-  },[orderedCards,isMN,data.profilePhotoIds,data.logs]);
+  // Palette blending removed
 
   // --- Grid placement (3 columns) for proximity blending ---
   const layout = useMemo(()=>{
@@ -4943,11 +4833,6 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
     return place;
   },[orderedCards,sizes]);
 
-  const photoPositions = useMemo(()=>{
-    return orderedCards
-      .filter(c=>c._photo && c._entryId && layout[c.iconId] && paletteMap[c._entryId])
-      .map(c=>({id:c._entryId, pos:layout[c.iconId], pal:paletteMap[c._entryId]}));
-  },[orderedCards,layout,paletteMap]);
 
   return(
     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
@@ -5021,43 +4906,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           touchAction:"none",
         };
 
-        // --- Photo-influenced colors (Manila Nights) ---
         let accentColor=th.accent;
         let labelColor=th.sub;
         let borderColor=th.border;
-        let glowColor=null;
-        let bgTint=null;
-        if(isMN && !card._photo && (photoPositions.length || globalPalette.length)){
-          const myPos=layout[card.iconId];
-          if(myPos && photoPositions.length){
-            let acc={r:0,g:0,b:0}, wSum=0;
-            photoPositions.forEach(p=>{
-              const d=Math.abs(myPos.cx-p.pos.cx)+Math.abs(myPos.cy-p.pos.cy);
-              const w=1/(d+0.5);
-              acc.r+=p.pal.accent.r*w;
-              acc.g+=p.pal.accent.g*w;
-              acc.b+=p.pal.accent.b*w;
-              wSum+=w;
-            });
-            const blended={r:acc.r/(wSum||1),g:acc.g/(wSum||1),b:acc.b/(wSum||1)};
-            accentColor=_rgbToHex(blended);
-            const subMix=_mix(blended,_hexToRgb(th.sub),0.25);
-            labelColor=_rgbToHex(subMix);
-            const bMix=_mix(blended,_hexToRgb("#c8ccd8"),0.4);
-            borderColor=_rgbToHex(bMix)+"80";
-            glowColor=accentColor+"55";
-            bgTint=`linear-gradient(135deg, ${accentColor}26 0%, rgba(12,8,22,0.35) 45%, ${accentColor}20 100%)`;
-          } else if(globalPalette.length){
-            const idx=myPos?(Math.round(myPos.r+myPos.c)%globalPalette.length):0;
-            accentColor=globalPalette[idx];
-            const subMix=_mix(_hexToRgb(accentColor),_hexToRgb(th.sub),0.25);
-            labelColor=_rgbToHex(subMix);
-            const bMix=_mix(_hexToRgb(accentColor),_hexToRgb("#c8ccd8"),0.4);
-            borderColor=_rgbToHex(bMix)+"80";
-            glowColor=accentColor+"55";
-            bgTint=`linear-gradient(135deg, ${accentColor}26 0%, rgba(12,8,22,0.35) 45%, ${accentColor}20 100%)`;
-          }
-        }
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
             ref={el=>{ if(el) cardRefs.current[card.iconId]=el; }}
@@ -5151,9 +5002,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             <div style={{
               width:"100%",height:"100%",padding:pad,
               borderRadius:14,
-              background:isMN&&bgTint?bgTint:th.card,
+              background:th.card,
               border:`1px solid ${borderColor}`,
-              boxShadow:glowColor?`0 6px 18px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.06)`:"none",
+              boxShadow:"none",
               display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
             }}>
@@ -5551,17 +5402,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             if(h>=20||h<4) nightOwlScore++;
             else if(h>=5&&h<12) earlyBirdScore++;
           });
-          const timeVibe=weekManualLogs.length>=5
+          const timeVibe=weekManualLogs.length>=3
             ?(nightOwlScore>earlyBirdScore?"Night Owl 🦉":"Early Bird 🌅")
             :null;
-          const timeVibeRaw=weekManualLogs.length>=5
+          const timeVibeRaw=weekManualLogs.length>=3
             ?(nightOwlScore>earlyBirdScore?"night_owl":"early_bird")
             :null;
 
           // Most logged
           const titleCount={};
           weekManualLogs.forEach(l=>{ if(l.title) titleCount[l.title]=(titleCount[l.title]||0)+1; });
-          const mostLoggedEntry=Object.entries(titleCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0];
+          const mostLoggedEntry=Object.entries(titleCount).filter(([,c])=>c>=3).sort((a,b)=>b[1]-a[1])[0];
           const mostLoggedTitle=mostLoggedEntry?.[0];
 
           // Top director / actor
@@ -5613,27 +5464,42 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
 
           // Week pulse vs average
           let weekPulse=null, weekPulseEmoji=null;
-          if(avgPerWeek>0){
+          if(avgPerWeek>0 && manualWeekCounts[weekKey]!==undefined && Object.keys(manualWeekCounts).sort().indexOf(weekKey)>0){
             const pulseRatio=thisWeekCount/avgPerWeek;
             weekPulse=pulseRatio>=1.3?"busier than usual":pulseRatio<=0.7?"quieter than usual":"about your pace";
             weekPulseEmoji=pulseRatio>=1.3?"🔥":pulseRatio<=0.7?"🌙":"〰️";
           }
 
           const wkId=id=>`${weekKey}_${id}`;
+          const slotSizes={
+            week_breakdown:{colSpan:2,rowSpan:1},
+            week_pulse:{colSpan:1,rowSpan:2},
+            photo0:{colSpan:2,rowSpan:2},
+            time_vibe:{colSpan:1,rowSpan:1},
+            steps:{colSpan:1,rowSpan:2},
+            photo1:{colSpan:2,rowSpan:2},
+            days:{colSpan:1,rowSpan:1},
+            most_logged:{colSpan:2,rowSpan:1},
+            photo2:{colSpan:2,rowSpan:1},
+            top_cat:{colSpan:1,rowSpan:1},
+            week:{colSpan:1,rowSpan:1},
+            top_actor:{colSpan:1,rowSpan:1},
+            top_director:{colSpan:1,rowSpan:1},
+          };
           const registry=[
-            {iconId:wkId("days"),  emoji:"🗓", label:"Days Active", value:daysActiveCount, min:1},
-            {iconId:wkId("week"),  emoji:"📅", label:"Entries",     value:thisWeekCount,  min:1},
-            ...(weekLikedCount>0?[{iconId:wkId("liked"), emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:weekLikedCount, min:1}]:[]),
+            {iconId:wkId("days"),  _baseId:"days",  emoji:"🗓", label:"Days Active", value:daysActiveCount, min:1, defaultSpan:slotSizes.days},
+            {iconId:wkId("week"),  _baseId:"week",  emoji:"📅", label:"Entries",     value:thisWeekCount,  min:1, defaultSpan:slotSizes.week},
+            ...(weekLikedCount>0?[{iconId:wkId("liked"), _baseId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:weekLikedCount, min:1}]:[]),
             ...(stepsLogs.length>0
-              ?[{iconId:wkId("steps"), emoji:"👟", label:"Steps", value:weekSteps, min:1}]
+              ?[{iconId:wkId("steps"), _baseId:"steps", emoji:"👟", label:"Steps", value:weekSteps, min:1, defaultSpan:slotSizes.steps}]
               :[]),
-            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"), emoji:topCatEmoji, label:"Top Category", value:topCatLabel, min:1}]:[]),
-            ...(timeVibe?[{iconId:wkId("time_vibe"), emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", min:1}]:[]),
-            ...(mostLoggedTitle?[{iconId:wkId("most_logged"), emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, min:1}]:[]),
-            ...(topDirector?[{iconId:wkId("top_director"), emoji:"🎬", label:"Director", value:topDirector, min:1}]:[]),
-            ...(topActor?[{iconId:wkId("top_actor"), emoji:"🎭", label:"Actor", value:topActor, min:1}]:[]),
-            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"), emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:{colSpan:2,rowSpan:1}}]:[]),
-            ...(weekPulse?[{iconId:wkId("week_pulse"), emoji:weekPulseEmoji, label:"Pace", value:weekPulse, min:1}]:[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"), _baseId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, min:1, defaultSpan:slotSizes.top_cat}]:[]),
+            ...(timeVibe?[{iconId:wkId("time_vibe"), _baseId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:"", value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", min:1, defaultSpan:slotSizes.time_vibe}]:[]),
+            ...(mostLoggedTitle?[{iconId:wkId("most_logged"), _baseId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, min:1, defaultSpan:slotSizes.most_logged}]:[]),
+            ...(topDirector?[{iconId:wkId("top_director"), _baseId:"top_director", emoji:"🎬", label:"Director", value:topDirector, min:1, defaultSpan:slotSizes.top_director}]:[]),
+            ...(topActor?[{iconId:wkId("top_actor"), _baseId:"top_actor", emoji:"🎭", label:"Actor", value:topActor, min:1, defaultSpan:slotSizes.top_actor}]:[]),
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"), _baseId:"week_breakdown", emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:slotSizes.week_breakdown}]:[]),
+            ...(weekPulse?[{iconId:wkId("week_pulse"), _baseId:"week_pulse", emoji:weekPulseEmoji, label:"", value:weekPulse, min:1, defaultSpan:slotSizes.week_pulse}]:[]),
           ];
 
           const visible=registry.filter(s=>s.show!==false&&s.value!==null&&s.value!==undefined&&s.value!==""&&(typeof s.value!=="number"||s.value>=s.min));
@@ -5646,10 +5512,45 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               const photo=entry?.actPhotos?.[0];
               if(!photo) return null;
               const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-              return {iconId:`profile_photo_${id}`, label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
+              return {iconId:`profile_photo_${id}`, _baseId:"photo", label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
             }).filter(Boolean);
 
-          const cards=[...visible, ...weekPhotoCards];
+          const orderedSlots=[
+            {key:"week_breakdown", size:slotSizes.week_breakdown},
+            {key:"week_pulse", size:slotSizes.week_pulse},
+            {key:"photo0", size:slotSizes.photo0},
+            {key:"time_vibe", size:slotSizes.time_vibe},
+            {key:"steps", size:slotSizes.steps},
+            {key:"photo1", size:slotSizes.photo1},
+            {key:"days", size:slotSizes.days},
+            {key:"most_logged", size:slotSizes.most_logged},
+            {key:"photo2", size:slotSizes.photo2},
+            {key:"top_cat", size:slotSizes.top_cat},
+            {key:"week", size:slotSizes.week},
+            {key:"top_actor", size:slotSizes.top_actor},
+            {key:"top_director", size:slotSizes.top_director},
+          ];
+          const photoCards=weekPhotoCards;
+          const orderedCards=[];
+          orderedSlots.forEach(slot=>{
+            if(slot.key.startsWith("photo")){
+              const idx=parseInt(slot.key.replace("photo",""),10);
+              const card=photoCards[idx];
+              if(card){
+                card.defaultSpan=slot.size;
+                orderedCards.push(card);
+              }
+              return;
+            }
+            const card=visible.find(c=>c._baseId===slot.key);
+            if(card){
+              card.defaultSpan=slot.size||card.defaultSpan;
+              orderedCards.push(card);
+            }
+          });
+          const used=new Set(orderedCards.map(c=>c.iconId));
+          const remaining=[...visible, ...weekPhotoCards].filter(c=>!used.has(c.iconId));
+          const cards=[...orderedCards, ...remaining];
           const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
           return {cards, slots};
         };
@@ -5914,6 +5815,23 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         <h3 style={{fontWeight:700,color:th.text,marginBottom:5}}>{t.support_title}</h3>
         <p style={{fontSize:13,color:th.sub,lineHeight:1.5}}>{t.support_desc}</p>
         <div style={{marginTop:10,fontSize:12,color:th.accent,fontWeight:500}}>{t.no_ads}</div>
+      </div>
+
+      {/* OMDB Status */}
+      <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+          <span style={{fontSize:20}}>🎬</span>
+          <h3 style={{fontWeight:700,color:th.text}}>OMDB Debug</h3>
+        </div>
+        <p style={{fontSize:12,color:th.sub,marginBottom:8,lineHeight:1.6}}>
+          {`OMDB items found: ${(data.omdbLibrary||[]).length}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8}}>
+          {`Cursor keys: ${Object.keys(data.omdbCursor||{}).length}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Last updated: ${data.omdbLastUpdated ? new Date(data.omdbLastUpdated).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
+        </p>
       </div>
 
       {/* Collaborate */}
