@@ -3,18 +3,23 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
-v5.11 — 2026-03-12
-  - Timeline: inline card expand — tap entry to see details, tap Edit to edit in place
-  - Timeline: inline editing — title (with autocomplete), note, category, date, photo removal
-  - Timeline: steps entries no longer expandable — swipe to delete only
-  - Timeline: per-theme card depth — glow for dark themes, shadows for light themes
-  - Timeline: fixed bug where editing one entry updated all entries with same title (duplicate IDs from Letterboxd import)
-  - Steps: title now uses en dash (Steps – 214), no redundant step count label
-  - Updates: app now checks for new version on every launch — persistent banner appears if update is ready, tap to reload instantly
-  - Nav: profile and suggestions tabs swapped
-  - Nav: profile tab shows your avatar when away, star when on profile
-  - Nav: suggestions tab has new icon
-  - Nav: Ulan theme gets a floating bubble menu tab bar
+v6.1 — 2026-03-17
+  - Profile: stat card colors now update live when cards are dragged — color is assigned after user order is applied, so each card always samples the photo closest to its actual grid position
+  - Profile: harmony mode moved into a compact dropdown inside the star-tap details row, next to the date range
+  - Profile: new photo_bg treatment — the 1x2 stat card sitting beside the first photo card in a week now shows that photo as a softly blurred background with a dark scrim for readability
+  - Profile: Night Owl / Early Bird and week_pulse no longer get the old blurred photo background — they now render as normal stat cards
+  - Profile: complete rework of default grid layout — slots own their shapes (2x1, 1x2, 2x2 etc.), cards flow into slots in priority order and inherit the slot's shape; no card has a predefined size
+  - Profile: new card priority order — Vibe, Pace, Photo, Night Owl, Steps, Photo, Days Active, Most Logged, Photo, Top Category, Entries, Top Actor, Top Director
+  - Profile: photo slots skipped cleanly when no photos exist that week without disrupting stat card flow
+
+v6.0 — 2026-03-13
+  - Profile: Manila Nights stat sticker cards — canvas-rendered, neon glass design
+  - Profile: tap any stat card to preview as a shareable sticker (hold to save/share)
+  - Profile: 3-column stat grid with smart orphan spanning
+  - Profile: stats are data-driven — only cards with real data are shown
+  - Profile: canvas border-radius fix for high-DPR phones (baked into bitmap, not CSS clip)
+  - Profile: canvas sizing uses double-rAF to guarantee correct dimensions on first mobile load
+  - Settings: beta redeem code — enter "beta" to unlock unlimited sticker saves
 
 ================================================================
 -->
@@ -29,6 +34,7 @@ v5.11 — 2026-03-12
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
+  <meta name="kwento-build" content="2026-03-16-1"/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 <script>
@@ -38,13 +44,15 @@ v5.11 — 2026-03-12
       document.documentElement.style.backgroundColor=bg;
       // Register service worker
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js");
+        navigator.serviceWorker.register("./sw.js?v=20260315-2");
       }
     })();
   </script>
 </head>
 <body>
-<style>html,body{background:#000;}<style>
+<style>
+html,body{background:#000;user-select:none;-webkit-user-select:none;}
+.selectable{user-select:text;-webkit-user-select:text;}
 @keyframes tri-open{from{transform:rotate(0deg)}to{transform:rotate(180deg)}}
 @keyframes tri-close{from{transform:rotate(180deg)}to{transform:rotate(0deg)}}
 .tri-btn svg{transition:transform 0.22s ease;}
@@ -63,6 +71,113 @@ const { useState, useEffect, useRef, useMemo } = React;
 const OFFENSIVE = ["fuck","shit","bitch","asshole","bastard","crap","puta","gago","bobo","putangina","tangina","leche","punyeta","tanga","ulol","pakyu","puke","dick","cock","pussy","cunt","whore","slut","nigger","faggot","retard","hate","kill","rape","murder","porn","nude","naked"];
 function isOffensive(t){ return OFFENSIVE.some(w=>t.toLowerCase().replace(/[^a-z0-9\s]/g,"").includes(w)); }
 
+// ─── COLOR HELPERS ───────────────────────────────────────────────────────────
+const _clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+function _hexToRgb(hex){
+  const h=hex.replace("#","").trim();
+  const n=h.length===3? h.split("").map(c=>c+c).join(""):h;
+  const i=parseInt(n,16);
+  return {r:(i>>16)&255,g:(i>>8)&255,b:i&255};
+}
+function _rgbToHex({r,g,b}){
+  const to=h=>h.toString(16).padStart(2,"0");
+  return `#${to(_clamp(Math.round(r),0,255))}${to(_clamp(Math.round(g),0,255))}${to(_clamp(Math.round(b),0,255))}`;
+}
+function _rgbToHsl({r,g,b}){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      default: h=(r-g)/d+4;
+    }
+    h*=60;
+  }
+  return {h,s,l};
+}
+function _hslToRgb({h,s,l}){
+  const c=(1-Math.abs(2*l-1))*s;
+  const x=c*(1-Math.abs((h/60)%2-1));
+  const m=l-c/2;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;}
+  else if(h<120){r=x;g=c;}
+  else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;}
+  else if(h<300){r=x;b=c;}
+  else{r=c;b=x;}
+  return {r:(r+m)*255,g:(g+m)*255,b:(b+m)*255};
+}
+function _mixRgb(a,b,t){
+  return {r:a.r+(b.r-a.r)*t,g:a.g+(b.g-a.g)*t,b:a.b+(b.b-a.b)*t};
+}
+function _luminance({r,g,b}){
+  const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const R=f(r),G=f(g),B=f(b);
+  return 0.2126*R+0.7152*G+0.0722*B;
+}
+function _contrast(a,b){
+  const L1=_luminance(a)+0.05;
+  const L2=_luminance(b)+0.05;
+  return L1>L2?L1/L2:L2/L1;
+}
+function _adjustForCard(rgb){
+  const hsl=_rgbToHsl(rgb);
+  const s=_clamp(hsl.s*0.7,0,1);
+  const l=_clamp(hsl.l+0.08,0,1);
+  return _hslToRgb({h:hsl.h,s,l});
+}
+function _pickReadableText(bgRgb, th){
+  const light=_hexToRgb("#ffffff");
+  const dark=_hexToRgb("#0b0f1a");
+  const prefer=_hexToRgb(th.text||"#ffffff");
+  const c1=_contrast(bgRgb,prefer);
+  if(c1>=3) return _rgbToHex(prefer);
+  const c2=_contrast(bgRgb,light);
+  const c3=_contrast(bgRgb,dark);
+  return c2>=c3?_rgbToHex(light):_rgbToHex(dark);
+}
+function _hueDistance(a,b){
+  const d=Math.abs(a-b)%360;
+  return d>180?360-d:d;
+}
+function _harmonizePhotoFirst(dominantHex, themeHex, mode="analogous"){
+  const dom=_hexToRgb(dominantHex);
+  const th=_hexToRgb(themeHex);
+  const domHsl=_rgbToHsl(dom);
+  const candidates=[
+    {name:"analog",h:(domHsl.h+30)%360},
+    {name:"comp",h:(domHsl.h+180)%360},
+    {name:"split1",h:(domHsl.h+150)%360},
+    {name:"split2",h:(domHsl.h+210)%360},
+    {name:"triad",h:(domHsl.h+120)%360},
+    {name:"mono",h:domHsl.h},
+  ];
+  const themeHsl=_rgbToHsl(th);
+  const clash=_hueDistance(domHsl.h,themeHsl.h)>=120;
+  const byName=name=>candidates.find(c=>c.name===name);
+  let ordered=candidates;
+  if(mode&&mode!=="auto"){
+    const first=byName(mode) || byName("analog");
+    ordered=[first, ...candidates.filter(c=>c!==first)];
+  } else {
+    ordered=clash?candidates:[byName("mono"),...candidates.filter(c=>c.name!=="mono")];
+  }
+  let picked=_hslToRgb({h:domHsl.h,s:domHsl.s,l:domHsl.l});
+  for(const c of ordered){
+    const rgb=_hslToRgb({h:c.h,s:domHsl.s,l:domHsl.l});
+    const adj=_adjustForCard(rgb);
+    const blend=_mixRgb(adj,th,0.2);
+    if(_contrast(blend,_hexToRgb("#ffffff"))>=2.2 || _contrast(blend,_hexToRgb("#0b0f1a"))>=2.2){
+      picked=blend; break;
+    }
+  }
+  return _rgbToHex(picked);
+}
 // ─── THEMES ──────────────────────────────────────────────────────────────────
 const THEMES = {
   jeepney:{name:"Jeepney",emoji:"🚌",dark:true,bg:"#1a0a2e",card:"#2d1057",accent:"#ff6b35",accent2:"#ffd23f",text:"#fff8f0",sub:"#d4a0ff",border:"#5a2d82",grad:"linear-gradient(135deg,#1a0a2e 0%,#2d1057 50%,#3d0066 100%)"},
@@ -196,12 +311,12 @@ const ITEM_MOOD = {
 
 // ─── ARCHETYPES ───────────────────────────────────────────────────────────────
 const ARCHETYPES = [
-  {id:"night_lakad",name:"The Night Lakad",nameFil:"Ang Gala ng Gabi",desc:"Night walks, mellow music, quiet films. You find magic in the hours when the world slows down.",descFil:"Night walks, mellow na musika, tahimik na pelikula.",tags:["night","solo","reflective","calm","slow","meditative"],emoji:"🌙"},
-  {id:"barkada_soul",name:"The Barkada Soul",nameFil:"Ang Kaluluwa ng Barkada",desc:"You thrive with people — loud music, group hangouts, and shared meals define your story.",descFil:"Sumisinag ka kapag may kasama — maingay na musika at masarap na pagkain.",tags:["barkada","social","upbeat","fun","competitive","interactive"],emoji:"🎉"},
-  {id:"cozy_bahay",name:"The Cozy Bahay",nameFil:"Ang Tahimik na Bahay",desc:"Comfort food, slow films, staying in. Home is your sanctuary and your favorite adventure.",descFil:"Comfort food, mabagal na pelikula, stay-at-home.",tags:["cozy","comfort","indoor","warm","relaxed","family"],emoji:"🏡"},
-  {id:"cultural_explorer",name:"The Cultural Explorer",nameFil:"Ang Manlalakbay ng Kultura",desc:"You seek new flavors, foreign films, and stories from everywhere. Curiosity is your compass.",descFil:"Naghahanap ka ng bagong lasa at kwento mula sa lahat ng dako.",tags:["cultural","historical","global","creative","artistic","discovery"],emoji:"🧭"},
-  {id:"malikhaing_diwa",name:"The Malikhaing Diwa",nameFil:"Ang Malikhaing Diwa",desc:"Art, music, and making things. You see the world as a canvas waiting to be filled.",descFil:"Sining, musika, at paggawa.",tags:["creative","artistic","indie","musical","expressive","aesthetic"],emoji:"🎨"},
-  {id:"tahimik_manunuri",name:"The Quiet Critic",nameFil:"Ang Tahimik na Manunuri",desc:"You read, reflect, and understand deeply. Your taste is refined, your thoughts quiet but profound.",descFil:"Nagbabasa ka, nag-iisip, malalim ang pag-unawa.",tags:["reflective","literary","slow","philosophical","intellectual","melancholic"],emoji:"📖"},
+  {id:"soulful",name:"Soulful",nameFil:"Soulful",desc:"You gravitate toward things that hit. Slow, quiet, and heavy all find their way to you across everything you log.",descFil:"Hinahangad mo ang mga bagay na tumatalab. Mabagal, tahimik, at mabigat — lahat sila napupunta sa iyo.",tags:["emotional","slow","melancholic","intimate","reflective","nostalgic","quiet","beautiful"],emoji:"🌧️"},
+  {id:"maximalist",name:"Maximalist",nameFil:"Maximalist",desc:"Dark, hard, heavy. You don't do watered-down.",descFil:"Madilim, matigas, mabigat. Hindi ka nagko-kontento sa basta-basta.",tags:["intense","dark","thriller","bold","epic","action","disturbing","psychological","complex"],emoji:"🔥"},
+  {id:"creature_of_comfort",name:"Creature of Comfort",nameFil:"Creature of Comfort",desc:"You know what you like and you go back to it. Home is always the right answer.",descFil:"Alam mo ang gusto mo at bumabalik ka palagi. Ang tahanan ay palaging tamang sagot.",tags:["cozy","comfort","warm","heartwarming","feel-good","simple","everyday","family","sweet"],emoji:"☕"},
+  {id:"aesthete",name:"Aesthete",nameFil:"Aesthete",desc:"Not everything makes the cut. But when something does, it really does.",descFil:"Hindi lahat pumapasa. Pero kapag pumasa, talagang pumasa.",tags:["stylish","aesthetic","indie","arthouse","cinematic","atmospheric","literary","smart","unique","dreamy"],emoji:"✨"},
+  {id:"tatak_pinoy",name:"Tatak Pinoy",nameFil:"Tatak Pinoy",desc:"Filipino content is always in the mix — the music, the food, the films. It's not a preference, it's just who you are.",descFil:"Palaging may Filipino sa halo — musika, pagkain, pelikula. Hindi lang ito kagustuhan, ito ay ikaw.",tags:["Filipino","OPM","cultural","historical","patriotic","Visayan","Ilocano","Ilonggo","Cebuano","Bicolano"],emoji:"🌺"},
+  {id:"cultural_nomad",name:"Cultural Nomad",nameFil:"Cultural Nomad",desc:"Korean one week, French the next. There's always something new worth trying.",descFil:"Korean ngayong linggo, French sa susunod. Palaging may bago na sulit subukan.",tags:["global","Japanese","Korean","French","Italian","British","Asian","Southeast-Asian","Vietnamese","Indian","discovery"],emoji:"🎲"},
 ];
 
 // ─── TRANSLATIONS ────────────────────────────────────────────────────────────
@@ -882,7 +997,7 @@ function getFoodVarietyBoosts(logs) {
 }
 
 
-function buildSuggestionQueue(logs, feedback, locationData=null) {
+function buildSuggestionQueue(logs, feedback, locationData=null, libraryMovies=[]) {
   const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
   const cats = ["movies","music","books","food","games","activities"];
   const catPools = {};
@@ -891,7 +1006,13 @@ function buildSuggestionQueue(logs, feedback, locationData=null) {
   // Variety boosts — silently diversify if dominant pattern detected
   const varietyBoosts = getFoodVarietyBoosts(logs);
   cats.forEach(cat => {
-    const items = (LIBRARY[cat]||[]);
+    let items = (LIBRARY[cat]||[]);
+    if(cat==="movies" && libraryMovies && libraryMovies.length){
+      const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
+      const dynTitles=new Set(dyn.map(m=>m.title.toLowerCase()));
+      const filtered=items.filter(i=>!dynTitles.has(i.title.toLowerCase()));
+      items=[...dyn,...filtered];
+    }
     catPools[cat] = items.map(i => {
       // Base score: Filipino bias + randomness. Feedback intentionally not used.
       let score = (i.ph?8:0) + Math.random()*4;
@@ -930,12 +1051,17 @@ function buildSuggestionQueue(logs, feedback, locationData=null) {
 }
 
 function getArchetype(logs) {
-  if(!logs.length) return null;
+  if(logs.length < 8) return null;
   const cnt = {};
   logs.forEach(l => (l.tags||[]).forEach(t => { cnt[t]=(cnt[t]||0)+1; }));
+  const phCount = logs.filter(l => {
+    const lib = LIBRARY[l.category]||[];
+    return lib.find(x=>x.title===l.title)?.ph;
+  }).length;
   let best = null, bestS = -1;
   ARCHETYPES.forEach(a => {
-    const s = a.tags.reduce((acc,t)=>acc+(cnt[t]||0),0);
+    let s = a.tags.reduce((acc,t)=>acc+(cnt[t]||0),0);
+    if(a.id==="tatak_pinoy") s += phCount * 2;
     if(s>bestS){bestS=s;best=a;}
   });
   return best;
@@ -1490,6 +1616,12 @@ function saveData(d){
     const slim={...d};
     delete slim.customPhoto;
     delete slim.photoPos;
+    if(slim.libraryMovies){
+      slim.libraryMovies=slim.libraryMovies.map(m=>{
+        const {poster,...rest}=m;
+        return rest;
+      });
+    }
     if(slim.logs) slim.logs=slim.logs.map(l=>{
       if(!l.actPhotos||!l.actPhotos.length) return l;
       const {actPhotos,...rest}=l;
@@ -1514,6 +1646,14 @@ async function savePhotos(d){
       }
     }
   }
+  // Movie posters
+  if(d.libraryMovies){
+    const posterMap={};
+    d.libraryMovies.forEach(m=>{
+      if(m.posterId && m.poster) posterMap["poster_"+m.posterId]=m.poster;
+    });
+    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+  }
 }
 
 // ── Hydrate: merge IndexedDB photos back into data object ────────────────────
@@ -1529,6 +1669,13 @@ async function hydratePhotos(d){
     hydrated.logs=hydrated.logs.map(l=>{
       const photos=all["entry_"+l.id];
       return photos?{...l,actPhotos:photos}:l;
+    });
+  }
+  if(hydrated.libraryMovies){
+    hydrated.libraryMovies=hydrated.libraryMovies.map(m=>{
+      if(!m.posterId) return m;
+      const poster=all["poster_"+m.posterId];
+      return poster?{...m,poster}:m;
     });
   }
   return hydrated;
@@ -1551,13 +1698,32 @@ async function migratePhotosToIDB(d){
       }
     }
   }
+  // Library posters still in localStorage
+  if(d.libraryMovies){
+    const posterMap={};
+    d.libraryMovies=d.libraryMovies.map(m=>{
+      if(m.poster && !m.posterId){
+        const posterId=m.imdbID||`t_${_h(m.title||"")}`;
+        posterMap["poster_"+posterId]=m.poster;
+        changed=true;
+        const {poster,...rest}=m;
+        return {...rest,posterId};
+      }
+      if(m.poster && m.posterId){
+        posterMap["poster_"+m.posterId]=m.poster;
+        changed=true;
+      }
+      return m;
+    });
+    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+  }
   if(changed) saveData(d); // re-save slim version without photos
   return changed;
 }
 function defaultData(){
   return{
     onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true,movies:true,music:true,books:true,food:true,games:true,activities:true},
-    logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",
+    logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",profilePhotoIds:[],profilePhotoPosMap:{},
     __showAvatarPicker:false,
     lastBackupAt:null,lastBackupHash:null,
     // Suggestion state persisted in data
@@ -1567,16 +1733,37 @@ function defaultData(){
     // Custom entry fuzzy match dismissals: {[entryId]:{skipped:[],never:false}}
     // Sticker generation tracking (freemium: 3/day free)
     stickerGenCount:0,stickerGenDate:null,
+    betaMode:false,
+    libraryMovies:[], // dynamic movie library (enriched)
+    omdbCursor:{},    // {term: nextPage} — tracks progress across days
+    weekHarmony:{},
+    discoverCounts:{},discoverDate:null,
+    discoverQueues:{},
   };
 }
 
 // ─── CSS ─────────────────────────────────────────────────────────────────────
 const CSS=`
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body,#root{height:100%;overflow:hidden;}
-html{background:#000 !important;}
-body{font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body,#root{height:100%;overflow:hidden;}
+  html{background:#000 !important;}
+  :root{
+    --font-display:'Playfair Display',serif;
+    --font-body:'DM Sans',sans-serif;
+    --font-mono:'Space Mono',monospace;
+    --stat-xl:clamp(26px,6.2vw,34px);
+    --stat-lg:clamp(20px,4.6vw,28px);
+    --stat-md:clamp(16px,3.6vw,22px);
+    --stat-label-lg:clamp(12px,2.2vw,14px);
+    --stat-label-md:clamp(11px,2vw,13px);
+    --stat-label-sm:clamp(10px,1.8vw,12px);
+    --stat-emoji-lg:clamp(26px,6vw,32px);
+    --stat-emoji-md:clamp(22px,5vw,28px);
+    --stat-emoji-sm:clamp(18px,4vw,22px);
+    --stat-note:clamp(11px,2vw,13px);
+  }
+  body{font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{display:none;}
 *{-ms-overflow-style:none;scrollbar-width:none;}
 input,textarea{outline:none;border:none;background:none;font-family:inherit;}
@@ -2185,6 +2372,59 @@ function Onboarding({onComplete}){
 }
 
 // ─── LOG MODAL ───────────────────────────────────────────────────────────────
+// ─── OMDB ─────────────────────────────────────────────────────────────────────
+const OMDB_KEY="24654217";
+// Legacy source HTML for migrating existing OMDB cache
+const MIGRATE_OMDB_SRC="MIGRATE OMDB LIBRARY, MAKE SURE TO NOT DUPLICATE.html";
+async function fetchMovieMeta(title){
+  try{
+    const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&type=movie`);
+    const d=await res.json();
+    if(d.Response==="False") return null;
+    return {
+      director:d.Director&&d.Director!=="N/A"?d.Director:null,
+      actor:d.Actors?d.Actors.split(",")[0].trim():null,
+      year:d.Year?d.Year.slice(0,4):null,
+      poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
+      genre:d.Genre&&d.Genre!=="N/A"?d.Genre.split(",")[0].trim():null,
+    };
+  }catch(e){ return null; }
+}
+
+// Derive tags from OMDB metadata — used when enriching the library
+function buildTagsFromOmdb(d){
+  const tags=[];
+  const genre=(d.Genre||"").toLowerCase();
+  const plot=(d.Plot||"").toLowerCase();
+  if(genre.includes("drama")) tags.push("dramatic","emotional");
+  if(genre.includes("romance")||genre.includes("romantic")) tags.push("romantic");
+  if(genre.includes("thriller")) tags.push("intense","suspenseful");
+  if(genre.includes("horror")) tags.push("scary","dark");
+  if(genre.includes("comedy")) tags.push("fun","lighthearted");
+  if(genre.includes("action")) tags.push("action","fast-paced");
+  if(genre.includes("animation")) tags.push("animated","family");
+  if(genre.includes("crime")) tags.push("crime","gritty");
+  if(genre.includes("mystery")) tags.push("mysterious");
+  if(genre.includes("sci-fi")||genre.includes("science fiction")) tags.push("sci-fi","futuristic");
+  if(genre.includes("fantasy")) tags.push("fantasy","magical");
+  if(genre.includes("biography")||genre.includes("biographical")) tags.push("biographical","inspiring");
+  if(genre.includes("musical")) tags.push("musical");
+  if(genre.includes("documentary")) tags.push("documentary","informative");
+  if(genre.includes("war")) tags.push("war","epic");
+  if(genre.includes("history")||genre.includes("historical")) tags.push("historical");
+  const country=(d.Country||"").toLowerCase();
+  if(country.includes("philippines")) tags.push("Filipino");
+  if(country.includes("korea")) tags.push("Korean");
+  if(country.includes("japan")) tags.push("Japanese");
+  if(country.includes("france")) tags.push("French");
+  if(country.includes("india")) tags.push("Indian");
+  const rated=d.Rated||"";
+  if(rated==="G"||rated==="PG") tags.push("family");
+  if(plot.includes("love")||plot.includes("relationship")) tags.push("romantic");
+  if(plot.includes("friend")) tags.push("friendship");
+  return [...new Set(tags)]; // deduplicate
+}
+
 function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const th=THEMES[data.theme];
 
@@ -2207,8 +2447,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
   const [useCustomDate,setUseCustomDate]=useState(!!editEntry?.customDate);
   const [customDate,setCustomDate]=useState(editEntry?.customDate||new Date().toISOString().split("T")[0]);
   const [results,setResults]=useState([]);
+  const [omdbError,setOmdbError]=useState("");
   const [queue,setQueue]=useState([]);
   const [actPhotos,setActPhotos]=useState(editEntry?.actPhotos||[]);
+  const [pinOnSave,setPinOnSave]=useState(false);
   const [previewIdx,setPreviewIdx]=useState(0);
   const actPhotoRef=useRef(null);
   const inputRef=useRef(null);
@@ -2223,20 +2465,54 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     },80);
   },[cat]);
 
+  const omdbSearchTimer=useRef(null);
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
       const pool=cat?(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})):
         Object.entries(LIBRARY).flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
-      // starts-with first, then contains — dedupe
-      // starts-with title OR any word in title starts with query
+      // Merge OMDB-fetched movies into the movie search pool
+  const dynMovies=(data.libraryMovies||[]).map(m=>({...m,_cat:"movies"}));
+  const libTitles=new Set((LIBRARY.movies||[]).map(m=>m.title.toLowerCase()));
+  const freshDyn=dynMovies.filter(m=>!libTitles.has(m.title.toLowerCase()));
+  const fullPool=cat==="movies"||!cat?[...pool,...freshDyn]:pool;
       const wordStart=i=>{
         const t=i.title.toLowerCase();
         if(t.startsWith(lq)) return true;
         return t.split(/\s+/).some(w=>w.startsWith(lq));
       };
-      setResults(pool.filter(wordStart).slice(0,5));
-    } else setResults([]);
+      const local=fullPool.filter(wordStart).slice(0,5);
+      setResults(local);
+      if(local.length>0) setOmdbError("");
+
+      // OMDB fallback — only for movies, only when local has no results
+      if(local.length===0&&(cat==="movies"||!cat)){
+        clearTimeout(omdbSearchTimer.current);
+        omdbSearchTimer.current=setTimeout(async()=>{
+          try{
+            const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(query)}&type=movie`);
+            const d=await res.json();
+            if(d.Search){
+              const omdbResults=d.Search.slice(0,5).map(m=>({
+                title:m.Title,year:m.Year?.slice(0,4)||null,
+                tags:[],genre:"Film",_cat:"movies",_fromOmdb:true,
+                poster:m.Poster!=="N/A"?m.Poster:null,
+              }));
+              setResults(omdbResults);
+              setOmdbError("");
+            } else if(d && d.Error){
+              setOmdbError(d.Error);
+            }
+          }catch(e){
+            setOmdbError("OMDB request failed.");
+          }
+        },400);
+      }
+    } else {
+      clearTimeout(omdbSearchTimer.current);
+      setResults([]);
+      setOmdbError("");
+    }
   },[query,cat]);
 
   const getGenreForCat=(item,category)=>{
@@ -2272,18 +2548,22 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
 
   const removeFromQueue=idx=>setQueue(q=>q.filter((_,i)=>i!==idx));
 
-  const handleSave=()=>{
+  const handleSave=async()=>{
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     if(isEdit){
       if(!selected&&!query.trim())return;
       const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
-      onSave({...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])});
+      const entry={...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])};
+      if(cat==="movies"){
+        const meta=await fetchMovieMeta(entry.title);
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
+      }
+      onSave({...entry, pinOnProfile: pinOnSave&&entry.actPhotos?.length>0});
       onClose();
       return;
     }
-    // Add whatever is typed as custom if cat selected
     let finalQueue=[...queue];
     if(query.trim()&&cat){
       const base={title:query.trim(),tags:[],genre:"Custom",year:null};
@@ -2291,8 +2571,16 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
       finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:null});
     }
     if(!finalQueue.length)return;
-    const toSave=finalQueue.map((item,i)=>({...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]}));
-    onSave(toSave);
+    const toSave=await Promise.all(finalQueue.map(async(item,i)=>{
+      const entry={...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
+      if(item.category==="movies"||cat==="movies"){
+        const meta=await fetchMovieMeta(item.title);
+        if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
+      }
+      return entry;
+    }));
+    const toSaveWithPin=toSave.map((e,i)=>i===0&&pinOnSave&&e.actPhotos?.length>0?{...e,pinOnProfile:true}:e);
+    onSave(toSaveWithPin);
     onClose();
   };
 
@@ -2349,8 +2637,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
             <button onClick={closeWithAnim} style={{fontSize:20,color:th.sub,lineHeight:1,background:"none",border:"none",cursor:"pointer",padding:"4px 2px",opacity:0.7}}>×</button>
           </div>
 
-          {/* Category chips — DM Sans 12, navigation level */}
-          <div ref={catRowRef} style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:18}}>
+          {/* Category chips — horizontal scroll */}
+          <div ref={catRowRef} style={{display:"flex",gap:6,overflowX:"auto",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
             {CATEGORIES.map(c=>{
               const active=cat===c.id;
               return(
@@ -2428,9 +2716,15 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                       {item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:11,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}
                     </div>
                     {item.genre&&item.genre!=="Custom"&&item.genre!=="Film"&&<div style={{fontSize:11,color:th.sub,marginTop:1,opacity:0.75}}>{item.genre}</div>}
+            {item._fromOmdb&&<div style={{fontSize:10,color:th.accent,opacity:0.7,marginTop:1}}>from OMDB</div>}
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {omdbError&&results.length===0&&(
+            <div style={{fontSize:11,color:"#ef4444",marginTop:4,marginBottom:8}}>
+              {`OMDB: ${omdbError}`}
             </div>
           )}
 
@@ -2537,13 +2831,35 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
                 };r.readAsDataURL(f);
               }}/>
               {actPhotos.length>0?(
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:32,height:32,borderRadius:7,overflow:"hidden",flexShrink:0}}>
-                    <img src={actPhotos[0]} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{width:32,height:32,borderRadius:7,overflow:"hidden",flexShrink:0}}>
+                      <img src={actPhotos[0]} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                    </div>
+                    <span style={{fontSize:13,color:th.sub,flex:1}}>Photo attached</span>
+                    <button onMouseDown={e=>e.preventDefault()} onClick={()=>{setActPhotos([]);setPinOnSave(false);}}
+                      style={{background:"none",border:"none",color:th.sub,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1,opacity:0.6}}>×</button>
                   </div>
-                  <span style={{fontSize:13,color:th.sub,flex:1}}>Photo attached</span>
-                  <button onMouseDown={e=>e.preventDefault()} onClick={()=>setActPhotos([])}
-                    style={{background:"none",border:"none",color:th.sub,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1,opacity:0.6}}>×</button>
+                  {(()=>{
+                    const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
+                    const entryWeekStart=getWeekStart(useCustomDate?new Date(customDate+"T12:00:00"):new Date());
+                    const cur=data.profilePhotoIds||[];
+                    const pinnedThisWeek=cur.filter(id=>{const e=data.logs.find(l=>l.id===id);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeekStart;});
+                    const weekFull=!pinOnSave&&pinnedThisWeek.length>=3;
+                    return(
+                      <div onClick={()=>{ if(!weekFull) setPinOnSave(p=>!p); }}
+                        style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
+                          background:pinOnSave?th.accent+"22":"none",
+                          border:`1px solid ${pinOnSave?th.accent:weekFull?"transparent":th.border}`,
+                          cursor:weekFull?"default":"pointer",
+                          color:pinOnSave?th.accent:weekFull?th.sub:th.sub,
+                          opacity:weekFull?0.45:1,
+                          fontSize:11,fontWeight:pinOnSave?600:400,alignSelf:"flex-start"}}>
+                        <span style={{fontSize:10}}>{pinOnSave?"✦":"○"}</span>
+                        {pinOnSave?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
+                      </div>
+                    );
+                  })()}
                 </div>
               ):(
                 <button onMouseDown={e=>e.preventDefault()} onClick={()=>actPhotoRef.current?.click()}
@@ -2752,7 +3068,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
       {id:"home",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="home"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="home"?mnEmboss:"none"}}><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>},
       {id:"timeline",icon:<TimelineTabIcon accent={tab==="timeline"?mnSilver:th.sub} sub={th.sub} active={tab==="timeline"} flash={flash} animKey={animKey}/>},
       {id:"profile",icon:tab==="profile"
-        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mnSilver} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:mnEmboss}}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ?<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mnSilver} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{filter:mnEmboss}}><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>
         :<span style={{opacity:0.45,display:"flex",alignItems:"center",justifyContent:"center"}}>{avDisplay}</span>},
       {id:"mystory",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="mystory"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="mystory"?mnEmboss:"none"}}><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/><path d="M9.5 9.5l5 5"/></svg>},
       {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab==="settings"?mnSilver:th.sub} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{filter:tab==="settings"?mnEmboss:"none"}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>},
@@ -2907,7 +3223,14 @@ function HomePage({data,onOpenLog,onRelog}){
   const t=T[data.language]||T.en;
   const h=new Date().getHours();
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
-  const weekLogs=getWeekLogs(data.logs);
+        // Calendar week (Sun–Sat) for vibe breakdown.
+        // NOTE: For now, use a fixed range requested by user.
+        const weekStart=new Date("2026-03-08T00:00:00");
+        const weekEnd=new Date("2026-03-15T00:00:00"); // exclusive
+        const weekLogs=data.logs.filter(l=>{
+          const d=new Date(l.date);
+          return d>=weekStart&&d<weekEnd;
+        });
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
   const totalWeek=weekLogs.length;
 
@@ -2993,7 +3316,7 @@ function HomePage({data,onOpenLog,onRelog}){
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {top.map(({log,count},i)=>{
               const meta=CAT_MAP[log.category];
-              const skipG=["Film","Custom","Movies","Music","Books","Food","Games","Activities"];
+              const skipG=["Movies","Music","Books","Food","Games","Activities","Custom"];
               const libM=(LIBRARY[log.category]||[]).find(x=>x.title.toLowerCase()===log.title.toLowerCase());
               const genre=(libM?.genre&&!skipG.includes(libM.genre)?libM.genre:null)||(log.genre&&!skipG.includes(log.genre)?log.genre:null)||null;
               const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
@@ -3060,8 +3383,12 @@ function _wordOverlap(a, b) {
 function _substringScore(custom, libTitle) {
   const a = custom.toLowerCase().trim();
   const b = libTitle.toLowerCase().trim();
+  // Don't match if custom title is too short to be meaningful
+  if(a.length < 3) return 0;
+  // Don't match if custom title is less than 40% of library title length (e.g. "T" vs "Concert")
+  if(a.length < b.length * 0.4) return 0;
   if(b === a) return 1.0;
-  if(b.includes(a)) return 0.85; // "Manok" in "Lechon Manok"
+  if(b.includes(a)) return 0.85;
   if(a.includes(b)) return 0.7;
   return 0;
 }
@@ -3098,7 +3425,7 @@ function getBestLibrarySuggestion(log, dismissedSugg) {
   if(dismissed.never){ _suggCache[log.id]=null; return null; }
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
-  let best = null, bestScore = 0.32;
+  let best = null, bestScore = 0.45;
   lib.forEach(item => {
     if(skipped.has(item.title)) return;
     const score = _fuzzyScore(log.title, item.title);
@@ -3135,7 +3462,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
 }
 
 // ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
-function SwipeableEntry({log, th, onDelete, onSave, data}){
+function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   const [drag,setDrag]=useState(0);
   const [confirmed,setConfirmed]=useState(false);
   const startX=useRef(null);
@@ -3157,6 +3484,8 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
   const [useToday,setUseToday]=useState(false);
   const [titleResults,setTitleResults]=useState([]);
   const [titleEdited,setTitleEdited]=useState(false);
+  const [pinChanged,setPinChanged]=useState(false);
+  const editPhotoRef=useRef(null);
 
   // Autocomplete: only fires after user has actually changed the title
   useEffect(()=>{
@@ -3174,7 +3503,8 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     editRating!==(log.rating||null)||
     editCat!==log.category||
     editDate!==((log.customDate||(log.date||"").split("T")[0])||"")||
-    editPhotos.length!==((log.actPhotos||[]).length)
+    editPhotos.length!==((log.actPhotos||[]).length)||
+    pinChanged
   );
 
   const handleTap=()=>{
@@ -3194,6 +3524,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     setUseToday(false);
     setTitleEdited(false);
     setTitleResults([]);
+    setPinChanged(false);
     setEditing(true);
     setExpanded(true);
   };
@@ -3204,6 +3535,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
     setShowCatPicker(false);
     setTitleResults([]);
     setTitleEdited(false);
+    setPinChanged(false);
   };
 
   const saveEdit=e=>{
@@ -3234,7 +3566,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
   const progress=Math.min(Math.abs(drag)/DELETE_THRESHOLD,1);
   const lib=(LIBRARY[log.category]||[]);
   const libMatch=lib.find(i=>i.title.toLowerCase()===log.title.toLowerCase());
-  const skipG=["Film","Movies","Music","Books","Food","Games","Activities","Custom"];
+  const skipG=["Movies","Music","Books","Food","Games","Activities","Custom"];
   const genre=(libMatch?.genre&&!skipG.includes(libMatch.genre)?libMatch.genre:null)||(log.genre&&!skipG.includes(log.genre)&&log.genre!=="Custom"?log.genre:null);
   const yr=(log.year&&log.year!==""?log.year:null)||(log.category==="movies"?MOVIE_YEARS[log.title]:null);
   const activeMeta=CAT_MAP[editing?editCat:log.category];
@@ -3339,11 +3671,16 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
 
           {/* Category picker */}
           {editing&&showCatPicker&&(
-            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",flexWrap:"wrap",gap:6}}>
+            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
               {CATEGORIES.map(c=>(
-                <button key={c.id} onClick={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
-                  style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,cursor:"pointer",
-                    border:"none",background:editCat===c.id?c.color:th.bg,color:editCat===c.id?"#fff":th.sub}}>
+                <button key={c.id}
+                  onTouchEnd={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
+                  onClick={e=>{e.stopPropagation();setEditCat(c.id);setShowCatPicker(false);}}
+                  style={{padding:"5px 12px",borderRadius:99,fontSize:11,fontWeight:600,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",
+                    border:`1.5px solid ${editCat===c.id?c.color:th.border}`,
+                    background:editCat===c.id?c.color:"transparent",
+                    color:editCat===c.id?"#fff":th.sub,
+                    boxShadow:editCat===c.id?`0 2px 8px ${c.color}40`:"none"}}>
                   {c.emoji} {c.labelEn}
                 </button>
               ))}
@@ -3352,7 +3689,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
 
           {/* Expanded section (non-steps only) */}
           {expanded&&!isSteps&&(
-            <div onClick={e=>e.stopPropagation()} style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
+            <div onClick={e=>e.stopPropagation()} className="selectable" style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
               {/* Rating — movies only, expanded view */}
               {(log.category==="movies"||editCat==="movies")&&(()=>{
                 const displayRating=editing?editRating:log.rating;
@@ -3413,6 +3750,72 @@ function SwipeableEntry({log, th, onDelete, onSave, data}){
                   ))}
                 </div>
               )}
+              {/* Add photo button — only when no photo yet (1 photo max) */}
+              {editing&&editPhotos.length===0&&(
+                <>
+                  <input ref={editPhotoRef} type="file" accept="image/*" style={{display:"none"}}
+                    onClick={e=>e.stopPropagation()}
+                    onChange={e=>{
+                      e.stopPropagation();
+                      const f=e.target.files[0]; if(!f) return;
+                      const r=new FileReader();
+                      r.onload=ev=>{
+                        const img=new Image();
+                        img.onload=()=>{
+                          const MAX=800; const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+                          const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+                          const c=document.createElement("canvas");c.width=w;c.height=h;
+                          c.getContext("2d").drawImage(img,0,0,w,h);
+                          setEditPhotos(p=>[...p,c.toDataURL("image/jpeg",0.8)]);
+                        };
+                        img.src=ev.target.result;
+                      };
+                      r.readAsDataURL(f);
+                      e.target.value="";
+                    }}
+                  />
+                  <button
+                    onMouseDown={e=>e.preventDefault()}
+                    onClick={e=>{e.stopPropagation();editPhotoRef.current?.click();}}
+                    style={{background:"none",border:`1px dashed ${th.border}`,borderRadius:8,
+                      cursor:"pointer",color:th.sub,fontSize:11,
+                      display:"flex",alignItems:"center",gap:6,padding:"6px 10px",alignSelf:"flex-start"}}>
+                    <span style={{fontSize:13,opacity:0.7}}>📷</span>
+                    <span>{editPhotos.length>0?"Add another photo":"Attach a photo"}</span>
+                  </button>
+                </>
+              )}
+              {/* Show on profile toggle — only when entry has photos */}
+              {editing&&editPhotos.length>0&&(()=>{
+                const pinned=data.profilePhotoIds||[];
+                const isPinned=pinned.includes(log.id);
+                const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
+                const entryWeekStart=getWeekStart(new Date(log.customDate?log.customDate+"T12:00:00":log.date));
+                const pinnedThisWeek=pinned.filter(id=>{const e=data.logs.find(l=>l.id===id);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeekStart;});
+                const weekFull=!isPinned&&pinnedThisWeek.length>=3;
+                const toggle=()=>{
+                  const cur=data.profilePhotoIds||[];
+                  const next=isPinned?cur.filter(id=>id!==log.id):[...cur,log.id];
+                  onChange({profilePhotoIds:next});
+                  setPinChanged(p=>!p);
+                };
+                return(
+                  <div
+                    onTouchStart={e=>e.stopPropagation()}
+                    onTouchEnd={e=>{e.stopPropagation();e.preventDefault();if(!weekFull)toggle();}}
+                    onClick={e=>{e.stopPropagation();if(!weekFull)toggle();}}
+                    style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,
+                      background:isPinned?th.accent+"22":"none",
+                      border:`1px solid ${isPinned?th.accent:th.border}`,
+                      cursor:weekFull?"default":"pointer",color:isPinned?th.accent:th.sub,
+                      opacity:weekFull?0.4:1,
+                      fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start",
+                      userSelect:"none",WebkitUserSelect:"none",WebkitTouchCallout:"none"}}>
+                    <span style={{fontSize:10}}>{isPinned?"✦":"○"}</span>
+                    {isPinned?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
+                  </div>
+                );
+              })()}
               {/* Date picker */}
               {editing&&(
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -3600,6 +4003,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
     <SwipeableEntry key={log.id||i} log={log} th={th} data={data}
       onDelete={()=>handleSoftDelete(log)}
       onSave={onSave}
+      onChange={onUpdateData}
     />
   );
 
@@ -3769,207 +4173,397 @@ function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada,on
   );
 }
 
-// ─── SUGGESTION DECK (one at a time, 10 daily, loops) ────────────────────────
-function SuggestionDeck({data,onFeedback,onUpdateSuggState}){
-  const th=THEMES[data.theme];
+// ─── DISCOVER PAGE — stacked category cards ─────────────────────────────────
+// 6 category cards stacked like a deck. Swipe left/right to move between
+// categories. Each card shows one suggestion on load (counts as 1 use).
+// Generate button fetches the next suggestion per category (5/day free).
+// Beta mode bypasses the daily limit entirely.
+
+const DISCOVER_FREE_LIMIT = 5;
+const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
+
+// Build a per-category suggestion pool, scored by taste profile
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) {
+  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
+  let items = LIBRARY[cat]||[];
+  if(cat==="movies" && libraryMovies && libraryMovies.length){
+    const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
+    const dynTitles=new Set(dyn.map(m=>m.title.toLowerCase()));
+    items=[...dyn,...items.filter(i=>!dynTitles.has(i.title.toLowerCase()))];
+  }
+  const logged=new Set(logs.filter(l=>l.category===cat).map(l=>l.title));
+  const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
+  const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
+  const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
+  return items
+    .filter(i=>!logged.has(i.title)&&!disliked.has(i.title))
+    .map(i=>{
+      let score=(i.ph?8:0)+Math.random()*4;
+      const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
+      score+=tagScore*0.5;
+      if(cat==="food"){
+        if(geoFoodSuggs){const gi=geoFoodSuggs.findIndex(f=>f.title===i.title);if(gi>=0)score+=(20-gi);else score-=10;}
+        if(varietyBoosts?.underrepTags&&(i.tags||[]).some(t=>varietyBoosts.underrepTags.has(t)))score+=12;
+        if(varietyBoosts?.dominantTags&&(i.tags||[]).some(t=>varietyBoosts.dominantTags.has(t)))score-=4;
+      }
+      return {...i,category:cat,score};
+    })
+    .sort((a,b)=>b.score-a.score||Math.random()-0.5);
+}
+
+function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onSwipePrev}){
   const today=todayKey();
+  const lang=data.language;
+  const catInfo=CAT_MAP[cat];
+  const FREE_LIMIT=DISCOVER_FREE_LIMIT;
 
-  // Build queue and descriptions ONCE at init — never re-compute on each render
-  // If location is enabled, fetch region and rebuild queue with GPS boost
-  const [queue,setQueue]=useState(()=>{
-    if(data.suggDate===today && data.suggQueue?.length) return data.suggQueue;
-    return buildSuggestionQueue(data.logs, data.feedback, null);
+  // Per-category queue — persisted in data.discoverQueues
+  const [pool,setPool]=useState(()=>{
+    const saved=data.discoverQueues?.[cat];
+    if(saved&&saved.length) return saved;
+    return buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[]);
   });
-  const [descriptions,setDescriptions]=useState(()=>{
-    const q=data.suggDate===today&&data.suggQueue?.length?data.suggQueue:buildSuggestionQueue(data.logs,data.feedback,null);
-    return q.map((item,i)=>generateDescription(item,data.logs,data.feedback,i));
-  });
+  const [poolIdx,setPoolIdx]=useState(0);
 
-  // Async GPS boost — only if user opted in
-  // Uses cached location if available, fetches fresh if not
+  // Daily generate count per category
+  const todayCounts=data.discoverDate===today?(data.discoverCounts||{}):{};
+  const usedToday=todayCounts[cat]||0;
+  const canGenerate=data.betaMode||usedToday<FREE_LIMIT;
+
   useEffect(()=>{
-    if(!data.locationEnabled) return; // location off = taste-only suggestions
-    if(data.suggDate===today && data.suggQueue?.length) return; // already have today's queue
+    if(!data.betaMode&&(data.discoverDate!==today||!(data.discoverCounts||{})[cat])){
+      onChange("__batch__",{discoverCounts:{...todayCounts,[cat]:1},discoverDate:today});
+    }
+  },[cat]);
+
+  // Count the first suggestion on mount (it counts as use #1)
+  const mountedRef=useRef(false);
+  useEffect(()=>{
+    if(mountedRef.current) return;
+    mountedRef.current=true;
+    if(!pool.length) return;
+    // Only count if we haven't already counted today for this cat
+    const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
+    if((tc[cat]||0)>0) return; // already counted today
+    const newCounts={...tc,[cat]:1};
+    onChange("__batch__",{discoverCounts:newCounts,discoverDate:today});
+  },[]);
+
+  // GPS boost for food on mount
+  useEffect(()=>{
+    if(cat!=="food"||!data.locationEnabled) return;
     (async()=>{
-      // Use in-memory cache first, then localStorage, then fetch fresh
-      const locationData = _gpsCache || await getPhRegion();
-      if(!locationData) return;
-      const boosted = buildSuggestionQueue(data.logs, data.feedback, locationData);
-      setQueue(boosted);
-      setDescriptions(boosted.map((item,i)=>generateDescription(item,data.logs,data.feedback,i)));
+      const loc=_gpsCache||await getPhRegion();
+      if(!loc) return;
+      const boosted=buildCatPool(cat,data.logs,data.feedback,loc,data.libraryMovies||[]);
+      setPool(boosted);
     })();
   },[]);
-  const [index,setIndex]=useState(()=>(data.suggDate===today?data.suggIndex||0:0));
 
-  // Only persist on index change, not every render
-  const prevIndex=useRef(index);
-  useEffect(()=>{
-    if(prevIndex.current!==index){
-      prevIndex.current=index;
-      onUpdateSuggState({suggQueue:queue,suggIndex:index,suggDate:today});
-    }
-  },[index]);
+  const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
+  const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
 
-  const currentItem=queue.length?queue[index%queue.length]:null;
-  const displayIndex=index%(queue.length||1);
-  const currentDesc=descriptions[displayIndex]||"";
-
-  const handleLeft=(item)=>{setIndex(i=>i+1);}; // visual only
-  const handleRight=(item)=>{setIndex(i=>i+1);}; // visual only
-
-  // "Find near me" handler for food suggestions
-  const handleFindNearMe=(title)=>{
-    const query=encodeURIComponent(title+" near me");
-    window.open(`https://www.google.com/search?q=${query}`,"_blank");
+  const handleGenerate=()=>{
+    if(!canGenerate) return;
+    const newIdx=poolIdx+1;
+    setPoolIdx(newIdx);
+    // Persist updated queue state and increment count
+    const newCounts={...todayCounts,[cat]:(usedToday+1)};
+    const newQueues={...(data.discoverQueues||{}),[cat]:pool};
+    onChange("__batch__",{
+      discoverCounts:newCounts,
+      discoverDate:today,
+      discoverQueues:newQueues,
+    });
   };
 
-  if(!currentItem) return(
-    <div style={{textAlign:"center",padding:"32px 20px",color:"var(--sub)"}}>
-      <div style={{fontSize:40,marginBottom:10}}>🌿</div>
-      <p style={{fontSize:14}}>{(T[data.language]||T.en).no_suggestions}</p>
-    </div>
-  );
+  const handleFindNearMe=(title)=>{
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(title+" near me")}`,"_blank");
+  };
+
+  // Swipe handling — left/right moves between categories
+  const startX=useRef(null);
+  const [drag,setDrag]=useState(0);
+  const [animDir,setAnimDir]=useState(null);
+
+  const hs=e=>{ if(!isTop)return; startX.current=(e.touches?e.touches[0]:e).clientX; };
+  const hm=e=>{ if(!isTop||startX.current===null)return; setDrag((e.touches?e.touches[0]:e).clientX-startX.current); };
+  const he=()=>{
+    if(!isTop||startX.current===null)return;
+    if(drag>60){setAnimDir("right");setTimeout(()=>{setDrag(0);setAnimDir(null);onSwipePrev();},220);}
+    else if(drag<-60){setAnimDir("left");setTimeout(()=>{setDrag(0);setAnimDir(null);onSwipeNext();},220);}
+    else setDrag(0);
+    startX.current=null;
+  };
+
+  const tx=animDir==="left"?-420:animDir==="right"?420:drag;
+  const rot=animDir==="left"?-8:animDir==="right"?8:drag*0.025;
 
   return(
-    <div>
-      <SingleCard
-        key={displayIndex}
-        item={currentItem} description={currentDesc}
-        index={displayIndex} total={queue.length}
-        onLeft={handleLeft} onRight={handleRight}
-        th={th} isBarkada={false}
-        onFindNearMe={handleFindNearMe}
-      />
-      {index>0&&index%queue.length===0&&(
-        <div style={{textAlign:"center",padding:"8px",fontSize:12,color:"var(--sub)",fontStyle:"italic",opacity:0.7,marginTop:8}}>
-          🔄 Looping — refreshes tomorrow
+    <div style={{
+      position:"absolute",top:0,
+      left:stackOffset*7,right:stackOffset*7,
+      transform:isTop
+        ?`translateX(${tx}px) rotate(${rot}deg)`
+        :`translate(${stackOffset*10}px,${-stackOffset*10}px) scale(${1-stackOffset*0.03})`,
+      transition:isTop?(animDir?"transform 0.22s ease-in":(drag===0?"transform 0.18s":"none")):"none",
+      zIndex:10-stackOffset,
+      pointerEvents:isTop?"auto":"none",
+      transformOrigin:"top right",
+      opacity:1-stackOffset*0.1,
+    }}>
+      <div style={{
+        borderRadius:22,
+        background:th.card,
+        border:`1px solid ${th.border}`,
+        boxShadow:isTop
+          ?"0 8px 32px rgba(0,0,0,0.18)"
+          :`0 ${2+stackOffset*2}px ${8+stackOffset*8}px rgba(0,0,0,${0.06+stackOffset*0.04})`,
+        overflow:"hidden",
+      }}>
+        {/* Category color bar */}
+        <div style={{height:4,background:`linear-gradient(90deg,${catInfo.color},${catInfo.color}88)`}}/>
+
+        <div style={{padding:"20px 20px 18px"}}>
+          {/* Header */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:22}}>{catInfo.emoji}</span>
+              <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:th.text}}>
+                {lang==="fil"?catInfo.label:catInfo.labelEn}
+              </span>
+            </div>
+            {/* Dot indicators */}
+            <div style={{display:"flex",gap:4}}>
+              {DISCOVER_CATS.map((c,i)=>(
+                <div key={c} style={{
+                  width:c===cat?16:6,height:6,borderRadius:3,
+                  background:c===cat?catInfo.color:th.border,
+                  transition:"all 0.2s",
+                }}/>
+              ))}
+            </div>
+          </div>
+
+          {/* Suggestion */}
+          {currentItem?(
+            <>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:th.text,lineHeight:1.3,marginBottom:14}}>
+                {currentItem.title}
+                {currentItem.category==="movies"&&(()=>{const y=currentItem.year||MOVIE_YEARS[currentItem.title];return y?<span style={{fontSize:13,fontWeight:400,opacity:0.55}}> ({y})</span>:null;})()}
+              </div>
+              <div style={{padding:"12px 14px",borderRadius:14,background:`${catInfo.color}12`,borderLeft:`3px solid ${catInfo.color}`,marginBottom:16}}>
+                <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this for you</div>
+                <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
+              </div>
+              {/* Food: find near me */}
+              {cat==="food"&&(
+                <button onClick={()=>handleFindNearMe(currentItem.title)}
+                  style={{width:"100%",padding:"9px",borderRadius:11,background:"transparent",
+                    border:`1px solid ${th.border}`,fontSize:12,fontWeight:600,color:th.sub,
+                    display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",marginBottom:12}}>
+                  🔍 Find near me
+                </button>
+              )}
+            </>
+          ):(
+            <div style={{textAlign:"center",padding:"28px 0",color:th.sub}}>
+              <div style={{fontSize:32,marginBottom:8}}>🌿</div>
+              <div style={{fontSize:13}}>Log more to unlock suggestions</div>
+            </div>
+          )}
+
+          {/* Generate button / limit message */}
+          {currentItem&&(
+            canGenerate?(
+              <button onClick={handleGenerate} style={{
+                width:"100%",padding:"11px",borderRadius:13,
+                background:catInfo.color,color:"#fff",
+                fontSize:13,fontWeight:700,border:"none",cursor:"pointer",
+                display:"flex",alignItems:"center",justifyContent:"center",gap:6,
+              }}>
+                ✦ Generate
+                {!data.betaMode&&<span style={{fontSize:11,opacity:0.75,fontWeight:500}}>({FREE_LIMIT-usedToday} left)</span>}
+              </button>
+            ):(
+              <div style={{textAlign:"center",padding:"10px",borderRadius:13,background:`${catInfo.color}12`,border:`1px solid ${catInfo.color}30`}}>
+                <div style={{fontSize:12,color:catInfo.color,fontWeight:600}}>You've hit your limit for today</div>
+                <div style={{fontSize:11,color:th.sub,marginTop:3}}>Come back tomorrow for more picks</div>
+              </div>
+            )
+          )}
         </div>
-      )}
+
+
+      </div>
     </div>
   );
 }
 
-// ─── BARKADA DECK (5 per day, one at a time, loops) ──────────────────────────
-function BarkadaDeck({data,onUpdateBarkadaState}){
+function DiscoverDeck({data,onChange}){
   const th=THEMES[data.theme];
-  const today=todayKey();
-  const [queue]=useState(()=>{
-    if(data.barkadaDate===today&&data.barkadaQueue?.length) return data.barkadaQueue;
-    return [...BARKADA_POOL].sort(()=>Math.random()-0.5).slice(0,5);
-  });
-  const [descriptions]=useState(()=>{
-    const q=data.barkadaDate===today&&data.barkadaQueue?.length?data.barkadaQueue:[...BARKADA_POOL].sort(()=>Math.random()-0.5).slice(0,5);
-    return q.map((_,i)=>generateBarkadaDescription(_,i));
-  });
-  const [index,setIndex]=useState(()=>(data.barkadaDate===today?data.barkadaIndex||0:0));
+  const [catIdx,setCatIdx]=useState(0);
 
-  const prevIndex=useRef(index);
-  useEffect(()=>{
-    if(prevIndex.current!==index){
-      prevIndex.current=index;
-      onUpdateBarkadaState({barkadaQueue:queue,barkadaIndex:index,barkadaDate:today});
-    }
-  },[index]);
+  const goNext=()=>setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
+  const goPrev=()=>setCatIdx(i=>(i-1+DISCOVER_CATS.length)%DISCOVER_CATS.length);
 
-  const currentItem=queue.length?queue[index%queue.length]:null;
-  const displayIndex=index%(queue.length||1);
-
-  const handleLeft=()=>setIndex(i=>i+1);
-  const handleRight=()=>setIndex(i=>i+1);
-
-  if(!currentItem) return(
-    <div style={{textAlign:"center",padding:"28px",color:"var(--sub)",fontSize:13}}>
-      <div style={{fontSize:32,marginBottom:8}}>🍻</div>
-      <p>Come back tomorrow for fresh picks!</p>
-    </div>
-  );
-
+  // Calculate card height — needs to be fixed so stack works
   return(
-    <div>
-      <SingleCard
-        key={`b-${displayIndex}`}
-        item={currentItem} description={descriptions[displayIndex]||""}
-        index={displayIndex} total={queue.length}
-        onLeft={handleLeft} onRight={handleRight}
-        th={th} isBarkada={true}
-      />
-      {index>0&&index%queue.length===0&&(
-        <div style={{textAlign:"center",padding:"8px",fontSize:12,color:"var(--sub)",fontStyle:"italic",opacity:0.7,marginTop:8}}>
-          🔄 Looping — 5 fresh picks tomorrow
-        </div>
-      )}
+    <div style={{position:"relative",height:460,marginBottom:16,paddingTop:24}}>
+      {/* Render 3 cards: current + 2 behind */}
+      {[2,1,0].map(offset=>{
+        const idx=(catIdx+offset)%DISCOVER_CATS.length;
+        const cat=DISCOVER_CATS[idx];
+        return(
+          <DiscoverCatCard
+            key={cat}
+            cat={cat}
+            data={data}
+            onChange={onChange}
+            th={th}
+            isTop={offset===0}
+            stackOffset={offset}
+            onSwipeNext={goNext}
+            onSwipePrev={goPrev}
+          />
+        );
+      })}
     </div>
   );
 }
 
-// ─── MY STORY PAGE ────────────────────────────────────────────────────────────
-function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState}){
+
+// ─── BARKADA CARD — same stacked treatment as discover cats ──────────────────
+function BarkadaStackCard({data,onChange,th,isTop,stackOffset}){
+  const today=todayKey();
+  const FREE_LIMIT=DISCOVER_FREE_LIMIT;
+
+  const [pool]=useState(()=>{
+    if(data.barkadaDate===today&&data.barkadaQueue?.length) return data.barkadaQueue;
+    return [...BARKADA_POOL].sort(()=>Math.random()-0.5);
+  });
+  const [poolIdx,setPoolIdx]=useState(()=>data.barkadaDate===today?data.barkadaIndex||0:0);
+
+  const todayCounts=data.discoverDate===today?(data.discoverCounts||{}):{};
+  const usedToday=todayCounts["barkada"]||0;
+  const canGenerate=data.betaMode||usedToday<FREE_LIMIT;
+
+  // Count first suggestion on mount
+  const mountedRef=useRef(false);
+  useEffect(()=>{
+    if(mountedRef.current) return;
+    mountedRef.current=true;
+    if(!pool.length) return;
+    const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
+    if((tc["barkada"]||0)>0) return;
+    onChange("__batch__",{discoverCounts:{...tc,barkada:1},discoverDate:today});
+  },[]);
+
+  const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
+  const description=currentItem?generateBarkadaDescription(currentItem,poolIdx):"";
+
+  const handleGenerate=()=>{
+    if(!canGenerate) return;
+    const newIdx=poolIdx+1;
+    setPoolIdx(newIdx);
+    const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
+    const newCounts={...tc,barkada:(usedToday+1)};
+    onChange("__batch__",{
+      discoverCounts:newCounts,discoverDate:today,
+      barkadaQueue:pool,barkadaIndex:newIdx,barkadaDate:today,
+    });
+  };
+
+  const handleFindNearMe=(title)=>{
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(title+" near me")}`,"_blank");
+  };
+
+  return(
+    <div>
+      <div style={{
+        borderRadius:22,
+        background:th.card,
+        border:`1px solid ${th.border}`,
+        boxShadow:isTop
+          ?"0 8px 32px rgba(0,0,0,0.18)"
+          :`0 ${2+stackOffset*2}px ${8+stackOffset*8}px rgba(0,0,0,${0.06+stackOffset*0.04})`,
+        overflow:"hidden",
+      }}>
+        <div style={{height:4,background:`linear-gradient(90deg,${th.accent2||th.accent},${th.accent}88)`}}/>
+        <div style={{padding:"20px 20px 18px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+            <span style={{fontSize:22}}>🍻</span>
+            <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:th.text}}>Barkada Picks</span>
+          </div>
+          {currentItem?(
+            <>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:th.text,lineHeight:1.3,marginBottom:14}}>
+                {currentItem.title}
+              </div>
+              <div style={{padding:"12px 14px",borderRadius:14,background:`${th.accent2||th.accent}12`,borderLeft:`3px solid ${th.accent2||th.accent}`,marginBottom:16}}>
+                <div style={{fontSize:10,fontWeight:700,color:th.accent2||th.accent,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this for the barkada</div>
+                <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
+              </div>
+
+              {canGenerate?(
+                <button onClick={handleGenerate} style={{
+                  width:"100%",padding:"11px",borderRadius:13,
+                  background:th.accent2||th.accent,color:"#fff",
+                  fontSize:13,fontWeight:700,border:"none",cursor:"pointer",
+                  display:"flex",alignItems:"center",justifyContent:"center",gap:6,
+                }}>
+                  ✦ Generate
+                  {!data.betaMode&&<span style={{fontSize:11,opacity:0.75,fontWeight:500}}>({FREE_LIMIT-usedToday} left)</span>}
+                </button>
+              ):(
+                <div style={{textAlign:"center",padding:"10px",borderRadius:13,background:`${th.accent}12`,border:`1px solid ${th.accent}30`}}>
+                  <div style={{fontSize:12,color:th.accent,fontWeight:600}}>You've hit your limit for today</div>
+                  <div style={{fontSize:11,color:th.sub,marginTop:3}}>Come back tomorrow for more picks</div>
+                </div>
+              )}
+            </>
+          ):(
+            <div style={{textAlign:"center",padding:"28px 0",color:th.sub}}>
+              <div style={{fontSize:32,marginBottom:8}}>🍻</div>
+              <div style={{fontSize:13}}>No picks available</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BarkadaDeckStack({data,onChange,th}){
+  return(
+    <div style={{marginBottom:16}}>
+      <BarkadaStackCard
+        data={data}
+        onChange={onChange}
+        th={th}
+        isTop={true}
+        stackOffset={0}
+      />
+    </div>
+  );
+}
+
+function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onChange}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
-  const lang=data.language;
-  const weekLogs=getWeekLogs(data.logs);
-  const archetype=getArchetype(weekLogs.length?weekLogs:data.logs);
-  const [showCard,setShowCard]=useState(false);
-  const av=AVATARS.find(a=>a.id===data.avatar);
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:4}}>{t.my_story} ✨</h1>
-      <p style={{color:th.sub,fontSize:13,marginBottom:20}}>{t.last_7_days} · {weekLogs.length} {t.entries}</p>
-
-      {/* Archetype — tap to open shareable image */}
-      {archetype?(
-        <div style={{borderRadius:20,padding:"22px 20px",marginBottom:24,background:`linear-gradient(135deg,${th.accent}33,${th.accent2}22)`,border:`1px solid ${th.accent}55`}}>
-          <div style={{fontSize:44,marginBottom:10}}>{archetype.emoji}</div>
-          <div style={{fontSize:10,color:th.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginBottom:6}}>{t.archetype_this_week}</div>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:th.text,marginBottom:8}}>{lang==="fil"?archetype.nameFil:archetype.name}</h2>
-          <p style={{fontSize:14,color:th.sub,lineHeight:1.6,marginBottom:16}}>{lang==="fil"?archetype.descFil:archetype.desc}</p>
-          <button onClick={()=>setShowCard(true)} style={{padding:"11px 22px",borderRadius:12,background:th.accent,color:"#fff",fontWeight:700,fontSize:14,boxShadow:`0 6px 20px ${th.accent}44`,display:"flex",alignItems:"center",gap:8}}>
-            <span>📤</span> {t.share_my_story}
-          </button>
-        </div>
-      ):(
-        <div style={{borderRadius:20,padding:"22px",marginBottom:24,textAlign:"center",background:th.card,border:`1px solid ${th.border}`}}>
-          <div style={{fontSize:36,marginBottom:8}}>📖</div>
-          <p style={{color:th.sub,fontSize:14}}>{t.log_more_archetype}</p>
-        </div>
-      )}
-
-      {/* Suggestions */}
-      <div style={{marginBottom:32}}>
-        <h2 style={{fontSize:16,fontWeight:700,color:th.text,marginBottom:4}}>{t.suggestions}</h2>
-        <p style={{fontSize:12,color:th.sub,marginBottom:6,lineHeight:1.5}}>
-          {lang==="fil"?"10 picks sa isang araw · batay sa iyong panlasa":"10 picks a day · based on your taste profile"}
-        </p>
-        {/* Swipe instructions */}
-        <div style={{display:"flex",gap:10,marginBottom:16}}>
-          <div style={{flex:1,padding:"9px 12px",borderRadius:12,background:"#ef444410",border:"1px solid #ef444420",textAlign:"center"}}>
-            <span style={{fontSize:16}}>👈</span>
-            <div style={{fontSize:10,fontWeight:600,color:"#ef4444",marginTop:3}}>{lang==="fil"?"Swipe kaliwa para laktawan":"Swipe left to skip"}</div>
-          </div>
-          <div style={{flex:1,padding:"9px 12px",borderRadius:12,background:"#22c55e10",border:"1px solid #22c55e20",textAlign:"center"}}>
-            <span style={{fontSize:16}}>👉</span>
-            <div style={{fontSize:10,fontWeight:600,color:"#22c55e",marginTop:3}}>{lang==="fil"?"Swipe kanan para gustuhin":"Swipe right to like"}</div>
-          </div>
-        </div>
-        <SuggestionDeck data={data} onFeedback={onFeedback} onUpdateSuggState={onUpdateSuggState}/>
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
+      <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
+        {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
+      </p>
+      <DiscoverDeck data={data} onChange={onChange}/>
+      <div style={{marginTop:8}}>
+        <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,marginBottom:6}}>Barkada Picks 🍻</h2>
+        <p style={{fontSize:12,color:th.sub,marginBottom:16}}>{(T[data.language]||T.en).barkada_sub}</p>
+        <BarkadaDeckStack data={data} onChange={onChange} th={th}/>
       </div>
-
-      {/* Barkada picks */}
-      <div style={{marginBottom:24}}>
-        <h2 style={{fontSize:16,fontWeight:700,color:th.text,marginBottom:4}}>{t.barkada_picks} 🍻</h2>
-        <p style={{fontSize:12,color:th.sub,marginBottom:16}}>{t.barkada_sub}</p>
-        <BarkadaDeck data={data} onUpdateBarkadaState={onUpdateBarkadaState}/>
-      </div>
-
-      {/* Premium upsell — at the bottom */}
-      <div style={{padding:"14px 18px",borderRadius:16,background:"var(--accent)08",border:"1px dashed var(--accent)44",textAlign:"center"}}>
-        <div style={{fontSize:13,color:"var(--sub)",lineHeight:1.6}}>
-          ✨ <span style={{color:"var(--accent)",fontWeight:700}}>Premium</span> — endless suggestions, refreshed any time
-        </div>
-      </div>
-
-      {showCard&&archetype&&<ShareCardModal archetype={archetype} data={data} av={av} onClose={()=>setShowCard(false)}/>}
     </div>
   );
 }
@@ -4175,72 +4769,62 @@ function StickerIcon({id}){
 // Draws the full sticker onto a canvas context.
 // CARD_H = visible height on profile. BRAND_H = extra strip inside card for "My week on Kwento".
 // On profile, the wrapper clips to CARD_H. In the modal preview, full height shows.
-function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
+function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlass, palette){
   const th=THEMES.manila_nights;
 
   ctx.clearRect(0,0,W,H);
 
-  // ── Rounded card background (full height including branding)
+  // ── Background (skip when using shared glass)
+  if(!sharedGlass){
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
+    if(palette&&palette.bg){
+      const grad=ctx.createLinearGradient(0,0,W,H);
+      grad.addColorStop(0,palette.bg);
+      grad.addColorStop(1,palette.bg2||palette.bg);
+      ctx.fillStyle=grad;
+    } else {
+      ctx.fillStyle="rgba(10,6,20,0.85)";
+    }
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
+
+  // ── Border
   ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(0,0,W,H,20);
-  ctx.clip();
-
-  // Dark glass fill
-  ctx.fillStyle="rgba(10,6,20,0.78)";
-  ctx.fillRect(0,0,W,H);
-
-  // Cyan glow — top left
-  const g1=ctx.createRadialGradient(W*0.15,0,0,W*0.15,0,W*0.75);
-  g1.addColorStop(0,"rgba(0,207,255,0.22)");
-  g1.addColorStop(1,"transparent");
-  ctx.fillStyle=g1; ctx.fillRect(0,0,W,H);
-
-  // Magenta glow — bottom right
-  const g2=ctx.createRadialGradient(W*0.88,CARD_H,0,W*0.88,CARD_H,W*0.65);
-  g2.addColorStop(0,"rgba(255,62,157,0.16)");
-  g2.addColorStop(1,"transparent");
-  ctx.fillStyle=g2; ctx.fillRect(0,0,W,H);
-
+  ctx.beginPath(); ctx.roundRect(0.5,0.5,W-1,H-1,20);
+  ctx.strokeStyle="rgba(200,204,216,0.22)"; ctx.lineWidth=1; ctx.stroke();
   ctx.restore();
 
-  // ── Glass border (full card shape)
-  ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(0.5,0.5,W-1,H-1,20);
-  ctx.strokeStyle="rgba(200,204,216,0.2)";
-  ctx.lineWidth=1;
-  ctx.stroke();
-  ctx.restore();
-
-  // ── Stat content — centred in the CARD_H visible zone
-  // Icon rendered as image-from-SVG (we do this inline via Path2D approximations)
-  // For canvas we draw simplified vector shapes directly
-  // PAD mirrors what CSS `padding: 14px 12px` gives a div.
-  // All content is expressed relative to this inset area so nothing
-  // ever draws flush against the edge, regardless of card width.
-  const PAD=14;
-  const cW=W-PAD*2;       // content width
-  const cH=CARD_H-PAD*2;  // content height (visible zone only)
+  // ── Layout constants
+  const PAD=12;
+  const cW=W-PAD*2;
+  const cH=CARD_H-PAD*2;
   const cx=W/2;
-  // Use the shorter content dimension as the type-size reference
-  // so a wide orphan card gets the same text weight as a normal card.
   const sizeRef=Math.min(cW,cH);
-  const iconScale=(sizeRef/100)*0.9;
-  const valueFontSize=Math.round(sizeRef*0.32);
-  const labelFontSize=Math.round(sizeRef*0.115);
-  const brandFontSize=Math.round(sizeRef*0.10);
-  // Vertical positions expressed as fractions of cH, offset by PAD
-  const iconY=PAD+cH*0.22;
 
+  // Cards where the value IS the identity — no separate label needed
+  const noLabel=["time_vibe","week_pulse"].includes(iconId);
+  // Cards that render value as stacked lines
+  const isMultiline=iconId==="week_breakdown";
+  const isNum=!isMultiline&&!noLabel&&(typeof value==="number"||!isNaN(Number(String(value))));
+  const lc=layout||{colSpan:1,rowSpan:1};
+  const breakdownMode=isMultiline
+    ?(lc.colSpan>=2&&lc.rowSpan===1?"wide":(lc.rowSpan>=2?"tall":"compact"))
+    :null;
+
+  // ── Vertical layout: icon top, value middle, label bottom (unless noLabel)
+  const iconSize=Math.round(sizeRef*0.22);
+  const iconScale=(iconSize/24);
+  const iconY=noLabel||isMultiline ? PAD+cH*0.17 : PAD+cH*0.14;
+  const valueY=noLabel ? PAD+cH*0.60 : isMultiline ? PAD+cH*0.24 : PAD+cH*0.58;
+  const labelY=PAD+cH*0.90;
+
+  // ── Icon
   ctx.save();
-  ctx.strokeStyle="#00cfff";
-  ctx.lineWidth=Math.max(1,1.5*iconScale);
-  ctx.lineCap="round";
-  ctx.lineJoin="round";
-  ctx.translate(cx,iconY);
-  ctx.scale(iconScale,iconScale);
-  ctx.translate(-12,-12); // centre the 24×24 icon
+  ctx.strokeStyle=(palette&&palette.accent)||"#00cfff"; ctx.lineWidth=Math.max(1,1.5*iconScale);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.translate(cx,iconY); ctx.scale(iconScale,iconScale); ctx.translate(-12,-12);
 
   if(iconId==="total"){
     ctx.beginPath(); ctx.moveTo(12,20); ctx.lineTo(21,20); ctx.stroke();
@@ -4248,129 +4832,117 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId){
   } else if(iconId==="days"){
     ctx.beginPath(); ctx.roundRect(3,4,18,18,2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(3,9); ctx.lineTo(21,9); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(9,4); ctx.lineTo(9,9); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(15,4); ctx.lineTo(15,9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9,4); ctx.lineTo(9,9); ctx.moveTo(15,4); ctx.lineTo(15,9); ctx.stroke();
   } else if(iconId==="week"){
     ctx.beginPath(); ctx.arc(12,12,9,0,Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(12,7); ctx.lineTo(12,12); ctx.lineTo(15,15); ctx.stroke();
   } else if(iconId==="liked"){
     ctx.beginPath();
     ctx.moveTo(12,21); ctx.lineTo(4.22,13.22);
-    const r=3.5;
-    ctx.arc(8.5,8.5,r,-Math.PI*0.25,-Math.PI,true);
-    ctx.arc(15.5,8.5,r,-Math.PI,0.1,false);
-    ctx.closePath();
-    ctx.stroke();
+    ctx.arc(8.5,8.5,3.5,-Math.PI*0.25,-Math.PI,true);
+    ctx.arc(15.5,8.5,3.5,-Math.PI,0.1,false);
+    ctx.closePath(); ctx.stroke();
+  } else if(iconId==="steps"){
+    // Footstep pair
+    ctx.beginPath(); ctx.ellipse(9,8,2.5,3.5,0.3,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(15,14,2.5,3.5,-0.3,0,Math.PI*2); ctx.stroke();
+  } else if(iconId==="top_cat"){
+    ctx.beginPath(); ctx.moveTo(12,2); ctx.lineTo(15,9); ctx.lineTo(22,9); ctx.lineTo(17,14); ctx.lineTo(19,21); ctx.lineTo(12,17); ctx.lineTo(5,21); ctx.lineTo(7,14); ctx.lineTo(2,9); ctx.lineTo(9,9); ctx.closePath(); ctx.stroke();
+  } else if(iconId==="time_vibe"){
+    // Moon for night owl, sun for early bird
+    if(String(value).toLowerCase().includes("night")||String(value).toLowerCase().includes("owl")){
+      ctx.beginPath(); ctx.arc(12,12,8,Math.PI*0.6,Math.PI*2.4); ctx.stroke();
+      ctx.beginPath(); ctx.arc(8,8,6,Math.PI*1.2,Math.PI*2.8,true); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(12,12,5,0,Math.PI*2); ctx.stroke();
+      for(let a=0;a<8;a++){ const r=a*Math.PI/4; ctx.beginPath(); ctx.moveTo(12+8*Math.cos(r),12+8*Math.sin(r)); ctx.lineTo(12+10*Math.cos(r),12+10*Math.sin(r)); ctx.stroke(); }
+    }
+  } else if(iconId==="most_logged"){
+    ctx.beginPath(); ctx.roundRect(3,8,18,13,2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(7,13); ctx.lineTo(17,13); ctx.moveTo(7,17); ctx.lineTo(13,17); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(15,3); ctx.lineTo(15,8); ctx.moveTo(12,5); ctx.lineTo(15,2); ctx.lineTo(18,5); ctx.stroke();
+  } else if(iconId==="top_director"){
+    ctx.beginPath(); ctx.roundRect(2,7,20,14,2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16,7); ctx.lineTo(22,4); ctx.lineTo(22,20); ctx.lineTo(16,17); ctx.stroke();
+  } else if(iconId==="top_actor"){
+    ctx.beginPath(); ctx.arc(12,7,4,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4,21); ctx.bezierCurveTo(4,17,8,14,12,14); ctx.bezierCurveTo(16,14,20,17,20,21); ctx.stroke();
+  } else if(iconId==="week_breakdown"){
+    ctx.beginPath(); ctx.moveTo(3,20); ctx.lineTo(3,13); ctx.lineTo(7,13); ctx.lineTo(7,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(10,20); ctx.lineTo(10,8); ctx.lineTo(14,8); ctx.lineTo(14,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(17,20); ctx.lineTo(17,11); ctx.lineTo(21,11); ctx.lineTo(21,20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(2,20); ctx.lineTo(22,20); ctx.stroke();
+  } else if(iconId==="week_pulse"){
+    ctx.beginPath(); ctx.moveTo(2,12); ctx.lineTo(6,7); ctx.lineTo(10,14); ctx.lineTo(14,9); ctx.lineTo(18,12); ctx.lineTo(22,12); ctx.stroke();
   }
   ctx.restore();
 
-  // ── Value number — positioned within the padded content area
+  // ── Value
   ctx.textAlign="center";
-  ctx.font=`bold ${valueFontSize}px 'DM Sans', sans-serif`;
-  ctx.fillStyle=th.accent;
-  ctx.shadowColor=th.accent;
-  ctx.shadowBlur=10;
-  ctx.fillText(String(value), cx, PAD+cH*0.62);
-  ctx.shadowBlur=0;
-  ctx.fillText(String(value), cx, PAD+cH*0.62);
+  const accent=(palette&&palette.accent)||th.accent;
+  ctx.fillStyle=accent;
+  ctx.shadowColor=accent;
 
-  // ── Label
-  ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
-  ctx.fillStyle="rgba(136,120,170,0.9)";
-  ctx.fillText(label.toUpperCase(), cx, PAD+cH*0.84);
+  if(isMultiline){
+    const parts=String(value).split(" · ");
+    const lines=breakdownMode==="wide"
+      ?[parts.join(" · ")]
+      :breakdownMode==="compact"
+        ?[parts[0]||String(value)]
+        :parts;
+    const availH=breakdownMode==="wide"?cH*0.34:cH*0.64;
+    const lineH=availH/lines.length;
+    let fSize=Math.min(Math.round(sizeRef*(breakdownMode==="wide"?0.12:0.14)), Math.round(lineH*0.72));
+    ctx.font=`600 ${fSize}px 'Space Mono', monospace`;
+    const longest=lines.reduce((a,b)=>ctx.measureText(a).width>ctx.measureText(b).width?a:b);
+    while(ctx.measureText(longest).width>cW*0.9&&fSize>8){ fSize--; ctx.font=`600 ${fSize}px 'Space Mono', monospace`; }
+    const startY=valueY+lineH*0.3;
+    lines.forEach((line,i)=>{
+      ctx.shadowBlur=5; ctx.fillText(line,cx,startY+i*lineH);
+      ctx.shadowBlur=0; ctx.fillText(line,cx,startY+i*lineH);
+    });
+  } else if(isNum){
+    const fSize=Math.round(sizeRef*0.32);
+    ctx.font=`bold ${fSize}px 'Playfair Display', Georgia, serif`;
+    ctx.shadowBlur=10; ctx.fillText(String(value),cx,valueY);
+    ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
+  } else {
+    let fSize=Math.round(sizeRef*0.18);
+    ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`;
+    while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){ fSize--; ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`; }
+    ctx.shadowBlur=8; ctx.fillText(String(value),cx,valueY);
+    ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
+  }
 
-  // ── Subtle divider — inset by PAD horizontally
-  ctx.strokeStyle="rgba(200,204,216,0.08)";
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  ctx.moveTo(PAD, CARD_H-1); ctx.lineTo(W-PAD, CARD_H-1);
-  ctx.stroke();
+  // ── Label — only for cards that have a separate label
+  if(!noLabel){
+    const labelFontSize=Math.round(sizeRef*0.10);
+    ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
+    ctx.fillStyle=(palette&&palette.label)||"rgba(136,120,170,0.75)";
+    ctx.shadowBlur=0;
+    ctx.fillText(label.toUpperCase(),cx,labelY);
+  }
 
-  // ── Branding strip — below the visible card area
+  // ── Divider
+  ctx.strokeStyle="rgba(200,204,216,0.08)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,CARD_H-1); ctx.lineTo(W-PAD,CARD_H-1); ctx.stroke();
+
+  // ── Branding
+  const brandFontSize=Math.round(sizeRef*0.09);
   ctx.font=`400 ${brandFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle="rgba(136,120,170,0.5)";
-  ctx.fillText("My week on Kwento", cx, CARD_H+16);
+  ctx.fillText("My week on Kwento",cx,CARD_H+16);
 }
 
-function StatSticker({iconId, label, value, data, onGenerate, span}){
-  const th=THEMES.manila_nights;
+// Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
+function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,rowSpan,sharedGlass,palette}){
   const canvasRef=useRef(null);
-  const wrapRef=useRef(null);
-  const [showPreview,setShowPreview]=useState(false);
-  const BRAND_H=26;
-  const DPR=Math.min(window.devicePixelRatio||1,2);
-
-  useEffect(()=>{
-    const canvas=canvasRef.current;
-    const wrap=wrapRef.current;
-    if(!canvas||!wrap) return;
-
-    function redraw(){
-      const W=wrap.offsetWidth;
-      const CARD_H=wrap.offsetHeight;
-      if(!W||!CARD_H) return; // not laid out yet
-      const H=CARD_H+BRAND_H;
-      canvas.width=W*DPR; canvas.height=H*DPR;
-      canvas.style.width=W+"px"; canvas.style.height=H+"px";
-      const ctx=canvas.getContext("2d");
-      ctx.scale(DPR,DPR);
-      drawSticker(ctx, W, H, CARD_H, label, value, iconId);
-    }
-
-    // Use ResizeObserver so we draw AFTER layout is complete
-    const ro=new ResizeObserver(()=>{ redraw(); ro.disconnect(); });
-    ro.observe(wrap);
-    // Also try immediately in case layout is already known
-    redraw();
-    return ()=>ro.disconnect();
-  },[value,label,iconId]);
-
-  return(
-    <>
-      <div
-        ref={wrapRef}
-        onClick={()=>setShowPreview(true)}
-        style={{
-          position:"relative",overflow:"hidden",
-          borderRadius:16,cursor:"pointer",
-          WebkitTapHighlightColor:"transparent",
-          transition:"transform 0.15s",
-          width:"100%",height:"100%",minHeight:95,
-          ...(span?{gridColumn:"span 3"}:{}),
-        }}
-        onTouchStart={e=>e.currentTarget.style.transform="scale(0.96)"}
-        onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}
-        onTouchCancel={e=>e.currentTarget.style.transform="scale(1)"}
-      >
-        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
-      </div>
-
-      {showPreview&&<StickerPreviewModal
-        iconId={iconId} label={label} value={value} data={data}
-        onClose={()=>setShowPreview(false)}
-        onGenerate={onGenerate}
-      />}
-    </>
-  );
-}
-
-function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
-  const th=THEMES.manila_nights;
-  const canvasRef=useRef(null);
-  const longPressTimer=useRef(null);
-  const [pressing,setPressing]=useState(false);
   const [imgUrl,setImgUrl]=useState(null);
-  const [limitHit,setLimitHit]=useState(false);
-
-  // Larger canvas for the preview — 2× the profile card
-  const SCALE=1.5;
-  const CARD_W=160*SCALE, CARD_H=110*SCALE, BRAND_H=26*SCALE;
+  const CARD_W=240, CARD_H=165, BRAND_H=39;
   const DPR=Math.min(window.devicePixelRatio||1,2);
-
-  // Check freemium limit
   const today=todayKey();
   const genCount=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-  const canGenerate=genCount<STICKER_FREE_LIMIT;
+  const canGenerate=data.betaMode||genCount<STICKER_FREE_LIMIT;
 
   useEffect(()=>{
     const canvas=canvasRef.current;
@@ -4380,99 +4952,662 @@ function StickerPreviewModal({iconId,label,value,data,onClose,onGenerate}){
     canvas.style.width=W+"px"; canvas.style.height=H+"px";
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
-    drawSticker(ctx, W, H, CARD_H, label, value, iconId);
+    drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass,palette);
     setImgUrl(canvas.toDataURL("image/png"));
+    if(canGenerate) onGenerate&&onGenerate();
   },[]);
 
-  const shareSticker=async()=>{
-    if(!imgUrl) return;
-    if(!canGenerate){ setLimitHit(true); return; }
-    // Record the generation
-    onGenerate();
-    try{
-      const res=await fetch(imgUrl);
-      const blob=await res.blob();
-      const file=new File([blob],`kwento-${label.toLowerCase().replace(/\s+/g,"-")}.png`,{type:"image/png"});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"My week on Kwento"});
-      } else {
-        const a=document.createElement("a");
-        a.href=imgUrl; a.download=file.name; a.click();
-      }
-    } catch(e){ console.warn("Share failed",e); }
-  };
+  // Portal to document.body so position:fixed isn't clipped by any scroll container
+  const el=useMemo(()=>document.createElement("div"),[]);
+  useEffect(()=>{
+    document.body.appendChild(el);
+    return ()=>document.body.removeChild(el);
+  },[]);
 
-  const onTouchStart=()=>{
-    setPressing(true);
-    longPressTimer.current=setTimeout(()=>{
-      setPressing(false);
-      shareSticker();
-    },500);
-  };
-  const onTouchEnd=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
-  const onTouchMove=()=>{ setPressing(false); clearTimeout(longPressTimer.current); };
+  const sheet=(
+    <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}
+      style={{position:"fixed",inset:0,zIndex:9999,
+        background:"rgba(0,0,0,0.65)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",
+        display:"flex",alignItems:"flex-end",justifyContent:"center",
+        touchAction:"none"}}>
+      <div onClick={e=>e.stopPropagation()}
+        style={{width:"100%",maxWidth:500,background:"#0a0614",
+          borderTopLeftRadius:24,borderTopRightRadius:24,
+          padding:"20px 24px 52px",
+          display:"flex",flexDirection:"column",alignItems:"center",gap:14,
+          border:"1px solid #221440",
+          boxShadow:"0 -8px 40px rgba(0,0,0,0.9)"}}>
+        <div style={{width:36,height:4,borderRadius:2,background:"rgba(136,120,170,0.3)"}}/>
+        <p style={{color:"rgba(136,120,170,0.6)",fontSize:11,fontWeight:500,
+          letterSpacing:"1.2px",textTransform:"uppercase"}}>
+          {canGenerate?"Hold image to save or share":"Daily limit reached"}
+        </p>
+        <canvas ref={canvasRef} style={{display:"none"}}/>
+        {imgUrl&&(
+          <img src={imgUrl} alt="Kwento stat sticker"
+            style={{width:240,height:204,borderRadius:16,
+              boxShadow:"0 8px 32px rgba(0,207,255,0.18)",display:"block",
+              WebkitTouchCallout:"default",userSelect:"none"}}/>
+        )}
+        {!canGenerate&&(
+          <p style={{color:"rgba(136,120,170,0.5)",fontSize:12,textAlign:"center"}}>
+            3 free saves per day · Unlimited with Premium
+          </p>
+        )}
+        <button onClick={onClose}
+          style={{background:"transparent",border:"none",color:"rgba(136,120,170,0.45)",
+            fontSize:13,cursor:"pointer",letterSpacing:"0.4px",marginTop:4}}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+
+  return ReactDOM.createPortal(sheet, el);
+}
+
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass,palette,bgImage}){
+  const canvasRef=useRef(null);
+  const wrapRef=useRef(null);
+  const [showSheet,setShowSheet]=useState(false);
+  const BRAND_H=26;
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current;
+    const wrap=wrapRef.current;
+    if(!canvas||!wrap) return;
+    function redraw(){
+      const W=wrap.offsetWidth;
+      const CARD_H=wrap.offsetHeight;
+      if(!W||!CARD_H) return;
+      const H=CARD_H+BRAND_H;
+      canvas.width=W*DPR; canvas.height=H*DPR;
+      canvas.style.width=W+"px"; canvas.style.height=H+"px";
+      const ctx=canvas.getContext("2d");
+      ctx.scale(DPR,DPR);
+      drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass,palette);
+    }
+    let raf1,raf2;
+    const ro=new ResizeObserver(()=>{
+      cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
+      raf1=requestAnimationFrame(()=>{ raf2=requestAnimationFrame(()=>{ redraw(); }); });
+    });
+    ro.observe(wrap);
+    return ()=>{ ro.disconnect(); cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  },[value,label,iconId]);
+
+  // openSheet is called by StatGrid after 1.2s hold
+  function openSheet(){
+    setShowSheet(true);
+    onStickerOpen&&onStickerOpen(true);
+  }
+
+  useEffect(()=>{ onRegisterOpen&&onRegisterOpen(openSheet); },[]);
 
   return(
-    <div
-      onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:200,
-        display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-        backdropFilter:"blur(8px)",padding:32,
-        touchAction:"none",overflow:"hidden"}}>
-
-      {/* Label above */}
-      <p style={{color:"rgba(136,120,170,0.7)",fontSize:11,fontWeight:500,
-        letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:20}}>
-        Hold to save or share
-      </p>
-
-      {/* The sticker preview — long-press triggers share */}
-      <div
-        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchMove={onTouchMove}
-        onClick={shareSticker} // desktop fallback
-        style={{
-          borderRadius:24,overflow:"hidden",cursor:"pointer",
-          transform:pressing?"scale(0.96)":"scale(1)",
-          transition:"transform 0.15s",
-          boxShadow:pressing
-            ?`0 0 0 3px ${th.accent}99, 0 12px 48px rgba(0,207,255,0.25)`
-            :`0 12px 40px rgba(0,207,255,0.15)`,
+    <>
+      <div ref={wrapRef}
+        style={{position:"relative",overflow:"hidden",borderRadius:16,
+          width:"100%",height:"100%",
+          WebkitTapHighlightColor:"transparent",
+          ...(span?{gridColumn:"span 3"}:{}),
         }}>
-        <canvas ref={canvasRef} style={{display:"block"}}/>
+        {bgImage&&(
+          <>
+            <div style={{
+              position:"absolute",inset:-10,
+              backgroundImage:`url(${bgImage})`,
+              backgroundSize:"cover",backgroundPosition:"center",
+              filter:"blur(30px)",transform:"scale(1.1)",
+              opacity:0.8
+            }}/>
+            <div style={{
+              position:"absolute",inset:0,
+              background:"rgba(0,0,0,0.45)",
+            }}/>
+            {palette&&(
+              <div style={{
+                position:"absolute",inset:0,
+                background:`linear-gradient(160deg,${palette.bg}66,${palette.bg2}66)`,
+                mixBlendMode:"screen",
+              }}/>
+            )}
+          </>
+        )}
+        <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
       </div>
+      {showSheet&&<StickerSaveSheet
+        iconId={iconId} label={label} value={value} data={data}
+        onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
+        onGenerate={onGenerate}
+        colSpan={colSpan} rowSpan={rowSpan} sharedGlass={sharedGlass}
+        palette={palette}
+      />}
+    </>
+  );
+}
 
-      {/* Freemium counter */}
-      {!limitHit?(
-        <p style={{color:"rgba(136,120,170,0.5)",fontSize:11,marginTop:20,letterSpacing:"0.4px"}}>
-          {canGenerate
-            ?`${STICKER_FREE_LIMIT-genCount} free ${STICKER_FREE_LIMIT-genCount===1?"save":"saves"} left today`
-            :"No free saves left today"}
-        </p>
-      ):(
-        <div style={{marginTop:20,textAlign:"center"}}>
-          <p style={{color:th.accent2,fontSize:13,fontWeight:600,marginBottom:4}}>Daily limit reached</p>
-          <p style={{color:"rgba(136,120,170,0.6)",fontSize:12}}>3 free stickers per day · Unlimited with Premium</p>
-        </div>
-      )}
+// ─── STAT GRID ────────────────────────────────────────────────────────────────
 
-      {/* Close */}
-      <button onClick={onClose} style={{marginTop:24,background:"transparent",border:"none",
-        color:"rgba(136,120,170,0.5)",fontSize:13,cursor:"pointer",letterSpacing:"0.4px"}}>
-        Close
-      </button>
+function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef, sharedGlass}){
+  const savedSizes = data.statCardSizes || {};
+  const savedOrder = data.statCardOrder || [];
+
+  const [order, setOrder] = useState(()=>{
+    const known = savedOrder.filter(id=>cards.find(c=>c.iconId===id));
+    const fresh  = cards.filter(c=>!known.includes(c.iconId)).map(c=>c.iconId);
+    return [...known,...fresh];
+  });
+  const [sizes, setSizes] = useState(()=>{
+    const s={};
+    cards.forEach(c=>{
+      s[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1});
+    });
+    return s;
+  });
+  useEffect(()=>{
+    const ids=cards.map(c=>c.iconId);
+    setOrder(prev=>{
+      const keep=prev.filter(id=>ids.includes(id));
+      const add=ids.filter(id=>!keep.includes(id));
+      return [...keep,...add];
+    });
+    setSizes(prev=>{
+      const next={...prev};
+      cards.forEach(c=>{
+        if(!next[c.iconId]) next[c.iconId]=savedSizes[c.iconId]||(c.defaultSpan||{colSpan:1,rowSpan:1});
+      });
+      return next;
+    });
+  },[cards.map(c=>c.iconId).join("|")]);
+
+  // drag state lives in refs so touch handlers always see current values
+  const dragState = useRef({active:false, fromId:null, overId:null});
+  const [dragging, setDragging] = useState(null);
+  const [dragOver, setDragOver] = useState(null);
+  const longTimer  = useRef(null);
+  const lastTouchY = useRef(null); // for manual scroll forwarding
+  const lastTapTime = useRef({}); // iconId → timestamp of last tap
+  const cardRefs = useRef({});   // iconId → DOM node, for measuring real width
+
+  function persist(o,s){ onChange("__batch__",{statCardOrder:o,statCardSizes:s}); }
+
+  function resize(iconId,patch){
+    setSizes(prev=>{
+      const next={...prev,[iconId]:{...prev[iconId],...patch}};
+      persist(order,next);
+      return next;
+    });
+  }
+
+  function reorder(fromId,toId){
+    if(!fromId||!toId||fromId===toId) return;
+    setOrder(prev=>{
+      const a=[...prev];
+      const fi=a.indexOf(fromId), ti=a.indexOf(toId);
+      if(fi<0||ti<0) return prev;
+      a.splice(fi,1); a.splice(ti,0,fromId);
+      persist(a,sizes);
+      return a;
+    });
+  }
+
+  // Each card calls these up to StatGrid
+  // stickerRefs: iconId → openSheet fn, set by each StatSticker via callback
+  const stickerOpenRefs = useRef({});
+
+  function onCardTouchStart(iconId, e){
+    const t=e.touches;
+    dragState.current.moved=false;
+    if(t.length===1){
+      // 400ms → drag mode
+      longTimer.current=setTimeout(()=>{
+        dragState.current={active:true,fromId:iconId,overId:null};
+        setDragging(iconId);
+        lastTapTime.current[iconId]=0; // reset double-tap tracking on drag start
+        if(navigator.vibrate) navigator.vibrate(25);
+
+        // 1200ms total → save sheet (only if still not moved)
+        longTimer.current=setTimeout(()=>{
+          if(dragState.current.active && !dragState.current.moved){
+            // cancel drag, open save sheet
+            dragState.current={active:false,fromId:null,overId:null,moved:false};
+            setDragging(null); setDragOver(null);
+            stickerOpenRefs.current[iconId]&&stickerOpenRefs.current[iconId]();
+          }
+        },800);
+      },400);
+    }
+    if(t.length===2) clearTimeout(longTimer.current);
+  }
+
+  function onCardTouchMove(iconId, e){
+    if(!dragState.current.active) return;
+    dragState.current.moved=true;
+    const t=e.touches[0];
+    const el=document.elementFromPoint(t.clientX,t.clientY);
+    if(!el) return;
+    const cardEl=el.closest("[data-cardid]");
+    if(!cardEl) return;
+    const overId=cardEl.getAttribute("data-cardid");
+    if(overId && overId!==dragState.current.fromId){
+      dragState.current.overId=overId;
+      setDragOver(overId);
+    }
+  }
+
+  function onCardTouchEnd(){
+    clearTimeout(longTimer.current);
+    if(dragState.current.active){
+      reorder(dragState.current.fromId, dragState.current.overId);
+      dragState.current={active:false,fromId:null,overId:null};
+      setDragging(null);
+      setDragOver(null);
+    }
+  }
+
+  const orderedCards=order.map(id=>cards.find(c=>c.iconId===id)).filter(Boolean);
+
+  // Palette blending removed
+
+  // --- Grid placement (3 columns) for proximity blending ---
+  const layout = useMemo(()=>{
+    const cols=3;
+    const occ=[];
+    const place={};
+    function fits(r,c,cs,rs){
+      if(c+cs>cols) return false;
+      for(let rr=r;rr<r+rs;rr++){
+        if(!occ[rr]) occ[rr]=Array(cols).fill(false);
+        for(let cc=c;cc<c+cs;cc++) if(occ[rr][cc]) return false;
+      }
+      return true;
+    }
+    function mark(r,c,cs,rs){
+      for(let rr=r;rr<r+rs;rr++){
+        if(!occ[rr]) occ[rr]=Array(cols).fill(false);
+        for(let cc=c;cc<c+cs;cc++) occ[rr][cc]=true;
+      }
+    }
+    let row=0,col=0;
+    orderedCards.forEach(card=>{
+      const span=sizes[card.iconId]||{colSpan:1,rowSpan:1};
+      const cs=span.colSpan||1, rs=span.rowSpan||1;
+      let placed=false;
+      for(let r=0;!placed;r++){
+        for(let c=0;c<cols;c++){
+          if(fits(r,c,cs,rs)){
+            mark(r,c,cs,rs);
+            place[card.iconId]={r,c,cs,rs,cx:c+cs/2,cy:r+rs/2};
+            placed=true;break;
+          }
+        }
+      }
+    });
+    return place;
+  },[orderedCards,sizes]);
+
+
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gridAutoFlow:"dense",gap:10}}>
+      {orderedCards.map(card=>{
+        const {colSpan,rowSpan}=sizes[card.iconId]||{colSpan:1,rowSpan:1};
+        const BASE_H=95;
+        const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
+        const area=colSpan*rowSpan;
+        const emojiSz=area>=4?"var(--stat-emoji-lg)":area>=2?"var(--stat-emoji-md)":"var(--stat-emoji-sm)";
+        const valSz=area>=4?"var(--stat-xl)":area>=2?"var(--stat-lg)":"var(--stat-md)";
+        const lblSz=area>=4?"var(--stat-label-lg)":area>=2?"var(--stat-label-md)":"var(--stat-label-sm)";
+        const pad=area>=4
+          ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
+          :area>=2
+            ?"clamp(9px,1.8vw,12px) clamp(8px,1.6vw,10px)"
+            :"clamp(8px,1.6vw,10px) clamp(7px,1.4vw,9px)";
+        const gapSize=area>=4?"clamp(4px,1vw,7px)":area>=2?"clamp(4px,0.9vw,6px)":"clamp(3px,0.8vw,5px)";
+        const isDrag=dragging===card.iconId;
+        const isOver=dragOver===card.iconId;
+
+        // pinch ref per card — stored on card object each render (safe, same ref)
+        if(!card._pinch) card._pinch={on:false,isH:false,dist0:0,col0:1,row0:1};
+        const pinch=card._pinch;
+
+        function d2(e){ const t=e.touches; return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
+
+        function handleTouchStart(e){
+          lastTouchY.current=e.touches[0].clientY;
+          onCardTouchStart(card.iconId,e);
+          if(e.touches.length===2){
+            e.preventDefault();
+            const t=e.touches;
+            const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
+            pinch.on=true; pinch.isH=Math.abs(dx)>=Math.abs(dy);
+            pinch.dist0=Math.hypot(dx,dy); pinch.col0=colSpan; pinch.row0=rowSpan;
+          }
+        }
+
+        function handleTouchMove(e){
+          onCardTouchMove(card.iconId,e);
+          if(!pinch.on||e.touches.length!==2) return;
+          e.preventDefault();
+          const ratio=d2(e)/pinch.dist0;
+          if(pinch.isH){
+            const next=ratio>1.28?Math.min(pinch.col0+1,2):ratio<0.78?Math.max(pinch.col0-1,1):pinch.col0;
+            if(next!==colSpan){ resize(card.iconId,{colSpan:next}); pinch.col0=next; pinch.dist0=d2(e); }
+          } else {
+            const next=ratio>1.28?Math.min(pinch.row0+1,2):ratio<0.78?Math.max(pinch.row0-1,1):pinch.row0;
+            if(next!==rowSpan){ resize(card.iconId,{rowSpan:next}); pinch.row0=next; pinch.dist0=d2(e); }
+          }
+        }
+
+        function handleTouchEnd(e){
+          pinch.on=false;
+          onCardTouchEnd();
+        }
+
+        const wrapStyle={
+          gridColumn:`span ${colSpan}`,
+          gridRow:`span ${rowSpan}`,
+          height:cardH,
+          transition:"height 0.28s ease, transform 0.22s ease, opacity 0.2s ease, box-shadow 0.2s ease",
+          transform:isDrag?"scale(1.04)":isOver?"scale(0.96)":"scale(1)",
+          opacity:isDrag?0.8:1,
+          boxShadow:isDrag?"0 14px 36px rgba(0,0,0,0.4)":"none",
+          zIndex:isDrag?20:1,
+          position:"relative",
+          WebkitUserSelect:"none",userSelect:"none",
+          WebkitTouchCallout:"none",
+          WebkitTapHighlightColor:"transparent",
+          touchAction:"none",
+        };
+
+        let accentColor=th.accent;
+        let labelColor=th.sub;
+        let borderColor=th.border;
+        if(card._photo) return(
+          <div key={card.iconId} data-cardid={card.iconId}
+            ref={el=>{ if(el) cardRefs.current[card.iconId]=el; }}
+            style={wrapStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={e=>{
+              const wasMoved=dragState.current.moved;
+              const wasActive=dragState.current.active;
+              const wasPinch=e.touches&&e.touches.length>0; // still fingers on screen = pinch releasing
+              handleTouchEnd(e);
+              if(wasActive||wasMoved||wasPinch){
+                lastTapTime.current[card.iconId]=0; // reset so pinch can't accidentally double-tap
+                return;
+              }
+              const now=Date.now();
+              const last=lastTapTime.current[card.iconId]||0;
+              if(now-last<350){
+                lastTapTime.current[card.iconId]=0;
+                const cardEl=cardRefs.current[card.iconId];
+                const realW=cardEl?cardEl.offsetWidth:null;
+                const realH=cardEl?cardEl.offsetHeight:null;
+                onPhotoTap&&onPhotoTap(card._entryId, card._photoPos, colSpan, rowSpan, realH||cardH, realW);
+              } else {
+                lastTapTime.current[card.iconId]=now;
+              }
+            }}
+            onTouchCancel={handleTouchEnd}
+          >
+            <div style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative"}}>
+              {card._photoPlaceholder?(
+                <div style={{
+                  position:"absolute",inset:0,
+                  background:`linear-gradient(145deg,${card._photoColor||"#1b1330"},${card._photoColor||"#120b24"})`,
+                }}/>
+              ):(
+                <>
+                  <img src={card._photoSrc} style={{
+                    width:(100*(card._photoPos.scale||1))+"%",
+                    height:(100*(card._photoPos.scale||1))+"%",
+                    objectFit:"cover",position:"absolute",
+                    left:((1-(card._photoPos.scale||1))*(card._photoPos.x||50)/100*100)+"%",
+                    top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
+                    pointerEvents:"none",
+                  }}/>
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 10px",
+                    background:"linear-gradient(transparent,rgba(0,0,0,0.6))",
+                    fontSize:10,color:"rgba(255,255,255,0.9)",fontWeight:500,
+                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                    userSelect:"none",WebkitUserSelect:"none"}}>
+                    {card.label}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+
+        // Sticker system archived for now — Manila Nights uses standard cards
+
+        const isVibe=String(card.iconId).includes("week_breakdown");
+        const vibeParts=isVibe?String(card.value||"").split(" · "):null;
+        const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
+        const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
+        const vibeTall=isVibe&&rowSpan>=2;
+        const vibeDisplay=isVibe
+          ?(vibeCompact?(vibeParts[0]||card.value):(vibeWide?vibeParts.join(" · "):vibeParts.join("\n")))
+          :card.value;
+        const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
+        const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
+
+        const palette=card._palette;
+        const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
+        const bg=palette?`linear-gradient(145deg,${palette.bg},${palette.bg2})`:th.card;
+        // photo_bg cards sit on top of a dark photo+scrim so we force white-anchored
+        // text colors regardless of what the palette computed from the harmonized hue
+        const valColor=isPhotoBg?"rgba(255,255,255,0.97)":palette?palette.accent:accentColor;
+        const lblColor=isPhotoBg?"rgba(255,255,255,0.6)":palette?palette.label:labelColor;
+        const textColor=isPhotoBg?"#ffffff":palette?palette.text:th.text;
+
+        return(
+          <div key={card.iconId} data-cardid={card.iconId}
+            style={wrapStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+          >
+            <div style={{
+              width:"100%",height:"100%",padding:pad,
+              borderRadius:14,
+              background:bg,
+              border:`1px solid ${borderColor}`,
+              boxShadow:"none",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              textAlign:"center",gap:gapSize,boxSizing:"border-box",
+              position:"relative",overflow:"hidden",color:textColor,
+            }}>
+              {card._slotRole==="photo_bg"&&card._bgImage&&(
+                <>
+                  {/* The photo itself — slightly blurred so it reads as texture/repetition
+                      rather than a competing focal point, but still recognisably the same image */}
+                  <div style={{
+                    position:"absolute",inset:-4,
+                    backgroundImage:`url(${card._bgImage})`,
+                    backgroundSize:"cover",backgroundPosition:"center",
+                    filter:"blur(3px)",
+                    transform:"scale(1.02)", // just enough scale to hide blur edges
+                    opacity:1,
+                  }}/>
+                  {/* Heavy dark scrim — covers the whole card so text is always readable
+                      regardless of whether the photo is light or dark */}
+                  <div style={{
+                    position:"absolute",inset:0,
+                    background:"rgba(0,0,0,0.52)",
+                  }}/>
+                  {/* Palette tint on top — keeps the card feeling harmonised with its
+                      neighbours while the photo still bleeds through underneath */}
+                  {palette&&(
+                    <div style={{
+                      position:"absolute",inset:0,
+                      background:`linear-gradient(160deg,${palette.bg}55,${palette.bg2}55)`,
+                      mixBlendMode:"screen",
+                    }}/>
+                  )}
+                </>
+              )}
+
+              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+              <div style={{
+                fontSize:valSz,fontWeight:800,color:valColor,
+                lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
+                maxWidth:"100%",textAlign:"center",
+                fontFamily:valueFont,position:"relative",zIndex:1
+              }}>
+                {card.iconId==="steps"
+                  ?card.value.toLocaleString()
+                  :vibeDisplay}
+              </div>
+              <div style={{fontSize:lblSz,color:lblColor,lineHeight:1.3,position:"relative",zIndex:1,
+                letterSpacing:isHapon?"0.3px":0.8,
+                whiteSpace:colSpan===2?"nowrap":"normal",
+                overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
+                fontFamily:"var(--font-body)",textTransform:"uppercase",
+              }}>{card.label}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function ProfilePage({data,onChange}){
+// ─── PROFILE PHOTO REPOSITIONER ──────────────────────────────────────────────
+// Full image moves freely behind a fixed frame. No clipping during editing.
+// pos.x, pos.y (0-100): where the image is panned within the frame
+// pos.scale (>=1): how much bigger than the frame the image is
+// Card rendering math: left = (1-scale)*x/100*frameW, top = (1-scale)*y/100*frameH
+// This component uses the same math so preview === card result.
+function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
+  const drag=useRef(null);
+  const pinch=useRef(null);
+  const PAD=80;
+  const cW=frameW+PAD*2;
+  const cH=frameH+PAD*2;
+
+  // Ensure scale is always >= 1 so image is always >= frame size
+  const sc=Math.max(1, pos.scale||1);
+  const px=pos.x||50;
+  const py=pos.y||50;
+
+  // Card math (percentage-based) converted to pixels for display:
+  // imgLeft (relative to frame origin) = (1-sc)*px/100*frameW
+  // In our container, frame origin is at PAD, so:
+  const imgLeft = PAD + (1-sc)*px/100*frameW;
+  const imgTop  = PAD + (1-sc)*py/100*frameH;
+  const imgW    = frameW*sc;
+  const imgH    = frameH*sc;
+
+  const savePos=(newImgLeft, newImgTop, newSc)=>{
+    const clampedSc=Math.max(1, newSc);
+    // Invert card math to get x,y:
+    // newImgLeft - PAD = (1-clampedSc)*x/100*frameW
+    const dX=(1-clampedSc)*frameW; // this is negative when sc>1
+    const dY=(1-clampedSc)*frameH;
+    const x = dX===0 ? 50 : Math.max(0,Math.min(100, (newImgLeft-PAD)/dX*100));
+    const y = dY===0 ? 50 : Math.max(0,Math.min(100, (newImgTop-PAD)/dY*100));
+    setPos({x, y, scale:clampedSc});
+  };
+
+  const onStart=(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if(e.touches&&e.touches.length>=2){
+      pinch.current={
+        dist0:Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY),
+        sc0:sc,
+        left0:imgLeft, top0:imgTop,
+      };
+      drag.current=null;
+    } else {
+      const t=e.touches?e.touches[0]:e;
+      drag.current={cx:t.clientX, cy:t.clientY, left0:imgLeft, top0:imgTop};
+      pinch.current=null;
+    }
+  };
+
+  const onMove=(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if(e.touches&&e.touches.length>=2&&pinch.current){
+      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+      const newSc=Math.max(1, Math.min(5, pinch.current.sc0*(dist/pinch.current.dist0)));
+      // Keep image center fixed while scaling
+      const ratio=newSc/pinch.current.sc0;
+      const newLeft=PAD+(pinch.current.left0-PAD)*ratio;
+      const newTop=PAD+(pinch.current.top0-PAD)*ratio;
+      savePos(newLeft, newTop, newSc);
+    } else if(drag.current&&(!e.touches||e.touches.length<2)){
+      const t=e.touches?e.touches[0]:e;
+      const dx=t.clientX-drag.current.cx;
+      const dy=t.clientY-drag.current.cy;
+      savePos(drag.current.left0+dx, drag.current.top0+dy, sc);
+    }
+  };
+
+  const onEnd=(e)=>{
+    if(!e.touches||e.touches.length===0){ drag.current=null; pinch.current=null; }
+    else if(e.touches.length===1){
+      const t=e.touches[0];
+      drag.current={cx:t.clientX,cy:t.clientY,left0:imgLeft,top0:imgTop};
+      pinch.current=null;
+    }
+  };
+
+  return(
+    <div
+      onMouseDown={onStart} onMouseMove={e=>e.buttons===1&&onMove(e)} onMouseUp={onEnd}
+      onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+      style={{width:cW,height:cH,position:"relative",overflow:"hidden",
+              cursor:"move",userSelect:"none",touchAction:"none",flexShrink:0}}>
+
+      {/* Full image — moves freely, never clipped by this container */}
+      <img src={photo} draggable={false}
+        style={{
+          width:imgW, height:imgH,
+          position:"absolute",
+          left:imgLeft, top:imgTop,
+          objectFit:"cover",
+          pointerEvents:"none",
+        }}
+      />
+
+      {/* Dark overlay with transparent hole showing exactly what saves to card */}
+      <svg style={{position:"absolute",inset:0,pointerEvents:"none"}} width={cW} height={cH}>
+        <defs>
+          <mask id="rMask">
+            <rect width={cW} height={cH} fill="white"/>
+            <rect x={PAD} y={PAD} width={frameW} height={frameH} rx={14} fill="black"/>
+          </mask>
+        </defs>
+        <rect width={cW} height={cH} fill="rgba(0,0,0,0.55)" mask="url(#rMask)"/>
+        <rect x={PAD} y={PAD} width={frameW} height={frameH} rx={14}
+          fill="none" stroke={accent} strokeWidth={3}/>
+      </svg>
+    </div>
+  );
+}
+
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
   const [editName,setEditName]=useState(false);
   const [nameVal,setNameVal]=useState(data.userName);
   const [showCropper,setShowCropper]=useState(false);
-  const [showVisFilter,setShowVisFilter]=useState(false);
+  const [showStatsShare,setShowStatsShare]=useState(false);
+  const [weekOpen,setWeekOpen]=useState({});
+  const [weekDetailsOpen,setWeekDetailsOpen]=useState({});
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
+  const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
+  const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
+  const [cropShape,setCropShape]=useState({colSpan:2,rowSpan:2});
+  const paletteCache=useRef(new Map());
+  const palettePending=useRef(new Set());
+  const [paletteTick,setPaletteTick]=useState(0);
   // local pending state for avatar picker — only saves on Done
   const [pickerOpen,setPickerOpen]=useState(false);
   const [pendingAvatar,setPendingAvatar]=useState(data.avatar);
@@ -4509,14 +5644,53 @@ function ProfilePage({data,onChange}){
 
   const isHapon=data.theme==="hapon";
   const isMN=data.theme==="manila_nights";
+  const profileScrollRef=useRef(null);
+  const getDominantFromImage=async(src)=>{
+    if(paletteCache.current.has(src) || palettePending.current.has(src)) return;
+    palettePending.current.add(src);
+    try{
+      const img=new Image();
+      img.crossOrigin="anonymous";
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=src;});
+      const c=document.createElement("canvas");
+      const w=32,h=32;
+      c.width=w; c.height=h;
+      const ctx=c.getContext("2d");
+      ctx.drawImage(img,0,0,w,h);
+      const data=ctx.getImageData(0,0,w,h).data;
+      let r=0,g=0,b=0,count=0;
+      for(let i=0;i<data.length;i+=4){
+        const a=data[i+3];
+        if(a<50) continue;
+        r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++;
+      }
+      if(count>0){
+        const rgb={r:r/count,g:g/count,b:b/count};
+        paletteCache.current.set(src,_rgbToHex(rgb));
+        setPaletteTick(t=>t+1);
+      }
+    }catch(_){}
+    palettePending.current.delete(src);
+  };
+  const getCachedDominant=(src)=>{
+    if(!src) return null;
+    const c=paletteCache.current.get(src);
+    if(c) return c;
+    getDominantFromImage(src);
+    return null;
+  };
   return(
-    <div className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <>
+    <div ref={profileScrollRef} className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
       {showCropper&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,touchAction:"none"}}>
           <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:8}}>Reposition Photo</p>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:32}}>Drag to move · Pinch to zoom</p>
           <PhotoCropper photo={data.customPhoto} pos={cropPos} setPos={setCropPos} size={260} accent={th.accent}/>
-          <button onClick={doneCropper} style={{marginTop:36,padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16}}>Done</button>
+          <div style={{display:"flex",gap:12,marginTop:36}}>
+            <button onClick={()=>setShowCropper(false)} style={{padding:"14px 28px",borderRadius:14,background:"transparent",border:"1px solid rgba(255,255,255,0.25)",color:"rgba(255,255,255,0.6)",fontWeight:600,fontSize:15,cursor:"pointer"}}>Cancel</button>
+            <button onClick={doneCropper} style={{padding:"14px 48px",borderRadius:14,background:th.accent,color:"#fff",fontWeight:700,fontSize:16,border:"none",cursor:"pointer"}}>Done</button>
+          </div>
         </div>
       )}
       {/* Avatar + name */}
@@ -4609,126 +5783,461 @@ function ProfilePage({data,onChange}){
 
       {/* Stats */}
       {(()=>{
-        const allCats=CATEGORIES.map(c=>c.id);
-        const hidden=data.profileVisibility?.hidden||[];
-        const isHidden=cat=>hidden.includes(cat);
-        const toggleCat=cat=>{
-          const next=isHidden(cat)?hidden.filter(x=>x!==cat):[...hidden,cat];
-          onChange("profileVisibility",{...(data.profileVisibility||{}),hidden:next});
+        const PH_TZ="Asia/Manila";
+        const phDateFmt=new Intl.DateTimeFormat("en-CA",{timeZone:PH_TZ,year:"numeric",month:"2-digit",day:"2-digit"});
+        const phWeekdayFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,weekday:"short"});
+        const phHourFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,hour:"2-digit",hour12:false});
+        const weekdayIdx={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+        const phDateKey=d=>phDateFmt.format(d);
+        const phWeekStartKey=d=>{
+          const key=phDateKey(d);
+          const wd=weekdayIdx[phWeekdayFmt.format(d)]??0;
+          const base=new Date(`${key}T00:00:00+08:00`);
+          base.setDate(base.getDate()-wd);
+          return phDateKey(base);
         };
-        // Steps visibility: steps toggle overrides activities toggle
-        // If steps=shown, always show regardless of activities
-        // If steps=hidden, always hide regardless of activities
-        const stepsHidden=isHidden("steps");
-        // Total logs: all entries including steps
-        const totalLogs=data.logs.length;
-        // Days active: manual entries only, only from date of first manual entry onward
-        const manualLogs=data.logs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
-        const firstManualDate=manualLogs.length
-          ?manualLogs.map(l=>l.date?.split("T")[0]).filter(Boolean).sort()[0]
-          :null;
-        const daysActiveCount=firstManualDate
-          ?new Set(manualLogs.filter(l=>(l.date?.split("T")[0]||"")>=firstManualDate).map(l=>l.date?.split("T")[0])).size
-          :0;
-        // This week: all entries including steps
-        const thisWeekCount=weekLogs.length;
-        const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
-        const stepsLogs=data.logs.filter(l=>l.fromHealthKit&&l.category==="activities");
-        const weekSteps=stepsLogs.filter(l=>new Date(l.customDate||l.date)>=weekAgo).reduce((s,l)=>s+(l.stepCount||0),0);
-        return(
-      <div style={{marginBottom:16}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <h2 style={{fontSize:isHapon?11:13,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:isHapon?2:1,fontFamily:isHapon?"'DM Sans',sans-serif":undefined}}>{isHapon?"✦ "+t.your_stats:t.your_stats}</h2>
-          <div style={{position:"relative"}}>
-            <button onClick={e=>{e.stopPropagation();setShowVisFilter(v=>!v);}}
-              className={`tri-btn${showVisFilter?" open":""}`}
-              style={{width:28,height:28,borderRadius:8,background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0}}>
-              <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 1L11 9H1L6 1Z" fill={th.sub} stroke={th.sub} strokeWidth="1" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            {showVisFilter&&<>
-              <div onClick={()=>setShowVisFilter(false)} style={{position:"fixed",inset:0,zIndex:88,background:"transparent"}}/>
-              <div style={{position:"absolute",right:0,top:32,width:200,borderRadius:12,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:89,overflow:"hidden"}}>
-                <div style={{fontSize:10,color:th.sub,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:"10px 14px 6px"}}>{lang==="fil"?"Ipakita sa profile":"Show on profile"}</div>
-                <div style={{maxHeight:210,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-                {[...CATEGORIES,{id:"steps",emoji:"👟",labelEn:"Steps",label:"Mga Hakbang"}].map(c=>{
-                  const isCatHidden=isHidden(c.id);
-                  return(
-                    <div key={c.id} onClick={e=>{e.stopPropagation();toggleCat(c.id);}}
-                      style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 14px",cursor:"pointer",gap:10}}>
-                      <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{fontSize:15}}>{c.emoji}</span>
-                        <span style={{fontSize:13,color:isCatHidden?th.sub:th.text,fontWeight:isCatHidden?400:500}}>{lang==="fil"?c.label:c.labelEn}</span>
-                      </div>
-                      <div style={{width:18,height:18,borderRadius:4,border:`2px solid ${isCatHidden?th.border:th.accent}`,background:isCatHidden?"transparent":th.accent,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                        {!isCatHidden&&<span style={{fontSize:10,color:"#fff",fontWeight:700}}>✓</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-                </div>
+        const phHour=d=>parseInt(phHourFmt.format(d),10);
+
+        const allLogs=data.logs.filter(l=>l.date);
+        if(!allLogs.length){
+          return(
+            <div style={{marginBottom:16}}>
+              <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
+                {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
               </div>
-            </>}
-          </div>
-        </div>
-        {(()=>{
-          // ── Stats registry: each entry defines a stat candidate.
-          // Only stats whose value passes the threshold will render.
-          // This means the grid grows and shrinks with real data —
-          // no empty "0" cards taking up space.
-          const registry=[
-            {iconId:"total", emoji:"📝", label:t.total_logs,          value:totalLogs,        min:1},
-            {iconId:"days",  emoji:"🗓", label:t.days_active,          value:daysActiveCount,  min:1},
-            {iconId:"week",  emoji:"📅", label:t.this_week,            value:thisWeekCount,    min:1},
-            {iconId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:swipedRight.length, min:1},
-            // Steps gets its own entry — only if steps category is visible and has data
-            ...(stepsLogs.length>0&&!stepsHidden
-              ?[{iconId:"steps", emoji:"👟", label:lang==="fil"?"Mga hakbang ngayong linggo":"Steps this week", value:weekSteps, min:1}]
-              :[]),
+            </div>
+          );
+        }
+
+        const weekMap={};
+        const entryDateForWeek=l=>{
+          if(l?.customDate) return new Date(l.customDate+"T12:00:00");
+          return l?.date?new Date(l.date):null;
+        };
+        allLogs.forEach(l=>{
+          const d=entryDateForWeek(l);
+          if(!d||isNaN(d)) return;
+          const wk=phWeekStartKey(d);
+          if(!weekMap[wk]) weekMap[wk]=[];
+          weekMap[wk].push(l);
+        });
+        const TIMELINE_START_KEY="2026-03-05";
+        const weekKeys=Object.keys(weekMap)
+          .filter(k=>k>=TIMELINE_START_KEY)
+          .sort((a,b)=>new Date(`${b}T00:00:00+08:00`)-new Date(`${a}T00:00:00+08:00`));
+
+        const manualLogs=allLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+        const cumulativeDaysActive=weekKey=>{
+          const end=new Date(weekKey+"T00:00:00");
+          end.setDate(end.getDate()+6);
+          const endKey=phDateKey(end);
+          const days=new Set();
+          manualLogs.forEach(l=>{
+            const d=entryDateForWeek(l);
+            if(!d||isNaN(d)) return;
+            const k=phDateKey(d);
+            if(k>=TIMELINE_START_KEY && k<=endKey) days.add(k);
+          });
+          return days.size;
+        };
+        const manualWeekCounts={};
+        manualLogs.forEach(l=>{
+          const wk=phWeekStartKey(new Date(l.date));
+          manualWeekCounts[wk]=(manualWeekCounts[wk]||0)+1;
+        });
+        const manualWeekKeys=Object.keys(manualWeekCounts);
+        const avgPerWeek=manualWeekKeys.length
+          ?manualWeekKeys.reduce((s,k)=>s+manualWeekCounts[k],0)/manualWeekKeys.length
+          :0;
+
+        const swipedRightSet=new Set(Object.entries(data.feedback||{}).filter(([,v])=>v==="right").map(([k])=>k));
+
+        const WeekStar=()=>(
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2l2.9 6.3L22 9.3l-5 4.9 1.2 6.9L12 17.8 5.8 21l1.2-6.9L2 9.3l7.1-1L12 2z"/>
+          </svg>
+        );
+
+        const buildWeekCards=(weekKey, prevWeekPalette)=>{
+          const weekLogs=weekMap[weekKey]||[];
+          const weekManualLogs=weekLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+          const stepsLogs=weekLogs.filter(l=>l.fromHealthKit&&l.category==="activities");
+          const weekSteps=stepsLogs.reduce((s,l)=>s+(l.stepCount||0),0);
+          const thisWeekCount=weekLogs.length;
+          const daysActiveCount=cumulativeDaysActive(weekKey);
+          const weekLikedCount=weekManualLogs.filter(l=>swipedRightSet.has(l.title)).length;
+
+          // Top category
+          const catCount={};
+          weekManualLogs.forEach(l=>{ if(l.category) catCount[l.category]=(catCount[l.category]||0)+1; });
+          const topCatId=Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0]?.[0];
+          const topCatCount=topCatId?catCount[topCatId]:0;
+          const topCatEmoji=topCatId?CAT_MAP[topCatId]?.emoji:"";
+          const topCatLabel=topCatId?CAT_MAP[topCatId]?.labelEn||topCatId:"";
+
+          // Night owl / early bird
+          let nightOwlScore=0, earlyBirdScore=0;
+          weekManualLogs.forEach(l=>{
+            if(!l.date) return;
+            const h=phHour(new Date(l.date));
+            if(h>=20||h<4) nightOwlScore++;
+            else if(h>=5&&h<12) earlyBirdScore++;
+          });
+          const timeVibe=weekManualLogs.length>=3
+            ?(nightOwlScore>earlyBirdScore?"Night Owl 🦉":"Early Bird 🌅")
+            :null;
+          const timeVibeRaw=weekManualLogs.length>=3
+            ?(nightOwlScore>earlyBirdScore?"night_owl":"early_bird")
+            :null;
+
+          // Most logged
+          const titleCount={};
+          weekManualLogs.forEach(l=>{ if(l.title) titleCount[l.title]=(titleCount[l.title]||0)+1; });
+          const mostLoggedEntry=Object.entries(titleCount).filter(([,c])=>c>=3).sort((a,b)=>b[1]-a[1])[0];
+          const mostLoggedTitle=mostLoggedEntry?.[0];
+
+          // Top director / actor
+          const movieLogs=weekManualLogs.filter(l=>l.category==="movies");
+          const directorCount={};
+          movieLogs.forEach(l=>{ if(l.director) l.director.split(",").map(d=>d.trim()).forEach(d=>{ directorCount[d]=(directorCount[d]||0)+1; }); });
+          const topDirector=Object.entries(directorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
+          const actorCount={};
+          movieLogs.forEach(l=>{ if(l.actor) actorCount[l.actor]=(actorCount[l.actor]||0)+1; });
+          const topActor=Object.entries(actorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+          // Week breakdown (top 3 tags, excludes global/filipino, sums to 100)
+          let weekBreakdownValue=null;
+          if(weekManualLogs.length>=3){
+            const wTagCount={};
+            weekManualLogs.forEach(l=>(l.tags||[]).forEach(tag=>{
+              const t=(tag||"").toLowerCase();
+              if(t==="global"||t==="filipino") return;
+              wTagCount[tag]=(wTagCount[tag]||0)+1;
+            }));
+            if(Object.keys(wTagCount).length>0){
+              const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
+              const topTotal=topTags.reduce((s,[,cnt])=>s+cnt,0);
+              const pcts=topTags.map(([tag,cnt])=>({tag,pct:Math.round(cnt/topTotal*100)}));
+              const sum=pcts.reduce((s,c)=>s+c.pct,0);
+              const remainder=100-sum;
+              if(pcts.length>0&&remainder!==0){
+                const maxCount=Math.max(...topTags.map(([,cnt])=>cnt));
+                const tied=topTags.map(([tag,cnt],i)=>({tag,cnt,i})).filter(t=>t.cnt===maxCount);
+                let targetIndex=tied[0]?.i??0;
+                if(tied.length>1){
+                  let bestTime=-Infinity;
+                  tied.forEach(t=>{
+                    const last=weekManualLogs.reduce((acc,l)=>{
+                      if((l.tags||[]).includes(t.tag)){
+                        const ts=new Date(l.date).getTime();
+                        return ts>acc?ts:acc;
+                      }
+                      return acc;
+                    },-Infinity);
+                    if(last>bestTime){bestTime=last;targetIndex=t.i;}
+                  });
+                }
+                pcts[targetIndex].pct+=remainder;
+              }
+              weekBreakdownValue=pcts.map(c=>`${c.pct}% ${c.tag}`).join(" · ");
+            }
+          }
+
+          // Week pulse vs average
+          let weekPulse=null, weekPulseEmoji=null;
+          if(avgPerWeek>0 && manualWeekCounts[weekKey]!==undefined && Object.keys(manualWeekCounts).sort().indexOf(weekKey)>0){
+            const pulseRatio=thisWeekCount/avgPerWeek;
+            weekPulse=pulseRatio>=1.3?"busier than usual":pulseRatio<=0.7?"quieter than usual":"about your pace";
+            weekPulseEmoji=pulseRatio>=1.3?"🔥":pulseRatio<=0.7?"🌙":"〰️";
+          }
+
+          const wkId=id=>`${weekKey}_${id}`;
+
+          // ── Slot sequence ─────────────────────────────────────────────────────
+          // Each slot owns a shape. Cards flow into slots in registry order,
+          // skipping any card that has no data. The card inherits the slot's shape —
+          // the card itself has no predefined size. Photo slots are skipped when
+          // there are no photos that week.
+          const defaultSlots=[
+            {colSpan:2,rowSpan:1},  // slot 1  — Vibe
+            {colSpan:1,rowSpan:2},  // slot 2  — Pace
+            {colSpan:2,rowSpan:2},  // slot 3  — Photo
+            {colSpan:1,rowSpan:1},  // slot 4  — Night Owl / Early Bird
+            {colSpan:1,rowSpan:2},  // slot 5  — Steps
+            {colSpan:2,rowSpan:2},  // slot 6  — Photo
+            {colSpan:1,rowSpan:1},  // slot 7  — Days Active
+            {colSpan:2,rowSpan:1},  // slot 8  — Most Logged
+            {colSpan:2,rowSpan:1},  // slot 9  — Photo (skipped if no photo)
+            {colSpan:1,rowSpan:1},  // slot 10 — Top Category
+            {colSpan:1,rowSpan:1},  // slot 11 — Entries
+            {colSpan:1,rowSpan:1},  // slot 12 — Top Actor
+            {colSpan:1,rowSpan:1},  // slot 13 — Top Director
           ];
 
-          // Filter to only cards that have meaningful data
-          const visible=registry.filter(s=>s.value>=s.min);
+          // ── Card registry — ordered by priority ───────────────────────────────
+          // This defines which card gets the first available slot, second, etc.
+          // If a card has no data it is simply absent and the next card moves up.
+          const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
+            const entry=data.logs.find(l=>l.id===id);
+            const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
+            if(!entry||!entryDate||isNaN(entryDate)) return null;
+            if(phWeekStartKey(entryDate)!==weekKey) return null;
+            const photo=entry?.actPhotos?.[0];
+            if(!photo) return null;
+            const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
+            return {iconId:`profile_photo_${id}`, _baseId:"photo", label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, min:1};
+          }).filter(Boolean);
 
-          // Nothing to show — render nothing (the section header is still visible)
-          if(!visible.length) return(
-            <div style={{padding:"20px 0",textAlign:"center",color:th.sub,fontSize:13}}>
-              {lang==="fil"?"Wala pang datos.":"No data yet — start logging!"}
-            </div>
-          );
+          // Stat cards in priority order — matches your registry 1,2,4,5,7,8,10,11,12,13
+          const statRegistry=[
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:"Vibe",value:weekBreakdownValue,min:1}]:[]),
+            ...(weekPulse?[{iconId:wkId("week_pulse"),_baseId:"week_pulse",emoji:weekPulseEmoji,label:"",value:weekPulse,min:1}]:[]),
+            ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌅",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
+            ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
+            ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
+            ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:"Most Logged",value:mostLoggedTitle,min:1}]:[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"),_baseId:"top_cat",emoji:topCatEmoji,label:"Top Category",value:topCatLabel,min:1}]:[]),
+            ...(thisWeekCount>0?[{iconId:wkId("week"),_baseId:"week",emoji:"📅",label:"Entries",value:thisWeekCount,min:1}]:[]),
+            ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
+            ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
+            ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
+          ];
 
-          return(
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-              {visible.map((s,i)=>{
-                // Orphan: last card on an incomplete row — span all 3 columns
-                const isOrphan=visible.length%3!==0 && i===visible.length-1;
-                const spanStyle=isOrphan?{gridColumn:"span 3"}:{};
+          // Photo cards iterator — consumed one at a time as photo slots are reached
+          let photoCardIdx=0;
+          // Stat cards iterator — consumed one at a time as stat slots are reached
+          let statCardIdx=0;
 
-                return data.theme==="manila_nights"
-                  ?<StatSticker key={s.iconId} iconId={s.iconId} label={s.label} value={s.value} data={data} span={isOrphan}
-                      onGenerate={()=>{
-                        const today=todayKey();
-                        const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                        onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-                      }}/>
-                  :<div key={s.iconId} style={{
-                    padding:"14px 12px",borderRadius:14,
-                    background:th.card,border:`1px solid ${th.border}`,
-                    textAlign:"center",...spanStyle,
-                  }}>
-                    <div style={{fontSize:20}}>{s.emoji}</div>
-                    <div style={{fontSize:22,fontWeight:800,color:th.accent}}>
-                      {s.iconId==="steps"?s.value.toLocaleString():s.value}
-                    </div>
-                    <div style={{fontSize:11,color:th.sub,marginTop:2,letterSpacing:isHapon?"0.3px":undefined}}>{s.label}</div>
-                  </div>;
-              })}
-            </div>
-          );
-        })()}
+          // Photo slots are at positions 3, 6, 9 (0-indexed: 2, 5, 8)
+          const photoSlotIndices=new Set([2,5,8]);
 
-      </div>
+          const orderedCards=[];
+          defaultSlots.forEach((slotShape, slotIndex)=>{
+            if(photoSlotIndices.has(slotIndex)){
+              // Photo slot — consume next available photo card, skip if none
+              const photoCard=weekPhotoCards[photoCardIdx];
+              if(photoCard){
+                photoCard.defaultSpan=slotShape;
+                orderedCards.push(photoCard);
+                photoCardIdx++;
+              }
+              // If no photo, slot is simply skipped — next stat slot is not affected
+            } else {
+              // Stat slot — consume next available stat card, skip if none
+              const statCard=statRegistry[statCardIdx];
+              if(statCard){
+                // The slot's shape is assigned to the card here — this is the key:
+                // the card has no predefined size, it just inherits whatever slot it lands in
+                statCard.defaultSpan=slotShape;
+                orderedCards.push(statCard);
+                statCardIdx++;
+              }
+            }
+          });
+
+          // Any remaining cards that didn't fit into the 13 default slots
+          // get appended with a default 1x1 size
+          const usedIds=new Set(orderedCards.map(c=>c.iconId));
+          const remaining=[
+            ...statRegistry.filter(c=>!usedIds.has(c.iconId)).map(c=>({...c,defaultSpan:{colSpan:1,rowSpan:1}})),
+            ...weekPhotoCards.filter(c=>!usedIds.has(c.iconId)).map(c=>({...c,defaultSpan:{colSpan:2,rowSpan:2}})),
+          ];
+          const unorderedCards=[...orderedCards, ...remaining];
+
+          const photoColors=weekPhotoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
+          const weekDominant=photoColors.length
+            ?_rgbToHex((()=>{
+              const sum=photoColors.reduce((acc,hex)=>{
+                const r=_hexToRgb(hex);
+                return {r:acc.r+r.r,g:acc.g+r.g,b:acc.b+r.b};
+              },{r:0,g:0,b:0});
+              return {r:sum.r/photoColors.length,g:sum.g/photoColors.length,b:sum.b/photoColors.length};
+            })())
+            :prevWeekPalette;
+
+          // ── Apply the user's saved drag order BEFORE assigning palette colors ──
+          // This is the key fix: we sort by the persisted order first, so that
+          // nearestPhotoSrc() sees each card in its actual grid position, not its
+          // construction order. Any card the user dragged will now sample the photo
+          // closest to where it actually sits in the layout.
+          const savedOrder=(data.statCardOrder||[]);
+          const cards = savedOrder.length
+            ? [
+                ...savedOrder.map(id=>unorderedCards.find(c=>c.iconId===id)).filter(Boolean),
+                ...unorderedCards.filter(c=>!savedOrder.includes(c.iconId)),
+              ]
+            : unorderedCards;
+
+          // Now build photo index map from the correctly-ordered array
+          const photoIndices=cards.map((c,i)=>c._photo?i:null).filter(i=>i!==null);
+          const nearestPhotoSrc=idx=>{
+            if(!photoIndices.length) return null;
+            let best=photoIndices[0], bestD=Math.abs(idx-best);
+            photoIndices.forEach(pi=>{const d=Math.abs(idx-pi); if(d<bestD){bestD=d;best=pi;}});
+            return cards[best]?cards[best]._photoSrc:null;
+          };
+          const topKeys=new Set(["week_breakdown","week_pulse"]);
+          const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
+
+          // ── Find the first real photo card and tag its visual side-neighbor ──
+          // A 2x2 photo in a 3-column grid always leaves exactly 1 column beside it.
+          // The card filling that column is always colSpan:1, rowSpan:2 — tall and
+          // narrow. We find whichever non-photo card has that shape and sits closest
+          // to the first photo in the ordered array. That card is always the visual
+          // left-or-right neighbor, wherever the user has dragged it.
+          const firstPhotoIdx=cards.findIndex(c=>c._photo && c._photoSrc);
+          const firstPhotoSrc=firstPhotoIdx!==-1?cards[firstPhotoIdx]._photoSrc:null;
+          const resolvedSizes=data.statCardSizes||{};
+          let photoBgIdx=-1;
+          if(firstPhotoIdx!==-1 && firstPhotoSrc){
+            let bestDist=Infinity;
+            cards.forEach((nc,ni)=>{
+              if(nc._photo) return;
+              const span=resolvedSizes[nc.iconId]||nc.defaultSpan||{colSpan:1,rowSpan:1};
+              if(span.colSpan===1 && span.rowSpan===2){
+                const dist=Math.abs(ni-firstPhotoIdx);
+                if(dist<bestDist){ bestDist=dist; photoBgIdx=ni; }
+              }
+            });
+          }
+
+          cards.forEach((c,i)=>{
+            if(c._photo) return;
+            const nearSrc=nearestPhotoSrc(i);
+            const dom=getCachedDominant(nearSrc)||weekDominant||th.accent;
+            const base=_harmonizePhotoFirst(dom, th.accent, harmonyMode);
+            const bgRgb=_hexToRgb(base);
+            const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
+            let text=_pickReadableText(bgRgb, th);
+            let accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.35));
+            let label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.55));
+            if(_luminance(bgRgb)>0.7){
+              text="#0b0f1a";
+              accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.8));
+              label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.6));
+            }
+            const palette={bg:base,bg2,text,accent,label};
+            c._palette=palette;
+            // photo_bg wins over any other role assignment
+            if(i===photoBgIdx){
+              c._slotRole="photo_bg";
+              c._bgImage=firstPhotoSrc;
+            } else {
+              c._slotRole=topKeys.has(c._baseId)?"top":"normal";
+            }
+          });
+          const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
+          return {cards, slots, weekDominant};
+        };
+
+        const rangeFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,month:"short",day:"numeric"});
+        const formatWeekRange=weekKey=>{
+          const start=new Date(`${weekKey}T00:00:00+08:00`);
+          const end=new Date(start); end.setDate(end.getDate()+6);
+          return `${rangeFmt.format(start)}–${rangeFmt.format(end)}`;
+        };
+
+        return(
+          <div style={{marginBottom:16}}>
+            {(()=>{
+              let lastPalette=null;
+              return weekKeys.map(weekKey=>{
+                const {cards, slots, weekDominant}=buildWeekCards(weekKey, lastPalette);
+                if(weekDominant) lastPalette=weekDominant;
+                if(!cards.length) return null;
+                const isOpen=weekOpen[weekKey]!==false;
+                const showDetails=weekDetailsOpen[weekKey]===true;
+                return(
+                  <div key={weekKey} style={{marginBottom:16}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                    <button
+                      onClick={()=>setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}))}
+                      style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:0.7}}
+                      aria-label="Toggle week details"
+                    >
+                      <WeekStar/>
+                    </button>
+                    {showDetails&&(
+                      <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                        <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{formatWeekRange(weekKey)}</span>
+                        {/* Harmony mode compact dropdown — sits right next to the date range */}
+                        <select
+                          value={(data.weekHarmony||{})[weekKey]||"analog"}
+                          onChange={e=>onChange("weekHarmony",{...(data.weekHarmony||{}),[weekKey]:e.target.value})}
+                          style={{
+                            fontSize:11,
+                            color:th.sub,
+                            background:th.card,
+                            border:`1px solid ${th.border}`,
+                            borderRadius:8,
+                            padding:"3px 8px",
+                            cursor:"pointer",
+                            outline:"none",
+                            appearance:"none",
+                            WebkitAppearance:"none",
+                            paddingRight:20,
+                            backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`,
+                            backgroundRepeat:"no-repeat",
+                            backgroundPosition:"right 6px center",
+                          }}
+                        >
+                          <option value="analog">Analog</option>
+                          <option value="comp">Complement</option>
+                          <option value="split1">Split-Comp</option>
+                          <option value="triad">Triad</option>
+                          <option value="mono">Mono</option>
+                          <option value="auto">Auto</option>
+                        </select>
+                        <button
+                          onClick={()=>setWeekOpen(prev=>({...prev,[weekKey]:!isOpen}))}
+                          style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",cursor:"pointer"}}
+                        >
+                          {isOpen?"Hide":"Show"}
+                        </button>
+                        <button
+                          disabled
+                          style={{fontSize:11,color:th.sub,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",opacity:0.5,cursor:"default"}}
+                        >
+                          Share
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                    {isOpen&&(
+                      <>
+                        <StatGrid
+                          cards={cards} data={data} onChange={onChange}
+                          th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
+                          onStickerOpen={onStickerOpen}
+                          onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
+                          scrollRef={profileScrollRef}
+                          sharedGlass={false}
+                        />
+                        {slots<=9&&(()=>{
+                          const allLogs=data.logs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+                          const firstDate=allLogs.length?new Date(allLogs.map(l=>l.date).filter(Boolean).sort()[0]):null;
+                          if(!firstDate) return null;
+                          // Sun–Sat calendar week: find the Sunday that starts the current week
+                          const now=new Date();
+                          const startOfWeek=new Date(now);
+                          startOfWeek.setDate(now.getDate()-now.getDay()); // getDay() 0=Sun, so this always lands on Sunday
+                          startOfWeek.setHours(0,0,0,0);
+                          // Only show if the user's very first log happened on or after this week's Sunday
+                          if(firstDate<startOfWeek) return null;
+                          return(
+                            <div style={{textAlign:"center",padding:"16px 24px 2px",opacity:weekMap[weekKey].length<2?1:0.3}}>
+                              <div style={{fontSize:weekMap[weekKey].length<2?32:20,marginBottom:4}}>🌱</div>
+                              <p style={{fontSize:weekMap[weekKey].length<2?13:11,color:th.sub}}>Log a few more things to see your profile grow.</p>
+                            </div>
+                          );
+                        })()}
+                      </>
+                    )}
+                </div>
+              );
+              });
+            })()}
+          </div>
         );
       })()}
 
@@ -4774,13 +6283,42 @@ function ProfilePage({data,onChange}){
         </div>
       )}
 
-      {data.logs.length<2&&(
-        <div style={{textAlign:"center",padding:"24px",color:th.sub,fontSize:13}}>
-          <div style={{fontSize:36,marginBottom:8}}>🌱</div>
-          <p>Log a few more things to see your profile grow.</p>
-        </div>
-      )}
     </div>
+
+    {/* Photo reposition modal */}
+    {cropPhotoId&&(()=>{
+      const entry=data.logs.find(l=>l.id===cropPhotoId);
+      const photo=entry?.actPhotos?.[0];
+      if(!photo) return null;
+      return ReactDOM.createPortal(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,touchAction:"none"}}>
+          <p style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:6}}>Reposition</p>
+          <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:32}}>Drag · Pinch to zoom</p>
+          <ProfilePhotoCropper photo={photo} pos={photoCropPos} setPos={setPhotoCropPos}
+            frameW={cropShape.cardW||280}
+            frameH={cropShape.cardH||95}
+            accent={th.accent}
+            borderRadius="14px"
+          />
+          <div style={{display:"flex",gap:12,marginTop:36}}>
+            <button onClick={()=>setCropPhotoId(null)}
+              style={{padding:"12px 28px",borderRadius:12,background:"transparent",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.6)",fontSize:14,cursor:"pointer"}}>
+              Cancel
+            </button>
+            <button onClick={()=>{
+              const map={...(data.profilePhotoPosMap||{}),[cropPhotoId]:photoCropPos};
+              onChange("profilePhotoPosMap",map);
+              setCropPhotoId(null);
+            }}
+              style={{padding:"12px 36px",borderRadius:12,background:th.accent,color:"#fff",fontWeight:700,fontSize:14,border:"none",cursor:"pointer",boxShadow:`0 4px 16px ${th.accent}55`}}>
+              Done
+            </button>
+          </div>
+        </div>,
+        document.body
+      );
+    })()}
+  </>
   );
 }
 
@@ -4796,6 +6334,20 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [lbMsg,setLbMsg]=useState("");
   const [importLoading,setImportLoading]=useState(false);
   const [showImportInfo,setShowImportInfo]=useState(false);
+  const [redeemInput,setRedeemInput]=useState("");
+  const [redeemMsg,setRedeemMsg]=useState("");
+  const [omdbShowCount,setOmdbShowCount]=useState(200);
+
+  const handleRedeem=()=>{
+    if(redeemInput.trim().toLowerCase()==="beta"){
+      onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null});
+      setRedeemMsg("✅ Beta mode activated — unlimited sticker saves!");
+      setRedeemInput("");
+    } else {
+      setRedeemMsg("❌ Invalid code.");
+    }
+    setTimeout(()=>setRedeemMsg(""),3000);
+  };
 
   const handleSuggestion=()=>{
     if(!suggText.trim())return;
@@ -4873,6 +6425,36 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         <div style={{marginTop:10,fontSize:12,color:th.accent,fontWeight:500}}>{t.no_ads}</div>
       </div>
 
+      {/* OMDB Status */}
+      <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+          <span style={{fontSize:20}}>🎬</span>
+          <h3 style={{fontWeight:700,color:th.text}}>OMDB Debug</h3>
+        </div>
+        <p style={{fontSize:12,color:th.sub,marginBottom:8,lineHeight:1.6}}>
+          {`Library movies: ${(data.libraryMovies||[]).length}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8}}>
+          {`Cursor keys: ${Object.keys(data.omdbCursor||{}).length}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Last updated: ${data.omdbLastUpdated ? new Date(data.omdbLastUpdated).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
+        </p>
+        <div style={{marginTop:8,maxHeight:120,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
+          {(data.libraryMovies||[]).slice(0,omdbShowCount).map((m,i)=>(
+            <div key={i} style={{fontSize:11,color:th.sub,lineHeight:1.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+              {m.title}
+            </div>
+          ))}
+          {(data.libraryMovies||[]).length>omdbShowCount&&(
+            <div style={{fontSize:10,color:th.accent,opacity:0.9,marginTop:6,cursor:"pointer"}}
+              onClick={()=>setOmdbShowCount(c=>c+200)}>
+              …show 200 more
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Collaborate */}
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
         <div style={{fontSize:22,marginBottom:6}}>🤝</div>
@@ -4931,6 +6513,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               ...data,
               customPhoto:av?av.data:data.customPhoto||null,
               photoPos:av?av.pos:data.photoPos||{x:50,y:50,scale:1},
+              libraryMovies:(data.libraryMovies||[]).map(m=>{const {poster,...rest}=m;return rest;}),
               logs:(data.logs||[]).map(l=>{
                 const ep=allPhotos["entry_"+l.id];
                 return ep?{...l,actPhotos:ep}:l;
@@ -4980,6 +6563,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                   delete slim.customPhoto;
                   delete slim.photoPos;
                   if(slim.logs) slim.logs=slim.logs.map(l=>{const {actPhotos,...rest}=l;return rest;});
+                  if(slim.libraryMovies) slim.libraryMovies=slim.libraryMovies.map(m=>{const {poster,...rest}=m;return rest;});
                   // Hydrate back from IDB so UI shows photos immediately
                   const hydrated=await hydratePhotos(slim);
                   onImport(hydrated);
@@ -5144,6 +6728,36 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         {lbMsg&&<p style={{marginTop:10,fontSize:13,fontWeight:500,color:lbMsg.startsWith("✅")?th.accent:lbMsg.startsWith("⚠️")?"#f59e0b":"#ef4444"}}>{lbMsg}</p>}
       </div>
 
+      {/* Beta Redeem */}
+      <div style={{marginBottom:24}}>
+        <h2 style={{fontSize:12,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Redeem Code</h2>
+        <div style={{padding:"14px 16px",borderRadius:14,background:th.card,border:`1px solid ${th.border}`}}>
+          {data.betaMode&&(
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+              <span style={{fontSize:18}}>🔓</span>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:th.accent}}>Beta active — all limits removed</div>
+                <div style={{fontSize:12,color:th.sub,marginTop:2}}>You have full access</div>
+              </div>
+            </div>
+          )}
+          <div style={{fontSize:13,color:th.sub,marginBottom:10}}>Have a code? Enter it below.</div>
+          <div style={{display:"flex",gap:8}}>
+            <input
+              value={redeemInput}
+              onChange={e=>setRedeemInput(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleRedeem()}
+              placeholder="Enter code…"
+              style={{flex:1,background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"10px 12px",fontSize:14,color:th.text,outline:"none"}}
+            />
+            <button onClick={handleRedeem} style={{padding:"10px 16px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:700,fontSize:13,flexShrink:0}}>
+              Redeem
+            </button>
+          </div>
+          {redeemMsg&&<p style={{marginTop:8,fontSize:13,color:redeemMsg.startsWith("✅")?th.accent:"#ef4444"}}>{redeemMsg}</p>}
+        </div>
+      </div>
+
       {/* Reset */}
       <div style={{marginBottom:24}}>
         {!confirmReset?(
@@ -5161,7 +6775,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.1</button></span>
       </div>
     </div>
   );
@@ -5179,6 +6793,55 @@ function App(){
   useEffect(()=>{
     (async()=>{
       const d=loadData()||defaultData();
+      try{
+        const res=await fetch(MIGRATE_OMDB_SRC,{cache:"no-store"});
+        if(res.ok){
+          const html=await res.text();
+          const m=html.match(/omdbLibrary:\s*(\[[\s\S]*?\])\s*,\s*omdbCursor:/);
+          if(m&&m[1]){
+            const srcList=eval(m[1])||[];
+            if(srcList.length){
+              const existing=new Set((d.libraryMovies||[]).map(x=>x.title.toLowerCase()));
+              const posterMap={};
+              const migrated=srcList.filter(x=>!existing.has(x.title.toLowerCase())).map(x=>{
+                if(x.poster){
+                  const posterId=x.posterId||x.imdbID||`t_${_h(x.title||"")}`;
+                  posterMap["poster_"+posterId]=x.poster;
+                  const {poster,...rest}=x;
+                  return {...rest,posterId};
+                }
+                return x;
+              });
+              if(migrated.length){
+                d.libraryMovies=[...(d.libraryMovies||[]),...migrated];
+                d.omdbLastUpdated=new Date().toISOString();
+              }
+              if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+              saveData(d);
+            }
+          }
+        }
+      }catch(_){}
+      if(d.omdbLibrary && d.omdbLibrary.length){
+        const existing=new Set((d.libraryMovies||[]).map(m=>m.title.toLowerCase()));
+        const migratedRaw=(d.omdbLibrary||[]).filter(m=>!existing.has(m.title.toLowerCase()));
+        const posterMap={};
+        const migrated=migratedRaw.map(m=>{
+          if(m.poster){
+            const posterId=m.posterId||m.imdbID||`t_${_h(m.title||"")}`;
+            posterMap["poster_"+posterId]=m.poster;
+            const {poster,...rest}=m;
+            return {...rest,posterId};
+          }
+          return m;
+        });
+        if(migrated.length){
+          d.libraryMovies=[...(d.libraryMovies||[]),...migrated];
+        }
+        if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+        delete d.omdbLibrary;
+        saveData(d);
+      }
       // One-time migration: move any photos still in localStorage → IDB
       await migratePhotosToIDB(d);
       // Hydrate IDB photos into state
@@ -5188,15 +6851,122 @@ function App(){
     })();
   },[]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
+
+  // ── OMDB library enrichment — runs silently in background, resumes daily ────
+  // Each app open checks if there are remaining search terms to process.
+  // Fetches up to DAILY_LIMIT pages per session, stores results in data.libraryMovies.
+  // data.omdbCursor tracks which terms are done and which page to resume from.
+  useEffect(()=>{
+    const DAILY_LIMIT=80; // max API calls per session (~800 movies)
+    const TERMS=[
+      // Genres
+      "drama","romance","thriller","horror","comedy","action","crime","animation",
+      "documentary","mystery","adventure","fantasy","sci-fi","biography","musical",
+      // Moods & styles
+      "indie","arthouse","coming of age","road trip","heist","psychological",
+      // Nationalities & regions
+      "Filipino","Korean","Japanese","French","Italian","Spanish","Indian",
+      "Chinese","Thai","Indonesian","Vietnamese","British","Australian",
+      // Decades
+      "2024","2023","2022","2021","2020","2019","2018","2017","2016","2015",
+      "2010","2005","2000","1995","1990","1985","1980",
+      // Popular searches
+      "love","family","war","based on true story","Oscar","award","classic",
+    ];
+    (async()=>{
+      try{
+        const cursor={...(data.omdbCursor||{})};
+        const existing=new Set((data.libraryMovies||[]).map(m=>m.title.toLowerCase()));
+        const newMovies=[];
+        const posterMap={};
+        let calls=0;
+
+        for(const term of TERMS){
+          if(calls>=DAILY_LIMIT) break;
+          // Skip terms that are fully exhausted (page set to null)
+          if(cursor[term]===null) continue;
+          const startPage=cursor[term]||1;
+
+          for(let page=startPage;page<=10;page++){
+            if(calls>=DAILY_LIMIT) break;
+            try{
+              const res=await fetch(
+                `https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(term)}&type=movie&page=${page}`
+              );
+              calls++;
+              const json=await res.json();
+              if(json.Response==="False"||!json.Search){
+                // No more results for this term
+                cursor[term]=null;
+                break;
+              }
+              // Fetch full details for each result to get director/actor
+              for(const m of json.Search){
+                if(calls>=DAILY_LIMIT) break;
+                if(existing.has(m.Title.toLowerCase())) continue;
+                // Skip clearly non-movie results
+                if(m.Type&&m.Type!=="movie") continue;
+                try{
+                  const detail=await fetch(
+                    `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${m.imdbID}&plot=short`
+                  );
+                  calls++;
+                  const d=await detail.json();
+                  if(d.Response==="False") continue;
+                  const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
+                  const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
+                  const posterId=d.imdbID||`t_${_h(d.Title||"")}`;
+                  const movie={
+                    title:d.Title,
+                    year:d.Year?d.Year.slice(0,4):null,
+                    genre:genres[0]||"Film",
+                    genres,
+                    director:d.Director&&d.Director!=="N/A"?d.Director:null,
+                    actor:actors[0]||null,
+                    actors,
+                    plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
+                    poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
+                    posterId,
+                    tags:buildTagsFromOmdb(d),
+                    ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
+                    _fromOmdb:true,
+                  };
+                  existing.add(movie.title.toLowerCase());
+                  newMovies.push(movie);
+                  if(movie.posterId && movie.poster){
+                    posterMap["poster_"+movie.posterId]=movie.poster;
+                  }
+                }catch(_){}
+              }
+              // Store the next page to resume from
+              cursor[term]=page+1;
+            }catch(_){ break; }
+          }
+        }
+
+        if(newMovies.length>0||JSON.stringify(cursor)!==JSON.stringify(data.omdbCursor||{})){
+          if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+          setData(d=>({
+            ...d,
+            libraryMovies:[...(d.libraryMovies||[]),...newMovies],
+            omdbCursor:cursor,
+            omdbLastUpdated:new Date().toISOString(),
+            omdbLibrary:undefined,
+          }));
+        }
+      }catch(_){}
+    })();
+  },[]); // runs once per app mount;
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [timelineUnread,setTimelineUnread]=useState(0);
   const [showPatch,setShowPatch]=useState(false);
+  const [stickerOpen,setStickerOpen]=useState(false);
   const [badgeAnimKey,setBadgeAnimKey]=useState(0);
   const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
 
-  const anyModalOpen=showLog||showPatch;
+  const anyModalOpen=showLog||showPatch||stickerOpen;
 
   useEffect(()=>{
     if(!photosReady) return; // don't save until hydration is done
@@ -5214,13 +6984,18 @@ function App(){
     const enriched=data.logs.map(log=>{
       if(log.genre!=="Custom")return log;
       const lib=LIBRARY[log.category]||[];
+      const dyn=log.category==="movies" ? (data.libraryMovies||[]) : [];
+      const matchDyn=dyn.find(item=>item.title.toLowerCase()===log.title.toLowerCase());
+      if(matchDyn){
+        return {...log,genre:matchDyn.genre||log.genre,tags:matchDyn.tags||log.tags,enriched:true};
+      }
       const match=lib.find(item=>item.title.toLowerCase()===log.title.toLowerCase());
       if(!match)return log;
       return {...log,genre:match.genre,tags:match.tags,enriched:true};
     });
     const changed=enriched.some((l,i)=>l!==data.logs[i]);
     if(changed)setData(d=>({...d,logs:enriched}));
-  },[]);
+  },[data.libraryMovies]);
 
   // Listen for service worker update messages
   const [updateReady, setUpdateReady] = useState(false);
@@ -5240,6 +7015,7 @@ function App(){
     // On launch: check for update after SW is ready
     const launchCheck = setTimeout(()=>{
       if(navigator.serviceWorker.controller){
+        navigator.serviceWorker.getRegistration().then(reg=>{ if(reg) reg.update(); });
         navigator.serviceWorker.controller.postMessage("CHECK_UPDATE");
       }
     }, 1500);
@@ -5274,6 +7050,7 @@ function App(){
 
     const onTouchStart = e => {
       if(tab === "settings") return; // no PTR on settings
+      if(stickerOpen) return;        // no PTR when sticker modal is open
       const inner = ptrInnerRef.current;
       if(!inner) return;
       // Find deepest scrollable container that is scrolled
@@ -5347,7 +7124,7 @@ function App(){
       wrap.removeEventListener("touchmove", onTouchMove);
       wrap.removeEventListener("touchend", onTouchEnd);
     };
-  }, [tab, ptrY]);
+  }, [tab, ptrY, stickerOpen]);
 
   const ptrProgress = Math.min(ptrY / PTR_THRESHOLD, 1);
 
@@ -5359,11 +7136,43 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
     const arr=Array.isArray(entries)?entries:[entries];
-    if(editEntry&&arr.length===1){
-      update({logs:data.logs.map(l=>l.id===arr[0].id?arr[0]:l)});
+    const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
+    const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
+    if(editEntry&&cleanArr.length===1){
+      update({logs:data.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l)});
     } else {
-      // Use functional update so all entries are prepended at once
-      setData(d=>({...d,logs:[...arr,...d.logs]}));
+      setData(d=>{
+        const cur=d.profilePhotoIds||[];
+        // Only add pins that don't exceed 3 for their Sun-Sat calendar week
+        const newLogs=[...cleanArr,...d.logs];
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=newLogs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=newLogs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
+        return {...d,logs:newLogs,profilePhotoIds:newPins};
+      });
+      return;
+    }
+    if(pinIds.length){
+      setData(d=>{
+        const cur=d.profilePhotoIds||[];
+        const newPins=[...cur];
+        pinIds.forEach(id=>{
+          if(newPins.includes(id)) return;
+          const entry=d.logs.find(l=>l.id===id);
+          if(!entry) return;
+          const entryWeek=getWeekStart(new Date(entry.customDate?entry.customDate+"T12:00:00":entry.date));
+          const weekCount=newPins.filter(pid=>{const e=d.logs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
+          if(weekCount<3) newPins.push(id);
+        });
+        return {...d,profilePhotoIds:newPins};
+      });
     }
     setEditEntry(null);
   };
@@ -5440,14 +7249,14 @@ function App(){
                 </div>
               )}
               {/* Page content slides down over indicator */}
-              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"visible"}}>
+              <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"auto"}}>
               {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
               {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
@@ -5488,27 +7297,43 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 12, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.1</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 16, 2026</span>
                     </div>
                     {[
-                      {v:"v6",date:"Mar 12, 2026",notes:[
-                        "Tap any timeline entry to expand it — see your note, photos, and details in place",
-                        "Edit directly from the expanded card — title, note, category, date, and photo removal, no modal needed",
-                        "Title field suggests from the library as you type, just like when logging",
-                        "Fixed a bug where editing one entry could update all entries with the same title",
-                        "Steps entries are simpler now — just the title and swipe to delete",
-                        "App checks for updates on every launch — a tap-to-reload banner appears if a new version is ready",
-                        "Profile and Suggestions tabs have switched positions",
-                        "Profile tab now shows your avatar when you're elsewhere, and a star when you're on it",
-                        "Ulan theme gets a floating bubble menu navigation bar",
+                      {v:"v6.1",date:"Mar 17, 2026",notes:[
+                        "Profile: stat card colors now update live when you drag — cards sample the nearest photo based on where they actually sit in the grid",
+                        "Profile: harmony mode selector moved into a compact dropdown next to the date range, visible when you tap the week star",
+                        "Profile: the 1×2 stat card beside the first photo in each week now shows that photo as a softly blurred background",
+                        "Profile: Night Owl / Early Bird and Week Pulse now render as normal stat cards",
+                        "Profile: new default grid layout — slots own their shapes, cards flow into them in priority order",
+                        "Profile: photo slots skipped cleanly when no photos exist that week",
+                        "Profile: theme animations paused while on the Profile tab",
+                        "Profile: archetypes reworked — Soulful, Maximalist, Creature of Comfort, Aesthete, Tatak Pinoy, Cultural Nomad",
+                        "Profile: archetypes now need at least 8 logs before showing",
+                        "Discover: redesigned as a stacked deck of 6 category cards — swipe left/right to move between categories, generate button fetches a new suggestion per category (5 per day free, beta bypasses limit)",
+                      ]},
+                      {v:"v6.0",date:"Mar 13, 2026",notes:[
+                        "Manila Nights stat cards are now canvas-rendered neon glass stickers",
+                        "Tap any stat card to preview it as a shareable sticker — hold to save or share",
+                        "Stats grid is now 3 columns with smart layout so solo cards span the full width",
+                        "Only stats with real data are shown — no empty cards",
+                        "Border-radius on stat cards now baked into the canvas bitmap, fixing rounding on high-DPR phones",
+                        "Canvas sizing now waits for the browser to fully paint before drawing, so first load always looks correct",
+                        "Settings: enter a redeem code to unlock beta perks",
                       ]},
                     ].map((rel,ri)=>(
-                      <div key={ri}>
+                      <div key={ri} style={{marginBottom:ri===0?20:0}}>
+                        {ri>0&&(
+                          <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:12,marginTop:4}}>
+                            <span style={{fontSize:13,fontWeight:700,color:THEMES[data.theme].sub}}>{rel.v}</span>
+                            <span style={{fontSize:11,color:THEMES[data.theme].sub,opacity:0.6}}>{rel.date}</span>
+                          </div>
+                        )}
                         {rel.notes.map((n,i)=>(
                           <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
-                            <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
-                            <span style={{fontSize:13,color:THEMES[data.theme].sub,lineHeight:1.5}}>{n}</span>
+                            <span style={{color:ri===0?THEMES[data.theme].accent:THEMES[data.theme].sub,flexShrink:0,fontWeight:700}}>·</span>
+                            <span style={{fontSize:13,color:ri===0?THEMES[data.theme].sub:THEMES[data.theme].sub,lineHeight:1.5,opacity:ri===0?1:0.6}}>{n}</span>
                           </div>
                         ))}
                       </div>
@@ -5517,7 +7342,7 @@ function App(){
                 </div>
               )}
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
-              <ThemeAnimations theme={data.theme} modalOpen={showLog} animationsOff={data.animationsOff||false}/>
+              <ThemeAnimations theme={data.theme} modalOpen={showLog||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
         </div>
