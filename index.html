@@ -5887,7 +5887,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             if(c._photo) return;
             const nearSrc=nearestPhotoSrc(i);
             const dom=getCachedDominant(nearSrc)||weekDominant||th.accent;
-            const base=_harmonizePhotoFirst(dom, th.bg, harmonyMode);
+            const base=_harmonizePhotoFirst(dom, th.accent, harmonyMode);
             const bgRgb=_hexToRgb(base);
             const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
             let text=_pickReadableText(bgRgb, th);
