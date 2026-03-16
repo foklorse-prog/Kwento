@@ -5817,7 +5817,22 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           });
           const used=new Set(orderedCards.map(c=>c.iconId));
           const remaining=[...visible, ...weekPhotoCards].filter(c=>!used.has(c.iconId));
-          const cards=[...orderedCards, ...remaining];
+          const unorderedCards=[...orderedCards, ...remaining];
+
+          // ── Apply the user's saved drag order BEFORE assigning palette colors ──
+          // This is the key fix: we sort by the persisted order first, so that
+          // nearestPhotoSrc() sees each card in its actual grid position, not its
+          // construction order. Any card the user dragged will now sample the photo
+          // closest to where it actually sits in the layout.
+          const savedOrder=(data.statCardOrder||[]);
+          const cards = savedOrder.length
+            ? [
+                ...savedOrder.map(id=>unorderedCards.find(c=>c.iconId===id)).filter(Boolean),
+                ...unorderedCards.filter(c=>!savedOrder.includes(c.iconId)),
+              ]
+            : unorderedCards;
+
+          // Now build photo index map from the correctly-ordered array
           const photoIndices=cards.map((c,i)=>c._photo?i:null).filter(i=>i!==null);
           const nearestPhotoSrc=idx=>{
             if(!photoIndices.length) return null;
@@ -5890,6 +5905,34 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                     {showDetails&&(
                       <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                         <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{formatWeekRange(weekKey)}</span>
+                        {/* Harmony mode compact dropdown — sits right next to the date range */}
+                        <select
+                          value={(data.weekHarmony||{})[weekKey]||"analog"}
+                          onChange={e=>onChange("weekHarmony",{...(data.weekHarmony||{}),[weekKey]:e.target.value})}
+                          style={{
+                            fontSize:11,
+                            color:th.sub,
+                            background:th.card,
+                            border:`1px solid ${th.border}`,
+                            borderRadius:8,
+                            padding:"3px 8px",
+                            cursor:"pointer",
+                            outline:"none",
+                            appearance:"none",
+                            WebkitAppearance:"none",
+                            paddingRight:20,
+                            backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`,
+                            backgroundRepeat:"no-repeat",
+                            backgroundPosition:"right 6px center",
+                          }}
+                        >
+                          <option value="analog">Analog</option>
+                          <option value="comp">Complement</option>
+                          <option value="split1">Split-Comp</option>
+                          <option value="triad">Triad</option>
+                          <option value="mono">Mono</option>
+                          <option value="auto">Auto</option>
+                        </select>
                         <button
                           onClick={()=>setWeekOpen(prev=>({...prev,[weekKey]:!isOpen}))}
                           style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",cursor:"pointer"}}
@@ -5902,23 +5945,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                         >
                           Share
                         </button>
-                        {[
-                          ["analog","Analog"],
-                          ["comp","Complement"],
-                          ["split1","Split-Comp"],
-                          ["triad","Triad"],
-                          ["mono","Mono"],
-                          ["auto","Auto"],
-                        ].map(([val,label])=>{
-                          const active=(data.weekHarmony||{})[weekKey]===val || (!data.weekHarmony?.[weekKey] && val==="analog");
-                          return(
-                            <span key={val}
-                              onClick={()=>onChange("weekHarmony",{...(data.weekHarmony||{}),[weekKey]:val})}
-                              style={{fontSize:10,color:active?th.accent:th.sub,letterSpacing:0.4,cursor:"pointer",padding:"2px 6px",borderRadius:6,border:`1px solid ${active?th.accent:th.border}`}}>
-                              {label}
-                            </span>
-                          );
-                        })}
                       </div>
                     )}
                   </div>
