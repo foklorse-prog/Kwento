@@ -136,7 +136,7 @@ function _hueDistance(a,b){
   const d=Math.abs(a-b)%360;
   return d>180?360-d:d;
 }
-function _harmonizePhotoFirst(dominantHex, themeHex){
+function _harmonizePhotoFirst(dominantHex, themeHex, mode="analogous"){
   const dom=_hexToRgb(dominantHex);
   const th=_hexToRgb(themeHex);
   const domHsl=_rgbToHsl(dom);
@@ -150,7 +150,14 @@ function _harmonizePhotoFirst(dominantHex, themeHex){
   ];
   const themeHsl=_rgbToHsl(th);
   const clash=_hueDistance(domHsl.h,themeHsl.h)>=120;
-  const ordered=clash?candidates:[candidates[5],...candidates.slice(0,5)];
+  const byName=name=>candidates.find(c=>c.name===name);
+  let ordered=candidates;
+  if(mode&&mode!=="auto"){
+    const first=byName(mode) || byName("analog");
+    ordered=[first, ...candidates.filter(c=>c!==first)];
+  } else {
+    ordered=clash?candidates:[byName("mono"),...candidates.filter(c=>c.name!=="mono")];
+  }
   let picked=_hslToRgb({h:domHsl.h,s:domHsl.s,l:domHsl.l});
   for(const c of ordered){
     const rgb=_hslToRgb({h:c.h,s:domHsl.s,l:domHsl.l});
@@ -1715,6 +1722,7 @@ function defaultData(){
     betaMode:false,
     libraryMovies:[], // dynamic movie library (enriched)
     omdbCursor:{},    // {term: nextPage} — tracks progress across days
+    weekHarmony:{},
   };
 }
 
@@ -4771,7 +4779,7 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,ro
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass,palette}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass,palette,bgImage}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
   const [showSheet,setShowSheet]=useState(false);
@@ -4818,6 +4826,28 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
           WebkitTapHighlightColor:"transparent",
           ...(span?{gridColumn:"span 3"}:{}),
         }}>
+        {bgImage&&(
+          <>
+            <div style={{
+              position:"absolute",inset:-10,
+              backgroundImage:`url(${bgImage})`,
+              backgroundSize:"cover",backgroundPosition:"center",
+              filter:"blur(30px)",transform:"scale(1.1)",
+              opacity:0.8
+            }}/>
+            <div style={{
+              position:"absolute",inset:0,
+              background:"rgba(0,0,0,0.45)",
+            }}/>
+            {palette&&(
+              <div style={{
+                position:"absolute",inset:0,
+                background:`linear-gradient(160deg,${palette.bg}66,${palette.bg2}66)`,
+                mixBlendMode:"screen",
+              }}/>
+            )}
+          </>
+        )}
         <canvas ref={canvasRef} style={{display:"block",position:"absolute",top:0,left:0}}/>
       </div>
       {showSheet&&<StickerSaveSheet
@@ -5139,6 +5169,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               onStickerOpen={onStickerOpen}
               onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
               palette={card._palette}
+              bgImage={card._slotRole==="side"?card._bgImage:null}
               onGenerate={()=>{
                 const today=todayKey();
                 const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
@@ -5818,20 +5849,28 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           };
           const topKeys=new Set(["week_breakdown","week_pulse"]);
           const sideKeys=new Set(["week_pulse","time_vibe"]);
+          const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
           cards.forEach((c,i)=>{
             if(c._photo) return;
             const nearSrc=nearestPhotoSrc(i);
             const dom=getCachedDominant(nearSrc)||weekDominant||th.accent;
-            const base=_harmonizePhotoFirst(dom, th.accent);
+            const base=_harmonizePhotoFirst(dom, th.accent, harmonyMode);
             const bgRgb=_hexToRgb(base);
             const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
-            const text=_pickReadableText(bgRgb, th);
+            let text=_pickReadableText(bgRgb, th);
+            let accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.35));
+            let label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.55));
+            if(_luminance(bgRgb)>0.7){
+              text="#0b0f1a";
+              accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.8));
+              label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.6));
+            }
             const palette={
               bg:base,
               bg2,
               text,
-              accent:_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.35)),
-              label:_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.55)),
+              accent,
+              label,
             };
             c._palette=palette;
             c._slotRole=topKeys.has(c._baseId)?"top":sideKeys.has(c._baseId)?"side":"normal";
@@ -5871,7 +5910,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                       <WeekStar/>
                     </button>
                     {showDetails&&(
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                         <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{formatWeekRange(weekKey)}</span>
                         <button
                           onClick={()=>setWeekOpen(prev=>({...prev,[weekKey]:!isOpen}))}
@@ -5885,6 +5924,23 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                         >
                           Share
                         </button>
+                        {[
+                          ["analog","Analog"],
+                          ["comp","Complement"],
+                          ["split1","Split-Comp"],
+                          ["triad","Triad"],
+                          ["mono","Mono"],
+                          ["auto","Auto"],
+                        ].map(([val,label])=>{
+                          const active=(data.weekHarmony||{})[weekKey]===val || (!data.weekHarmony?.[weekKey] && val==="analog");
+                          return(
+                            <span key={val}
+                              onClick={()=>onChange("weekHarmony",{...(data.weekHarmony||{}),[weekKey]:val})}
+                              style={{fontSize:10,color:active?th.accent:th.sub,letterSpacing:0.4,cursor:"pointer",padding:"2px 6px",borderRadius:6,border:`1px solid ${active?th.accent:th.border}`}}>
+                              {label}
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
