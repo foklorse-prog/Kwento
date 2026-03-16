@@ -5155,29 +5155,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           </div>
         );
 
-        if(isMN) return(
-          <div key={card.iconId} data-cardid={card.iconId}
-            style={wrapStyle}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-          >
-            <StatSticker
-              iconId={card.iconId} label={card.label} value={card.value}
-              data={data} span={false} colSpan={colSpan} rowSpan={rowSpan} sharedGlass={!!sharedGlass}
-              onStickerOpen={onStickerOpen}
-              onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
-              palette={card._palette}
-              bgImage={card._slotRole==="side"?card._bgImage:null}
-              onGenerate={()=>{
-                const today=todayKey();
-                const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
-                onChange("__batch__",{stickerGenCount:count+1,stickerGenDate:today});
-              }}
-            />
-          </div>
-        );
+        // Sticker system archived for now — Manila Nights uses standard cards
 
         const isVibe=String(card.iconId).includes("week_breakdown");
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
