@@ -5200,12 +5200,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                   {/* The photo itself — slightly blurred so it reads as texture/repetition
                       rather than a competing focal point, but still recognisably the same image */}
                   <div style={{
-                    position:"absolute",inset:-6,
+                    position:"absolute",inset:-4,
                     backgroundImage:`url(${card._bgImage})`,
                     backgroundSize:"cover",backgroundPosition:"center",
-                    filter:"blur(6px)",
-                    transform:"scale(1.05)", // small scale-up so blur edges don't show
-                    opacity:0.9,
+                    filter:"blur(3px)",
+                    transform:"scale(1.02)", // just enough scale to hide blur edges
+                    opacity:1,
                   }}/>
                   {/* Heavy dark scrim — covers the whole card so text is always readable
                       regardless of whether the photo is light or dark */}
@@ -5876,24 +5876,26 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           const sideKeys=new Set(["week_pulse","time_vibe"]);
           const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
 
-          // ── Find the first real photo card and tag its immediate 2x1 neighbor ──
-          // We look left first, then right. Only a card with colSpan=2, rowSpan=1
-          // qualifies — that matches the "2x1" shape the user wants. Only the very
-          // first photo card in the week acts as the anchor; subsequent photos don't
-          // trigger this treatment.
+          // ── Find the first real photo card and tag its visual side-neighbor ──
+          // A 2x2 photo in a 3-column grid always leaves exactly 1 column beside it.
+          // The card filling that column is always colSpan:1, rowSpan:2 — tall and
+          // narrow. We find whichever non-photo card has that shape and sits closest
+          // to the first photo in the ordered array. That card is always the visual
+          // left-or-right neighbor, wherever the user has dragged it.
           const firstPhotoIdx=cards.findIndex(c=>c._photo && c._photoSrc);
           const firstPhotoSrc=firstPhotoIdx!==-1?cards[firstPhotoIdx]._photoSrc:null;
           const resolvedSizes=data.statCardSizes||{};
           let photoBgIdx=-1;
           if(firstPhotoIdx!==-1 && firstPhotoSrc){
-            const neighbors=[firstPhotoIdx-1, firstPhotoIdx+1];
-            for(const ni of neighbors){
-              if(ni<0||ni>=cards.length) continue;
-              const nc=cards[ni];
-              if(nc._photo) continue; // skip other photo cards
+            let bestDist=Infinity;
+            cards.forEach((nc,ni)=>{
+              if(nc._photo) return;
               const span=resolvedSizes[nc.iconId]||nc.defaultSpan||{colSpan:1,rowSpan:1};
-              if(span.colSpan===2 && span.rowSpan===1){ photoBgIdx=ni; break; }
-            }
+              if(span.colSpan===1 && span.rowSpan===2){
+                const dist=Math.abs(ni-firstPhotoIdx);
+                if(dist<bestDist){ bestDist=dist; photoBgIdx=ni; }
+              }
+            });
           }
 
           cards.forEach((c,i)=>{
