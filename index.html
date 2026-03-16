@@ -3,6 +3,15 @@
   KWENTO PATCH NOTES (dev only — update this every release)
 ================================================================
 
+v6.1 — 2026-03-16
+  - Profile: stat card colors now update live when cards are dragged — color is assigned after user order is applied, so each card always samples the photo closest to its actual grid position
+  - Profile: harmony mode moved into a compact dropdown inside the star-tap details row, next to the date range
+  - Profile: new photo_bg treatment — the 1x2 stat card sitting beside the first photo card in a week now shows that photo as a softly blurred background with a dark scrim for readability
+  - Profile: Night Owl / Early Bird and week_pulse no longer get the old blurred photo background — they now render as normal stat cards
+  - Profile: complete rework of default grid layout — slots own their shapes (2x1, 1x2, 2x2 etc.), cards flow into slots in priority order and inherit the slot's shape; no card has a predefined size
+  - Profile: new card priority order — Vibe, Pace, Photo, Night Owl, Steps, Photo, Days Active, Most Logged, Photo, Top Category, Entries, Top Actor, Top Director
+  - Profile: photo slots skipped cleanly when no photos exist that week without disrupting stat card flow
+
 v6.0 — 2026-03-13
   - Profile: Manila Nights stat sticker cards — canvas-rendered, neon glass design
   - Profile: tap any stat card to preview as a shareable sticker (hold to save/share)
@@ -25,7 +34,7 @@ v6.0 — 2026-03-13
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
-  <meta name="kwento-build" content="2026-03-15-2"/>
+  <meta name="kwento-build" content="2026-03-16-1"/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 <script>
@@ -5878,7 +5887,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             if(c._photo) return;
             const nearSrc=nearestPhotoSrc(i);
             const dom=getCachedDominant(nearSrc)||weekDominant||th.accent;
-            const base=_harmonizePhotoFirst(dom, th.accent, harmonyMode);
+            const base=_harmonizePhotoFirst(dom, th.bg, harmonyMode);
             const bgRgb=_hexToRgb(base);
             const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
             let text=_pickReadableText(bgRgb, th);
@@ -6548,7 +6557,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.0</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.1</button></span>
       </div>
     </div>
   );
@@ -7070,10 +7079,18 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.0</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 13, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.1</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 16, 2026</span>
                     </div>
                     {[
+                      {v:"v6.1",date:"Mar 16, 2026",notes:[
+                        "Profile: stat card colors now update live when you drag — cards sample the nearest photo based on where they actually sit in the grid",
+                        "Profile: harmony mode selector moved into a compact dropdown next to the date range, visible when you tap the week star",
+                        "Profile: the 1×2 stat card beside the first photo in each week now shows that photo as a softly blurred background",
+                        "Profile: Night Owl / Early Bird and Week Pulse now render as normal stat cards, consistent with all others",
+                        "Profile: new default grid layout — slots own their shapes, cards flow into them in priority order and inherit whatever shape the slot defines",
+                        "Profile: photo slots are skipped cleanly when no photos exist that week, without disrupting the stat card flow",
+                      ]},
                       {v:"v6.0",date:"Mar 13, 2026",notes:[
                         "Manila Nights stat cards are now canvas-rendered neon glass stickers",
                         "Tap any stat card to preview it as a shareable sticker — hold to save or share",
@@ -7084,11 +7101,17 @@ function App(){
                         "Settings: enter a redeem code to unlock beta perks",
                       ]},
                     ].map((rel,ri)=>(
-                      <div key={ri}>
+                      <div key={ri} style={{marginBottom:ri===0?20:0}}>
+                        {ri>0&&(
+                          <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:12,marginTop:4}}>
+                            <span style={{fontSize:13,fontWeight:700,color:THEMES[data.theme].sub}}>{rel.v}</span>
+                            <span style={{fontSize:11,color:THEMES[data.theme].sub,opacity:0.6}}>{rel.date}</span>
+                          </div>
+                        )}
                         {rel.notes.map((n,i)=>(
                           <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
-                            <span style={{color:THEMES[data.theme].accent,flexShrink:0,fontWeight:700}}>·</span>
-                            <span style={{fontSize:13,color:THEMES[data.theme].sub,lineHeight:1.5}}>{n}</span>
+                            <span style={{color:ri===0?THEMES[data.theme].accent:THEMES[data.theme].sub,flexShrink:0,fontWeight:700}}>·</span>
+                            <span style={{fontSize:13,color:ri===0?THEMES[data.theme].sub:THEMES[data.theme].sub,lineHeight:1.5,opacity:ri===0?1:0.6}}>{n}</span>
                           </div>
                         ))}
                       </div>
