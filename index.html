@@ -5725,80 +5725,99 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           }
 
           const wkId=id=>`${weekKey}_${id}`;
-          const slotSizes={
-            week_breakdown:{colSpan:2,rowSpan:1},
-            week_pulse:{colSpan:1,rowSpan:2},
-            photo0:{colSpan:2,rowSpan:2},
-            time_vibe:{colSpan:1,rowSpan:1},
-            steps:{colSpan:1,rowSpan:2},
-            photo1:{colSpan:2,rowSpan:2},
-            days:{colSpan:1,rowSpan:1},
-            most_logged:{colSpan:2,rowSpan:1},
-            photo2:{colSpan:2,rowSpan:1},
-            top_cat:{colSpan:1,rowSpan:1},
-            week:{colSpan:1,rowSpan:1},
-            top_actor:{colSpan:1,rowSpan:1},
-            top_director:{colSpan:1,rowSpan:1},
-          };
-          const registry=[
-            {iconId:wkId("days"),  _baseId:"days",  emoji:"🗓", label:"Days Active", value:daysActiveCount, min:1, defaultSpan:slotSizes.days},
-            {iconId:wkId("week"),  _baseId:"week",  emoji:"📅", label:"Entries",     value:thisWeekCount,  min:1, defaultSpan:slotSizes.week},
-            ...(weekLikedCount>0?[{iconId:wkId("liked"), _baseId:"liked", emoji:"👍", label:lang==="fil"?"Na-like":"Liked", value:weekLikedCount, min:1}]:[]),
-            ...(stepsLogs.length>0
-              ?[{iconId:wkId("steps"), _baseId:"steps", emoji:"👟", label:"Steps", value:weekSteps, min:1, defaultSpan:slotSizes.steps}]
-              :[]),
-            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"), _baseId:"top_cat", emoji:topCatEmoji, label:"Top Category", value:topCatLabel, min:1, defaultSpan:slotSizes.top_cat}]:[]),
-            ...(timeVibe?[{iconId:wkId("time_vibe"), _baseId:"time_vibe", emoji:timeVibeRaw==="night_owl"?"🦉":"🌅", label:"", value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird", min:1, defaultSpan:slotSizes.time_vibe}]:[]),
-            ...(mostLoggedTitle?[{iconId:wkId("most_logged"), _baseId:"most_logged", emoji:"🔁", label:"Most Logged", value:mostLoggedTitle, min:1, defaultSpan:slotSizes.most_logged}]:[]),
-            ...(topDirector?[{iconId:wkId("top_director"), _baseId:"top_director", emoji:"🎬", label:"Director", value:topDirector, min:1, defaultSpan:slotSizes.top_director}]:[]),
-            ...(topActor?[{iconId:wkId("top_actor"), _baseId:"top_actor", emoji:"🎭", label:"Actor", value:topActor, min:1, defaultSpan:slotSizes.top_actor}]:[]),
-            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"), _baseId:"week_breakdown", emoji:"📊", label:"Vibe", value:weekBreakdownValue, min:1, defaultSpan:slotSizes.week_breakdown}]:[]),
-            ...(weekPulse?[{iconId:wkId("week_pulse"), _baseId:"week_pulse", emoji:weekPulseEmoji, label:"", value:weekPulse, min:1, defaultSpan:slotSizes.week_pulse}]:[]),
+
+          // ── Slot sequence ─────────────────────────────────────────────────────
+          // Each slot owns a shape. Cards flow into slots in registry order,
+          // skipping any card that has no data. The card inherits the slot's shape —
+          // the card itself has no predefined size. Photo slots are skipped when
+          // there are no photos that week.
+          const defaultSlots=[
+            {colSpan:2,rowSpan:1},  // slot 1  — Vibe
+            {colSpan:1,rowSpan:2},  // slot 2  — Pace
+            {colSpan:2,rowSpan:2},  // slot 3  — Photo
+            {colSpan:1,rowSpan:1},  // slot 4  — Night Owl / Early Bird
+            {colSpan:1,rowSpan:2},  // slot 5  — Steps
+            {colSpan:2,rowSpan:2},  // slot 6  — Photo
+            {colSpan:1,rowSpan:1},  // slot 7  — Days Active
+            {colSpan:2,rowSpan:1},  // slot 8  — Most Logged
+            {colSpan:2,rowSpan:1},  // slot 9  — Photo (skipped if no photo)
+            {colSpan:1,rowSpan:1},  // slot 10 — Top Category
+            {colSpan:1,rowSpan:1},  // slot 11 — Entries
+            {colSpan:1,rowSpan:1},  // slot 12 — Top Actor
+            {colSpan:1,rowSpan:1},  // slot 13 — Top Director
           ];
 
-          const visible=registry.filter(s=>s.show!==false&&s.value!==null&&s.value!==undefined&&s.value!==""&&(typeof s.value!=="number"||s.value>=s.min));
+          // ── Card registry — ordered by priority ───────────────────────────────
+          // This defines which card gets the first available slot, second, etc.
+          // If a card has no data it is simply absent and the next card moves up.
+          const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
+            const entry=data.logs.find(l=>l.id===id);
+            const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
+            if(!entry||!entryDate||isNaN(entryDate)) return null;
+            if(phWeekStartKey(entryDate)!==weekKey) return null;
+            const photo=entry?.actPhotos?.[0];
+            if(!photo) return null;
+            const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
+            return {iconId:`profile_photo_${id}`, _baseId:"photo", label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, min:1};
+          }).filter(Boolean);
 
-            const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
-              const entry=data.logs.find(l=>l.id===id);
-              const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
-              if(!entry||!entryDate||isNaN(entryDate)) return null;
-              if(phWeekStartKey(entryDate)!==weekKey) return null;
-              const photo=entry?.actPhotos?.[0];
-              if(!photo) return null;
-              const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-              return {iconId:`profile_photo_${id}`, _baseId:"photo", label:entry.title||"", value:"📷", _photo:true, _photoSrc:photo, _entryId:id, _photoPos:pos, defaultSpan:{colSpan:2,rowSpan:2}, min:1};
-            }).filter(Boolean);
-
-          const orderedSlots=[
-            {key:"week_breakdown", size:slotSizes.week_breakdown},
-            {key:"week_pulse", size:slotSizes.week_pulse},
-            {key:"photo0", size:slotSizes.photo0},
-            {key:"time_vibe", size:slotSizes.time_vibe},
-            {key:"steps", size:slotSizes.steps},
-            {key:"photo1", size:slotSizes.photo1},
-            {key:"days", size:slotSizes.days},
-            {key:"most_logged", size:slotSizes.most_logged},
-            {key:"photo2", size:slotSizes.photo2},
-            {key:"top_cat", size:slotSizes.top_cat},
-            {key:"week", size:slotSizes.week},
-            {key:"top_actor", size:slotSizes.top_actor},
-            {key:"top_director", size:slotSizes.top_director},
+          // Stat cards in priority order — matches your registry 1,2,4,5,7,8,10,11,12,13
+          const statRegistry=[
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:"Vibe",value:weekBreakdownValue,min:1}]:[]),
+            ...(weekPulse?[{iconId:wkId("week_pulse"),_baseId:"week_pulse",emoji:weekPulseEmoji,label:"",value:weekPulse,min:1}]:[]),
+            ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌅",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
+            ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
+            ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
+            ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:"Most Logged",value:mostLoggedTitle,min:1}]:[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"),_baseId:"top_cat",emoji:topCatEmoji,label:"Top Category",value:topCatLabel,min:1}]:[]),
+            ...(thisWeekCount>0?[{iconId:wkId("week"),_baseId:"week",emoji:"📅",label:"Entries",value:thisWeekCount,min:1}]:[]),
+            ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
+            ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
+            ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
           ];
-          let photoCards=weekPhotoCards;
-          if(!photoCards.length && prevWeekPalette){
-            photoCards=[0,1,2].map(i=>({
-              iconId:`profile_photo_placeholder_${weekKey}_${i}`,
-              _baseId:"photo",
-              label:"", value:"",
-              _photo:true,
-              _photoPlaceholder:true,
-              _photoColor:prevWeekPalette,
-              _entryId:null,
-              _photoPos:{x:50,y:50,scale:1},
-              defaultSpan:slotSizes[`photo${i}`]||{colSpan:2,rowSpan:2},
-            }));
-          }
-          const photoColors=photoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
+
+          // Photo cards iterator — consumed one at a time as photo slots are reached
+          let photoCardIdx=0;
+          // Stat cards iterator — consumed one at a time as stat slots are reached
+          let statCardIdx=0;
+
+          // Photo slots are at positions 3, 6, 9 (0-indexed: 2, 5, 8)
+          const photoSlotIndices=new Set([2,5,8]);
+
+          const orderedCards=[];
+          defaultSlots.forEach((slotShape, slotIndex)=>{
+            if(photoSlotIndices.has(slotIndex)){
+              // Photo slot — consume next available photo card, skip if none
+              const photoCard=weekPhotoCards[photoCardIdx];
+              if(photoCard){
+                photoCard.defaultSpan=slotShape;
+                orderedCards.push(photoCard);
+                photoCardIdx++;
+              }
+              // If no photo, slot is simply skipped — next stat slot is not affected
+            } else {
+              // Stat slot — consume next available stat card, skip if none
+              const statCard=statRegistry[statCardIdx];
+              if(statCard){
+                // The slot's shape is assigned to the card here — this is the key:
+                // the card has no predefined size, it just inherits whatever slot it lands in
+                statCard.defaultSpan=slotShape;
+                orderedCards.push(statCard);
+                statCardIdx++;
+              }
+            }
+          });
+
+          // Any remaining cards that didn't fit into the 13 default slots
+          // get appended with a default 1x1 size
+          const usedIds=new Set(orderedCards.map(c=>c.iconId));
+          const remaining=[
+            ...statRegistry.filter(c=>!usedIds.has(c.iconId)).map(c=>({...c,defaultSpan:{colSpan:1,rowSpan:1}})),
+            ...weekPhotoCards.filter(c=>!usedIds.has(c.iconId)).map(c=>({...c,defaultSpan:{colSpan:2,rowSpan:2}})),
+          ];
+          const unorderedCards=[...orderedCards, ...remaining];
+
+          const photoColors=weekPhotoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
           const weekDominant=photoColors.length
             ?_rgbToHex((()=>{
               const sum=photoColors.reduce((acc,hex)=>{
@@ -5808,26 +5827,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               return {r:sum.r/photoColors.length,g:sum.g/photoColors.length,b:sum.b/photoColors.length};
             })())
             :prevWeekPalette;
-          const orderedCards=[];
-          orderedSlots.forEach(slot=>{
-            if(slot.key.startsWith("photo")){
-              const idx=parseInt(slot.key.replace("photo",""),10);
-              const card=photoCards[idx];
-              if(card){
-                card.defaultSpan=slot.size;
-                orderedCards.push(card);
-              }
-              return;
-            }
-            const card=visible.find(c=>c._baseId===slot.key);
-            if(card){
-              card.defaultSpan=slot.size||card.defaultSpan;
-              orderedCards.push(card);
-            }
-          });
-          const used=new Set(orderedCards.map(c=>c.iconId));
-          const remaining=[...visible, ...weekPhotoCards].filter(c=>!used.has(c.iconId));
-          const unorderedCards=[...orderedCards, ...remaining];
 
           // ── Apply the user's saved drag order BEFORE assigning palette colors ──
           // This is the key fix: we sort by the persisted order first, so that
