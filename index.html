@@ -5224,29 +5224,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                   )}
                 </>
               )}
-              {card._slotRole==="side"&&card._bgImage&&(
-                <>
-                  <div style={{
-                    position:"absolute",inset:-10,
-                    backgroundImage:`url(${card._bgImage})`,
-                    backgroundSize:"cover",backgroundPosition:"center",
-                    filter:"blur(28px)",transform:"scale(1.1)",
-                    opacity:0.75,
-                  }}/>
-                  <div style={{
-                    position:"absolute",inset:0,
-                    background:`linear-gradient(180deg,rgba(0,0,0,0.35),rgba(0,0,0,0.5))`,
-                    mixBlendMode:"multiply",
-                  }}/>
-                  {palette&&(
-                    <div style={{
-                      position:"absolute",inset:0,
-                      background:`linear-gradient(160deg,${palette.bg}66,${palette.bg2}66)`,
-                      mixBlendMode:"screen",
-                    }}/>
-                  )}
-                </>
-              )}
+
               <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
               <div style={{
                 fontSize:valSz,fontWeight:800,color:valColor,
@@ -5873,7 +5851,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             return cards[best]?cards[best]._photoSrc:null;
           };
           const topKeys=new Set(["week_breakdown","week_pulse"]);
-          const sideKeys=new Set(["week_pulse","time_vibe"]);
           const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
 
           // ── Find the first real photo card and tag its visual side-neighbor ──
@@ -5920,10 +5897,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               c._slotRole="photo_bg";
               c._bgImage=firstPhotoSrc;
             } else {
-              c._slotRole=topKeys.has(c._baseId)?"top":sideKeys.has(c._baseId)?"side":"normal";
-              if(c._slotRole==="side" && nearSrc){
-                c._bgImage=nearSrc;
-              }
+              c._slotRole=topKeys.has(c._baseId)?"top":"normal";
             }
           });
           const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
