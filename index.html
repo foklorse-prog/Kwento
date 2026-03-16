@@ -62,6 +62,106 @@ const { useState, useEffect, useRef, useMemo } = React;
 const OFFENSIVE = ["fuck","shit","bitch","asshole","bastard","crap","puta","gago","bobo","putangina","tangina","leche","punyeta","tanga","ulol","pakyu","puke","dick","cock","pussy","cunt","whore","slut","nigger","faggot","retard","hate","kill","rape","murder","porn","nude","naked"];
 function isOffensive(t){ return OFFENSIVE.some(w=>t.toLowerCase().replace(/[^a-z0-9\s]/g,"").includes(w)); }
 
+// ─── COLOR HELPERS ───────────────────────────────────────────────────────────
+const _clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+function _hexToRgb(hex){
+  const h=hex.replace("#","").trim();
+  const n=h.length===3? h.split("").map(c=>c+c).join(""):h;
+  const i=parseInt(n,16);
+  return {r:(i>>16)&255,g:(i>>8)&255,b:i&255};
+}
+function _rgbToHex({r,g,b}){
+  const to=h=>h.toString(16).padStart(2,"0");
+  return `#${to(_clamp(Math.round(r),0,255))}${to(_clamp(Math.round(g),0,255))}${to(_clamp(Math.round(b),0,255))}`;
+}
+function _rgbToHsl({r,g,b}){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      default: h=(r-g)/d+4;
+    }
+    h*=60;
+  }
+  return {h,s,l};
+}
+function _hslToRgb({h,s,l}){
+  const c=(1-Math.abs(2*l-1))*s;
+  const x=c*(1-Math.abs((h/60)%2-1));
+  const m=l-c/2;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;}
+  else if(h<120){r=x;g=c;}
+  else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;}
+  else if(h<300){r=x;b=c;}
+  else{r=c;b=x;}
+  return {r:(r+m)*255,g:(g+m)*255,b:(b+m)*255};
+}
+function _mixRgb(a,b,t){
+  return {r:a.r+(b.r-a.r)*t,g:a.g+(b.g-a.g)*t,b:a.b+(b.b-a.b)*t};
+}
+function _luminance({r,g,b}){
+  const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const R=f(r),G=f(g),B=f(b);
+  return 0.2126*R+0.7152*G+0.0722*B;
+}
+function _contrast(a,b){
+  const L1=_luminance(a)+0.05;
+  const L2=_luminance(b)+0.05;
+  return L1>L2?L1/L2:L2/L1;
+}
+function _adjustForCard(rgb){
+  const hsl=_rgbToHsl(rgb);
+  const s=_clamp(hsl.s*0.7,0,1);
+  const l=_clamp(hsl.l+0.08,0,1);
+  return _hslToRgb({h:hsl.h,s,l});
+}
+function _pickReadableText(bgRgb, th){
+  const light=_hexToRgb("#ffffff");
+  const dark=_hexToRgb("#0b0f1a");
+  const prefer=_hexToRgb(th.text||"#ffffff");
+  const c1=_contrast(bgRgb,prefer);
+  if(c1>=3) return _rgbToHex(prefer);
+  const c2=_contrast(bgRgb,light);
+  const c3=_contrast(bgRgb,dark);
+  return c2>=c3?_rgbToHex(light):_rgbToHex(dark);
+}
+function _hueDistance(a,b){
+  const d=Math.abs(a-b)%360;
+  return d>180?360-d:d;
+}
+function _harmonizePhotoFirst(dominantHex, themeHex){
+  const dom=_hexToRgb(dominantHex);
+  const th=_hexToRgb(themeHex);
+  const domHsl=_rgbToHsl(dom);
+  const candidates=[
+    {name:"comp",h:(domHsl.h+180)%360},
+    {name:"split1",h:(domHsl.h+150)%360},
+    {name:"split2",h:(domHsl.h+210)%360},
+    {name:"analog",h:(domHsl.h+30)%360},
+    {name:"triad",h:(domHsl.h+120)%360},
+    {name:"mono",h:domHsl.h},
+  ];
+  const themeHsl=_rgbToHsl(th);
+  const clash=_hueDistance(domHsl.h,themeHsl.h)>=120;
+  const ordered=clash?candidates:[candidates[5],...candidates.slice(0,5)];
+  let picked=_hslToRgb({h:domHsl.h,s:domHsl.s,l:domHsl.l});
+  for(const c of ordered){
+    const rgb=_hslToRgb({h:c.h,s:domHsl.s,l:domHsl.l});
+    const adj=_adjustForCard(rgb);
+    const blend=_mixRgb(adj,th,0.2);
+    if(_contrast(blend,_hexToRgb("#ffffff"))>=2.2 || _contrast(blend,_hexToRgb("#0b0f1a"))>=2.2){
+      picked=blend; break;
+    }
+  }
+  return _rgbToHex(picked);
+}
 // ─── THEMES ──────────────────────────────────────────────────────────────────
 const THEMES = {
   jeepney:{name:"Jeepney",emoji:"🚌",dark:true,bg:"#1a0a2e",card:"#2d1057",accent:"#ff6b35",accent2:"#ffd23f",text:"#fff8f0",sub:"#d4a0ff",border:"#5a2d82",grad:"linear-gradient(135deg,#1a0a2e 0%,#2d1057 50%,#3d0066 100%)"},
@@ -4434,7 +4534,7 @@ function StickerIcon({id}){
 // Draws the full sticker onto a canvas context.
 // CARD_H = visible height on profile. BRAND_H = extra strip inside card for "My week on Kwento".
 // On profile, the wrapper clips to CARD_H. In the modal preview, full height shows.
-function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlass){
+function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlass, palette){
   const th=THEMES.manila_nights;
 
   ctx.clearRect(0,0,W,H);
@@ -4443,7 +4543,15 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
   if(!sharedGlass){
     ctx.save();
     ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
-    ctx.fillStyle="rgba(10,6,20,0.85)"; ctx.fillRect(0,0,W,H);
+    if(palette&&palette.bg){
+      const grad=ctx.createLinearGradient(0,0,W,H);
+      grad.addColorStop(0,palette.bg);
+      grad.addColorStop(1,palette.bg2||palette.bg);
+      ctx.fillStyle=grad;
+    } else {
+      ctx.fillStyle="rgba(10,6,20,0.85)";
+    }
+    ctx.fillRect(0,0,W,H);
     ctx.restore();
   }
 
@@ -4479,7 +4587,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 
   // ── Icon
   ctx.save();
-  ctx.strokeStyle="#00cfff"; ctx.lineWidth=Math.max(1,1.5*iconScale);
+  ctx.strokeStyle=(palette&&palette.accent)||"#00cfff"; ctx.lineWidth=Math.max(1,1.5*iconScale);
   ctx.lineCap="round"; ctx.lineJoin="round";
   ctx.translate(cx,iconY); ctx.scale(iconScale,iconScale); ctx.translate(-12,-12);
 
@@ -4536,8 +4644,9 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 
   // ── Value
   ctx.textAlign="center";
-  ctx.fillStyle=th.accent;
-  ctx.shadowColor=th.accent;
+  const accent=(palette&&palette.accent)||th.accent;
+  ctx.fillStyle=accent;
+  ctx.shadowColor=accent;
 
   if(isMultiline){
     const parts=String(value).split(" · ");
@@ -4574,7 +4683,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
   if(!noLabel){
     const labelFontSize=Math.round(sizeRef*0.10);
     ctx.font=`600 ${labelFontSize}px 'DM Sans', sans-serif`;
-    ctx.fillStyle="rgba(136,120,170,0.75)";
+    ctx.fillStyle=(palette&&palette.label)||"rgba(136,120,170,0.75)";
     ctx.shadowBlur=0;
     ctx.fillText(label.toUpperCase(),cx,labelY);
   }
@@ -4591,7 +4700,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 }
 
 // Slim bottom sheet that appears after long-hold — iOS native long-press on the img saves/shares
-function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,rowSpan,sharedGlass}){
+function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,rowSpan,sharedGlass,palette}){
   const canvasRef=useRef(null);
   const [imgUrl,setImgUrl]=useState(null);
   const CARD_W=240, CARD_H=165, BRAND_H=39;
@@ -4608,7 +4717,7 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,ro
     canvas.style.width=W+"px"; canvas.style.height=H+"px";
     const ctx=canvas.getContext("2d");
     ctx.scale(DPR,DPR);
-    drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass);
+    drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass,palette);
     setImgUrl(canvas.toDataURL("image/png"));
     if(canGenerate) onGenerate&&onGenerate();
   },[]);
@@ -4662,7 +4771,7 @@ function StickerSaveSheet({iconId,label,value,data,onClose,onGenerate,colSpan,ro
   return ReactDOM.createPortal(sheet, el);
 }
 
-function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass}){
+function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRegisterOpen,colSpan,rowSpan,sharedGlass,palette}){
   const canvasRef=useRef(null);
   const wrapRef=useRef(null);
   const [showSheet,setShowSheet]=useState(false);
@@ -4682,7 +4791,7 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
       canvas.style.width=W+"px"; canvas.style.height=H+"px";
       const ctx=canvas.getContext("2d");
       ctx.scale(DPR,DPR);
-      drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass);
+      drawSticker(ctx,W,H,CARD_H,label,value,iconId,{colSpan:colSpan||1,rowSpan:rowSpan||1},sharedGlass,palette);
     }
     let raf1,raf2;
     const ro=new ResizeObserver(()=>{
@@ -4716,6 +4825,7 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
         onClose={()=>{ setShowSheet(false); onStickerOpen&&onStickerOpen(false); }}
         onGenerate={onGenerate}
         colSpan={colSpan} rowSpan={rowSpan} sharedGlass={sharedGlass}
+        palette={palette}
       />}
     </>
   );
@@ -4987,21 +5097,30 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchCancel={handleTouchEnd}
           >
             <div style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative"}}>
-              <img src={card._photoSrc} style={{
-                width:(100*(card._photoPos.scale||1))+"%",
-                height:(100*(card._photoPos.scale||1))+"%",
-                objectFit:"cover",position:"absolute",
-                left:((1-(card._photoPos.scale||1))*(card._photoPos.x||50)/100*100)+"%",
-                top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
-                pointerEvents:"none",
-              }}/>
-              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 10px",
-                background:"linear-gradient(transparent,rgba(0,0,0,0.6))",
-                fontSize:10,color:"rgba(255,255,255,0.9)",fontWeight:500,
-                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                userSelect:"none",WebkitUserSelect:"none"}}>
-                {card.label}
-              </div>
+              {card._photoPlaceholder?(
+                <div style={{
+                  position:"absolute",inset:0,
+                  background:`linear-gradient(145deg,${card._photoColor||"#1b1330"},${card._photoColor||"#120b24"})`,
+                }}/>
+              ):(
+                <>
+                  <img src={card._photoSrc} style={{
+                    width:(100*(card._photoPos.scale||1))+"%",
+                    height:(100*(card._photoPos.scale||1))+"%",
+                    objectFit:"cover",position:"absolute",
+                    left:((1-(card._photoPos.scale||1))*(card._photoPos.x||50)/100*100)+"%",
+                    top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
+                    pointerEvents:"none",
+                  }}/>
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 10px",
+                    background:"linear-gradient(transparent,rgba(0,0,0,0.6))",
+                    fontSize:10,color:"rgba(255,255,255,0.9)",fontWeight:500,
+                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                    userSelect:"none",WebkitUserSelect:"none"}}>
+                    {card.label}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         );
@@ -5019,6 +5138,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               data={data} span={false} colSpan={colSpan} rowSpan={rowSpan} sharedGlass={!!sharedGlass}
               onStickerOpen={onStickerOpen}
               onRegisterOpen={fn=>{ stickerOpenRefs.current[card.iconId]=fn; }}
+              palette={card._palette}
               onGenerate={()=>{
                 const today=todayKey();
                 const count=data.stickerGenDate===today?(data.stickerGenCount||0):0;
@@ -5039,6 +5159,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
 
+        const palette=card._palette;
+        const bg=palette?`linear-gradient(145deg,${palette.bg},${palette.bg2})`:th.card;
+        const valColor=palette?palette.accent:accentColor;
+        const lblColor=palette?palette.label:labelColor;
+        const textColor=palette?palette.text:th.text;
+
         return(
           <div key={card.iconId} data-cardid={card.iconId}
             style={wrapStyle}
@@ -5050,24 +5176,48 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             <div style={{
               width:"100%",height:"100%",padding:pad,
               borderRadius:14,
-              background:th.card,
+              background:bg,
               border:`1px solid ${borderColor}`,
               boxShadow:"none",
               display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
+              position:"relative",overflow:"hidden",color:textColor,
             }}>
-              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)"}}>{card.emoji}</div>
+              {card._slotRole==="side"&&card._bgImage&&(
+                <>
+                  <div style={{
+                    position:"absolute",inset:-10,
+                    backgroundImage:`url(${card._bgImage})`,
+                    backgroundSize:"cover",backgroundPosition:"center",
+                    filter:"blur(28px)",transform:"scale(1.1)",
+                    opacity:0.75,
+                  }}/>
+                  <div style={{
+                    position:"absolute",inset:0,
+                    background:`linear-gradient(180deg,rgba(0,0,0,0.35),rgba(0,0,0,0.5))`,
+                    mixBlendMode:"multiply",
+                  }}/>
+                  {palette&&(
+                    <div style={{
+                      position:"absolute",inset:0,
+                      background:`linear-gradient(160deg,${palette.bg}66,${palette.bg2}66)`,
+                      mixBlendMode:"screen",
+                    }}/>
+                  )}
+                </>
+              )}
+              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
               <div style={{
-                fontSize:valSz,fontWeight:800,color:accentColor,
+                fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont
+                fontFamily:valueFont,position:"relative",zIndex:1
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
                   :vibeDisplay}
               </div>
-              <div style={{fontSize:lblSz,color:labelColor,lineHeight:1.3,
+              <div style={{fontSize:lblSz,color:lblColor,lineHeight:1.3,position:"relative",zIndex:1,
                 letterSpacing:isHapon?"0.3px":0.8,
                 whiteSpace:colSpan===2?"nowrap":"normal",
                 overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
@@ -5209,6 +5359,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
   const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
   const [cropShape,setCropShape]=useState({colSpan:2,rowSpan:2});
+  const paletteCache=useRef(new Map());
+  const palettePending=useRef(new Set());
+  const [paletteTick,setPaletteTick]=useState(0);
   // local pending state for avatar picker — only saves on Done
   const [pickerOpen,setPickerOpen]=useState(false);
   const [pendingAvatar,setPendingAvatar]=useState(data.avatar);
@@ -5246,6 +5399,40 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const isHapon=data.theme==="hapon";
   const isMN=data.theme==="manila_nights";
   const profileScrollRef=useRef(null);
+  const getDominantFromImage=async(src)=>{
+    if(paletteCache.current.has(src) || palettePending.current.has(src)) return;
+    palettePending.current.add(src);
+    try{
+      const img=new Image();
+      img.crossOrigin="anonymous";
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=src;});
+      const c=document.createElement("canvas");
+      const w=32,h=32;
+      c.width=w; c.height=h;
+      const ctx=c.getContext("2d");
+      ctx.drawImage(img,0,0,w,h);
+      const data=ctx.getImageData(0,0,w,h).data;
+      let r=0,g=0,b=0,count=0;
+      for(let i=0;i<data.length;i+=4){
+        const a=data[i+3];
+        if(a<50) continue;
+        r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++;
+      }
+      if(count>0){
+        const rgb={r:r/count,g:g/count,b:b/count};
+        paletteCache.current.set(src,_rgbToHex(rgb));
+        setPaletteTick(t=>t+1);
+      }
+    }catch(_){}
+    palettePending.current.delete(src);
+  };
+  const getCachedDominant=(src)=>{
+    if(!src) return null;
+    const c=paletteCache.current.get(src);
+    if(c) return c;
+    getDominantFromImage(src);
+    return null;
+  };
   return(
     <>
     <div ref={profileScrollRef} className="fade-in" style={{padding:`20px 20px ${isMN?"76px":"100px"}`,position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:stickerOpen?"hidden":"auto",WebkitOverflowScrolling:"touch"}}>
@@ -5425,7 +5612,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           </svg>
         );
 
-        const buildWeekCards=weekKey=>{
+        const buildWeekCards=(weekKey, prevWeekPalette)=>{
           const weekLogs=weekMap[weekKey]||[];
           const weekManualLogs=weekLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
           const stepsLogs=weekLogs.filter(l=>l.fromHealthKit&&l.category==="activities");
@@ -5578,7 +5765,30 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
             {key:"top_actor", size:slotSizes.top_actor},
             {key:"top_director", size:slotSizes.top_director},
           ];
-          const photoCards=weekPhotoCards;
+          let photoCards=weekPhotoCards;
+          if(!photoCards.length && prevWeekPalette){
+            photoCards=[0,1,2].map(i=>({
+              iconId:`profile_photo_placeholder_${weekKey}_${i}`,
+              _baseId:"photo",
+              label:"", value:"",
+              _photo:true,
+              _photoPlaceholder:true,
+              _photoColor:prevWeekPalette,
+              _entryId:null,
+              _photoPos:{x:50,y:50,scale:1},
+              defaultSpan:slotSizes[`photo${i}`]||{colSpan:2,rowSpan:2},
+            }));
+          }
+          const photoColors=photoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
+          const weekDominant=photoColors.length
+            ?_rgbToHex((()=>{
+              const sum=photoColors.reduce((acc,hex)=>{
+                const r=_hexToRgb(hex);
+                return {r:acc.r+r.r,g:acc.g+r.g,b:acc.b+r.b};
+              },{r:0,g:0,b:0});
+              return {r:sum.r/photoColors.length,g:sum.g/photoColors.length,b:sum.b/photoColors.length};
+            })())
+            :prevWeekPalette;
           const orderedCards=[];
           orderedSlots.forEach(slot=>{
             if(slot.key.startsWith("photo")){
@@ -5599,8 +5809,38 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           const used=new Set(orderedCards.map(c=>c.iconId));
           const remaining=[...visible, ...weekPhotoCards].filter(c=>!used.has(c.iconId));
           const cards=[...orderedCards, ...remaining];
+          const photoIndices=cards.map((c,i)=>c._photo?i:null).filter(i=>i!==null);
+          const nearestPhotoSrc=idx=>{
+            if(!photoIndices.length) return null;
+            let best=photoIndices[0], bestD=Math.abs(idx-best);
+            photoIndices.forEach(pi=>{const d=Math.abs(idx-pi); if(d<bestD){bestD=d;best=pi;}});
+            return cards[best]?cards[best]._photoSrc:null;
+          };
+          const topKeys=new Set(["week_breakdown","week_pulse"]);
+          const sideKeys=new Set(["week_pulse","time_vibe"]);
+          cards.forEach((c,i)=>{
+            if(c._photo) return;
+            const nearSrc=nearestPhotoSrc(i);
+            const dom=getCachedDominant(nearSrc)||weekDominant||th.accent;
+            const base=_harmonizePhotoFirst(dom, th.accent);
+            const bgRgb=_hexToRgb(base);
+            const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
+            const text=_pickReadableText(bgRgb, th);
+            const palette={
+              bg:base,
+              bg2,
+              text,
+              accent:_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.35)),
+              label:_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.55)),
+            };
+            c._palette=palette;
+            c._slotRole=topKeys.has(c._baseId)?"top":sideKeys.has(c._baseId)?"side":"normal";
+            if(c._slotRole==="side" && nearSrc){
+              c._bgImage=nearSrc;
+            }
+          });
           const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
-          return {cards, slots};
+          return {cards, slots, weekDominant};
         };
 
         const rangeFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,month:"short",day:"numeric"});
@@ -5612,13 +5852,16 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
 
         return(
           <div style={{marginBottom:16}}>
-            {weekKeys.map(weekKey=>{
-              const {cards, slots}=buildWeekCards(weekKey);
-              if(!cards.length) return null;
-              const isOpen=weekOpen[weekKey]!==false;
-              const showDetails=weekDetailsOpen[weekKey]===true;
-              return(
-                <div key={weekKey} style={{marginBottom:16}}>
+            {(()=>{
+              let lastPalette=null;
+              return weekKeys.map(weekKey=>{
+                const {cards, slots, weekDominant}=buildWeekCards(weekKey, lastPalette);
+                if(weekDominant) lastPalette=weekDominant;
+                if(!cards.length) return null;
+                const isOpen=weekOpen[weekKey]!==false;
+                const showDetails=weekDetailsOpen[weekKey]===true;
+                return(
+                  <div key={weekKey} style={{marginBottom:16}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <button
                       onClick={()=>setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}))}
@@ -5677,7 +5920,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
                     )}
                 </div>
               );
-            })}
+              });
+            })()}
           </div>
         );
       })()}
@@ -5777,6 +6021,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [showImportInfo,setShowImportInfo]=useState(false);
   const [redeemInput,setRedeemInput]=useState("");
   const [redeemMsg,setRedeemMsg]=useState("");
+  const [omdbShowCount,setOmdbShowCount]=useState(200);
 
   const handleRedeem=()=>{
     if(redeemInput.trim().toLowerCase()==="beta"){
@@ -5881,13 +6126,16 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           {`Last updated: ${data.omdbLastUpdated ? new Date(data.omdbLastUpdated).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
         </p>
         <div style={{marginTop:8,maxHeight:120,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
-          {(data.libraryMovies||[]).slice(0,200).map((m,i)=>(
+          {(data.libraryMovies||[]).slice(0,omdbShowCount).map((m,i)=>(
             <div key={i} style={{fontSize:11,color:th.sub,lineHeight:1.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
               {m.title}
             </div>
           ))}
-          {(data.libraryMovies||[]).length>200&&(
-            <div style={{fontSize:10,color:th.sub,opacity:0.7,marginTop:6}}>…and more</div>
+          {(data.libraryMovies||[]).length>omdbShowCount&&(
+            <div style={{fontSize:10,color:th.accent,opacity:0.9,marginTop:6,cursor:"pointer"}}
+              onClick={()=>setOmdbShowCount(c=>c+200)}>
+              …show 200 more
+            </div>
           )}
         </div>
       </div>
