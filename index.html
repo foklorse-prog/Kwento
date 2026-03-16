@@ -5169,10 +5169,13 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
 
         const palette=card._palette;
+        const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
         const bg=palette?`linear-gradient(145deg,${palette.bg},${palette.bg2})`:th.card;
-        const valColor=palette?palette.accent:accentColor;
-        const lblColor=palette?palette.label:labelColor;
-        const textColor=palette?palette.text:th.text;
+        // photo_bg cards sit on top of a dark photo+scrim so we force white-anchored
+        // text colors regardless of what the palette computed from the harmonized hue
+        const valColor=isPhotoBg?"rgba(255,255,255,0.97)":palette?palette.accent:accentColor;
+        const lblColor=isPhotoBg?"rgba(255,255,255,0.6)":palette?palette.label:labelColor;
+        const textColor=isPhotoBg?"#ffffff":palette?palette.text:th.text;
 
         return(
           <div key={card.iconId} data-cardid={card.iconId}
@@ -5192,6 +5195,35 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
               position:"relative",overflow:"hidden",color:textColor,
             }}>
+              {card._slotRole==="photo_bg"&&card._bgImage&&(
+                <>
+                  {/* The photo itself — slightly blurred so it reads as texture/repetition
+                      rather than a competing focal point, but still recognisably the same image */}
+                  <div style={{
+                    position:"absolute",inset:-6,
+                    backgroundImage:`url(${card._bgImage})`,
+                    backgroundSize:"cover",backgroundPosition:"center",
+                    filter:"blur(6px)",
+                    transform:"scale(1.05)", // small scale-up so blur edges don't show
+                    opacity:0.9,
+                  }}/>
+                  {/* Heavy dark scrim — covers the whole card so text is always readable
+                      regardless of whether the photo is light or dark */}
+                  <div style={{
+                    position:"absolute",inset:0,
+                    background:"rgba(0,0,0,0.52)",
+                  }}/>
+                  {/* Palette tint on top — keeps the card feeling harmonised with its
+                      neighbours while the photo still bleeds through underneath */}
+                  {palette&&(
+                    <div style={{
+                      position:"absolute",inset:0,
+                      background:`linear-gradient(160deg,${palette.bg}55,${palette.bg2}55)`,
+                      mixBlendMode:"screen",
+                    }}/>
+                  )}
+                </>
+              )}
               {card._slotRole==="side"&&card._bgImage&&(
                 <>
                   <div style={{
@@ -5843,6 +5875,27 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
           const topKeys=new Set(["week_breakdown","week_pulse"]);
           const sideKeys=new Set(["week_pulse","time_vibe"]);
           const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
+
+          // ── Find the first real photo card and tag its immediate 2x1 neighbor ──
+          // We look left first, then right. Only a card with colSpan=2, rowSpan=1
+          // qualifies — that matches the "2x1" shape the user wants. Only the very
+          // first photo card in the week acts as the anchor; subsequent photos don't
+          // trigger this treatment.
+          const firstPhotoIdx=cards.findIndex(c=>c._photo && c._photoSrc);
+          const firstPhotoSrc=firstPhotoIdx!==-1?cards[firstPhotoIdx]._photoSrc:null;
+          const resolvedSizes=data.statCardSizes||{};
+          let photoBgIdx=-1;
+          if(firstPhotoIdx!==-1 && firstPhotoSrc){
+            const neighbors=[firstPhotoIdx-1, firstPhotoIdx+1];
+            for(const ni of neighbors){
+              if(ni<0||ni>=cards.length) continue;
+              const nc=cards[ni];
+              if(nc._photo) continue; // skip other photo cards
+              const span=resolvedSizes[nc.iconId]||nc.defaultSpan||{colSpan:1,rowSpan:1};
+              if(span.colSpan===2 && span.rowSpan===1){ photoBgIdx=ni; break; }
+            }
+          }
+
           cards.forEach((c,i)=>{
             if(c._photo) return;
             const nearSrc=nearestPhotoSrc(i);
@@ -5858,17 +5911,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
               accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.8));
               label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.6));
             }
-            const palette={
-              bg:base,
-              bg2,
-              text,
-              accent,
-              label,
-            };
+            const palette={bg:base,bg2,text,accent,label};
             c._palette=palette;
-            c._slotRole=topKeys.has(c._baseId)?"top":sideKeys.has(c._baseId)?"side":"normal";
-            if(c._slotRole==="side" && nearSrc){
-              c._bgImage=nearSrc;
+            // photo_bg wins over any other role assignment
+            if(i===photoBgIdx){
+              c._slotRole="photo_bg";
+              c._bgImage=firstPhotoSrc;
+            } else {
+              c._slotRole=topKeys.has(c._baseId)?"top":sideKeys.has(c._baseId)?"side":"normal";
+              if(c._slotRole==="side" && nearSrc){
+                c._bgImage=nearSrc;
+              }
             }
           });
           const slots=cards.reduce((sum,c)=>{const s=(data.statCardSizes||{})[c.iconId]||{colSpan:1,rowSpan:1};return sum+s.colSpan*s.rowSpan;},0);
