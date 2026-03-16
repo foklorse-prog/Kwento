@@ -141,10 +141,10 @@ function _harmonizePhotoFirst(dominantHex, themeHex){
   const th=_hexToRgb(themeHex);
   const domHsl=_rgbToHsl(dom);
   const candidates=[
+    {name:"analog",h:(domHsl.h+30)%360},
     {name:"comp",h:(domHsl.h+180)%360},
     {name:"split1",h:(domHsl.h+150)%360},
     {name:"split2",h:(domHsl.h+210)%360},
-    {name:"analog",h:(domHsl.h+30)%360},
     {name:"triad",h:(domHsl.h+120)%360},
     {name:"mono",h:domHsl.h},
   ];
