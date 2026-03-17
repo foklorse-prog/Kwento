@@ -2408,8 +2408,6 @@ function cleanupOmdbLibrary(d){
     if(m._fromOmdb){
       if(isListLikeTitle(m.title)) return false;
       if(m.omdbType && !isAllowedOmdbType(m.omdbType)) return false;
-      if(m.isNominee===false) return false;
-      if(m.awards && !isNomineeFromAwards(m.awards)) return false;
     }
     return true;
   });
@@ -6573,6 +6571,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [omdbBulkInput,setOmdbBulkInput]=useState("");
   const [omdbBulkStatus,setOmdbBulkStatus]=useState("");
   const [omdbBulkWorking,setOmdbBulkWorking]=useState(false);
+  const [omdbFilter,setOmdbFilter]=useState("");
+  const [omdbSelected,setOmdbSelected]=useState({});
 
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
@@ -6659,6 +6659,36 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }
     setOmdbBulkStatus(`Added ${added}, updated ${updated}, skipped ${skipped}, failed ${failed}.`);
     setOmdbBulkWorking(false);
+  };
+  const filteredOmdb=(data.libraryMovies||[]).filter(m=>{
+    if(!omdbFilter.trim()) return true;
+    return (m.title||"").toLowerCase().includes(omdbFilter.trim().toLowerCase());
+  });
+  const toggleOmdbSelect=title=>{
+    const key=(title||"").toLowerCase();
+    if(!key) return;
+    setOmdbSelected(s=>({...s,[key]:!s[key]}));
+  };
+  const selectAllShown=()=>{
+    const shown=filteredOmdb.slice(0,omdbShowCount);
+    const allSelected=shown.every(m=>omdbSelected[(m.title||"").toLowerCase()]);
+    const next={...omdbSelected};
+    shown.forEach(m=>{
+      const k=(m.title||"").toLowerCase();
+      if(!k) return;
+      next[k]=!allSelected;
+    });
+    setOmdbSelected(next);
+  };
+  const deleteSelected=()=>{
+    const selectedKeys=new Set(Object.entries(omdbSelected).filter(([,v])=>v).map(([k])=>k));
+    if(!selectedKeys.size) return;
+    const before=(data.libraryMovies||[]).length;
+    const remaining=(data.libraryMovies||[]).filter(m=>!selectedKeys.has((m.title||"").toLowerCase()));
+    const removed=before-remaining.length;
+    onChange("libraryMovies",remaining);
+    setOmdbSelected({});
+    setOmdbBulkStatus(`Deleted ${removed} item${removed===1?"":"s"}.`);
   };
 
   const handleRedeem=()=>{
@@ -6788,13 +6818,26 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             <div style={{marginTop:6,fontSize:11,color:th.sub}}>{omdbBulkStatus}</div>
           )}
         </div>
-        <div style={{marginTop:8,maxHeight:120,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
-          {(data.libraryMovies||[]).slice(0,omdbShowCount).map((m,i)=>(
-            <div key={i} style={{fontSize:11,color:th.sub,lineHeight:1.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-              {m.title}
+        <div style={{marginTop:10,display:"flex",gap:8,alignItems:"center"}}>
+          <input value={omdbFilter} onChange={e=>setOmdbFilter(e.target.value)} placeholder="Filter titles"
+            style={{flex:1,background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:th.text}}/>
+          <button onClick={selectAllShown} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+            Select shown
+          </button>
+          <button onClick={deleteSelected} style={{fontSize:11,color:"#ef4444",background:"transparent",border:"1px solid #ef4444",borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+            Delete selected
+          </button>
+        </div>
+        <div style={{marginTop:8,maxHeight:140,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
+          {filteredOmdb.slice(0,omdbShowCount).map((m,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:11,color:th.sub,lineHeight:1.5}}>
+              <input type="checkbox" checked={!!omdbSelected[(m.title||"").toLowerCase()]} onChange={()=>toggleOmdbSelect(m.title)}/>
+              <div style={{whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1}}>
+                {m.title}
+              </div>
             </div>
           ))}
-          {(data.libraryMovies||[]).length>omdbShowCount&&(
+          {filteredOmdb.length>omdbShowCount&&(
             <div style={{fontSize:10,color:th.accent,opacity:0.9,marginTop:6,cursor:"pointer"}}
               onClick={()=>setOmdbShowCount(c=>c+200)}>
               …show 200 more
@@ -7276,8 +7319,6 @@ function App(){
                   const omdbType=normalizeOmdbType(d.Type);
                   if(!isAllowedOmdbType(omdbType)) continue;
                   if(isListLikeTitle(d.Title)) continue;
-                  const isNominee=isNomineeFromAwards(d.Awards);
-                  if(!isNominee) continue;
                   const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
                   const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
                   const posterId=d.imdbID||`t_${_h(d.Title||"")}`;
@@ -7296,7 +7337,7 @@ function App(){
                     imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
                     awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
                     omdbType,
-                    isNominee,
+                    isNominee:isNomineeFromAwards(d.Awards),
                     tags:buildTagsFromOmdb(d),
                     ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
                     _fromOmdb:true,
