@@ -953,8 +953,13 @@ function generateBarkadaDescription(item, index) {
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function buildTagScore(logs, feedback) {
-  // Feedback disabled — swipes are visual only for now
-  return {};
+  const cnt={};
+  logs.forEach(l=>(l.tags||[]).forEach(t=>{cnt[t]=(cnt[t]||0)+1;}));
+  // Normalize by total tag count so no single tag dominates
+  const total=Object.values(cnt).reduce((s,v)=>s+v,0)||1;
+  const normalized={};
+  Object.entries(cnt).forEach(([t,v])=>{normalized[t]=v/total;});
+  return normalized;
 }
 
 // ─── FOOD VARIETY PATTERN DETECTION ──────────────────────────────────────────
@@ -2387,6 +2392,9 @@ async function fetchMovieMeta(title){
       year:d.Year?d.Year.slice(0,4):null,
       poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
       genre:d.Genre&&d.Genre!=="N/A"?d.Genre.split(",")[0].trim():null,
+      plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
+      imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
+      imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
     };
   }catch(e){ return null; }
 }
@@ -4195,20 +4203,85 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
   const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
-  return items
+
+  // ── Movie-specific signals ────────────────────────────────────────────────
+  let avgYear=null, loggedGenres=new Set();
+  if(cat==="movies"){
+    const movieLogs=logs.filter(l=>l.category==="movies"&&!l.fromLetterboxd&&l.year);
+    if(movieLogs.length){
+      avgYear=movieLogs.reduce((s,l)=>s+parseInt(l.year),0)/movieLogs.length;
+    }
+    logs.filter(l=>l.category==="movies").forEach(l=>{
+      if(l.genre) loggedGenres.add(l.genre.toLowerCase());
+      (l.tags||[]).forEach(t=>loggedGenres.add(t));
+    });
+  }
+
+  const scored = items
     .filter(i=>!logged.has(i.title)&&!disliked.has(i.title))
     .map(i=>{
-      let score=(i.ph?8:0)+Math.random()*4;
+      let score=(i.ph?8:0)+Math.random()*3;
+
+      // Tag relevance — how much this item matches the user's taste profile
       const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
-      score+=tagScore*0.5;
+      score+=tagScore*15;
+
+      if(cat==="movies"){
+        // Year proximity — boost movies near the user's average logged year
+        // Old classics (8.0+ IMDB, pre-1990) get a separate quality boost so they
+        // surface even when a user mostly logs contemporary films
+        const itemYear=i.year?parseInt(i.year):(MOVIE_YEARS[i.title]?parseInt(MOVIE_YEARS[i.title]):null);
+        if(avgYear&&itemYear){
+          const diff=Math.abs(itemYear-avgYear);
+          // Soft boost for proximity — fades over 20 years but never goes negative
+          score+=Math.max(0,8*(1-diff/20));
+        }
+        // Classic bonus — high-rated films before 1990 get a flat boost so they
+        // aren't buried by year proximity alone
+        if(itemYear&&itemYear<1990&&i.imdbRating>=8.0){
+          score+=6;
+        }
+        // Quality signal — imdbRating weighted by log of vote count
+        // A 8.5 with 500k votes beats a 9.0 with 50 votes
+        if(i.imdbRating&&i.imdbVotes){
+          const qualityScore=i.imdbRating*Math.log10(Math.max(i.imdbVotes,100));
+          score+=qualityScore*0.8;
+        } else if(i.imdbRating){
+          score+=i.imdbRating*0.5; // less confident without vote count
+        }
+      }
+
       if(cat==="food"){
         if(geoFoodSuggs){const gi=geoFoodSuggs.findIndex(f=>f.title===i.title);if(gi>=0)score+=(20-gi);else score-=10;}
         if(varietyBoosts?.underrepTags&&(i.tags||[]).some(t=>varietyBoosts.underrepTags.has(t)))score+=12;
         if(varietyBoosts?.dominantTags&&(i.tags||[]).some(t=>varietyBoosts.dominantTags.has(t)))score-=4;
       }
+
       return {...i,category:cat,score};
     })
     .sort((a,b)=>b.score-a.score||Math.random()-0.5);
+
+  // ── Wildcard slot for movies — surface one high-quality film from a genre ──
+  // the user hasn't explored yet. Keeps suggestions from being an echo chamber.
+  if(cat==="movies" && scored.length>5 && loggedGenres.size>0){
+    const wildcardIdx=scored.findIndex(m=>{
+      const mGenres=new Set([
+        ...(m.genre?[m.genre.toLowerCase()]:[]),
+        ...(m.genres||[]).map(g=>g.toLowerCase()),
+        ...(m.tags||[]),
+      ]);
+      // Find a movie whose genres don't overlap with logged genres
+      const overlap=[...mGenres].filter(g=>loggedGenres.has(g));
+      return overlap.length===0 && (m.imdbRating>=7.5||(m.imdbRating==null&&m.ph));
+    });
+    if(wildcardIdx>0){
+      // Move wildcard to position 3 (after the first 2 strong matches)
+      const [wildcard]=scored.splice(wildcardIdx,1);
+      scored.splice(Math.min(2,scored.length),0,wildcard);
+    }
+  }
+
+  return scored;
 }
 
 function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onSwipePrev}){
@@ -4230,17 +4303,41 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
   const usedToday=todayCounts[cat]||0;
   const canGenerate=data.betaMode||usedToday<FREE_LIMIT;
 
+  // Define currentItem before all effects so they can reference it safely
+  const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
+  const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
+
   // Count the first suggestion only when this card is the top (visible) card
   const countedRef=useRef(false);
   useEffect(()=>{
-    if(!isTop) return; // only count when user can actually see this card
+    if(!isTop) return;
     if(countedRef.current) return;
     countedRef.current=true;
     if(!pool.length) return;
     const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
-    if((tc[cat]||0)>0) return; // already counted today
+    if((tc[cat]||0)>0) return;
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
   },[isTop]);
+
+  // Background OMDB fetch for movie suggestions missing plot/poster
+  const fetchingRef=useRef(null);
+  useEffect(()=>{
+    if(cat!=="movies"||!currentItem||!isTop) return;
+    if(currentItem.plot&&currentItem.poster) return;
+    if(fetchingRef.current===currentItem.title) return; // already fetching
+    fetchingRef.current=currentItem.title;
+    (async()=>{
+      const meta=await fetchMovieMeta(currentItem.title);
+      if(!meta) return;
+      if(currentItem._fromOmdb){
+        const updated=(data.libraryMovies||[]).map(m=>
+          m.title===currentItem.title?{...m,...meta}:m
+        );
+        onChange("libraryMovies",updated);
+      }
+      setPool(prev=>prev.map(m=>m.title===currentItem.title?{...m,...meta}:m));
+    })();
+  },[currentItem?.title,isTop]);
 
   // GPS boost for food on mount
   useEffect(()=>{
@@ -4252,9 +4349,6 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
       setPool(boosted);
     })();
   },[]);
-
-  const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
-  const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
 
   const handleGenerate=()=>{
     if(!canGenerate) return;
@@ -4346,13 +4440,40 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
           {/* Suggestion */}
           {currentItem?(
             <>
-              <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:th.text,lineHeight:1.3,marginBottom:14}}>
-                {currentItem.title}
-                {currentItem.category==="movies"&&(()=>{const y=currentItem.year||MOVIE_YEARS[currentItem.title];return y?<span style={{fontSize:13,fontWeight:400,opacity:0.55}}> ({y})</span>:null;})()}
+              {/* Poster + title row for movies */}
+              <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:14}}>
+                {cat==="movies"&&currentItem.poster&&(
+                  <img src={currentItem.poster} alt={currentItem.title}
+                    style={{width:64,height:96,objectFit:"cover",borderRadius:8,flexShrink:0,boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}
+                    onError={e=>e.target.style.display="none"}
+                  />
+                )}
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:th.text,lineHeight:1.3}}>
+                    {currentItem.title}
+                    {currentItem.category==="movies"&&(()=>{const y=currentItem.year||MOVIE_YEARS[currentItem.title];return y?<span style={{fontSize:13,fontWeight:400,opacity:0.55}}> ({y})</span>:null;})()}
+                  </div>
+                  {cat==="movies"&&currentItem.imdbRating&&(
+                    <div style={{fontSize:11,color:th.sub,marginTop:4}}>
+                      ⭐ {currentItem.imdbRating}/10
+                      {currentItem.imdbVotes&&<span style={{opacity:0.6}}> · {Number(currentItem.imdbVotes).toLocaleString()} votes</span>}
+                    </div>
+                  )}
+                </div>
               </div>
+              {/* Plot if available, else Why this for you */}
               <div style={{padding:"12px 14px",borderRadius:14,background:`${catInfo.color}12`,borderLeft:`3px solid ${catInfo.color}`,marginBottom:16}}>
-                <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this for you</div>
-                <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
+                {cat==="movies"&&currentItem.plot?(
+                  <>
+                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Plot</div>
+                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,opacity:0.85}}>{currentItem.plot}</div>
+                  </>
+                ):(
+                  <>
+                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this for you</div>
+                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
+                  </>
+                )}
               </div>
               {/* Food: find near me */}
               {cat==="food"&&(
@@ -6925,6 +7046,8 @@ function App(){
                     plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
                     poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
                     posterId,
+                    imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
+                    imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
                     tags:buildTagsFromOmdb(d),
                     ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
                     _fromOmdb:true,
