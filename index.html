@@ -34,7 +34,7 @@ v6.0 — 2026-03-13
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
-  <meta name="kwento-build" content="2026-03-16-1"/>
+  <meta name="kwento-build" content="2026-03-17-1"/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 <script>
@@ -4406,15 +4406,25 @@ function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
     if(!canGenerate) return;
     const newIdx=poolIdx+1;
     setPoolIdx(newIdx);
-    // Persist updated queue state and increment count
     const newCounts={...todayCounts,[cat]:(usedToday+1)};
     const newQueues={...(data.discoverQueues||{}),[cat]:pool};
     const newIndexes={...(data.discoverIndexes||{}),[cat]:newIdx};
+    // Save the newly shown movie to libraryMovies if not already there
+    const nextItem=pool[newIdx%Math.max(pool.length,1)]||null;
+    let libraryPatch={};
+    if(cat==="movies"&&nextItem){
+      const existing=data.libraryMovies||[];
+      const alreadyIn=existing.find(m=>m.title.toLowerCase()===nextItem.title.toLowerCase());
+      if(!alreadyIn){
+        libraryPatch={libraryMovies:[...existing,{...nextItem,_fromOmdb:true,category:"movies"}]};
+      }
+    }
     onChange("__batch__",{
       discoverCounts:newCounts,
       discoverDate:today,
       discoverQueues:newQueues,
       discoverIndexes:newIndexes,
+      ...libraryPatch,
     });
   };
 
@@ -4543,221 +4553,260 @@ function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
   );
 }
 
-function PeelCanvas({dir,onDone,cardRef,contentRef}){
-  const canvasRef=useRef(null);
-  const rafRef=useRef(null);
-  const startRef=useRef(null);
-  const DURATION=500;
-
-  useEffect(()=>{
-    const canvas=canvasRef.current;
-    const card=cardRef.current;
-    if(!canvas||!card) return;
-    const rect=card.getBoundingClientRect();
-    const W=rect.width||300;
-    const H=rect.height||400;
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    canvas.width=W*dpr;
-    canvas.height=H*dpr;
-    canvas.style.width=W+"px";
-    canvas.style.height=H+"px";
-    const ctx=canvas.getContext("2d");
-    ctx.scale(dpr,dpr);
-    const fromRight=dir==="left";
-
-    const getClipPath=(p)=>{
-      // The unpeeled polygon — this is what clips the card content
-      const peelW=W*p;
-      const peelH=H*p*0.85;
-      if(fromRight){
-        // Unpeeled area: left side of the card
-        const x1=W-peelW, y1=0;
-        const x2=W-peelW*0.3, y2=H-peelH;
-        return `polygon(0% 0%, ${x1/W*100}% 0%, ${x2/W*100}% ${y2/H*100}%, 0% 100%)`;
-      } else {
-        const x1=peelW, y1=0;
-        const x2=peelW*0.3, y2=H-peelH;
-        return `polygon(${x1/W*100}% 0%, 100% 0%, 100% 100%, ${x2/W*100}% ${y2/H*100}%)`;
-      }
-    };
-
-    const draw=(p)=>{
-      ctx.clearRect(0,0,W,H);
-      const peelW=W*p;
-      const peelH=H*p*0.85;
-
-      // Clip card content to unpeeled region
-      if(contentRef&&contentRef.current){
-        contentRef.current.style.clipPath=p>0?getClipPath(p):"none";
-        contentRef.current.style.WebkitClipPath=p>0?getClipPath(p):"none";
-      }
-
-      // Peeling flap
-      ctx.save();
-      ctx.beginPath();
-      if(fromRight){
-        const x0=W-peelW,x1=W,x2=W-peelW*0.3;
-        const y1=H-peelH,y2=H-peelH;
-        ctx.moveTo(x0,0);ctx.lineTo(W,0);ctx.lineTo(x1,y1);
-        ctx.quadraticCurveTo(W-peelW*0.15,H-peelH*0.5,x2,y2);
-        ctx.closePath();
-      } else {
-        const x0=peelW,x1=0,x2=peelW*0.3;
-        const y1=H-peelH,y2=H-peelH;
-        ctx.moveTo(x0,0);ctx.lineTo(0,0);ctx.lineTo(x1,y1);
-        ctx.quadraticCurveTo(peelW*0.15,H-peelH*0.5,x2,y2);
-        ctx.closePath();
-      }
-      const grad=fromRight
-        ?ctx.createLinearGradient(W-peelW,0,W,H-peelH)
-        :ctx.createLinearGradient(peelW,0,0,H-peelH);
-      grad.addColorStop(0,"rgba(255,255,255,0.25)");
-      grad.addColorStop(0.4,"rgba(200,200,200,0.3)");
-      grad.addColorStop(1,"rgba(60,60,60,0.45)");
-      ctx.fillStyle=grad;
-      ctx.fill();
-
-      // Cast shadow on next page
-      ctx.save();
-      ctx.beginPath();
-      if(fromRight){
-        ctx.moveTo(W-peelW,0);ctx.lineTo(W-peelW+peelW*0.1,0);
-        ctx.lineTo(W-peelW*0.2,H-peelH);ctx.lineTo(W-peelW*0.3,H-peelH);
-        ctx.closePath();
-      } else {
-        ctx.moveTo(peelW,0);ctx.lineTo(peelW-peelW*0.1,0);
-        ctx.lineTo(peelW*0.2,H-peelH);ctx.lineTo(peelW*0.3,H-peelH);
-        ctx.closePath();
-      }
-      ctx.fillStyle=`rgba(0,0,0,${0.14*p})`;
-      ctx.fill();
-      ctx.restore();
-      ctx.restore();
-    };
-
-    const animate=(ts)=>{
-      if(!startRef.current) startRef.current=ts;
-      const elapsed=ts-startRef.current;
-      const t=Math.min(elapsed/DURATION,1);
-      const eased=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-      draw(eased);
-      if(elapsed<DURATION){
-        rafRef.current=requestAnimationFrame(animate);
-      } else {
-        // Reset clip before unmounting
-        if(contentRef?.current){
-          contentRef.current.style.clipPath="none";
-          contentRef.current.style.WebkitClipPath="none";
-        }
-        onDone();
-      }
-    };
-    rafRef.current=requestAnimationFrame(animate);
-    return()=>{
-      if(rafRef.current) cancelAnimationFrame(rafRef.current);
-      if(contentRef?.current){
-        contentRef.current.style.clipPath="none";
-        contentRef.current.style.WebkitClipPath="none";
-      }
-    };
-  },[]);
-
-  return(
-    <canvas ref={canvasRef} style={{
-      position:"absolute",top:0,left:0,
-      pointerEvents:"none",zIndex:10,
-      borderRadius:22,
-    }}/>
-  );
-}
-
+// ─── DISCOVER DECK — corner peel with spring snap ────────────────────────────
 function DiscoverDeck({data,onChange}){
   const th=THEMES[data.theme];
   const [catIdx,setCatIdx]=useState(0);
-  const [peelState,setPeelState]=useState(null); // {dir, nextIdx}
+  const [nextIdx,setNextIdx]=useState(null);
+  const stackRef=useRef(null);
+  const canvasRef=useRef(null);
+  const frontRef=useRef(null);
   const peeling=useRef(false);
-  const cardRef=useRef(null);
-  const contentRef=useRef(null);
+  const prog=useRef(0);
+  const raf=useRef(null);
+  const dims=useRef({W:320,H:480});
 
-  const peel=(nextIdx,dir)=>{
+  const SNAP_THRESHOLD=0.38;
+  const COMPLETE_MS=360;
+  const SNAP_MS=260;
+
+  // Spring ease — elastic out
+  const ease=(t)=>{
+    if(t<=0) return 0;
+    if(t>=1) return 1;
+    const c=2*Math.PI/2.8;
+    return Math.pow(2,-9*t)*Math.sin((t*9-0.75)*c)+1;
+  };
+
+  useEffect(()=>{
+    const measure=()=>{
+      const el=stackRef.current;
+      if(!el) return;
+      const r=el.getBoundingClientRect();
+      dims.current={W:r.width||320,H:r.height||480};
+      const cv=canvasRef.current;
+      if(!cv) return;
+      const dpr=Math.min(window.devicePixelRatio||1,2);
+      const {W,H}=dims.current;
+      cv.width=W*dpr;cv.height=H*dpr;
+      cv.style.width=W+'px';cv.style.height=H+'px';
+      const ctx=cv.getContext('2d');
+      ctx.scale(dpr,dpr);
+    };
+    measure();
+    const ro=new ResizeObserver(measure);
+    if(stackRef.current) ro.observe(stackRef.current);
+    return()=>ro.disconnect();
+  },[]);
+
+  const getClip=(p)=>{
+    if(p<=0.005) return 'none';
+    const {W,H}=dims.current;
+    // Match render geometry exactly — bottom-right origin
+    const bx=W-W*p, by=H;   // bottom edge reach point
+    const rx=W,    ry=H-H*p; // right edge reach point
+    const fx=(bx+rx)/2-W*0.05*p;
+    const fy=(by+ry)/2-H*0.05*p;
+    // Unpeeled region: everything except the bottom-right triangle
+    const pts=[[0,0],[W,0],[rx,ry],[fx,fy],[bx,by],[0,H]];
+    return'polygon('+pts.map(([x,y])=>
+      (x/W*100).toFixed(2)+'% '+(y/H*100).toFixed(2)+'%'
+    ).join(',')+')';
+  };
+
+  const render=(p)=>{
+    const cv=canvasRef.current;
+    const fr=frontRef.current;
+    if(!cv) return;
+    const {W,H}=dims.current;
+    const ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+
+    const clip=getClip(p);
+    if(fr){fr.style.clipPath=clip;fr.style.WebkitClipPath=clip;}
+    if(p<=0.005) return;
+
+    // Peel from BOTTOM-RIGHT corner sweeping toward TOP-LEFT
+    // bx,by = bottom edge reach point (moves left as p grows)
+    // rx,ry = right edge reach point (moves up as p grows)
+    const bx=W-W*p,  by=H;      // bottom edge: starts at W,H moves left
+    const rx=W,      ry=H-H*p;  // right edge: starts at W,H moves up
+    // Fold curve control point — slightly inward
+    const fx=(bx+rx)/2-W*0.05*p;
+    const fy=(by+ry)/2-H*0.05*p;
+
+    // Convert hex card color to rgba for canvas
+    const hex=(th.card||'#130a22').replace('#','');
+    const r2=parseInt(hex.substring(0,2),16);
+    const g2=parseInt(hex.substring(2,4),16);
+    const b2=parseInt(hex.substring(4,6),16);
+    const cc=(a)=>`rgba(${r2},${g2},${b2},${a})`;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(W,H);     // anchor: bottom-right corner
+    ctx.lineTo(bx,by);   // bottom edge reach point
+    ctx.quadraticCurveTo(fx,fy,rx,ry); // curved fold to right edge
+    ctx.closePath();
+
+    const g=ctx.createLinearGradient(W,H,bx,ry);
+    g.addColorStop(0,  cc(0.55));  // dark at anchor (shadow fold)
+    g.addColorStop(0.4,cc(0.80));
+    g.addColorStop(0.75,cc(0.92));
+    g.addColorStop(1,  cc(0.97));  // matches card color at leading edge
+    ctx.fillStyle=g;
+    ctx.fill();
+
+    // Fold highlight
+    ctx.beginPath();
+    ctx.moveTo(bx,by);
+    ctx.quadraticCurveTo(fx,fy,rx,ry);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.28*p)+')';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+
+    // Cast shadow strip on next card
+    ctx.beginPath();
+    ctx.moveTo(bx,by);ctx.lineTo(bx-5,by);
+    ctx.lineTo(rx-5,ry);ctx.lineTo(rx,ry);
+    ctx.closePath();
+    const sg=ctx.createLinearGradient(bx,by,bx-12,by);
+    sg.addColorStop(0,'rgba(0,0,0,'+(0.16*p)+')');
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sg;ctx.fill();
+    ctx.restore();
+  };
+
+  const clear=()=>{
+    const cv=canvasRef.current;
+    const fr=frontRef.current;
+    const {W,H}=dims.current;
+    if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,W,H);}
+    if(fr){fr.style.clipPath='none';fr.style.WebkitClipPath='none';}
+  };
+
+  const animTo=(target,ms,cb)=>{
+    if(raf.current) cancelAnimationFrame(raf.current);
+    const from=prog.current;
+    const dist=target-from;
+    if(Math.abs(dist)<0.005){prog.current=target;render(target);if(!target)clear();cb&&cb();return;}
+    const dur=ms*Math.abs(dist);
+    const t0=performance.now();
+    const tick=(now)=>{
+      const t=Math.min((now-t0)/dur,1);
+      prog.current=from+dist*ease(t);
+      render(prog.current);
+      if(t<1){raf.current=requestAnimationFrame(tick);}
+      else{prog.current=target;render(target);if(!target)clear();cb&&cb();}
+    };
+    raf.current=requestAnimationFrame(tick);
+  };
+
+  const getP=(clientX,clientY)=>{
+    const el=stackRef.current;
+    if(!el) return 0;
+    const r=el.getBoundingClientRect();
+    const {W,H}=dims.current;
+    const dx=r.right-clientX;
+    const dy=r.bottom-clientY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    return Math.min(Math.max(1-d/Math.sqrt(W*W+H*H),0),1);
+  };
+
+  const onStart=(x,y)=>{
     if(peeling.current) return;
+    const el=stackRef.current;
+    if(!el) return;
+    const r=el.getBoundingClientRect();
+    // Allow drag from the right half or bottom quarter
+    if((r.right-x)>r.width*0.55&&(r.bottom-y)>r.height*0.25) return;
+    const ni=(catIdx+1)%DISCOVER_CATS.length;
+    setNextIdx(ni);
     peeling.current=true;
-    setPeelState({dir,nextIdx});
+    prog.current=getP(x,y);
+    render(prog.current);
   };
 
-  const onPeelDone=()=>{
-    setCatIdx(peelState?.nextIdx??catIdx);
-    setPeelState(null);
-    peeling.current=false;
+  const onMove=(x,y)=>{
+    if(!peeling.current) return;
+    prog.current=getP(x,y);
+    render(prog.current);
   };
 
-  const goNext=()=>peel((catIdx+1)%DISCOVER_CATS.length,"left");
-  const goPrev=()=>peel((catIdx-1+DISCOVER_CATS.length)%DISCOVER_CATS.length,"right");
+  const onEnd=()=>{
+    if(!peeling.current) return;
+    if(prog.current>=SNAP_THRESHOLD){
+      animTo(1,COMPLETE_MS,()=>{
+        clear();
+        prog.current=0;
+        peeling.current=false;
+        setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
+        setNextIdx(null);
+      });
+    } else {
+      animTo(0,SNAP_MS,()=>{
+        clear();
+        prog.current=0;
+        peeling.current=false;
+        setNextIdx(null);
+      });
+    }
+  };
+
+  const dotTap=(i)=>{
+    if(i===catIdx||peeling.current) return;
+    setNextIdx(i);
+    peeling.current=true;
+    prog.current=0;
+    animTo(1,COMPLETE_MS,()=>{
+      clear();prog.current=0;peeling.current=false;
+      setCatIdx(i);setNextIdx(null);
+    });
+  };
 
   const currentCat=DISCOVER_CATS[catIdx];
-  const nextCat=peelState?DISCOVER_CATS[peelState.nextIdx]:null;
+  const nextCat=nextIdx!==null?DISCOVER_CATS[nextIdx]:null;
 
   return(
     <div style={{marginBottom:16}}>
-      {/* Category dots */}
       <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:10}}>
         {DISCOVER_CATS.map((c,i)=>{
           const ci=CAT_MAP[c];
-          const isActive=c===currentCat;
           return(
-            <div key={c}
-              onClick={()=>{
-                if(isActive||peeling.current) return;
-                peel(i,i>catIdx?"left":"right");
-              }}
-              style={{
-                width:isActive?20:8,height:8,borderRadius:4,
-                background:isActive?ci.color:th.border,
-                transition:"all 0.2s",cursor:"pointer",
-              }}
-            />
+            <div key={c} onClick={()=>dotTap(i)} style={{
+              width:c===currentCat?20:8,height:8,borderRadius:4,
+              background:c===currentCat?ci.color:th.border,
+              transition:"all 0.2s",cursor:"pointer",
+            }}/>
           );
         })}
       </div>
-
-      <div style={{position:"relative"}}>
-        {/* Next card sits underneath — revealed as peel progresses */}
-        {peelState&&nextCat&&(
+      <div
+        ref={stackRef}
+        onMouseDown={e=>{onStart(e.clientX,e.clientY);}}
+        onMouseMove={e=>{if(peeling.current)onMove(e.clientX,e.clientY);}}
+        onMouseUp={onEnd}
+        onMouseLeave={onEnd}
+        onTouchStart={e=>{const t=e.touches[0];onStart(t.clientX,t.clientY);}}
+        onTouchMove={e=>{e.preventDefault();const t=e.touches[0];onMove(t.clientX,t.clientY);}}
+        onTouchEnd={onEnd}
+        style={{position:"relative",touchAction:"pan-y",userSelect:"none"}}
+      >
+        {nextCat&&(
           <div style={{position:"absolute",top:0,left:0,right:0,zIndex:1}}>
-            <DiscoverCatCard
-              key={`next-${nextCat}`}
-              cat={nextCat}
-              data={data}
-              onChange={onChange}
-              th={th}
-              onSwipeNext={goNext}
-              onSwipePrev={goPrev}
-            />
+            <DiscoverCatCard key={"next-"+nextCat} cat={nextCat} data={data} onChange={onChange} th={th}
+              onSwipeNext={()=>{}} onSwipePrev={()=>{}}/>
           </div>
         )}
-        {/* Current card on top */}
-        <div ref={cardRef} style={{position:"relative",zIndex:2}}>
-          <div ref={contentRef}>
-          <DiscoverCatCard
-            key={currentCat}
-            cat={currentCat}
-            data={data}
-            onChange={onChange}
-            th={th}
-            onSwipeNext={goNext}
-            onSwipePrev={goPrev}
-          />
-          </div>
-          {/* Canvas peel overlay */}
-          {peelState&&(
-            <PeelCanvas
-              dir={peelState.dir}
-              cardRef={cardRef}
-              contentRef={contentRef}
-              onDone={onPeelDone}
-            />
-          )}
+        <div ref={frontRef} style={{position:"relative",zIndex:2}}>
+          <DiscoverCatCard key={currentCat} cat={currentCat} data={data} onChange={onChange} th={th}
+            onSwipeNext={()=>dotTap((catIdx+1)%DISCOVER_CATS.length)}
+            onSwipePrev={()=>dotTap((catIdx-1+DISCOVER_CATS.length)%DISCOVER_CATS.length)}/>
         </div>
+        <canvas ref={canvasRef} style={{
+          position:"absolute",top:0,left:0,
+          pointerEvents:"none",zIndex:10,borderRadius:22,
+        }}/>
       </div>
     </div>
   );
@@ -4882,7 +4931,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Suggestions For You</h1>
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
       <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
         {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
       </p>
