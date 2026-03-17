@@ -4230,24 +4230,17 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
   const usedToday=todayCounts[cat]||0;
   const canGenerate=data.betaMode||usedToday<FREE_LIMIT;
 
+  // Count the first suggestion only when this card is the top (visible) card
+  const countedRef=useRef(false);
   useEffect(()=>{
-    if(!data.betaMode&&(data.discoverDate!==today||!(data.discoverCounts||{})[cat])){
-      onChange("__batch__",{discoverCounts:{...todayCounts,[cat]:1},discoverDate:today});
-    }
-  },[cat]);
-
-  // Count the first suggestion on mount (it counts as use #1)
-  const mountedRef=useRef(false);
-  useEffect(()=>{
-    if(mountedRef.current) return;
-    mountedRef.current=true;
+    if(!isTop) return; // only count when user can actually see this card
+    if(countedRef.current) return;
+    countedRef.current=true;
     if(!pool.length) return;
-    // Only count if we haven't already counted today for this cat
     const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
     if((tc[cat]||0)>0) return; // already counted today
-    const newCounts={...tc,[cat]:1};
-    onChange("__batch__",{discoverCounts:newCounts,discoverDate:today});
-  },[]);
+    onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
+  },[isTop]);
 
   // GPS boost for food on mount
   useEffect(()=>{
@@ -4300,18 +4293,23 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
   const rot=animDir==="left"?-8:animDir==="right"?8:drag*0.025;
 
   return(
-    <div style={{
-      position:"absolute",top:0,
-      left:stackOffset*7,right:stackOffset*7,
-      transform:isTop
-        ?`translateX(${tx}px) rotate(${rot}deg)`
-        :`translate(${stackOffset*10}px,${-stackOffset*10}px) scale(${1-stackOffset*0.03})`,
-      transition:isTop?(animDir?"transform 0.22s ease-in":(drag===0?"transform 0.18s":"none")):"none",
-      zIndex:10-stackOffset,
-      pointerEvents:isTop?"auto":"none",
-      transformOrigin:"top right",
-      opacity:1-stackOffset*0.1,
-    }}>
+    <div
+      onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
+      onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
+      style={{
+        position:"absolute",
+        top:isTop?30:30-stackOffset*6,
+        left:isTop?0:stackOffset*8,
+        right:0,
+        transform:isTop?`translateX(${tx}px) rotate(${rot}deg)`:"none",
+        transition:isTop?(animDir?"transform 0.22s ease-in":(drag===0?"transform 0.18s":"none")):"none",
+        zIndex:10-stackOffset,
+        pointerEvents:isTop?"auto":"none",
+        opacity:1,
+        touchAction:"none",
+        userSelect:"none",
+        cursor:isTop?(drag!==0?"grabbing":"grab"):"default",
+      }}>
       <div style={{
         borderRadius:22,
         background:th.card,
@@ -4409,9 +4407,9 @@ function DiscoverDeck({data,onChange}){
 
   // Calculate card height — needs to be fixed so stack works
   return(
-    <div style={{position:"relative",height:460,marginBottom:16,paddingTop:24}}>
-      {/* Render 3 cards: current + 2 behind */}
-      {[2,1,0].map(offset=>{
+    <div style={{position:"relative",height:380,marginBottom:16}}>
+      {/* Render 6 cards: current + 5 peeking behind */}
+      {[5,4,3,2,1,0].map(offset=>{
         const idx=(catIdx+offset)%DISCOVER_CATS.length;
         const cat=DISCOVER_CATS[idx];
         return(
@@ -4554,7 +4552,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Suggestions For You</h1>
       <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
         {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
       </p>
