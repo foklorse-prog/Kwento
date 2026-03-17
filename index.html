@@ -1741,6 +1741,7 @@ function defaultData(){
     betaMode:false,
     libraryMovies:[], // dynamic movie library (enriched)
     omdbCursor:{},    // {term: nextPage} — tracks progress across days
+    omdbCleanedAt:null,
     weekHarmony:{},
     discoverCounts:{},discoverDate:null,
     discoverQueues:{},
@@ -2386,14 +2387,48 @@ function Onboarding({onComplete}){
 const OMDB_KEY="24654217";
 // Legacy source HTML for migrating existing OMDB cache
 const MIGRATE_OMDB_SRC="MIGRATE OMDB LIBRARY, MAKE SURE TO NOT DUPLICATE.html";
-async function fetchMovieMeta(title){
+const ALLOWED_OMDB_TYPES=new Set(["movie","series"]);
+function normalizeOmdbType(t){ return (t||"").toLowerCase().trim(); }
+function isAllowedOmdbType(t){ return ALLOWED_OMDB_TYPES.has(normalizeOmdbType(t)); }
+function isNomineeFromAwards(awards){
+  if(!awards||awards==="N/A") return false;
+  const a=awards.toLowerCase();
+  return a.includes("nominat")||a.includes("nominee")||a.includes("won")||a.includes("win");
+}
+function isListLikeTitle(title){
+  const t=(title||"").toLowerCase();
+  if(!t) return false;
+  return /\b(list of|best of|top \d+|countdown|nominees|winners|awards|award ceremony|ceremony|lineup|shortlist|finalists|year in review|highlights|selection|selections|showcase)\b/.test(t);
+}
+function cleanupOmdbLibrary(d){
+  const lib=d.libraryMovies||[];
+  if(!lib.length) return false;
+  const cleaned=lib.filter(m=>{
+    if(!m||!m.title) return false;
+    if(m._fromOmdb){
+      if(isListLikeTitle(m.title)) return false;
+      if(m.omdbType && !isAllowedOmdbType(m.omdbType)) return false;
+      if(m.isNominee===false) return false;
+      if(m.awards && !isNomineeFromAwards(m.awards)) return false;
+    }
+    return true;
+  });
+  if(cleaned.length!==lib.length){
+    d.libraryMovies=cleaned;
+    return true;
+  }
+  return false;
+}
+async function fetchMovieMeta(title,typeHint="movie"){
   try{
-    const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&type=movie`);
+    const typeParam=typeHint?`&type=${typeHint}`:"";
+    const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}${typeParam}`);
     const d=await res.json();
     if(d.Response==="False") return null;
     const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
     const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
     return {
+      title:d.Title||title,
       year:d.Year?d.Year.slice(0,4):null,
       genre:genres[0]||null,
       genres,
@@ -2410,6 +2445,8 @@ async function fetchMovieMeta(title){
       country:d.Country&&d.Country!=="N/A"?d.Country:null,
       language:d.Language&&d.Language!=="N/A"?d.Language:null,
       awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
+      omdbType:d.Type&&d.Type!=="N/A"?normalizeOmdbType(d.Type):null,
+      isNominee:isNomineeFromAwards(d.Awards),
       tags:buildTagsFromOmdb(d),
       ph:d.Country?d.Country.toLowerCase().includes("philippines"):null,
     };
@@ -4366,14 +4403,20 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
     if(cat!=="movies"||!currentItem) return;
     // Fetch if missing plot OR poster OR imdbRating — catches both new and old library entries
     const needsFetch=!currentItem.plot||!currentItem.poster||currentItem.imdbRating==null;
-    if(!needsFetch) return;
+    const existing=(data.libraryMovies||[]);
+    const alreadyIn=existing.find(m=>m.title.toLowerCase()===currentItem.title.toLowerCase());
+    if(!needsFetch){
+      if(!alreadyIn){
+        const newEntry={...currentItem,_fromOmdb:!!currentItem._fromOmdb,category:"movies"};
+        onChange("libraryMovies",[...existing,newEntry]);
+      }
+      return;
+    }
     if(fetchingRef.current===currentItem.title) return;
     fetchingRef.current=currentItem.title;
     (async()=>{
       const meta=await fetchMovieMeta(currentItem.title);
       if(!meta) return;
-      const existing=(data.libraryMovies||[]);
-      const alreadyIn=existing.find(m=>m.title.toLowerCase()===currentItem.title.toLowerCase());
       if(alreadyIn){
         // Update existing entry with any new fields (plot, poster, rating etc.)
         const updated=existing.map(m=>
@@ -6527,6 +6570,96 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [redeemInput,setRedeemInput]=useState("");
   const [redeemMsg,setRedeemMsg]=useState("");
   const [omdbShowCount,setOmdbShowCount]=useState(200);
+  const [omdbBulkInput,setOmdbBulkInput]=useState("");
+  const [omdbBulkStatus,setOmdbBulkStatus]=useState("");
+  const [omdbBulkWorking,setOmdbBulkWorking]=useState(false);
+
+  const splitTitleList=raw=>{
+    const s=(raw||"").trim();
+    if(!s) return [];
+    if(s.includes(",") || /\r?\n/.test(s)){
+      return s.split(/,|\r?\n/).map(t=>t.trim()).filter(Boolean);
+    }
+    // Fallback: split on 2+ spaces to preserve multi-word titles
+    return s.split(/\s{2,}/).map(t=>t.trim()).filter(Boolean);
+  };
+  const handleOmdbClean=()=>{
+    const before=(data.libraryMovies||[]).length;
+    const next={...data,libraryMovies:[...(data.libraryMovies||[])]};
+    const changed=cleanupOmdbLibrary(next);
+    const removed=before-(next.libraryMovies||[]).length;
+    if(changed){
+      const cleanedAt=new Date().toISOString();
+      onChange("__batch__",{libraryMovies:next.libraryMovies,omdbCleanedAt:cleanedAt});
+      setOmdbBulkStatus(`Cleaned ${removed} item${removed===1?"":"s"}.`);
+    } else {
+      setOmdbBulkStatus("Nothing to clean.");
+    }
+  };
+  const handleOmdbBulkAdd=async()=>{
+    if(omdbBulkWorking) return;
+    const titles=splitTitleList(omdbBulkInput);
+    if(!titles.length){ setOmdbBulkStatus("Add at least one title."); return; }
+    setOmdbBulkWorking(true);
+    let added=0,updated=0,skipped=0,failed=0;
+    const existing=[...(data.libraryMovies||[])];
+    const indexMap=new Map(existing.map((m,i)=>[m.title.toLowerCase(),i]));
+    const posterMap={};
+
+    for(const rawTitle of titles){
+      const meta=await fetchMovieMeta(rawTitle,null);
+      if(!meta){ failed++; continue; }
+      if(meta.omdbType && !isAllowedOmdbType(meta.omdbType)){ skipped++; continue; }
+      const title=meta.title||rawTitle;
+      if(isListLikeTitle(title)){ skipped++; continue; }
+      const posterId=meta.imdbID||`t_${_h(title||"")}`;
+      const entry={
+        title,
+        year:meta.year||null,
+        genre:meta.genre||"Film",
+        genres:meta.genres||[],
+        director:meta.director||null,
+        actor:meta.actor||null,
+        actors:meta.actors||[],
+        plot:meta.plot||null,
+        poster:meta.poster||null,
+        posterId,
+        imdbRating:meta.imdbRating??null,
+        imdbVotes:meta.imdbVotes??null,
+        imdbID:meta.imdbID??null,
+        runtime:meta.runtime||null,
+        rated:meta.rated||null,
+        country:meta.country||null,
+        language:meta.language||null,
+        awards:meta.awards||null,
+        omdbType:meta.omdbType||null,
+        isNominee:!!meta.isNominee,
+        tags:meta.tags||[],
+        ph:meta.ph,
+        _fromOmdb:true,
+        category:"movies",
+      };
+      const key=title.toLowerCase();
+      if(indexMap.has(key)){
+        const idx=indexMap.get(key);
+        existing[idx]={...existing[idx],...entry};
+        updated++;
+      } else {
+        indexMap.set(key,existing.length);
+        existing.push(entry);
+        added++;
+      }
+      if(entry.poster && entry.posterId){
+        posterMap["poster_"+entry.posterId]=entry.poster;
+      }
+    }
+    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
+    if(added||updated){
+      onChange("libraryMovies",existing);
+    }
+    setOmdbBulkStatus(`Added ${added}, updated ${updated}, skipped ${skipped}, failed ${failed}.`);
+    setOmdbBulkWorking(false);
+  };
 
   const handleRedeem=()=>{
     if(redeemInput.trim().toLowerCase()==="beta"){
@@ -6631,11 +6764,30 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           {`Last updated: ${data.omdbLastUpdated ? new Date(data.omdbLastUpdated).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Last clean: ${data.omdbCleanedAt ? new Date(data.omdbCleanedAt).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Exhausted terms: ${Object.values(data.omdbCursor||{}).filter(v=>v===null).length} / ${Object.keys(data.omdbCursor||{}).length}`}
         </p>
         <button onClick={()=>onChange("omdbCursor",{})} style={{marginTop:8,fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>
           Reset cursor (re-fetch all)
         </button>
+        <button onClick={handleOmdbClean} style={{marginTop:8,marginLeft:8,fontSize:11,color:"#ef4444",background:"transparent",border:"1px solid #ef4444",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>
+          Clean OMDB now
+        </button>
+        <div style={{marginTop:10}}>
+          <div style={{fontSize:11,fontWeight:700,color:th.sub,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>Bulk add titles</div>
+          <textarea value={omdbBulkInput} onChange={e=>setOmdbBulkInput(e.target.value)}
+            placeholder={"Comma or newline separated titles (double-spaces also work)"}
+            style={{width:"100%",minHeight:74,resize:"vertical",background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",fontSize:12,color:th.text,lineHeight:1.5}}/>
+          <button onClick={handleOmdbBulkAdd} disabled={omdbBulkWorking}
+            style={{marginTop:8,fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 12px",cursor:omdbBulkWorking?"default":"pointer",opacity:omdbBulkWorking?0.6:1}}>
+            {omdbBulkWorking?"Adding...":"Add to library"}
+          </button>
+          {omdbBulkStatus&&(
+            <div style={{marginTop:6,fontSize:11,color:th.sub}}>{omdbBulkStatus}</div>
+          )}
+        </div>
         <div style={{marginTop:8,maxHeight:120,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
           {(data.libraryMovies||[]).slice(0,omdbShowCount).map((m,i)=>(
             <div key={i} style={{fontSize:11,color:th.sub,lineHeight:1.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -7038,6 +7190,10 @@ function App(){
         delete d.omdbLibrary;
         saveData(d);
       }
+      if(!d.omdbCleanedAt && cleanupOmdbLibrary(d)){
+        d.omdbCleanedAt=new Date().toISOString();
+        saveData(d);
+      }
       // One-time migration: move any photos still in localStorage → IDB
       await migratePhotosToIDB(d);
       // Hydrate IDB photos into state
@@ -7055,15 +7211,10 @@ function App(){
   useEffect(()=>{
     const DAILY_LIMIT=80; // max API calls per session (~800 movies)
     const TERMS=[
-      // Awards & prestige
-      "Academy Award","Palme d'Or","Cannes","Sundance","BAFTA","Golden Globe",
-      "Venice Film Festival","Berlin Film Festival","Tribeca","Tiff","Criterion",
-      "Oscar winner","Oscar nominated","Best Picture",
       // Acclaimed studios & labels
       "A24","Miramax","Focus Features","Sony Pictures Classics","Neon",
       "Studio Ghibli","Pixar","Universal Classics",
-      // Filipino cinema — our primary regional focus
-      "Filipino film","Cinemalaya","Metro Manila Film Festival","MMFF",
+      // Filipino cinema — primary regional focus
       "Star Cinema","TBA Studios","Viva Films","Black Sheep",
       // Acclaimed international directors
       "Bong Joon-ho","Park Chan-wook","Wong Kar-wai","Hayao Miyazaki",
@@ -7075,11 +7226,8 @@ function App(){
       "Martin Scorsese","Steven Spielberg","Stanley Kubrick",
       "Francis Ford Coppola","David Fincher","Ridley Scott",
       // Regional cinema
-      "Korean film","Japanese cinema","French cinema","Italian neorealism",
+      "Korean film","Japanese cinema","French cinema","Italian cinema",
       "Hong Kong cinema","Thai film","Indonesian film",
-      // Acclaimed recent releases
-      "2024 film","2023 film","2022 film","2021 film","2020 film",
-      "2019 film","2018 film","2017 film","2016 film",
       // Timeless quality signals
       "cult classic","film noir","new wave","masterpiece",
       "Ingmar Bergman","Akira Kurosawa","Federico Fellini","Jean-Luc Godard",
@@ -7125,6 +7273,11 @@ function App(){
                   calls++;
                   const d=await detail.json();
                   if(d.Response==="False") continue;
+                  const omdbType=normalizeOmdbType(d.Type);
+                  if(!isAllowedOmdbType(omdbType)) continue;
+                  if(isListLikeTitle(d.Title)) continue;
+                  const isNominee=isNomineeFromAwards(d.Awards);
+                  if(!isNominee) continue;
                   const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
                   const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
                   const posterId=d.imdbID||`t_${_h(d.Title||"")}`;
@@ -7141,6 +7294,9 @@ function App(){
                     posterId,
                     imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
                     imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
+                    awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
+                    omdbType,
+                    isNominee,
                     tags:buildTagsFromOmdb(d),
                     ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
                     _fromOmdb:true,
