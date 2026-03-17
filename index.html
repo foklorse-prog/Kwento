@@ -1778,6 +1778,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(100%);}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.93);}to{opacity:1;transform:scale(1);}}
@@ -2387,15 +2388,27 @@ async function fetchMovieMeta(title){
     const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&type=movie`);
     const d=await res.json();
     if(d.Response==="False") return null;
+    const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
+    const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
     return {
-      director:d.Director&&d.Director!=="N/A"?d.Director:null,
-      actor:d.Actors?d.Actors.split(",")[0].trim():null,
       year:d.Year?d.Year.slice(0,4):null,
-      poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
-      genre:d.Genre&&d.Genre!=="N/A"?d.Genre.split(",")[0].trim():null,
+      genre:genres[0]||null,
+      genres,
+      director:d.Director&&d.Director!=="N/A"?d.Director:null,
+      actor:actors[0]||null,
+      actors,
       plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
+      poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
       imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
       imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
+      imdbID:d.imdbID&&d.imdbID!=="N/A"?d.imdbID:null,
+      runtime:d.Runtime&&d.Runtime!=="N/A"?d.Runtime:null,
+      rated:d.Rated&&d.Rated!=="N/A"?d.Rated:null,
+      country:d.Country&&d.Country!=="N/A"?d.Country:null,
+      language:d.Language&&d.Language!=="N/A"?d.Language:null,
+      awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
+      tags:buildTagsFromOmdb(d),
+      ph:d.Country?d.Country.toLowerCase().includes("philippines"):null,
     };
   }catch(e){ return null; }
 }
@@ -4310,7 +4323,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
   return scored;
 }
 
-function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onSwipePrev}){
+function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
   const today=todayKey();
   const lang=data.language;
   const catInfo=CAT_MAP[cat];
@@ -4333,37 +4346,50 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
   const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
   const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
 
-  // Count the first suggestion only when this card is the top (visible) card
+  // Count the first suggestion on mount — card is always the active one now
   const countedRef=useRef(false);
   useEffect(()=>{
-    if(!isTop) return;
     if(countedRef.current) return;
     countedRef.current=true;
     if(!pool.length) return;
     const tc=data.discoverDate===today?(data.discoverCounts||{}):{};
     if((tc[cat]||0)>0) return;
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
-  },[isTop]);
+  },[]);
 
   // Background OMDB fetch for movie suggestions missing plot/poster
   const fetchingRef=useRef(null);
   useEffect(()=>{
-    if(cat!=="movies"||!currentItem||!isTop) return;
-    if(currentItem.plot&&currentItem.poster) return;
-    if(fetchingRef.current===currentItem.title) return; // already fetching
+    if(cat!=="movies"||!currentItem) return;
+    // Fetch if missing plot OR poster OR imdbRating — catches both new and old library entries
+    const needsFetch=!currentItem.plot||!currentItem.poster||currentItem.imdbRating==null;
+    if(!needsFetch) return;
+    if(fetchingRef.current===currentItem.title) return;
     fetchingRef.current=currentItem.title;
     (async()=>{
       const meta=await fetchMovieMeta(currentItem.title);
       if(!meta) return;
-      if(currentItem._fromOmdb){
-        const updated=(data.libraryMovies||[]).map(m=>
-          m.title===currentItem.title?{...m,...meta}:m
+      const existing=(data.libraryMovies||[]);
+      const alreadyIn=existing.find(m=>m.title.toLowerCase()===currentItem.title.toLowerCase());
+      if(alreadyIn){
+        // Update existing entry with any new fields (plot, poster, rating etc.)
+        const updated=existing.map(m=>
+          m.title.toLowerCase()===currentItem.title.toLowerCase()?{...m,...meta}:m
         );
         onChange("libraryMovies",updated);
+      } else {
+        // Not in library yet — add it so it's available for future sessions
+        const newEntry={
+          ...currentItem,
+          ...meta,
+          _fromOmdb:true,
+          category:"movies",
+        };
+        onChange("libraryMovies",[...existing,newEntry]);
       }
       setPool(prev=>prev.map(m=>m.title===currentItem.title?{...m,...meta}:m));
     })();
-  },[currentItem?.title,isTop]);
+  },[currentItem?.title]);
 
   // GPS boost for food on mount
   useEffect(()=>{
@@ -4396,49 +4422,28 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
     window.open(`https://www.google.com/search?q=${encodeURIComponent(title+" near me")}`,"_blank");
   };
 
-  // Swipe handling — left/right moves between categories
+  // Swipe handling — left/right triggers page flip
   const startX=useRef(null);
-  const [drag,setDrag]=useState(0);
-  const [animDir,setAnimDir]=useState(null);
-
-  const hs=e=>{ if(!isTop)return; startX.current=(e.touches?e.touches[0]:e).clientX; };
-  const hm=e=>{ if(!isTop||startX.current===null)return; setDrag((e.touches?e.touches[0]:e).clientX-startX.current); };
-  const he=()=>{
-    if(!isTop||startX.current===null)return;
-    if(drag>60){setAnimDir("right");setTimeout(()=>{setDrag(0);setAnimDir(null);onSwipePrev();},220);}
-    else if(drag<-60){setAnimDir("left");setTimeout(()=>{setDrag(0);setAnimDir(null);onSwipeNext();},220);}
-    else setDrag(0);
+  const hs=e=>{ startX.current=(e.touches?e.touches[0]:e).clientX; };
+  const hm=e=>{ e.preventDefault(); }; // prevent scroll during swipe
+  const he=e=>{
+    if(startX.current===null) return;
+    const dx=(e.changedTouches?e.changedTouches[0]:e).clientX-startX.current;
+    if(dx<-60) onSwipeNext();
+    else if(dx>60) onSwipePrev();
     startX.current=null;
   };
 
-  const tx=animDir==="left"?-420:animDir==="right"?420:drag;
-  const rot=animDir==="left"?-8:animDir==="right"?8:drag*0.025;
-
   return(
     <div
-      onMouseDown={hs} onMouseMove={hm} onMouseUp={he} onMouseLeave={he}
+      onMouseDown={hs} onMouseUp={he}
       onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-      style={{
-        position:"absolute",
-        top:isTop?30:30-stackOffset*6,
-        left:isTop?0:stackOffset*8,
-        right:0,
-        transform:isTop?`translateX(${tx}px) rotate(${rot}deg)`:"none",
-        transition:isTop?(animDir?"transform 0.22s ease-in":(drag===0?"transform 0.18s":"none")):"none",
-        zIndex:10-stackOffset,
-        pointerEvents:isTop?"auto":"none",
-        opacity:1,
-        touchAction:"none",
-        userSelect:"none",
-        cursor:isTop?(drag!==0?"grabbing":"grab"):"default",
-      }}>
+      style={{touchAction:"pan-y",userSelect:"none"}}>
       <div style={{
         borderRadius:22,
         background:th.card,
         border:`1px solid ${th.border}`,
-        boxShadow:isTop
-          ?"0 8px 32px rgba(0,0,0,0.18)"
-          :`0 ${2+stackOffset*2}px ${8+stackOffset*8}px rgba(0,0,0,${0.06+stackOffset*0.04})`,
+        boxShadow:"0 8px 32px rgba(0,0,0,0.18)",
         overflow:"hidden",
       }}>
         {/* Category color bar */}
@@ -4453,16 +4458,7 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
                 {lang==="fil"?catInfo.label:catInfo.labelEn}
               </span>
             </div>
-            {/* Dot indicators */}
-            <div style={{display:"flex",gap:4}}>
-              {DISCOVER_CATS.map((c,i)=>(
-                <div key={c} style={{
-                  width:c===cat?16:6,height:6,borderRadius:3,
-                  background:c===cat?catInfo.color:th.border,
-                  transition:"all 0.2s",
-                }}/>
-              ))}
-            </div>
+  
           </div>
 
           {/* Suggestion */}
@@ -4547,38 +4543,225 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
   );
 }
 
-function DiscoverDeck({data,onChange}){
-  const th=THEMES[data.theme];
-  const [catIdx,setCatIdx]=useState(0);
+function PeelCanvas({dir,onDone,cardRef,contentRef}){
+  const canvasRef=useRef(null);
+  const rafRef=useRef(null);
+  const startRef=useRef(null);
+  const DURATION=500;
 
-  const goNext=()=>setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
-  const goPrev=()=>setCatIdx(i=>(i-1+DISCOVER_CATS.length)%DISCOVER_CATS.length);
+  useEffect(()=>{
+    const canvas=canvasRef.current;
+    const card=cardRef.current;
+    if(!canvas||!card) return;
+    const rect=card.getBoundingClientRect();
+    const W=rect.width||300;
+    const H=rect.height||400;
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=W*dpr;
+    canvas.height=H*dpr;
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
+    const ctx=canvas.getContext("2d");
+    ctx.scale(dpr,dpr);
+    const fromRight=dir==="left";
 
-  // Calculate card height — needs to be fixed so stack works
+    const getClipPath=(p)=>{
+      // The unpeeled polygon — this is what clips the card content
+      const peelW=W*p;
+      const peelH=H*p*0.85;
+      if(fromRight){
+        // Unpeeled area: left side of the card
+        const x1=W-peelW, y1=0;
+        const x2=W-peelW*0.3, y2=H-peelH;
+        return `polygon(0% 0%, ${x1/W*100}% 0%, ${x2/W*100}% ${y2/H*100}%, 0% 100%)`;
+      } else {
+        const x1=peelW, y1=0;
+        const x2=peelW*0.3, y2=H-peelH;
+        return `polygon(${x1/W*100}% 0%, 100% 0%, 100% 100%, ${x2/W*100}% ${y2/H*100}%)`;
+      }
+    };
+
+    const draw=(p)=>{
+      ctx.clearRect(0,0,W,H);
+      const peelW=W*p;
+      const peelH=H*p*0.85;
+
+      // Clip card content to unpeeled region
+      if(contentRef&&contentRef.current){
+        contentRef.current.style.clipPath=p>0?getClipPath(p):"none";
+        contentRef.current.style.WebkitClipPath=p>0?getClipPath(p):"none";
+      }
+
+      // Peeling flap
+      ctx.save();
+      ctx.beginPath();
+      if(fromRight){
+        const x0=W-peelW,x1=W,x2=W-peelW*0.3;
+        const y1=H-peelH,y2=H-peelH;
+        ctx.moveTo(x0,0);ctx.lineTo(W,0);ctx.lineTo(x1,y1);
+        ctx.quadraticCurveTo(W-peelW*0.15,H-peelH*0.5,x2,y2);
+        ctx.closePath();
+      } else {
+        const x0=peelW,x1=0,x2=peelW*0.3;
+        const y1=H-peelH,y2=H-peelH;
+        ctx.moveTo(x0,0);ctx.lineTo(0,0);ctx.lineTo(x1,y1);
+        ctx.quadraticCurveTo(peelW*0.15,H-peelH*0.5,x2,y2);
+        ctx.closePath();
+      }
+      const grad=fromRight
+        ?ctx.createLinearGradient(W-peelW,0,W,H-peelH)
+        :ctx.createLinearGradient(peelW,0,0,H-peelH);
+      grad.addColorStop(0,"rgba(255,255,255,0.25)");
+      grad.addColorStop(0.4,"rgba(200,200,200,0.3)");
+      grad.addColorStop(1,"rgba(60,60,60,0.45)");
+      ctx.fillStyle=grad;
+      ctx.fill();
+
+      // Cast shadow on next page
+      ctx.save();
+      ctx.beginPath();
+      if(fromRight){
+        ctx.moveTo(W-peelW,0);ctx.lineTo(W-peelW+peelW*0.1,0);
+        ctx.lineTo(W-peelW*0.2,H-peelH);ctx.lineTo(W-peelW*0.3,H-peelH);
+        ctx.closePath();
+      } else {
+        ctx.moveTo(peelW,0);ctx.lineTo(peelW-peelW*0.1,0);
+        ctx.lineTo(peelW*0.2,H-peelH);ctx.lineTo(peelW*0.3,H-peelH);
+        ctx.closePath();
+      }
+      ctx.fillStyle=`rgba(0,0,0,${0.14*p})`;
+      ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    };
+
+    const animate=(ts)=>{
+      if(!startRef.current) startRef.current=ts;
+      const elapsed=ts-startRef.current;
+      const t=Math.min(elapsed/DURATION,1);
+      const eased=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      draw(eased);
+      if(elapsed<DURATION){
+        rafRef.current=requestAnimationFrame(animate);
+      } else {
+        // Reset clip before unmounting
+        if(contentRef?.current){
+          contentRef.current.style.clipPath="none";
+          contentRef.current.style.WebkitClipPath="none";
+        }
+        onDone();
+      }
+    };
+    rafRef.current=requestAnimationFrame(animate);
+    return()=>{
+      if(rafRef.current) cancelAnimationFrame(rafRef.current);
+      if(contentRef?.current){
+        contentRef.current.style.clipPath="none";
+        contentRef.current.style.WebkitClipPath="none";
+      }
+    };
+  },[]);
+
   return(
-    <div style={{position:"relative",height:380,marginBottom:16}}>
-      {/* Render 6 cards: current + 5 peeking behind */}
-      {[5,4,3,2,1,0].map(offset=>{
-        const idx=(catIdx+offset)%DISCOVER_CATS.length;
-        const cat=DISCOVER_CATS[idx];
-        return(
-          <DiscoverCatCard
-            key={cat}
-            cat={cat}
-            data={data}
-            onChange={onChange}
-            th={th}
-            isTop={offset===0}
-            stackOffset={offset}
-            onSwipeNext={goNext}
-            onSwipePrev={goPrev}
-          />
-        );
-      })}
-    </div>
+    <canvas ref={canvasRef} style={{
+      position:"absolute",top:0,left:0,
+      pointerEvents:"none",zIndex:10,
+      borderRadius:22,
+    }}/>
   );
 }
 
+function DiscoverDeck({data,onChange}){
+  const th=THEMES[data.theme];
+  const [catIdx,setCatIdx]=useState(0);
+  const [peelState,setPeelState]=useState(null); // {dir, nextIdx}
+  const peeling=useRef(false);
+  const cardRef=useRef(null);
+  const contentRef=useRef(null);
+
+  const peel=(nextIdx,dir)=>{
+    if(peeling.current) return;
+    peeling.current=true;
+    setPeelState({dir,nextIdx});
+  };
+
+  const onPeelDone=()=>{
+    setCatIdx(peelState?.nextIdx??catIdx);
+    setPeelState(null);
+    peeling.current=false;
+  };
+
+  const goNext=()=>peel((catIdx+1)%DISCOVER_CATS.length,"left");
+  const goPrev=()=>peel((catIdx-1+DISCOVER_CATS.length)%DISCOVER_CATS.length,"right");
+
+  const currentCat=DISCOVER_CATS[catIdx];
+  const nextCat=peelState?DISCOVER_CATS[peelState.nextIdx]:null;
+
+  return(
+    <div style={{marginBottom:16}}>
+      {/* Category dots */}
+      <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:10}}>
+        {DISCOVER_CATS.map((c,i)=>{
+          const ci=CAT_MAP[c];
+          const isActive=c===currentCat;
+          return(
+            <div key={c}
+              onClick={()=>{
+                if(isActive||peeling.current) return;
+                peel(i,i>catIdx?"left":"right");
+              }}
+              style={{
+                width:isActive?20:8,height:8,borderRadius:4,
+                background:isActive?ci.color:th.border,
+                transition:"all 0.2s",cursor:"pointer",
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <div style={{position:"relative"}}>
+        {/* Next card sits underneath — revealed as peel progresses */}
+        {peelState&&nextCat&&(
+          <div style={{position:"absolute",top:0,left:0,right:0,zIndex:1}}>
+            <DiscoverCatCard
+              key={`next-${nextCat}`}
+              cat={nextCat}
+              data={data}
+              onChange={onChange}
+              th={th}
+              onSwipeNext={goNext}
+              onSwipePrev={goPrev}
+            />
+          </div>
+        )}
+        {/* Current card on top */}
+        <div ref={cardRef} style={{position:"relative",zIndex:2}}>
+          <div ref={contentRef}>
+          <DiscoverCatCard
+            key={currentCat}
+            cat={currentCat}
+            data={data}
+            onChange={onChange}
+            th={th}
+            onSwipeNext={goNext}
+            onSwipePrev={goPrev}
+          />
+          </div>
+          {/* Canvas peel overlay */}
+          {peelState&&(
+            <PeelCanvas
+              dir={peelState.dir}
+              cardRef={cardRef}
+              contentRef={contentRef}
+              onDone={onPeelDone}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── BARKADA CARD — same stacked treatment as discover cats ──────────────────
 function BarkadaStackCard({data,onChange,th,isTop,stackOffset}){
@@ -4631,9 +4814,7 @@ function BarkadaStackCard({data,onChange,th,isTop,stackOffset}){
         borderRadius:22,
         background:th.card,
         border:`1px solid ${th.border}`,
-        boxShadow:isTop
-          ?"0 8px 32px rgba(0,0,0,0.18)"
-          :`0 ${2+stackOffset*2}px ${8+stackOffset*8}px rgba(0,0,0,${0.06+stackOffset*0.04})`,
+        boxShadow:"0 8px 32px rgba(0,0,0,0.18)",
         overflow:"hidden",
       }}>
         <div style={{height:4,background:`linear-gradient(90deg,${th.accent2||th.accent},${th.accent}88)`}}/>
@@ -4706,7 +4887,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
         {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
       </p>
       <DiscoverDeck data={data} onChange={onChange}/>
-      <div style={{marginTop:8}}>
+      <div style={{paddingTop:24}}>
         <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,marginBottom:6}}>Barkada Picks 🍻</h2>
         <p style={{fontSize:12,color:th.sub,marginBottom:16}}>{(T[data.language]||T.en).barkada_sub}</p>
         <BarkadaDeckStack data={data} onChange={onChange} th={th}/>
