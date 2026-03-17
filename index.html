@@ -4567,15 +4567,14 @@ function DiscoverDeck({data,onChange}){
   const dims=useRef({W:320,H:480});
 
   const SNAP_THRESHOLD=0.38;
-  const COMPLETE_MS=360;
-  const SNAP_MS=260;
+  const COMPLETE_MS=700;   // total ms for full peel — feels physical not snappy
+  const SNAP_MS=500;       // total ms for snap back
 
-  // Spring ease — elastic out
+  // Ease out cubic — smooth deceleration, no spring overshoot for peel
   const ease=(t)=>{
     if(t<=0) return 0;
     if(t>=1) return 1;
-    const c=2*Math.PI/2.8;
-    return Math.pow(2,-9*t)*Math.sin((t*9-0.75)*c)+1;
+    return 1-Math.pow(1-t,3);
   };
 
   useEffect(()=>{
@@ -4602,13 +4601,11 @@ function DiscoverDeck({data,onChange}){
   const getClip=(p)=>{
     if(p<=0.005) return 'none';
     const {W,H}=dims.current;
-    // Match render geometry exactly — bottom-right origin
-    const bx=W-W*p, by=H;   // bottom edge reach point
-    const rx=W,    ry=H-H*p; // right edge reach point
-    const fx=(bx+rx)/2-W*0.05*p;
-    const fy=(by+ry)/2-H*0.05*p;
-    // Unpeeled region: everything except the bottom-right triangle
-    const pts=[[0,0],[W,0],[rx,ry],[fx,fy],[bx,by],[0,H]];
+    const bx=W-W*p, by=H;
+    const rx=W,    ry=H-H*p;
+    // STRAIGHT LINE fold edge — no curve — so clip-path matches canvas exactly
+    // This eliminates the gap between the clip boundary and the canvas flap
+    const pts=[[0,0],[W,0],[rx,ry],[bx,by],[0,H]];
     return'polygon('+pts.map(([x,y])=>
       (x/W*100).toFixed(2)+'% '+(y/H*100).toFixed(2)+'%'
     ).join(',')+')';
@@ -4644,9 +4641,9 @@ function DiscoverDeck({data,onChange}){
 
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(W,H);     // anchor: bottom-right corner
-    ctx.lineTo(bx,by);   // bottom edge reach point
-    ctx.quadraticCurveTo(fx,fy,rx,ry); // curved fold to right edge
+    ctx.moveTo(W,H);   // anchor: bottom-right corner
+    ctx.lineTo(bx,by); // bottom edge
+    ctx.lineTo(rx,ry); // straight fold to right edge — matches clip-path exactly
     ctx.closePath();
 
     const g=ctx.createLinearGradient(W,H,bx,ry);
@@ -4657,10 +4654,10 @@ function DiscoverDeck({data,onChange}){
     ctx.fillStyle=g;
     ctx.fill();
 
-    // Fold highlight
+    // Fold highlight — straight line matching clip edge
     ctx.beginPath();
     ctx.moveTo(bx,by);
-    ctx.quadraticCurveTo(fx,fy,rx,ry);
+    ctx.lineTo(rx,ry);
     ctx.strokeStyle='rgba(255,255,255,'+(0.28*p)+')';
     ctx.lineWidth=1.5;
     ctx.stroke();
@@ -4718,8 +4715,8 @@ function DiscoverDeck({data,onChange}){
     const el=stackRef.current;
     if(!el) return;
     const r=el.getBoundingClientRect();
-    // Allow drag from the right half or bottom quarter
-    if((r.right-x)>r.width*0.55&&(r.bottom-y)>r.height*0.25) return;
+    // Only trigger from bottom-right corner zone (80px x 80px)
+    if((r.right-x)>80||(r.bottom-y)>80) return;
     const ni=(catIdx+1)%DISCOVER_CATS.length;
     setNextIdx(ni);
     peeling.current=true;
@@ -4740,8 +4737,8 @@ function DiscoverDeck({data,onChange}){
         clear();
         prog.current=0;
         peeling.current=false;
-        setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
         setNextIdx(null);
+        setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
       });
     } else {
       animTo(0,SNAP_MS,()=>{
