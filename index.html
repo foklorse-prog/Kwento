@@ -34,7 +34,7 @@ v6.0 — 2026-03-13
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
-  <meta name="kwento-build" content="2026-03-17-1"/>
+  <meta name="kwento-build" content="2026-03-16-1"/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 <script>
@@ -1778,7 +1778,10 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes ptr-spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
+@keyframes pageFlipOut{0%{transform:perspective(1200px) rotateY(0deg);opacity:1;}100%{transform:perspective(1200px) rotateY(-90deg);opacity:0;}}
+@keyframes pageFlipIn{0%{transform:perspective(1200px) rotateY(90deg);opacity:0;}100%{transform:perspective(1200px) rotateY(0deg);opacity:1;}}
+@keyframes pageFlipOutRev{0%{transform:perspective(1200px) rotateY(0deg);opacity:1;}100%{transform:perspective(1200px) rotateY(90deg);opacity:0;}}
+@keyframes pageFlipInRev{0%{transform:perspective(1200px) rotateY(-90deg);opacity:0;}100%{transform:perspective(1200px) rotateY(0deg);opacity:1;}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(100%);}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.93);}to{opacity:1;transform:scale(1);}}
@@ -4323,7 +4326,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
   return scored;
 }
 
-function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
+function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}){
   const today=todayKey();
   const lang=data.language;
   const catInfo=CAT_MAP[cat];
@@ -4406,25 +4409,15 @@ function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
     if(!canGenerate) return;
     const newIdx=poolIdx+1;
     setPoolIdx(newIdx);
+    // Persist updated queue state and increment count
     const newCounts={...todayCounts,[cat]:(usedToday+1)};
     const newQueues={...(data.discoverQueues||{}),[cat]:pool};
     const newIndexes={...(data.discoverIndexes||{}),[cat]:newIdx};
-    // Save the newly shown movie to libraryMovies if not already there
-    const nextItem=pool[newIdx%Math.max(pool.length,1)]||null;
-    let libraryPatch={};
-    if(cat==="movies"&&nextItem){
-      const existing=data.libraryMovies||[];
-      const alreadyIn=existing.find(m=>m.title.toLowerCase()===nextItem.title.toLowerCase());
-      if(!alreadyIn){
-        libraryPatch={libraryMovies:[...existing,{...nextItem,_fromOmdb:true,category:"movies"}]};
-      }
-    }
     onChange("__batch__",{
       discoverCounts:newCounts,
       discoverDate:today,
       discoverQueues:newQueues,
       discoverIndexes:newIndexes,
-      ...libraryPatch,
     });
   };
 
@@ -4444,11 +4437,22 @@ function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
     startX.current=null;
   };
 
+  // Flip animation class based on direction
+  const animStyle=flipAnim==="in-left"
+    ?{animation:"pageFlipIn 0.32s ease forwards",transformOrigin:"center"}
+    :flipAnim==="in-right"
+    ?{animation:"pageFlipInRev 0.32s ease forwards",transformOrigin:"center"}
+    :{};
+
   return(
     <div
       onMouseDown={hs} onMouseUp={he}
       onTouchStart={hs} onTouchMove={hm} onTouchEnd={he}
-      style={{touchAction:"pan-y",userSelect:"none"}}>
+      style={{
+        touchAction:"pan-y",
+        userSelect:"none",
+        ...animStyle,
+      }}>
       <div style={{
         borderRadius:22,
         background:th.card,
@@ -4553,261 +4557,73 @@ function DiscoverCatCard({cat,data,onChange,th,onSwipeNext,onSwipePrev}){
   );
 }
 
-// ─── DISCOVER DECK — corner peel with spring snap ────────────────────────────
 function DiscoverDeck({data,onChange}){
   const th=THEMES[data.theme];
   const [catIdx,setCatIdx]=useState(0);
-  const [nextIdx,setNextIdx]=useState(null);
-  const stackRef=useRef(null);
-  const canvasRef=useRef(null);
-  const frontRef=useRef(null);
-  const peeling=useRef(false);
-  const prog=useRef(0);
-  const raf=useRef(null);
-  const dims=useRef({W:320,H:480});
+  const [flipAnim,setFlipAnim]=useState(null);
+  const flipping=useRef(false);
 
-  const SNAP_THRESHOLD=0.38;
-  const COMPLETE_MS=700;   // total ms for full peel — feels physical not snappy
-  const SNAP_MS=500;       // total ms for snap back
-
-  // Ease out cubic — smooth deceleration, no spring overshoot for peel
-  const ease=(t)=>{
-    if(t<=0) return 0;
-    if(t>=1) return 1;
-    return 1-Math.pow(1-t,3);
+  const goNext=()=>{
+    if(flipping.current) return;
+    flipping.current=true;
+    setFlipAnim("in-left");
+    setTimeout(()=>{
+      setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
+      setFlipAnim(null);
+      flipping.current=false;
+    },320);
+  };
+  const goPrev=()=>{
+    if(flipping.current) return;
+    flipping.current=true;
+    setFlipAnim("in-right");
+    setTimeout(()=>{
+      setCatIdx(i=>(i-1+DISCOVER_CATS.length)%DISCOVER_CATS.length);
+      setFlipAnim(null);
+      flipping.current=false;
+    },320);
   };
 
-  useEffect(()=>{
-    const measure=()=>{
-      const el=stackRef.current;
-      if(!el) return;
-      const r=el.getBoundingClientRect();
-      dims.current={W:r.width||320,H:r.height||480};
-      const cv=canvasRef.current;
-      if(!cv) return;
-      const dpr=Math.min(window.devicePixelRatio||1,2);
-      const {W,H}=dims.current;
-      cv.width=W*dpr;cv.height=H*dpr;
-      cv.style.width=W+'px';cv.style.height=H+'px';
-      const ctx=cv.getContext('2d');
-      ctx.scale(dpr,dpr);
-    };
-    measure();
-    const ro=new ResizeObserver(measure);
-    if(stackRef.current) ro.observe(stackRef.current);
-    return()=>ro.disconnect();
-  },[]);
-
-  const getClip=(p)=>{
-    if(p<=0.005) return 'none';
-    const {W,H}=dims.current;
-    const bx=W-W*p, by=H;
-    const rx=W,    ry=H-H*p;
-    // STRAIGHT LINE fold edge — no curve — so clip-path matches canvas exactly
-    // This eliminates the gap between the clip boundary and the canvas flap
-    const pts=[[0,0],[W,0],[rx,ry],[bx,by],[0,H]];
-    return'polygon('+pts.map(([x,y])=>
-      (x/W*100).toFixed(2)+'% '+(y/H*100).toFixed(2)+'%'
-    ).join(',')+')';
-  };
-
-  const render=(p)=>{
-    const cv=canvasRef.current;
-    const fr=frontRef.current;
-    if(!cv) return;
-    const {W,H}=dims.current;
-    const ctx=cv.getContext('2d');
-    ctx.clearRect(0,0,W,H);
-
-    const clip=getClip(p);
-    if(fr){fr.style.clipPath=clip;fr.style.WebkitClipPath=clip;}
-    if(p<=0.005) return;
-
-    // Peel from BOTTOM-RIGHT corner sweeping toward TOP-LEFT
-    // bx,by = bottom edge reach point (moves left as p grows)
-    // rx,ry = right edge reach point (moves up as p grows)
-    const bx=W-W*p,  by=H;      // bottom edge: starts at W,H moves left
-    const rx=W,      ry=H-H*p;  // right edge: starts at W,H moves up
-    // Fold curve control point — slightly inward
-    const fx=(bx+rx)/2-W*0.05*p;
-    const fy=(by+ry)/2-H*0.05*p;
-
-    // Convert hex card color to rgba for canvas
-    const hex=(th.card||'#130a22').replace('#','');
-    const r2=parseInt(hex.substring(0,2),16);
-    const g2=parseInt(hex.substring(2,4),16);
-    const b2=parseInt(hex.substring(4,6),16);
-    const cc=(a)=>`rgba(${r2},${g2},${b2},${a})`;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(W,H);   // anchor: bottom-right corner
-    ctx.lineTo(bx,by); // bottom edge
-    ctx.lineTo(rx,ry); // straight fold to right edge — matches clip-path exactly
-    ctx.closePath();
-
-    const g=ctx.createLinearGradient(W,H,bx,ry);
-    g.addColorStop(0,  cc(0.55));  // dark at anchor (shadow fold)
-    g.addColorStop(0.4,cc(0.80));
-    g.addColorStop(0.75,cc(0.92));
-    g.addColorStop(1,  cc(0.97));  // matches card color at leading edge
-    ctx.fillStyle=g;
-    ctx.fill();
-
-    // Fold highlight — straight line matching clip edge
-    ctx.beginPath();
-    ctx.moveTo(bx,by);
-    ctx.lineTo(rx,ry);
-    ctx.strokeStyle='rgba(255,255,255,'+(0.28*p)+')';
-    ctx.lineWidth=1.5;
-    ctx.stroke();
-
-    // Cast shadow strip on next card
-    ctx.beginPath();
-    ctx.moveTo(bx,by);ctx.lineTo(bx-5,by);
-    ctx.lineTo(rx-5,ry);ctx.lineTo(rx,ry);
-    ctx.closePath();
-    const sg=ctx.createLinearGradient(bx,by,bx-12,by);
-    sg.addColorStop(0,'rgba(0,0,0,'+(0.16*p)+')');
-    sg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=sg;ctx.fill();
-    ctx.restore();
-  };
-
-  const clear=()=>{
-    const cv=canvasRef.current;
-    const fr=frontRef.current;
-    const {W,H}=dims.current;
-    if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,W,H);}
-    if(fr){fr.style.clipPath='none';fr.style.WebkitClipPath='none';}
-  };
-
-  const animTo=(target,ms,cb)=>{
-    if(raf.current) cancelAnimationFrame(raf.current);
-    const from=prog.current;
-    const dist=target-from;
-    if(Math.abs(dist)<0.005){prog.current=target;render(target);if(!target)clear();cb&&cb();return;}
-    const dur=ms*Math.abs(dist);
-    const t0=performance.now();
-    const tick=(now)=>{
-      const t=Math.min((now-t0)/dur,1);
-      prog.current=from+dist*ease(t);
-      render(prog.current);
-      if(t<1){raf.current=requestAnimationFrame(tick);}
-      else{prog.current=target;render(target);if(!target)clear();cb&&cb();}
-    };
-    raf.current=requestAnimationFrame(tick);
-  };
-
-  const getP=(clientX,clientY)=>{
-    const el=stackRef.current;
-    if(!el) return 0;
-    const r=el.getBoundingClientRect();
-    const {W,H}=dims.current;
-    const dx=r.right-clientX;
-    const dy=r.bottom-clientY;
-    const d=Math.sqrt(dx*dx+dy*dy);
-    return Math.min(Math.max(1-d/Math.sqrt(W*W+H*H),0),1);
-  };
-
-  const onStart=(x,y)=>{
-    if(peeling.current) return;
-    const el=stackRef.current;
-    if(!el) return;
-    const r=el.getBoundingClientRect();
-    // Only trigger from bottom-right corner zone (80px x 80px)
-    if((r.right-x)>80||(r.bottom-y)>80) return;
-    const ni=(catIdx+1)%DISCOVER_CATS.length;
-    setNextIdx(ni);
-    peeling.current=true;
-    prog.current=getP(x,y);
-    render(prog.current);
-  };
-
-  const onMove=(x,y)=>{
-    if(!peeling.current) return;
-    prog.current=getP(x,y);
-    render(prog.current);
-  };
-
-  const onEnd=()=>{
-    if(!peeling.current) return;
-    if(prog.current>=SNAP_THRESHOLD){
-      animTo(1,COMPLETE_MS,()=>{
-        clear();
-        prog.current=0;
-        peeling.current=false;
-        setNextIdx(null);
-        setCatIdx(i=>(i+1)%DISCOVER_CATS.length);
-      });
-    } else {
-      animTo(0,SNAP_MS,()=>{
-        clear();
-        prog.current=0;
-        peeling.current=false;
-        setNextIdx(null);
-      });
-    }
-  };
-
-  const dotTap=(i)=>{
-    if(i===catIdx||peeling.current) return;
-    setNextIdx(i);
-    peeling.current=true;
-    prog.current=0;
-    animTo(1,COMPLETE_MS,()=>{
-      clear();prog.current=0;peeling.current=false;
-      setCatIdx(i);setNextIdx(null);
-    });
-  };
-
-  const currentCat=DISCOVER_CATS[catIdx];
-  const nextCat=nextIdx!==null?DISCOVER_CATS[nextIdx]:null;
+  const cat=DISCOVER_CATS[catIdx];
 
   return(
     <div style={{marginBottom:16}}>
+      {/* Category dot indicators above card */}
       <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:10}}>
         {DISCOVER_CATS.map((c,i)=>{
           const ci=CAT_MAP[c];
           return(
-            <div key={c} onClick={()=>dotTap(i)} style={{
-              width:c===currentCat?20:8,height:8,borderRadius:4,
-              background:c===currentCat?ci.color:th.border,
-              transition:"all 0.2s",cursor:"pointer",
-            }}/>
+            <div key={c}
+              onClick={()=>{
+                if(c===cat||flipping.current) return;
+                const dir=i>catIdx?"in-left":"in-right";
+                flipping.current=true;
+                setFlipAnim(dir);
+                setTimeout(()=>{setCatIdx(i);setFlipAnim(null);flipping.current=false;},320);
+              }}
+              style={{
+                width:c===cat?20:8,height:8,borderRadius:4,
+                background:c===cat?ci.color:th.border,
+                transition:"all 0.2s",cursor:"pointer",
+              }}
+            />
           );
         })}
       </div>
-      <div
-        ref={stackRef}
-        onMouseDown={e=>{onStart(e.clientX,e.clientY);}}
-        onMouseMove={e=>{if(peeling.current)onMove(e.clientX,e.clientY);}}
-        onMouseUp={onEnd}
-        onMouseLeave={onEnd}
-        onTouchStart={e=>{const t=e.touches[0];onStart(t.clientX,t.clientY);}}
-        onTouchMove={e=>{e.preventDefault();const t=e.touches[0];onMove(t.clientX,t.clientY);}}
-        onTouchEnd={onEnd}
-        style={{position:"relative",touchAction:"pan-y",userSelect:"none"}}
-      >
-        {nextCat&&(
-          <div style={{position:"absolute",top:0,left:0,right:0,zIndex:1}}>
-            <DiscoverCatCard key={"next-"+nextCat} cat={nextCat} data={data} onChange={onChange} th={th}
-              onSwipeNext={()=>{}} onSwipePrev={()=>{}}/>
-          </div>
-        )}
-        <div ref={frontRef} style={{position:"relative",zIndex:2}}>
-          <DiscoverCatCard key={currentCat} cat={currentCat} data={data} onChange={onChange} th={th}
-            onSwipeNext={()=>dotTap((catIdx+1)%DISCOVER_CATS.length)}
-            onSwipePrev={()=>dotTap((catIdx-1+DISCOVER_CATS.length)%DISCOVER_CATS.length)}/>
-        </div>
-        <canvas ref={canvasRef} style={{
-          position:"absolute",top:0,left:0,
-          pointerEvents:"none",zIndex:10,borderRadius:22,
-        }}/>
-      </div>
+      <DiscoverCatCard
+        key={cat}
+        cat={cat}
+        data={data}
+        onChange={onChange}
+        th={th}
+        flipAnim={flipAnim}
+        onSwipeNext={goNext}
+        onSwipePrev={goPrev}
+      />
     </div>
   );
 }
+
 
 // ─── BARKADA CARD — same stacked treatment as discover cats ──────────────────
 function BarkadaStackCard({data,onChange,th,isTop,stackOffset}){
@@ -4928,7 +4744,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Suggestions For You</h1>
       <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
         {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
       </p>
