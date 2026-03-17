@@ -1744,6 +1744,7 @@ function defaultData(){
     weekHarmony:{},
     discoverCounts:{},discoverDate:null,
     discoverQueues:{},
+    discoverIndexes:{},
   };
 }
 
@@ -4218,36 +4219,44 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
   }
 
   const scored = items
-    .filter(i=>!logged.has(i.title)&&!disliked.has(i.title))
+    .filter(i=>{
+      if(logged.has(i.title)||disliked.has(i.title)) return false;
+      // Quality filter for OMDB-enriched movies only
+      // Library movies pass through — they're hand-picked
+      if(cat==="movies"&&i._fromOmdb){
+        if(i.imdbRating!=null&&i.imdbRating<6.0) return false;
+        // Non-Filipino films need at least 1000 votes
+        // Filipino films are exempt — they're systematically under-voted globally
+        if(!i.ph&&i.imdbVotes!=null&&i.imdbVotes<1000) return false;
+      }
+      return true;
+    })
     .map(i=>{
-      let score=(i.ph?8:0)+Math.random()*3;
+      let score=Math.random()*3;
 
-      // Tag relevance — how much this item matches the user's taste profile
+      // Tag relevance
       const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
       score+=tagScore*15;
 
       if(cat==="movies"){
-        // Year proximity — boost movies near the user's average logged year
-        // Old classics (8.0+ IMDB, pre-1990) get a separate quality boost so they
-        // surface even when a user mostly logs contemporary films
+        // Year proximity
         const itemYear=i.year?parseInt(i.year):(MOVIE_YEARS[i.title]?parseInt(MOVIE_YEARS[i.title]):null);
         if(avgYear&&itemYear){
           const diff=Math.abs(itemYear-avgYear);
-          // Soft boost for proximity — fades over 20 years but never goes negative
           score+=Math.max(0,8*(1-diff/20));
         }
-        // Classic bonus — high-rated films before 1990 get a flat boost so they
-        // aren't buried by year proximity alone
-        if(itemYear&&itemYear<1990&&i.imdbRating>=8.0){
-          score+=6;
-        }
-        // Quality signal — imdbRating weighted by log of vote count
-        // A 8.5 with 500k votes beats a 9.0 with 50 votes
-        if(i.imdbRating&&i.imdbVotes){
-          const qualityScore=i.imdbRating*Math.log10(Math.max(i.imdbVotes,100));
+        // Classic bonus
+        if(itemYear&&itemYear<1990&&i.imdbRating>=8.0) score+=6;
+
+        // Quality signal — vote-corrected so Filipino films aren't penalised
+        // for being under-voted. We scale their vote count up by 10x to
+        // approximate what they'd have if they had the same global audience.
+        if(i.imdbRating){
+          const effectiveVotes=i.imdbVotes
+            ?(i.ph ? i.imdbVotes*10 : i.imdbVotes)
+            :500; // no vote data — assume modest
+          const qualityScore=i.imdbRating*Math.log10(Math.max(effectiveVotes,100));
           score+=qualityScore*0.8;
-        } else if(i.imdbRating){
-          score+=i.imdbRating*0.5; // less confident without vote count
         }
       }
 
@@ -4257,9 +4266,26 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
         if(varietyBoosts?.dominantTags&&(i.tags||[]).some(t=>varietyBoosts.dominantTags.has(t)))score-=4;
       }
 
-      return {...i,category:cat,score};
+      return {...i,category:cat,score,_ph:!!i.ph};
     })
     .sort((a,b)=>b.score-a.score||Math.random()-0.5);
+
+  // ── Soft 60/40 Filipino/global mix for movies ─────────────────────────────
+  // After quality sorting, interleave so roughly every 5 suggestions has
+  // 3 Filipino and 2 global. Never forces bad films in — if there aren't
+  // enough Filipino films to fill the slots, globals fill naturally.
+  if(cat==="movies"){
+    const ph=scored.filter(m=>m._ph);
+    const global=scored.filter(m=>!m._ph);
+    const mixed=[];
+    let pi=0,gi=0;
+    while(pi<ph.length||gi<global.length){
+      // 3 Filipino then 2 global, repeat
+      for(let i=0;i<3&&pi<ph.length;i++) mixed.push(ph[pi++]);
+      for(let i=0;i<2&&gi<global.length;i++) mixed.push(global[gi++]);
+    }
+    return mixed;
+  }
 
   // ── Wildcard slot for movies — surface one high-quality film from a genre ──
   // the user hasn't explored yet. Keeps suggestions from being an echo chamber.
@@ -4296,7 +4322,7 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
     if(saved&&saved.length) return saved;
     return buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[]);
   });
-  const [poolIdx,setPoolIdx]=useState(0);
+  const [poolIdx,setPoolIdx]=useState(()=>data.discoverIndexes?.[cat]||0);
 
   // Daily generate count per category
   const todayCounts=data.discoverDate===today?(data.discoverCounts||{}):{};
@@ -4357,10 +4383,12 @@ function DiscoverCatCard({cat,data,onChange,th,isTop,stackOffset,onSwipeNext,onS
     // Persist updated queue state and increment count
     const newCounts={...todayCounts,[cat]:(usedToday+1)};
     const newQueues={...(data.discoverQueues||{}),[cat]:pool};
+    const newIndexes={...(data.discoverIndexes||{}),[cat]:newIdx};
     onChange("__batch__",{
       discoverCounts:newCounts,
       discoverDate:today,
       discoverQueues:newQueues,
+      discoverIndexes:newIndexes,
     });
   };
 
@@ -6559,6 +6587,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Last updated: ${data.omdbLastUpdated ? new Date(data.omdbLastUpdated).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
         </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Exhausted terms: ${Object.values(data.omdbCursor||{}).filter(v=>v===null).length} / ${Object.keys(data.omdbCursor||{}).length}`}
+        </p>
+        <button onClick={()=>onChange("omdbCursor",{})} style={{marginTop:8,fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>
+          Reset cursor (re-fetch all)
+        </button>
         <div style={{marginTop:8,maxHeight:120,overflowY:"auto",border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",background:th.bg}}>
           {(data.libraryMovies||[]).slice(0,omdbShowCount).map((m,i)=>(
             <div key={i} style={{fontSize:11,color:th.sub,lineHeight:1.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -6978,19 +7012,35 @@ function App(){
   useEffect(()=>{
     const DAILY_LIMIT=80; // max API calls per session (~800 movies)
     const TERMS=[
-      // Genres
-      "drama","romance","thriller","horror","comedy","action","crime","animation",
-      "documentary","mystery","adventure","fantasy","sci-fi","biography","musical",
-      // Moods & styles
-      "indie","arthouse","coming of age","road trip","heist","psychological",
-      // Nationalities & regions
-      "Filipino","Korean","Japanese","French","Italian","Spanish","Indian",
-      "Chinese","Thai","Indonesian","Vietnamese","British","Australian",
-      // Decades
-      "2024","2023","2022","2021","2020","2019","2018","2017","2016","2015",
-      "2010","2005","2000","1995","1990","1985","1980",
-      // Popular searches
-      "love","family","war","based on true story","Oscar","award","classic",
+      // Awards & prestige
+      "Academy Award","Palme d'Or","Cannes","Sundance","BAFTA","Golden Globe",
+      "Venice Film Festival","Berlin Film Festival","Tribeca","Tiff","Criterion",
+      "Oscar winner","Oscar nominated","Best Picture",
+      // Acclaimed studios & labels
+      "A24","Miramax","Focus Features","Sony Pictures Classics","Neon",
+      "Studio Ghibli","Pixar","Universal Classics",
+      // Filipino cinema — our primary regional focus
+      "Filipino film","Cinemalaya","Metro Manila Film Festival","MMFF",
+      "Star Cinema","TBA Studios","Viva Films","Black Sheep",
+      // Acclaimed international directors
+      "Bong Joon-ho","Park Chan-wook","Wong Kar-wai","Hayao Miyazaki",
+      "Hirokazu Kore-eda","Apichatpong Weerasethakul",
+      "Lav Diaz","Brillante Mendoza","Erik Matti","Antoinette Jadaone",
+      "Quentin Tarantino","Christopher Nolan","Denis Villeneuve",
+      "Alfonso Cuaron","Guillermo del Toro","Pedro Almodovar",
+      "Wes Anderson","Richard Linklater","Darren Aronofsky",
+      "Martin Scorsese","Steven Spielberg","Stanley Kubrick",
+      "Francis Ford Coppola","David Fincher","Ridley Scott",
+      // Regional cinema
+      "Korean film","Japanese cinema","French cinema","Italian neorealism",
+      "Hong Kong cinema","Thai film","Indonesian film",
+      // Acclaimed recent releases
+      "2024 film","2023 film","2022 film","2021 film","2020 film",
+      "2019 film","2018 film","2017 film","2016 film",
+      // Timeless quality signals
+      "cult classic","film noir","new wave","masterpiece",
+      "Ingmar Bergman","Akira Kurosawa","Federico Fellini","Jean-Luc Godard",
+      "Francois Truffaut","Luis Bunuel","Andrei Tarkovsky",
     ];
     (async()=>{
       try{
