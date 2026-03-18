@@ -1,25 +1,18 @@
-<!--
+﻿<!--
 ================================================================
-  KWENTO PATCH NOTES (dev only — update this every release)
+  KWENTO PATCH NOTES (dev only - update this every release)
 ================================================================
 
-v6.1 — 2026-03-17
-  - Profile: stat card colors now update live when cards are dragged — color is assigned after user order is applied, so each card always samples the photo closest to its actual grid position
-  - Profile: harmony mode moved into a compact dropdown inside the star-tap details row, next to the date range
-  - Profile: new photo_bg treatment — the 1x2 stat card sitting beside the first photo card in a week now shows that photo as a softly blurred background with a dark scrim for readability
-  - Profile: Night Owl / Early Bird and week_pulse no longer get the old blurred photo background — they now render as normal stat cards
-  - Profile: complete rework of default grid layout — slots own their shapes (2x1, 1x2, 2x2 etc.), cards flow into slots in priority order and inherit the slot's shape; no card has a predefined size
-  - Profile: new card priority order — Vibe, Pace, Photo, Night Owl, Steps, Photo, Days Active, Most Logged, Photo, Top Category, Entries, Top Actor, Top Director
-  - Profile: photo slots skipped cleanly when no photos exist that week without disrupting stat card flow
-
-v6.0 — 2026-03-13
-  - Profile: Manila Nights stat sticker cards — canvas-rendered, neon glass design
-  - Profile: tap any stat card to preview as a shareable sticker (hold to save/share)
-  - Profile: 3-column stat grid with smart orphan spanning
-  - Profile: stats are data-driven — only cards with real data are shown
-  - Profile: canvas border-radius fix for high-DPR phones (baked into bitmap, not CSS clip)
-  - Profile: canvas sizing uses double-rAF to guarantee correct dimensions on first mobile load
-  - Settings: beta redeem code — enter "beta" to unlock unlimited sticker saves
+v6.2 - 2026-03-18
+  - Discover: movie quick-log modal now hides non-movie category chips and suggestion list when opened from Discover
+  - Discover: movie action icons now show completed state (log/like/watchlist)
+  - Discover: watchlist preview moved below Barkada Picks as a one-row poster gallery with Show more
+  - Discover: preview row only shows watchlist entries with metadata (poster + genre + director)
+  - Watchlist: new full gallery page with tap-to-open movie details
+  - Watchlist: adding from Discover now opens Set Reminder modal
+  - Notifications: local watchlist reminders now trigger while app/browser is open (with permission)
+  - Suggestions: scoring now weights recent behavior more and scales movie taste impact by rating
+  - Suggestions: Generate on movie now records skip signal to reduce repeats
 
 ================================================================
 -->
@@ -34,7 +27,7 @@ v6.0 — 2026-03-13
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
   <meta name="apple-mobile-web-app-title" content="Kwento"/>
   <meta name="description" content="Your personal story journal."/>
-  <meta name="kwento-build" content="2026-03-16-1"/>
+  <meta name="kwento-build" content="2026-03-18-1"/>
   <title>Kwento</title>
   <link rel="manifest" href="manifest.json"/>
 <script>
@@ -954,11 +947,25 @@ function generateBarkadaDescription(item, index) {
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function buildTagScore(logs, feedback) {
   const cnt={};
-  logs.forEach(l=>(l.tags||[]).forEach(t=>{cnt[t]=(cnt[t]||0)+1;}));
-  // Normalize by total tag count so no single tag dominates
-  const total=Object.values(cnt).reduce((s,v)=>s+v,0)||1;
+  const now=Date.now();
+  logs.forEach(l=>{
+    const tags=l.tags||[];
+    if(!tags.length) return;
+    const ts=l.date?new Date(l.date).getTime():now;
+    const ageDays=Math.max(0,(now-(isNaN(ts)?now:ts))/86400000);
+    const recencyFactor=ageDays<=7?1.8:ageDays<=30?1.35:ageDays<=90?1.15:1;
+    const scoreWeight=(typeof l._weight==="number"&&isFinite(l._weight))?l._weight:1;
+    let ratingFactor=1;
+    if(l.category==="movies"&&typeof l.rating==="number"&&isFinite(l.rating)){
+      const r=Math.max(0,Math.min(5,l.rating));
+      ratingFactor=0.4+(r/5)*1.8; // 0.4..2.2
+    }
+    const w=recencyFactor*ratingFactor*scoreWeight;
+    tags.forEach(t=>{cnt[t]=(cnt[t]||0)+w;});
+  });
+  const total=Object.values(cnt).reduce((s,v)=>s+Math.max(0,v),0)||1;
   const normalized={};
-  Object.entries(cnt).forEach(([t,v])=>{normalized[t]=v/total;});
+  Object.entries(cnt).forEach(([t,v])=>{normalized[t]=Math.max(0,v)/total;});
   return normalized;
 }
 
@@ -1729,6 +1736,9 @@ function defaultData(){
   return{
     onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true,movies:true,music:true,books:true,food:true,games:true,activities:true},
     logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",profilePhotoIds:[],profilePhotoPosMap:{},
+    watchlist:[],
+    watchlistReminders:[],
+    likedSuggestions:{},
     __showAvatarPicker:false,
     lastBackupAt:null,lastBackupHash:null,
     // Suggestion state persisted in data
@@ -1749,6 +1759,8 @@ function defaultData(){
     discoverCounts:{},discoverDate:null,
     discoverQueues:{},
     discoverIndexes:{},
+    discoverSkips:{},
+    discoverInteractions:{},
   };
 }
 
@@ -2644,7 +2656,7 @@ function buildTagsFromOmdb(d){
   return [...new Set(tags)]; // deduplicate
 }
 
-function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
+function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQuery="",discoverQuickLog=false}){
   const th=THEMES[data.theme];
 
   const t=T[data.language]||T.en;
@@ -2657,8 +2669,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
     setTimeout(onClose,260);
   };
 
-  const [cat,setCat]=useState(isEdit?editEntry.category:(initialCat||null));
-  const [query,setQuery]=useState(isEdit?editEntry.title:"");
+  const [cat,setCat]=useState(isEdit?editEntry.category:(discoverQuickLog?"movies":(initialCat||null)));
+  const [query,setQuery]=useState(isEdit?editEntry.title:(initialQuery||""));
   const [note,setNote]=useState(isEdit?editEntry.note:"");
   const [review,setReview]=useState(isEdit?editEntry.review||"":"");
   const [rating,setRating]=useState(isEdit?editEntry.rating||null:null);
@@ -2865,40 +2877,42 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
           </div>
 
           {/* Category chips — horizontal scroll */}
-          <div ref={catRowRef} style={{display:"flex",gap:6,overflowX:"auto",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
-            {CATEGORIES.map(c=>{
-              const active=cat===c.id;
-              return(
-                <button key={c.id} data-cat={c.id}
-                  onClick={()=>{setCat(c.id);requestAnimationFrame(()=>inputRef.current?.focus());}}
-                  style={data.theme==="fiesta"?{
-                    padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
-                    fontSize:12,fontWeight:active?600:500,
-                    cursor:"pointer",flexShrink:0,transition:"all 0.18s",
-                    background:active
-                      ?c.color
-                      :"linear-gradient(145deg,rgba(255,255,255,0.12) 0%,rgba(255,215,255,0.05) 100%)",
-                    backdropFilter:"blur(10px)",
-                    WebkitBackdropFilter:"blur(10px)",
-                    color:active?"#fff":th.sub,
-                    border:active?"1px solid rgba(255,255,255,0.32)":"1px solid rgba(255,255,255,0.16)",
-                    boxShadow:active
-                      ?"0 1px 0 rgba(255,255,255,0.50) inset,0 -1px 0 rgba(0,0,0,0.10) inset,0 2px 6px rgba(0,0,0,0.09)"
-                      :"0 1px 0 rgba(255,255,255,0.32) inset,0 -1px 0 rgba(0,0,0,0.07) inset,0 1px 3px rgba(0,0,0,0.06)",
-                  }:{
-                    padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
-                    fontSize:12,fontWeight:active?600:400,
-                    background:active?c.color:"transparent",
-                    color:active?"#fff":th.sub,
-                    border:`1.5px solid ${active?c.color:th.border}`,
-                    cursor:"pointer",flexShrink:0,transition:"all 0.12s",
-                    boxShadow:active?`0 2px 8px ${c.color}40`:"none"
-                  }}>
-                  {c.emoji} {lang==="fil"?c.label:c.labelEn}
-                </button>
-              );
-            })}
-          </div>
+          {!discoverQuickLog&&(
+            <div ref={catRowRef} style={{display:"flex",gap:6,overflowX:"auto",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
+              {CATEGORIES.map(c=>{
+                const active=cat===c.id;
+                return(
+                  <button key={c.id} data-cat={c.id}
+                    onClick={()=>{setCat(c.id);requestAnimationFrame(()=>inputRef.current?.focus());}}
+                    style={data.theme==="fiesta"?{
+                      padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
+                      fontSize:12,fontWeight:active?600:500,
+                      cursor:"pointer",flexShrink:0,transition:"all 0.18s",
+                      background:active
+                        ?c.color
+                        :"linear-gradient(145deg,rgba(255,255,255,0.12) 0%,rgba(255,215,255,0.05) 100%)",
+                      backdropFilter:"blur(10px)",
+                      WebkitBackdropFilter:"blur(10px)",
+                      color:active?"#fff":th.sub,
+                      border:active?"1px solid rgba(255,255,255,0.32)":"1px solid rgba(255,255,255,0.16)",
+                      boxShadow:active
+                        ?"0 1px 0 rgba(255,255,255,0.50) inset,0 -1px 0 rgba(0,0,0,0.10) inset,0 2px 6px rgba(0,0,0,0.09)"
+                        :"0 1px 0 rgba(255,255,255,0.32) inset,0 -1px 0 rgba(0,0,0,0.07) inset,0 1px 3px rgba(0,0,0,0.06)",
+                    }:{
+                      padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
+                      fontSize:12,fontWeight:active?600:400,
+                      background:active?c.color:"transparent",
+                      color:active?"#fff":th.sub,
+                      border:`1.5px solid ${active?c.color:th.border}`,
+                      cursor:"pointer",flexShrink:0,transition:"all 0.12s",
+                      boxShadow:active?`0 2px 8px ${c.color}40`:"none"
+                    }}>
+                    {c.emoji} {lang==="fil"?c.label:c.labelEn}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Search — DM Sans 16, primary action, underline only */}
           <div style={{marginBottom:6,position:"relative"}}>
@@ -2928,7 +2942,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
           </div>
 
           {/* Suggestions — DM Sans 13/11, floats below search */}
-          {results.length>0&&(
+          {!discoverQuickLog&&results.length>0&&(
             <div style={{marginBottom:10,background:th.card,borderRadius:"0 0 12px 12px",overflow:"hidden",
               boxShadow:`0 6px 20px rgba(0,0,0,${th.dark?0.35:0.08})`,
               border:`1px solid ${th.border}`,borderTop:"none"}}>
@@ -4410,8 +4424,14 @@ const DISCOVER_FREE_LIMIT = 5;
 const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
-function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) {
-  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}) {
+  const seedLogs=(tasteSeed||[]).map(s=>({
+    tags:s.tags||[],
+    category:s.category||cat,
+    date:s.savedAt||new Date().toISOString(),
+    _weight:typeof s.scoreWeight==="number"?s.scoreWeight:1,
+  }));
+  const tc = buildTagScore([...logs.filter(l=>!l.fromHealthKit),...seedLogs], feedback);
   let items = LIBRARY[cat]||[];
   if(cat==="movies" && libraryMovies && libraryMovies.length){
     const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
@@ -4454,10 +4474,13 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
     })
     .map(i=>{
       let score=Math.random()*3;
+      const itemKey=(i.imdbID||i.title||"").toLowerCase();
+      const skipPenalty=(cat==="movies"&&discoverSkips&&itemKey)?Math.min(12,(discoverSkips[itemKey]||0)*3):0;
 
       // Tag relevance
       const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
       score+=tagScore*15;
+      score-=skipPenalty;
 
       if(cat==="movies"){
         // Year proximity
@@ -4598,7 +4621,7 @@ async function cachePostersForItems(items, limit){
   if(Object.keys(posterMap).length) await idbSetAll(posterMap);
 }
 
-function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}){
+function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,onOpenMovieLog}){
   const today=todayKey();
   const lang=data.language;
   const catInfo=CAT_MAP[cat];
@@ -4608,7 +4631,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
   const [pool,setPool]=useState(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return saved;
-    return buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[]);
+    return buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{});
   });
   const [poolIdx,setPoolIdx]=useState(()=>data.discoverIndexes?.[cat]||0);
 
@@ -4620,6 +4643,20 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
   // Define currentItem before all effects so they can reference it safely
   const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
   const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
+  const likedKey=(currentItem?.imdbID||currentItem?.title||"").toLowerCase();
+  const likedMap=data.likedSuggestions||{};
+  const isLiked=!!likedMap[likedKey];
+  const interactedMap=data.discoverInteractions||{};
+  const watchlist=_normalizeWatchlistItems(data);
+  const isWatchlisted=!!watchlist.find(w=>(w.imdbID||w.title||"").toLowerCase()===likedKey);
+  const isLogged=!!(data.logs||[]).find(l=>l.category==="movies"&&((l.imdbID&&currentItem?.imdbID&&l.imdbID===currentItem.imdbID)||((l.title||"").toLowerCase()===(currentItem?.title||"").toLowerCase())));
+  const [reminderMovie,setReminderMovie]=useState(null);
+  const [reminderAt,setReminderAt]=useState(()=>{
+    const d=new Date();
+    d.setDate(d.getDate()+1);
+    d.setHours(20,0,0,0);
+    return d.toISOString().slice(0,16);
+  });
 
   // Count the first suggestion on mount — card is always the active one now
   const countedRef=useRef(false);
@@ -4631,6 +4668,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
     if((tc[cat]||0)>0) return;
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
   },[]);
+  useEffect(()=>{
+    setPool(buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{}));
+  },[cat,data.tasteSeed,data.discoverSkips]);
 
   // Background OMDB fetch for movie suggestions missing plot/poster
   const fetchingRef=useRef(null);
@@ -4680,7 +4720,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
     (async()=>{
       const loc=_gpsCache||await getPhRegion();
       if(!loc) return;
-      const boosted=buildCatPool(cat,data.logs,data.feedback,loc,data.libraryMovies||[]);
+      const boosted=buildCatPool(cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{});
       setPool(boosted);
     })();
   },[]);
@@ -4689,6 +4729,16 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
     if(!canGenerate) return;
     const newIdx=poolIdx+1;
     setPoolIdx(newIdx);
+    const skipPatch=(cat==="movies"&&currentItem)
+      ?(()=>{
+        const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+        if(!key) return {};
+        if(interactedMap[key]) return {};
+        const ds={...(data.discoverSkips||{})};
+        ds[key]=(ds[key]||0)+1;
+        return {discoverSkips:ds};
+      })()
+      :{};
     // Persist updated queue state and increment count
     const newCounts={...todayCounts,[cat]:(usedToday+1)};
     const newQueues={...(data.discoverQueues||{}),[cat]:pool};
@@ -4698,8 +4748,110 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
       discoverDate:today,
       discoverQueues:newQueues,
       discoverIndexes:newIndexes,
+      ...skipPatch,
     });
   };
+  const markInteracted=(key)=>{
+    if(!key) return;
+    if(interactedMap[key]) return;
+    onChange("discoverInteractions",{...interactedMap,[key]:true});
+  };
+  const handleLike=()=>{
+    if(cat!=="movies"||!currentItem) return;
+    const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+    if(!key) return;
+    markInteracted(key);
+    const nextLiked={...(data.likedSuggestions||{})};
+    let nextSeed=[...(data.tasteSeed||[])];
+    const nextSkips={...(data.discoverSkips||{})};
+    if(nextLiked[key]){
+      delete nextLiked[key];
+      nextSeed=nextSeed.filter(s=>((s.imdbID||s.title||"").toLowerCase()!==key||s.signal!=="like"));
+    } else {
+      nextLiked[key]=true;
+      delete nextSkips[key];
+      if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===key&&s.signal==="like"))){
+        nextSeed.push({
+          title:currentItem.title,
+          imdbID:currentItem.imdbID||null,
+          category:"movies",
+          tags:currentItem.tags||[],
+          genre:currentItem.genre||null,
+          signal:"like",
+          scoreWeight:1.35,
+          savedAt:new Date().toISOString(),
+        });
+      }
+    }
+    onChange("__batch__",{
+      likedSuggestions:nextLiked,
+      tasteSeed:nextSeed,
+      discoverSkips:nextSkips,
+    });
+  };
+  const handleWatchlist=()=>{
+    if(cat!=="movies"||!currentItem) return;
+    const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+    if(!key) return;
+    markInteracted(key);
+    const existing=_normalizeWatchlistItems(data);
+    const has=existing.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
+    const seed=[...(data.tasteSeed||[])];
+    const next=has
+      ?existing.filter(w=>((w.imdbID||w.title||"").toLowerCase()!==key))
+      :[...existing,{
+        title:currentItem.title,
+        year:currentItem.year||null,
+        imdbID:currentItem.imdbID||null,
+        poster:currentItem.poster||null,
+        posterId:currentItem.posterId||currentItem.imdbID||`t_${_h(currentItem.title||"")}`,
+        genre:currentItem.genre||null,
+        director:currentItem.director||null,
+        tags:currentItem.tags||[]
+      }];
+    let nextSeed=seed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===key)&&s.signal==="watchlist"));
+    const nextSkips={...(data.discoverSkips||{})};
+    if(!has){
+      delete nextSkips[key];
+      nextSeed.push({
+        title:currentItem.title,
+        imdbID:currentItem.imdbID||null,
+        category:"movies",
+        tags:currentItem.tags||[],
+        genre:currentItem.genre||null,
+        signal:"watchlist",
+        scoreWeight:1.1,
+        savedAt:new Date().toISOString(),
+      });
+    }
+    const nextReminders=has
+      ?(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key))
+      :(data.watchlistReminders||[]);
+    onChange("__batch__",{
+      watchlist:next,
+      watchlistReminders:nextReminders,
+      tasteSeed:nextSeed,
+      discoverSkips:nextSkips,
+    });
+    if(!has){
+      setReminderMovie({
+        title:currentItem.title,
+        imdbID:currentItem.imdbID||null,
+        poster:currentItem.poster||null,
+      });
+    }
+  };
+  const ActionBtn=({onClick,active,children,title})=>(
+    <button onClick={onClick} title={title}
+      style={{
+        flex:1,padding:"10px 8px",borderRadius:11,cursor:"pointer",
+        background:active?`${catInfo.color}22`:"transparent",
+        border:`1px solid ${active?catInfo.color:th.border}`,
+        display:"flex",alignItems:"center",justifyContent:"center"
+      }}>
+      {children}
+    </button>
+  );
 
   const handleFindNearMe=(title)=>{
     window.open(`https://www.google.com/search?q=${encodeURIComponent(title+" near me")}`,"_blank");
@@ -4777,6 +4929,16 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
                       {currentItem.imdbVotes&&<span style={{opacity:0.6}}> · {Number(currentItem.imdbVotes).toLocaleString()} votes</span>}
                     </div>
                   )}
+                  {cat==="movies"&&currentItem.genre&&(
+                    <div style={{fontSize:11,color:th.sub,marginTop:3}}>
+                      Genre: <span style={{color:th.text,opacity:0.88}}>{currentItem.genre}</span>
+                    </div>
+                  )}
+                  {cat==="movies"&&currentItem.director&&(
+                    <div style={{fontSize:11,color:th.sub,marginTop:2}}>
+                      Director: <span style={{color:th.text,opacity:0.88}}>{currentItem.director}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Plot if available, else Why this for you */}
@@ -4810,8 +4972,40 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
             </div>
           )}
 
-          {/* Generate button / limit message */}
-          {currentItem&&(
+          {currentItem&&cat==="movies"&&(
+            <div style={{display:"flex",gap:8,marginTop:2}}>
+              <ActionBtn onClick={()=>{
+                const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+                markInteracted(key);
+                onOpenMovieLog&&onOpenMovieLog(currentItem);
+              }} active={isLogged} title="Log">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill={isLogged?catInfo.color:"none"} stroke={isLogged?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+              </ActionBtn>
+              <ActionBtn onClick={handleLike} active={isLiked} title="Like">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill={isLiked?catInfo.color:"none"} stroke={isLiked?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
+                </svg>
+              </ActionBtn>
+              <ActionBtn onClick={handleWatchlist} active={isWatchlisted} title="Watchlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted?catInfo.color:"none"} stroke={isWatchlisted?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/>
+                </svg>
+              </ActionBtn>
+              <ActionBtn onClick={canGenerate?handleGenerate:()=>{}} title="Generate">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
+                </svg>
+              </ActionBtn>
+            </div>
+          )}
+          {currentItem&&cat==="movies"&&!canGenerate&&(
+            <div style={{fontSize:11,color:th.sub,marginTop:8,textAlign:"center"}}>
+              Daily generate limit reached.
+            </div>
+          )}
+          {currentItem&&cat!=="movies"&&(
             canGenerate?(
               <button onClick={handleGenerate} style={{
                 width:"100%",padding:"11px",borderRadius:13,
@@ -4833,11 +5027,49 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
 
 
       </div>
+      {reminderMovie&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:220,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={e=>{if(e.target===e.currentTarget)setReminderMovie(null);}}>
+          <div style={{width:"100%",maxWidth:360,background:th.card,border:`1px solid ${th.border}`,borderRadius:16,padding:16}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,marginBottom:8}}>Set Reminder</div>
+            <div style={{fontSize:12,color:th.sub,marginBottom:10}}>We&apos;ll remind you to watch {reminderMovie.title}.</div>
+            <input
+              type="datetime-local"
+              value={reminderAt}
+              onChange={e=>setReminderAt(e.target.value)}
+              style={{width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:th.bg,color:th.text,marginBottom:12}}
+            />
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={()=>setReminderMovie(null)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Skip</button>
+              <button onClick={async()=>{
+                const atIso=reminderAt?new Date(reminderAt).toISOString():null;
+                if(!atIso) return;
+                const key=(reminderMovie.imdbID||reminderMovie.title||"").toLowerCase();
+                const clean=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
+                const next=[...clean,{
+                  id:Date.now()+"_"+key,
+                  title:reminderMovie.title,
+                  imdbID:reminderMovie.imdbID||null,
+                  poster:reminderMovie.poster||null,
+                  at:atIso,
+                  createdAt:new Date().toISOString(),
+                  sentAt:null,
+                }];
+                onChange("watchlistReminders",next);
+                if("Notification" in window && Notification.permission==="default"){
+                  try{ await Notification.requestPermission(); }catch(_){}
+                }
+                setReminderMovie(null);
+              }} style={{flex:1,padding:"10px",borderRadius:10,border:"none",background:th.accent,color:"#fff",fontWeight:700,cursor:"pointer"}}>Save</button>
+            </div>
+            <div style={{fontSize:11,color:th.sub,marginTop:8,opacity:0.75}}>Notifications work best when browser permission is allowed.</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function DiscoverDeck({data,onChange}){
+function DiscoverDeck({data,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
   const [catIdx,setCatIdx]=useState(0);
   const [flipAnim,setFlipAnim]=useState(null);
@@ -4895,6 +5127,7 @@ function DiscoverDeck({data,onChange}){
         cat={cat}
         data={data}
         onChange={onChange}
+        onOpenMovieLog={onOpenMovieLog}
         th={th}
         flipAnim={flipAnim}
         onSwipeNext={goNext}
@@ -5018,27 +5251,105 @@ function BarkadaDeckStack({data,onChange,th}){
   );
 }
 
-function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onChange}){
+function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onChange,onOpenMovieLog,onOpenWatchlist}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
+  const watchlist=_normalizeWatchlistItems(data);
+  const watchlistPreview=watchlist.filter(w=>w.poster&&w.genre&&w.director);
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Suggestions For You</h1>
+      <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
       <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
-        {data.betaMode?"Unlimited · based on your taste":"5 per category · based on your taste"}
+        {data.betaMode?"Unlimited · calibrated by recent + overall taste":"5 per category · calibrated by recent + overall taste"}
       </p>
-      <DiscoverDeck data={data} onChange={onChange}/>
+      <DiscoverDeck data={data} onChange={onChange} onOpenMovieLog={onOpenMovieLog}/>
       <div style={{paddingTop:24}}>
         <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,marginBottom:6}}>Barkada Picks 🍻</h2>
         <p style={{fontSize:12,color:th.sub,marginBottom:16}}>{(T[data.language]||T.en).barkada_sub}</p>
         <BarkadaDeckStack data={data} onChange={onChange} th={th}/>
+      </div>
+      <div style={{paddingTop:22}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,margin:0}}>Watchlist</h2>
+          <button onClick={onOpenWatchlist} style={{fontSize:12,color:th.accent,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>
+            Show more
+          </button>
+        </div>
+        {watchlistPreview.length?(
+          <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
+            {watchlistPreview.slice(0,10).map((w,i)=>(
+              <button key={(w.imdbID||w.title||"w")+i} onClick={onOpenWatchlist}
+                style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
+                <img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>
+              </button>
+            ))}
+          </div>
+        ):(
+          <div style={{fontSize:12,color:th.sub}}>Preview shows only watchlist items with full metadata.</div>
+        )}
       </div>
     </div>
   );
 }
 
 // ─── SHARE CARD MODAL — renders to canvas for saving as image ────────────────
+function WatchlistPage({data,onClose}){
+  const th=THEMES[data.theme];
+  const items=_normalizeWatchlistItems(data);
+  const [selected,setSelected]=useState(null);
+  const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const enriched=items.map(i=>{
+    const key=(i.imdbID||i.title||"").toLowerCase();
+    const meta=byKey.get(key)||null;
+    return {...meta,...i};
+  });
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+      <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Watchlist</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
+        </div>
+        {enriched.length?(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+            {enriched.map((w,i)=>(
+              <button key={(w.imdbID||w.title||"w")+i} onClick={()=>setSelected(w)}
+                style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                {w.poster?(
+                  <img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                ):(
+                  <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>
+                )}
+              </button>
+            ))}
+          </div>
+        ):(
+          <div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>
+        )}
+      </div>
+      {selected&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.62)",zIndex:261,display:"flex",alignItems:"flex-end"}} onClick={e=>{if(e.target===e.currentTarget)setSelected(null);}}>
+          <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.card,borderTopLeftRadius:20,borderTopRightRadius:20,border:`1px solid ${th.border}`,padding:"16px 18px 22px"}}>
+            <div style={{display:"flex",gap:12}}>
+              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:80,height:120,objectFit:"cover",borderRadius:8,flexShrink:0}}/>}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:700,color:th.text,lineHeight:1.2}}>{selected.title}</div>
+                {selected.year&&<div style={{fontSize:12,color:th.sub,marginTop:4}}>Year: {selected.year}</div>}
+                {selected.genre&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
+                {selected.director&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                {selected.imdbRating&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>IMDb: <span style={{color:th.text}}>{selected.imdbRating}/10</span></div>}
+              </div>
+            </div>
+            {selected.plot&&<div style={{fontSize:13,color:th.text,opacity:0.88,lineHeight:1.55,marginTop:10}}>{selected.plot}</div>}
+            <button onClick={()=>setSelected(null)} style={{marginTop:12,width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ShareCardModal({archetype,data,av,onClose}){
   const th=THEMES[data.theme];
   const canvasRef=useRef(null);
@@ -7394,7 +7705,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
 
       <div style={{textAlign:"center",paddingBottom:8}}>
-        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.1</button></span>
+        <span style={{fontSize:11,color:th.sub}}>{t.made_with} · <button onClick={()=>onShowPatch()} style={{fontSize:11,color:th.accent,fontWeight:600,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>v6.2</button></span>
       </div>
     </div>
   );
@@ -7661,8 +7972,11 @@ function App(){
   const [badgeAnimKey,setBadgeAnimKey]=useState(0);
   const handleRelog=entry=>{handleLog(entry);setTimelineUnread(n=>n+1);setBadgeAnimKey(k=>k+1);};
   const [logCat,setLogCat]=useState(null);
+  const [logPrefill,setLogPrefill]=useState("");
+  const [logFromDiscover,setLogFromDiscover]=useState(false);
+  const [showWatchlistPage,setShowWatchlistPage]=useState(false);
 
-  const anyModalOpen=showLog||showPatch||stickerOpen;
+  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage;
 
   useEffect(()=>{
     if(!photosReady) return; // don't save until hydration is done
@@ -7692,6 +8006,28 @@ function App(){
     const changed=enriched.some((l,i)=>l!==data.logs[i]);
     if(changed)setData(d=>({...d,logs:enriched}));
   },[data.libraryMovies]);
+  useEffect(()=>{
+    const tick=()=>{
+      const reminders=(data.watchlistReminders||[]);
+      if(!reminders.length) return;
+      const now=Date.now();
+      const due=reminders.filter(r=>!r.sentAt&&r.at&&new Date(r.at).getTime()<=now);
+      if(!due.length) return;
+      if("Notification" in window && Notification.permission==="granted"){
+        due.forEach(r=>{
+          try{ new Notification("Watchlist reminder",{body:r.title||"Time to watch",icon:r.poster||undefined}); }catch(_){}
+        });
+      }
+      const doneSet=new Set(due.map(r=>r.id));
+      setData(prev=>({
+        ...prev,
+        watchlistReminders:(prev.watchlistReminders||[]).map(r=>doneSet.has(r.id)?{...r,sentAt:new Date().toISOString()}:r)
+      }));
+    };
+    const id=setInterval(tick,30000);
+    tick();
+    return()=>clearInterval(id);
+  },[data.watchlistReminders]);
 
   // Listen for service worker update messages
   const [updateReady, setUpdateReady] = useState(false);
@@ -7946,12 +8282,12 @@ function App(){
               )}
               {/* Page content slides down over indicator */}
               <div ref={ptrInnerRef} style={{position:"absolute",top:0,left:0,right:0,bottom:0,transform:`translateY(${ptrTranslate}px)`,transition:ptrIsRefreshing?"transform 0.2s ease":"none",zIndex:2,overflow:anyModalOpen?"hidden":"auto"}}>
-              {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);}}/>}
-              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);}} onDelete={handleDelete} onRestore={log=>{
+              {tab==="home"&&<HomePage onRelog={handleRelog} data={data} onOpenLog={(cat)=>{setEditEntry(null);setShowLog(true);setLogCat(cat||null);setLogPrefill("");setLogFromDiscover(false);}}/>}
+              {tab==="timeline"&&<TimelinePage data={data} onOpenLog={()=>{setEditEntry(null);setShowLog(true);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);}} onDelete={handleDelete} onRestore={log=>{
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}} onOpenWatchlist={()=>setShowWatchlistPage(true)}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
@@ -7993,30 +8329,21 @@ function App(){
                       <button onClick={()=>setShowPatch(false)} style={{fontSize:24,color:THEMES[data.theme].sub,lineHeight:1}}>×</button>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:16}}>
-                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.1</span>
-                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 16, 2026</span>
+                      <span style={{fontSize:14,fontWeight:700,color:THEMES[data.theme].accent}}>v6.2</span>
+                      <span style={{fontSize:11,color:THEMES[data.theme].sub}}>Mar 18, 2026</span>
                     </div>
                     {[
-                      {v:"v6.1",date:"Mar 17, 2026",notes:[
-                        "Profile: stat card colors now update live when you drag — cards sample the nearest photo based on where they actually sit in the grid",
-                        "Profile: harmony mode selector moved into a compact dropdown next to the date range, visible when you tap the week star",
-                        "Profile: the 1×2 stat card beside the first photo in each week now shows that photo as a softly blurred background",
-                        "Profile: Night Owl / Early Bird and Week Pulse now render as normal stat cards",
-                        "Profile: new default grid layout — slots own their shapes, cards flow into them in priority order",
-                        "Profile: photo slots skipped cleanly when no photos exist that week",
-                        "Profile: theme animations paused while on the Profile tab",
-                        "Profile: archetypes reworked — Soulful, Maximalist, Creature of Comfort, Aesthete, Tatak Pinoy, Cultural Nomad",
-                        "Profile: archetypes now need at least 8 logs before showing",
-                        "Discover: redesigned as a stacked deck of 6 category cards — swipe left/right to move between categories, generate button fetches a new suggestion per category (5 per day free, beta bypasses limit)",
-                      ]},
-                      {v:"v6.0",date:"Mar 13, 2026",notes:[
-                        "Manila Nights stat cards are now canvas-rendered neon glass stickers",
-                        "Tap any stat card to preview it as a shareable sticker — hold to save or share",
-                        "Stats grid is now 3 columns with smart layout so solo cards span the full width",
-                        "Only stats with real data are shown — no empty cards",
-                        "Border-radius on stat cards now baked into the canvas bitmap, fixing rounding on high-DPR phones",
-                        "Canvas sizing now waits for the browser to fully paint before drawing, so first load always looks correct",
-                        "Settings: enter a redeem code to unlock beta perks",
+                      {v:"v6.2",date:"Mar 18, 2026",notes:[
+                        "Discover movie quick-log now hides other category chips and suggestion list.",
+                        "Movie action icons now show done state for Log, Like, and Watchlist.",
+                        "Watchlist preview moved below Barkada Picks as a one-row gallery.",
+                        "Preview row only shows watchlist entries with metadata.",
+                        "Show more opens a dedicated watchlist page with full gallery.",
+                        "Tapping a watchlist item opens its details (year, genre, director, rating, plot).",
+                        "Adding to watchlist opens Set Reminder modal.",
+                        "Reminder notifications now fire locally while app/browser is open.",
+                        "Suggestion scoring now balances recent + overall taste and uses rating strength.",
+                        "Generate on movie now records skip signal to reduce repeats.",
                       ]},
                     ].map((rel,ri)=>(
                       <div key={ri} style={{marginBottom:ri===0?20:0}}>
@@ -8037,8 +8364,9 @@ function App(){
                   </div>
                 </div>
               )}
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat}/>}
-              <ThemeAnimations theme={data.theme} modalOpen={showLog||tab==="profile"} animationsOff={data.animationsOff||false}/>
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
+              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)}/>}
+              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
         </div>
@@ -8053,3 +8381,5 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
