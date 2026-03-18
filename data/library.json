@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:10.895Z",
+  "updatedAt": "2026-03-18T08:07:11.839Z",
   "items": [
     {
       "title": "Mid90s",
@@ -868,6 +868,43 @@
         "lighthearted",
         "biographical",
         "inspiring"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Demon Hunters",
+      "year": "1999",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Horror"
+      ],
+      "director": "Ben Dobyns",
+      "actor": "Matt Vancil",
+      "actors": [
+        "Matt Vancil",
+        "Steve Wolbrecht",
+        "Nathan Rice",
+        "Don Early"
+      ],
+      "plot": "Deep in the library basement of Pacific Northwest University lies a great evil, the Earthwalking demon Duamerthrax the Indestructible. Freed after a 1,000 year imprisonment, the demon ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTZkNGFlODQtODAyOS00NGIxLWEwNjctOWIwYTUwN2Q2Mzk1XkEyXkFqcGdeQXVyNDUxNjc5NjY@._V1_SX300.jpg",
+      "posterId": "tt1101035",
+      "imdbRating": 7.2,
+      "imdbVotes": 40,
+      "imdbID": "tt1101035",
+      "runtime": "90 min",
+      "rated": null,
+      "country": "USA",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "scary",
+        "dark",
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "manual_bulk"
