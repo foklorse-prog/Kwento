@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:06:00.358Z",
+  "updatedAt": "2026-03-18T08:06:03.075Z",
   "items": [
     {
       "title": "Mid90s",
@@ -469,6 +469,43 @@
       "tags": [
         "fun",
         "lighthearted",
+        "animated",
+        "family"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Zootopia",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Byron Howard, Rich Moore, Jared Bush",
+      "actor": "Ginnifer Goodwin",
+      "actors": [
+        "Ginnifer Goodwin",
+        "Jason Bateman",
+        "Idris Elba"
+      ],
+      "plot": "In a city of anthropomorphic animals, a rookie bunny cop and a cynical con artist fox must work together to uncover a conspiracy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTMyMjEyNzIzMV5BMl5BanBnXkFtZTgwNzIyNjU0NzE@._V1_SX300.jpg",
+      "posterId": "tt2948356",
+      "imdbRating": 8,
+      "imdbVotes": 625023,
+      "imdbID": "tt2948356",
+      "runtime": "108 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 49 wins & 75 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "fast-paced",
         "animated",
         "family"
       ],
