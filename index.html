@@ -1742,6 +1742,7 @@ function defaultData(){
     libraryMovies:[], // dynamic movie library (enriched)
     omdbCursor:{},    // {term: nextPage} — tracks progress across days
     omdbCleanedAt:null,
+    sharedSyncDone:false,
     weekHarmony:{},
     discoverCounts:{},discoverDate:null,
     discoverQueues:{},
@@ -2387,6 +2388,13 @@ function Onboarding({onComplete}){
 const OMDB_KEY="24654217";
 // Legacy source HTML for migrating existing OMDB cache
 const MIGRATE_OMDB_SRC="MIGRATE OMDB LIBRARY, MAKE SURE TO NOT DUPLICATE.html";
+const GH_OWNER="foklorse-prog";
+const GH_REPO="Kwento";
+const SHARED_LIBRARY_PATH="data/library.json";
+const SHARED_LIBRARY_URL=`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${SHARED_LIBRARY_PATH}`;
+const GH_ISSUES_URL=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`;
+const GH_TOKEN_KEY="kwento_gh_token";
+const SHARED_QUEUE_KEY="kwento_shared_queue";
 const ALLOWED_OMDB_TYPES=new Set(["movie","series"]);
 function normalizeOmdbType(t){ return (t||"").toLowerCase().trim(); }
 function isAllowedOmdbType(t){ return ALLOWED_OMDB_TYPES.has(normalizeOmdbType(t)); }
@@ -2399,6 +2407,103 @@ function isListLikeTitle(title){
   const t=(title||"").toLowerCase();
   if(!t) return false;
   return /\b(list of|best of|top \d+|countdown|nominees|winners|awards|award ceremony|ceremony|lineup|shortlist|finalists|year in review|highlights|selection|selections|showcase)\b/.test(t);
+}
+function isActualMovieOrSeries(item){
+  if(!item) return false;
+  if(item._fromOmdb){
+    if(item.omdbType) return isAllowedOmdbType(item.omdbType);
+    if(item.imdbID) return true;
+    return false;
+  }
+  return true; // curated library entries
+}
+function _loadSharedQueue(){
+  try{
+    const raw=localStorage.getItem(SHARED_QUEUE_KEY);
+    const list=raw?JSON.parse(raw):[];
+    return Array.isArray(list)?list:[];
+  }catch(_){ return []; }
+}
+function _saveSharedQueue(list){
+  try{ localStorage.setItem(SHARED_QUEUE_KEY,JSON.stringify(list||[])); }catch(_){}
+}
+function _getGhToken(){
+  try{ return localStorage.getItem(GH_TOKEN_KEY)||""; }catch(_){ return ""; }
+}
+function _setGhToken(v){
+  try{
+    if(!v) localStorage.removeItem(GH_TOKEN_KEY);
+    else localStorage.setItem(GH_TOKEN_KEY,v);
+  }catch(_){}
+}
+function queueSharedCandidate(item,source="unknown"){
+  if(!item) return;
+  if(!isActualMovieOrSeries(item)) return;
+  const key=(item.imdbID||item.title||"").toLowerCase();
+  if(!key) return;
+  const queue=_loadSharedQueue();
+  if(queue.some(q=>(q.imdbID||q.title||"").toLowerCase()===key)) return;
+  queue.push({
+    title:item.title||null,
+    year:item.year||null,
+    genre:item.genre||null,
+    genres:item.genres||[],
+    director:item.director||null,
+    actor:item.actor||null,
+    actors:item.actors||[],
+    plot:item.plot||null,
+    poster:item.poster||null,
+    posterId:item.posterId||null,
+    imdbRating:item.imdbRating??null,
+    imdbVotes:item.imdbVotes??null,
+    imdbID:item.imdbID??null,
+    runtime:item.runtime||null,
+    rated:item.rated||null,
+    country:item.country||null,
+    language:item.language||null,
+    awards:item.awards||null,
+    omdbType:item.omdbType||null,
+    tags:item.tags||[],
+    ph:item.ph||false,
+    source,
+  });
+  _saveSharedQueue(queue);
+}
+async function flushSharedQueue(){
+  const token=_getGhToken();
+  if(!token) return {ok:false,err:"No token"};
+  const queue=_loadSharedQueue();
+  if(!queue.length) return {ok:true,empty:true};
+  const batch=queue.slice(0,20);
+  const body=[
+    "AUTO-SUBMITTED MOVIE CANDIDATES",
+    "",
+    "```json",
+    JSON.stringify({items:batch},null,2),
+    "```",
+  ].join("\n");
+  try{
+    const res=await fetch(GH_ISSUES_URL,{
+      method:"POST",
+      headers:{
+        "Accept":"application/vnd.github+json",
+        "Authorization":"Bearer "+token,
+        "Content-Type":"application/json",
+      },
+      body:JSON.stringify({
+        title:`Library candidates (${batch.length})`,
+        body,
+        labels:["library-candidate"],
+      })
+    });
+    if(!res.ok){
+      return {ok:false,err:`Issue create failed (${res.status})`};
+    }
+    _saveSharedQueue(queue.slice(batch.length));
+    return {ok:true,count:batch.length};
+  }catch(e){
+    return {ok:false,err:"Network error"};
+  }
 }
 function cleanupOmdbLibrary(d){
   const lib=d.libraryMovies||[];
@@ -2541,7 +2646,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
         if(t.startsWith(lq)) return true;
         return t.split(/\s+/).some(w=>w.startsWith(lq));
       };
-      const local=fullPool.filter(wordStart).slice(0,5);
+      const local=fullPool
+        .filter(wordStart)
+        .filter(i=>((i._cat||cat)==="movies")?isActualMovieOrSeries(i):true)
+        .slice(0,5);
       setResults(local);
       if(local.length>0) setOmdbError("");
 
@@ -2553,10 +2661,15 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null}){
             const res=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(query)}&type=movie`);
             const d=await res.json();
             if(d.Search){
-              const omdbResults=d.Search.slice(0,5).map(m=>({
+              const omdbResults=d.Search
+                .filter(m=>isAllowedOmdbType(m.Type))
+                .slice(0,5)
+                .map(m=>({
                 title:m.Title,year:m.Year?.slice(0,4)||null,
                 tags:[],genre:"Film",_cat:"movies",_fromOmdb:true,
                 poster:m.Poster!=="N/A"?m.Poster:null,
+                imdbID:m.imdbID||null,
+                omdbType:m.Type||null,
               }));
               setResults(omdbResults);
               setOmdbError("");
@@ -4251,6 +4364,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
     const dynTitles=new Set(dyn.map(m=>m.title.toLowerCase()));
     items=[...dyn,...items.filter(i=>!dynTitles.has(i.title.toLowerCase()))];
   }
+  if(cat==="movies"){
+    items=items.filter(isActualMovieOrSeries);
+  }
   const logged=new Set(logs.filter(l=>l.category===cat).map(l=>l.title));
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
@@ -4361,6 +4477,30 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[]) 
   return scored;
 }
 
+function curateSharedLibrary(sharedItems, logs, feedback, limit=300){
+  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
+  const scored=(sharedItems||[]).map(i=>{
+    let score=Math.random()*2;
+    const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
+    score+=tagScore*10;
+    if(i.imdbRating) score+=i.imdbRating*0.6;
+    if(i.ph) score+=1.5;
+    return {...i,_shared:true,score};
+  }).sort((a,b)=>b.score-a.score||Math.random()-0.5);
+  return scored.slice(0,limit).map(({score,...rest})=>rest);
+}
+function buildRelevantLocalLibrary(curated, logs, existing){
+  const loggedTitles=new Set((logs||[]).filter(l=>l.category==="movies").map(l=>(l.title||"").toLowerCase()));
+  const keepLogged=(existing||[]).filter(m=>loggedTitles.has((m.title||"").toLowerCase()));
+  const byKey=new Map();
+  [...curated,...keepLogged].forEach(m=>{
+    const key=(m.imdbID||m.title||"").toLowerCase();
+    if(!key) return;
+    if(!byKey.has(key)) byKey.set(key,m);
+  });
+  return Array.from(byKey.values());
+}
+
 function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}){
   const today=todayKey();
   const lang=data.language;
@@ -4430,6 +4570,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
           category:"movies",
         };
         onChange("libraryMovies",[...existing,newEntry]);
+        queueSharedCandidate(newEntry,"discover");
+        flushSharedQueue();
       }
       setPool(prev=>prev.map(m=>m.title===currentItem.title?{...m,...meta}:m));
     })();
@@ -6573,6 +6715,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [omdbBulkWorking,setOmdbBulkWorking]=useState(false);
   const [omdbFilter,setOmdbFilter]=useState("");
   const [omdbSelected,setOmdbSelected]=useState({});
+  const [ghTokenInput,setGhTokenInput]=useState("");
+  const [ghStatus,setGhStatus]=useState("");
+
+  useEffect(()=>{
+    setGhTokenInput(_getGhToken());
+  },[]);
 
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
@@ -6657,6 +6805,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     if(added||updated){
       onChange("libraryMovies",existing);
     }
+    const newlyAdded=existing.filter(m=>titles.some(t=>(m.title||"").toLowerCase()===(t||"").toLowerCase()));
+    newlyAdded.forEach(m=>queueSharedCandidate(m,"manual_bulk"));
+    flushSharedQueue();
     setOmdbBulkStatus(`Added ${added}, updated ${updated}, skipped ${skipped}, failed ${failed}.`);
     setOmdbBulkWorking(false);
   };
@@ -6689,6 +6840,19 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     onChange("libraryMovies",remaining);
     setOmdbSelected({});
     setOmdbBulkStatus(`Deleted ${removed} item${removed===1?"":"s"}.`);
+  };
+  const saveGhToken=()=>{
+    _setGhToken(ghTokenInput.trim());
+    setGhStatus(ghTokenInput.trim()?"Token saved.":"Token cleared.");
+  };
+  const testGhSync=async()=>{
+    setGhStatus("Sending...");
+    const r=await flushSharedQueue();
+    if(r.ok){
+      setGhStatus(r.empty?"Queue empty.":"Sent to GitHub.");
+    } else {
+      setGhStatus(r.err||"Failed.");
+    }
   };
 
   const handleRedeem=()=>{
@@ -6816,6 +6980,25 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           </button>
           {omdbBulkStatus&&(
             <div style={{marginTop:6,fontSize:11,color:th.sub}}>{omdbBulkStatus}</div>
+          )}
+        </div>
+        <div style={{marginTop:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:th.sub,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>GitHub Shared Library</div>
+          <div style={{fontSize:11,color:th.sub,marginBottom:6}}>
+            {`Shared JSON: ${SHARED_LIBRARY_PATH}`}
+          </div>
+          <input type="password" value={ghTokenInput} onChange={e=>setGhTokenInput(e.target.value)} placeholder="GitHub token (stored locally)"
+            style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:th.text}}/>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button onClick={saveGhToken} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+              Save token
+            </button>
+            <button onClick={testGhSync} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+              Sync now
+            </button>
+          </div>
+          {ghStatus&&(
+            <div style={{marginTop:6,fontSize:11,color:th.sub}}>{ghStatus}</div>
           )}
         </div>
         <div style={{marginTop:10,display:"flex",gap:8,alignItems:"center"}}>
@@ -7245,6 +7428,31 @@ function App(){
       setPhotosReady(true);
     })();
   },[]);
+
+  // ── Shared global library (GitHub JSON) ────────────────────────────────────
+  useEffect(()=>{
+    (async()=>{
+      try{
+        const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
+        if(!res.ok) return;
+        const json=await res.json();
+        const sharedItems=(json.items||json.library||json)||[];
+        try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
+        const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,300);
+        const token=_getGhToken();
+        const existing=data.libraryMovies||[];
+        if(token && !data.sharedSyncDone && existing.length){
+          existing.forEach(m=>queueSharedCandidate(m,"local_migration"));
+          const r=await flushSharedQueue();
+          if(r.ok){
+            setData(d=>({...d,sharedSyncDone:true}));
+          }
+        }
+        const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
+        setData(d=>({...d,libraryMovies:relevant}));
+      }catch(_){}
+    })();
+  },[]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
 
   // ── OMDB library enrichment — runs silently in background, resumes daily ────
@@ -7344,6 +7552,7 @@ function App(){
                   };
                   existing.add(movie.title.toLowerCase());
                   newMovies.push(movie);
+                  queueSharedCandidate(movie,"omdb_enrich");
                   if(movie.posterId && movie.poster){
                     posterMap["poster_"+movie.posterId]=movie.poster;
                   }
@@ -7364,6 +7573,7 @@ function App(){
             omdbLastUpdated:new Date().toISOString(),
             omdbLibrary:undefined,
           }));
+          flushSharedQueue();
         }
       }catch(_){}
     })();
