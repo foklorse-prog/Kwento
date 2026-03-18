@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:43:38.452Z",
+  "updatedAt": "2026-03-18T08:43:40.013Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1481,6 +1481,40 @@
         "biographical",
         "inspiring",
         "historical"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Only",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Sport"
+      ],
+      "director": "Anthony J. Cortese",
+      "actor": "Briana Scurry",
+      "actors": [
+        "Briana Scurry",
+        "Brandi Chastain",
+        "Julie Foudy"
+      ],
+      "plot": "The documentary explores the inspirational glory and deeply dark corners of a Hall of Fame goalkeeper who stood alone on the field as the only Black starter and the only openly gay player. While celebrating the historic legacy of ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTA5Y2FlM2QtMDdlYi00M2ZjLWI0ZDEtODgwMDMwNWYxMjlkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt21102534",
+      "imdbRating": 7.4,
+      "imdbVotes": 72,
+      "imdbID": "tt21102534",
+      "runtime": "99 min",
+      "rated": "TV-MA",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative"
       ],
       "ph": false,
       "source": "manual_bulk"
