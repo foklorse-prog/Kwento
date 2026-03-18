@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:26:08.843Z",
+  "updatedAt": "2026-03-18T08:26:10.897Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1197,6 +1197,35 @@
         "biographical",
         "inspiring",
         "Japanese"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Alabama Solution",
+      "year": "2025",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Andrew Jarecki, Charlotte Kaufman",
+      "actor": null,
+      "actors": [],
+      "plot": "Incarcerated men defy the odds to expose a cover-up in one of America's deadliest prison systems.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmQ2YjFlNTEtMzcxNy00ZTVhLWJhNTYtMDg0ZGUxMGQ1MWY1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt35307139",
+      "imdbRating": 9.5,
+      "imdbVotes": 21,
+      "imdbID": "tt35307139",
+      "runtime": "117 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative"
       ],
       "ph": false,
       "source": "manual_bulk"
