@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:38:56.005Z",
+  "updatedAt": "2026-03-18T15:39:08.579Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2125,6 +2125,41 @@
       "tags": [
         "dramatic",
         "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Perfect Romance",
+      "year": "2004",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "director": "Douglas Barr",
+      "actor": "Kathleen Quinlan",
+      "actors": [
+        "Kathleen Quinlan",
+        "Lori Heuring",
+        "Henry Ian Cusick"
+      ],
+      "plot": "The mother of a young divorcee places an ad on her daughter's behalf on a lonely hearts internet website but the person who responds fits her own ideal of a suitable partner. The daughter is still hung up on her musician ex-husband.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ2NTMxNjI5NF5BMl5BanBnXkFtZTgwNDgwMDA2MDE@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 6,
+      "imdbVotes": 719,
+      "imdbID": "tt0373968",
+      "runtime": "90 min",
+      "rated": "TV-14",
+      "country": "Canada, United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
         "fun",
         "lighthearted"
       ],
