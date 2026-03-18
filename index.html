@@ -6717,10 +6717,20 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [omdbSelected,setOmdbSelected]=useState({});
   const [ghTokenInput,setGhTokenInput]=useState("");
   const [ghStatus,setGhStatus]=useState("");
+  const [sharedTotal,setSharedTotal]=useState(null);
 
   useEffect(()=>{
     setGhTokenInput(_getGhToken());
   },[]);
+  useEffect(()=>{
+    try{
+      const raw=localStorage.getItem("kwento_shared_library_cache");
+      const list=raw?JSON.parse(raw):[];
+      setSharedTotal(Array.isArray(list)?list.length:0);
+    }catch(_){
+      setSharedTotal(null);
+    }
+  },[data.libraryMovies,ghStatus]);
 
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
@@ -6854,6 +6864,20 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       setGhStatus(r.err||"Failed.");
     }
   };
+  const queueLocalLibraryNow=async()=>{
+    const token=_getGhToken();
+    if(!token){ setGhStatus("No token."); return; }
+    const existing=(data.libraryMovies||[]);
+    if(!existing.length){ setGhStatus("Local library empty."); return; }
+    existing.forEach(m=>queueSharedCandidate(m,"manual_queue"));
+    setGhStatus("Queued. Sending...");
+    const r=await flushSharedQueue();
+    if(r.ok){
+      setGhStatus(r.empty?"Queue empty.":"Sent to GitHub.");
+    } else {
+      setGhStatus(r.err||"Failed.");
+    }
+  };
 
   const handleRedeem=()=>{
     if(redeemInput.trim().toLowerCase()==="beta"){
@@ -6952,6 +6976,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           {`Library movies: ${(data.libraryMovies||[]).length}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8}}>
+          {`Shared library total: ${sharedTotal!=null?sharedTotal:"Unknown"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Shared sync status: ${_getGhToken() ? (data.sharedSyncDone ? "Synced" : "Not synced") : "No token"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8}}>
           {`Cursor keys: ${Object.keys(data.omdbCursor||{}).length}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
@@ -6995,6 +7025,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             </button>
             <button onClick={testGhSync} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
               Sync now
+            </button>
+            <button onClick={queueLocalLibraryNow} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+              Queue local library
             </button>
           </div>
           {ghStatus&&(
