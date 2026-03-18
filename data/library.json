@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:39:45.493Z",
+  "updatedAt": "2026-03-18T15:40:01.456Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2232,6 +2232,39 @@
         "scary",
         "dark",
         "family"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Das Drama von Dresden",
+      "year": "2005",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Sebastian Dehnhardt",
+      "actor": "Dorothea Meyer",
+      "actors": [
+        "Dorothea Meyer",
+        "Horst Milde",
+        "John Aldridge"
+      ],
+      "plot": "Documentary about the bombing of the city of Dresden in 1945 during World War II.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDE3YTkyM2QtMGQ4OS00OWI1LTk5YTYtNzA1YWM2NTY2OGYzXkEyXkFqcGdeQXVyNjUwNjczODM@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 7.6,
+      "imdbVotes": 44,
+      "imdbID": "tt0790645",
+      "runtime": "90 min",
+      "rated": null,
+      "country": "Germany",
+      "language": "English, German",
+      "awards": "2 wins",
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative"
       ],
       "ph": false,
       "source": "discover"
