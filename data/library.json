@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:09.050Z",
+  "updatedAt": "2026-03-18T08:07:10.895Z",
   "items": [
     {
       "title": "Mid90s",
@@ -829,6 +829,45 @@
         "fantasy",
         "magical",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Blue Moon",
+      "year": "2025",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Richard Linklater",
+      "actor": "Ethan Hawke",
+      "actors": [
+        "Ethan Hawke",
+        "Bobby Cannavale",
+        "Andrew Scott"
+      ],
+      "plot": "Tells the story of Lorenz Hart's struggles with alcoholism and mental health as he tries to save face during the opening of \"Oklahoma!\".",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODQ0NjNlN2MtNGRmZi00OGYzLWFjNGYtMjkyMTlmMWFkNTQ2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt32536315",
+      "imdbRating": 6.8,
+      "imdbVotes": 16403,
+      "imdbID": "tt32536315",
+      "runtime": "100 min",
+      "rated": "R",
+      "country": "United States, Ireland",
+      "language": "English, Hebrew",
+      "awards": "Nominated for 2 Oscars. 15 wins & 73 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "biographical",
+        "inspiring"
       ],
       "ph": false,
       "source": "manual_bulk"
