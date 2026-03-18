@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T09:08:03.037Z",
+  "updatedAt": "2026-03-18T09:08:13.309Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1699,6 +1699,42 @@
         "emotional",
         "fun",
         "lighthearted"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Butterfly",
+      "year": "1999",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "War"
+      ],
+      "director": "José Luis Cuerda",
+      "actor": "Manuel Lozano",
+      "actors": [
+        "Manuel Lozano",
+        "Fernando Fernán Gómez",
+        "Uxía Blanco"
+      ],
+      "plot": "Spain, 1936. Moncho is an outcast at school but is able to form a strong bond with his outspoken teacher. When fascism arrives to Spain, his teacher is considered an enemy of the regime.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGQ3YThkY2MtNjliNy00MmQyLThmZjctOWFmMjg3NGM1NWJiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0188030",
+      "imdbRating": 7.6,
+      "imdbVotes": 10002,
+      "imdbID": "tt0188030",
+      "runtime": "96 min",
+      "rated": "R",
+      "country": "Spain",
+      "language": "Spanish, Galician, Latin",
+      "awards": "6 wins & 19 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "war",
+        "epic"
       ],
       "ph": false,
       "source": "manual_bulk"
