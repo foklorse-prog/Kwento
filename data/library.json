@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:05.331Z",
+  "updatedAt": "2026-03-18T08:07:06.257Z",
   "items": [
     {
       "title": "Mid90s",
@@ -718,6 +718,44 @@
         "emotional",
         "intense",
         "suspenseful",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Come See Me in the Good Light",
+      "year": "2025",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Family"
+      ],
+      "director": "Ryan White",
+      "actor": "Megan Falley",
+      "actors": [
+        "Megan Falley",
+        "Andrea Gibson",
+        "Tig Notaro"
+      ],
+      "plot": "Facing an incurable diagnosis, two poet lovers embark on a poignant yet unexpectedly humorous exploration of love, mortality, and life's moments.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTEwNjRiMzUtMmU1OC00OWE5LTkwYjItMGE1NTQwMTFiM2NmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt34966013",
+      "imdbRating": 7.6,
+      "imdbVotes": 2299,
+      "imdbID": "tt34966013",
+      "runtime": "104 min",
+      "rated": "TV-MA",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 20 wins & 27 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "biographical",
+        "inspiring",
+        "documentary",
+        "informative",
         "romantic"
       ],
       "ph": false,
