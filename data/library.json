@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:53.816Z",
+  "updatedAt": "2026-03-18T08:05:54.630Z",
   "items": [
     {
       "title": "Mid90s",
@@ -289,6 +289,44 @@
         "documentary",
         "informative",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "September 5",
+      "year": "2024",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History",
+        "Thriller"
+      ],
+      "director": "Tim Fehlbaum",
+      "actor": "Peter Sarsgaard",
+      "actors": [
+        "Peter Sarsgaard",
+        "John Magaro",
+        "Ben Chaplin"
+      ],
+      "plot": "During the 1972 Summer Olympics in Munich, Germany, an American sports broadcasting team must adapt to live coverage of the Israeli athletes being held hostage by a terrorist group.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWUxY2YyYzctYWY3Yi00ZGJjLTkzMDktZjYzMTIzZjNhNmM2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt28082769",
+      "imdbRating": 7.1,
+      "imdbVotes": 33845,
+      "imdbID": "tt28082769",
+      "runtime": "95 min",
+      "rated": "R",
+      "country": "Germany, United States",
+      "language": "English, German, Hebrew",
+      "awards": "Nominated for 1 Oscar. 24 wins & 28 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "historical"
       ],
       "ph": false,
       "source": "manual_bulk"
