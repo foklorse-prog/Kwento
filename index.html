@@ -2518,7 +2518,12 @@ async function flushSharedQueue(){
       })
     });
     if(!res.ok){
-      return {ok:false,err:`Issue create failed (${res.status})`};
+      let detail="";
+      try{
+        const j=await res.json();
+        detail=j?.message||JSON.stringify(j);
+      }catch(_){}
+      return {ok:false,err:`Issue create failed (${res.status})${detail?": "+detail:""}`};
     }
     _saveSharedQueue(queue.slice(batch.length));
     _setSharedPendingCount(_getSharedPendingCount()+batch.length);
