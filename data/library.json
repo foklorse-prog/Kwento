@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:38:15.672Z",
+  "updatedAt": "2026-03-18T15:38:25.774Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2053,6 +2053,43 @@
         "suspenseful",
         "Korean",
         "romantic"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Soul",
+      "year": "2020",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Pete Docter, Kemp Powers",
+      "actor": "Jamie Foxx",
+      "actors": [
+        "Jamie Foxx",
+        "Tina Fey",
+        "Graham Norton"
+      ],
+      "plot": "Joe is a middle-school band teacher whose life hasn't quite gone the way he expected. His true passion is jazz. But when he travels to another realm to help someone find their passion, he soon discovers what it means to have soul.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTZkYjA5MDEtMjY1ZC00ODk5LThjOTUtZDYxODEzYWNjMTU2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8,
+      "imdbVotes": 441986,
+      "imdbID": "tt2948372",
+      "runtime": "100 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Korean, Inuktitut",
+      "awards": "Won 2 Oscars. 125 wins & 91 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated",
+        "family"
       ],
       "ph": false,
       "source": "discover"
