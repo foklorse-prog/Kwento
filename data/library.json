@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:39:08.579Z",
+  "updatedAt": "2026-03-18T15:39:28.478Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2162,6 +2162,39 @@
         "romantic",
         "fun",
         "lighthearted"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "A Christmas Recipe for Romance",
+      "year": "2019",
+      "genre": "Romance",
+      "genres": [
+        "Romance"
+      ],
+      "director": "Marco Deufemia",
+      "actor": "Madeline Leon",
+      "actors": [
+        "Madeline Leon",
+        "Sebastian Sacco",
+        "Peggy Calvert"
+      ],
+      "plot": "The owner of a historic inn decides to enter a prestigious cooking contest to win funds for renovations and get free publicity, but she is a horrible cook. She recruits a renowned chef to help but the kitchen isn't the only thing ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDIyMzVjZTYtNzA5OS00YmY1LThhYjItNThkYTBjNjljZWVmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 5.7,
+      "imdbVotes": 625,
+      "imdbID": "tt11060704",
+      "runtime": "88 min",
+      "rated": "G",
+      "country": "Canada",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "family"
       ],
       "ph": false,
       "source": "discover"
