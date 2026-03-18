@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:33:41.455Z",
+  "updatedAt": "2026-03-18T15:35:50.037Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1980,6 +1980,41 @@
         "romantic",
         "Korean",
         "friendship"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Forrest Gump",
+      "year": "1994",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Robert Zemeckis",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Robin Wright",
+        "Gary Sinise"
+      ],
+      "plot": "The history of the United States from the 1950s to the '70s unfolds from the perspective of an Alabama man with an IQ of 75, who yearns to be reunited with his childhood sweetheart.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8.8,
+      "imdbVotes": 2477413,
+      "imdbID": "tt0109830",
+      "runtime": "142 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 6 Oscars. 51 wins & 74 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
       ],
       "ph": false,
       "source": "discover"
