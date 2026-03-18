@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:43:34.455Z",
+  "updatedAt": "2026-03-18T08:43:35.728Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1443,6 +1443,44 @@
         "animated",
         "family",
         "Japanese"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Hamnet",
+      "year": "2025",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Chloé Zhao",
+      "actor": "Jessie Buckley",
+      "actors": [
+        "Jessie Buckley",
+        "Paul Mescal",
+        "Zac Wishart"
+      ],
+      "plot": "After losing their son Hamnet to plague, Agnes and William Shakespeare grapple with grief in 16th-century England. A healer, Agnes must find strength to care for her surviving children while processing her devastating loss.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDQ5ZmY0OWYtOTYzZi00Mzg5LWE3N2EtMjYwZTAzZmJhYjkyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14905854",
+      "imdbRating": 8.1,
+      "imdbVotes": 27462,
+      "imdbID": "tt14905854",
+      "runtime": "125 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 8 Oscars. 60 wins & 278 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "biographical",
+        "inspiring",
+        "historical"
       ],
       "ph": false,
       "source": "manual_bulk"
