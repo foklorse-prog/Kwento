@@ -2474,7 +2474,7 @@ async function flushSharedQueue(){
   if(!token) return {ok:false,err:"No token"};
   const queue=_loadSharedQueue();
   if(!queue.length) return {ok:true,empty:true};
-  const batch=queue.slice(0,20);
+  const batch=queue.slice(0,200);
   const body=[
     "AUTO-SUBMITTED MOVIE CANDIDATES",
     "",
