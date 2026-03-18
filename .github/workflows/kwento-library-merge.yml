@@ -7,6 +7,13 @@ permissions:
   contents: write
   issues: write
 
+concurrency:
+  group: library-merge
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   merge:
     if: contains(github.event.issue.labels.*.name, 'library-candidate') || contains(github.event.issue.labels.*.name, 'library-remove')
@@ -25,7 +32,7 @@ jobs:
 
             const body = issue.body || "";
             let jsonText = null;
-            const match = body.match(/```json\\s*([\\s\\S]*?)```/i);
+            const match = body.match(/```json\s*([\s\S]*?)```/i);
             if (match) jsonText = match[1];
             if (!jsonText) {
               const braceStart = body.indexOf("{");
@@ -46,52 +53,110 @@ jobs:
               return;
             }
 
-            let file;
-            try {
-              file = await github.rest.repos.getContent({ owner, repo, path });
-            } catch (e) {
-              file = null;
-            }
-            let library = { version: 1, updatedAt: null, items: [] };
-            if (file && file.data && file.data.content) {
-              const raw = Buffer.from(file.data.content, "base64").toString("utf8");
-              library = JSON.parse(raw);
-              if (!Array.isArray(library.items)) library.items = [];
-            }
+            const maxAttempts = 5;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              let file;
+              try {
+                file = await github.rest.repos.getContent({ owner, repo, path });
+              } catch (e) {
+                file = null;
+              }
+              let library = { version: 1, updatedAt: null, items: [] };
+              if (file && file.data && file.data.content) {
+                const raw = Buffer.from(file.data.content, "base64").toString("utf8");
+                library = JSON.parse(raw);
+                if (!Array.isArray(library.items)) library.items = [];
+              }
 
-            const byKey = new Map(library.items.map(i => [(i.imdbID || i.title || "").toLowerCase(), i]));
+              const byKey = new Map(library.items.map(i => [(i.imdbID || i.title || "").toLowerCase(), i]));
 
-            if (isRemove) {
-              const removeList = payload.remove || payload.items || [];
-              if (!Array.isArray(removeList) || removeList.length === 0) {
-                core.warning("No items to remove.");
+              if (isRemove) {
+                const removeList = payload.remove || payload.items || [];
+                if (!Array.isArray(removeList) || removeList.length === 0) {
+                  core.warning("No items to remove.");
+                  return;
+                }
+                let removed = 0;
+                for (const it of removeList) {
+                  const key = (it.imdbID || it.title || "").toLowerCase();
+                  if (!key) continue;
+                  if (byKey.has(key)) {
+                    byKey.delete(key);
+                    removed++;
+                  }
+                }
+                library.items = Array.from(byKey.values());
+                library.updatedAt = new Date().toISOString();
+
+                const content = Buffer.from(JSON.stringify(library, null, 2)).toString("base64");
+                const sha = file && file.data ? file.data.sha : undefined;
+
+                try {
+                  await github.rest.repos.createOrUpdateFileContents({
+                    owner, repo, path,
+                    message: `Remove ${removed} library items`,
+                    content,
+                    sha,
+                  });
+                } catch (e) {
+                  if (e.status === 409 || (e.message||"").includes("does not match")) {
+                    if (attempt < maxAttempts) continue;
+                  }
+                  throw e;
+                }
+
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: issue.number,
+                  body: `Removed ${removed} items from ${path}.`
+                });
+
+                await github.rest.issues.update({
+                  owner, repo, issue_number: issue.number, state: "closed"
+                });
                 return;
               }
-              let removed = 0;
-              for (const it of removeList) {
+
+              const items = payload.items || [];
+              if (!Array.isArray(items) || items.length === 0) {
+                core.warning("No items to merge.");
+                return;
+              }
+
+              let added = 0;
+              for (const it of items) {
                 const key = (it.imdbID || it.title || "").toLowerCase();
                 if (!key) continue;
-                if (byKey.has(key)) {
-                  byKey.delete(key);
-                  removed++;
+                if (!byKey.has(key)) {
+                  byKey.set(key, it);
+                  added++;
+                } else {
+                  byKey.set(key, { ...byKey.get(key), ...it });
                 }
               }
+
               library.items = Array.from(byKey.values());
               library.updatedAt = new Date().toISOString();
 
               const content = Buffer.from(JSON.stringify(library, null, 2)).toString("base64");
               const sha = file && file.data ? file.data.sha : undefined;
 
-              await github.rest.repos.createOrUpdateFileContents({
-                owner, repo, path,
-                message: `Remove ${removed} library items`,
-                content,
-                sha,
-              });
+              try {
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner, repo, path,
+                  message: `Merge ${items.length} library candidates`,
+                  content,
+                  sha,
+                });
+              } catch (e) {
+                if (e.status === 409 || (e.message||"").includes("does not match")) {
+                  if (attempt < maxAttempts) continue;
+                }
+                throw e;
+              }
 
               await github.rest.issues.createComment({
                 owner, repo, issue_number: issue.number,
-                body: `Removed ${removed} items from ${path}.`
+                body: `Merged ${items.length} candidates into ${path}. Added new: ${added}.`
               });
 
               await github.rest.issues.update({
@@ -100,42 +165,4 @@ jobs:
               return;
             }
 
-            const items = payload.items || [];
-            if (!Array.isArray(items) || items.length === 0) {
-              core.warning("No items to merge.");
-              return;
-            }
-
-            let added = 0;
-            for (const it of items) {
-              const key = (it.imdbID || it.title || "").toLowerCase();
-              if (!key) continue;
-              if (!byKey.has(key)) {
-                byKey.set(key, it);
-                added++;
-              } else {
-                byKey.set(key, { ...byKey.get(key), ...it });
-              }
-            }
-
-            library.items = Array.from(byKey.values());
-            library.updatedAt = new Date().toISOString();
-
-            const content = Buffer.from(JSON.stringify(library, null, 2)).toString("base64");
-            const sha = file && file.data ? file.data.sha : undefined;
-
-            await github.rest.repos.createOrUpdateFileContents({
-              owner, repo, path,
-              message: `Merge ${items.length} library candidates`,
-              content,
-              sha,
-            });
-
-            await github.rest.issues.createComment({
-              owner, repo, issue_number: issue.number,
-              body: `Merged ${items.length} candidates into ${path}. Added new: ${added}.`
-            });
-
-            await github.rest.issues.update({
-              owner, repo, issue_number: issue.number, state: "closed"
-            });
+            core.setFailed("Failed to update library.json after multiple attempts.");
