@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T13:16:30.095Z",
+  "updatedAt": "2026-03-18T15:31:36.961Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1840,6 +1840,43 @@
         "action",
         "fast-paced",
         "friendship"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Everything Everywhere All at Once",
+      "year": "2022",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Daniel Kwan, Daniel Scheinert",
+      "actor": "Michelle Yeoh",
+      "actors": [
+        "Michelle Yeoh",
+        "Stephanie Hsu",
+        "Jamie Lee Curtis"
+      ],
+      "plot": "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWNmMzAzZmQtNDQ1NC00Nzk5LTkyMmUtNGI2N2NkOWM4MzEyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 7.7,
+      "imdbVotes": 621828,
+      "imdbID": "tt6710474",
+      "runtime": "139 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Mandarin, Cantonese",
+      "awards": "Won 7 Oscars. 406 wins & 382 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action",
+        "fast-paced"
       ],
       "ph": false,
       "source": "discover"
