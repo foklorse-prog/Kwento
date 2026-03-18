@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:01.904Z",
+  "updatedAt": "2026-03-18T08:07:03.551Z",
   "items": [
     {
       "title": "Mid90s",
@@ -645,6 +645,43 @@
         "dramatic",
         "emotional",
         "Japanese"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Elio",
+      "year": "2025",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Adrian Molina, Madeline Sharafian, Domee Shi",
+      "actor": "Yonas Kibreab",
+      "actors": [
+        "Yonas Kibreab",
+        "Zoe Saldaña",
+        "Remy Edgerly"
+      ],
+      "plot": "Elio, a space fanatic with an active imagination, finds himself on a cosmic misadventure where he must form new bonds with alien lifeforms, navigate a crisis of intergalactic proportions and somehow discover who he is truly meant ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWE5ZDMyMWEtOTZjMi00YzFhLWE4OTEtNDc3MDMzZjFmMmIzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4900148",
+      "imdbRating": 6.6,
+      "imdbVotes": 39859,
+      "imdbID": "tt4900148",
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Spanish, French, Serbian, Dutch, Hindi, Japanese, Italian",
+      "awards": "Nominated for 1 Oscar. 43 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated",
+        "family"
       ],
       "ph": false,
       "source": "manual_bulk"
