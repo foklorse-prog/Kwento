@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:56:28.312Z",
+  "updatedAt": "2026-03-18T09:08:03.037Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1662,6 +1662,43 @@
         "gritty",
         "mysterious",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Singers",
+      "year": "2025",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Sam A. Davis",
+      "actor": "Michael Young",
+      "actors": [
+        "Michael Young",
+        "Chris Smither",
+        "Will Harrington"
+      ],
+      "plot": "An impromptu sing-off will decide the best singer in the bar tonight.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI2NmQwMmMtOGFlMS00YjAyLTk0ZDQtM2IyZmRjOWUzNTIzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt33508491",
+      "imdbRating": 7.3,
+      "imdbVotes": 2403,
+      "imdbID": "tt33508491",
+      "runtime": "18 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 27 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "manual_bulk"
