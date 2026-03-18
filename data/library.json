@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:56:10.217Z",
+  "updatedAt": "2026-03-18T08:56:19.481Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1589,6 +1589,40 @@
         "biographical",
         "inspiring",
         "historical"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Kpop",
+      "year": "2021",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Music"
+      ],
+      "director": "Richard Allen, Casey Hanley",
+      "actor": "Amy Anderson",
+      "actors": [
+        "Amy Anderson",
+        "Jennifer Sun Bell",
+        "Shannon Dang"
+      ],
+      "plot": "A Shelved label artist decides to discover her roots and get to know her heritage better in order to make music.",
+      "poster": null,
+      "posterId": "tt9000110",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "imdbID": "tt9000110",
+      "runtime": "23 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "manual_bulk"
