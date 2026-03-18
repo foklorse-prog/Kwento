@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:06:03.075Z",
+  "updatedAt": "2026-03-18T08:06:59.081Z",
   "items": [
     {
       "title": "Mid90s",
@@ -508,6 +508,44 @@
         "fast-paced",
         "animated",
         "family"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Song Sung Blue",
+      "year": "2025",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Craig Brewer",
+      "actor": "Hugh Jackman",
+      "actors": [
+        "Hugh Jackman",
+        "Kate Hudson",
+        "Ella Anderson"
+      ],
+      "plot": "Lightning and Thunder, a Milwaukee husband and wife Neil Diamond tribute act, experience soaring success and devastating heartbreak in their musical journey together.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmQ2YjhjNjgtNGQxNC00NmI0LWEzMjktNWEzMWY2OTUwZjFiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt30343021",
+      "imdbRating": 7.3,
+      "imdbVotes": 15532,
+      "imdbID": "tt30343021",
+      "runtime": "132 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "biographical",
+        "inspiring",
+        "historical"
       ],
       "ph": false,
       "source": "manual_bulk"
