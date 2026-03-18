@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:32:12.769Z",
+  "updatedAt": "2026-03-18T15:32:23.802Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1906,6 +1906,39 @@
       "country": "United States",
       "language": "English",
       "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Minari",
+      "year": "2020",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Lee Isaac Chung",
+      "actor": "Steven Yeun",
+      "actors": [
+        "Steven Yeun",
+        "Han Ye-ri",
+        "Alan Kim"
+      ],
+      "plot": "A Korean American family moves to an Arkansas farm in search of its own American dream. Amidst the challenges of new life in the strange and rugged Ozarks, they discover the undeniable resilience of family and what really makes a ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWVmNDE3YzMtZWQ3Ny00YjhkLWEzN2QtZjNhYWNlMGI2N2NkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 7.4,
+      "imdbVotes": 105340,
+      "imdbID": "tt10633456",
+      "runtime": "115 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "Korean, English",
+      "awards": "Won 1 Oscar. 120 wins & 241 nominations total",
       "omdbType": "movie",
       "tags": [
         "dramatic",
