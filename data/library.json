@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:32:23.802Z",
+  "updatedAt": "2026-03-18T15:33:41.455Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1943,6 +1943,43 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Past Lives",
+      "year": "2023",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Celine Song",
+      "actor": "Greta Lee",
+      "actors": [
+        "Greta Lee",
+        "Teo Yoo",
+        "John Magaro"
+      ],
+      "plot": "Nora and Hae Sung, two deeply connected childhood friends, are wrested apart after Nora's family emigrates from South Korea. Twenty years later, they are reunited for one fateful week as they confront notions of love and destiny.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjQyMTNhNjUtN2VmYy00NWRhLTkwOTctMGVmNTBmNDIxYjZhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 7.8,
+      "imdbVotes": 169739,
+      "imdbID": "tt13238346",
+      "runtime": "105 min",
+      "rated": "PG-13",
+      "country": "United States, South Korea",
+      "language": "Korean, English, Mandarin, French",
+      "awards": "Nominated for 2 Oscars. 83 wins & 240 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "Korean",
+        "friendship"
       ],
       "ph": false,
       "source": "discover"
