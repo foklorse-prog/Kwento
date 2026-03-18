@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:07.806Z",
+  "updatedAt": "2026-03-18T08:07:09.050Z",
   "items": [
     {
       "title": "Mid90s",
@@ -791,6 +791,44 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Arco",
+      "year": "2025",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Fantasy"
+      ],
+      "director": "Ugo Bienvenu",
+      "actor": "Margot Ringard Oldra",
+      "actors": [
+        "Margot Ringard Oldra",
+        "Oscar Tresanini",
+        "Nathanaël Perrot"
+      ],
+      "plot": "In 2075, a girl witnesses a mysterious boy in a rainbow suit fall from the sky. He comes from an idyllic far future where time travel is possible. She shelters him and will do whatever it takes to help him return to his time.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BM2IzNjdiNzUtNTJjMy00Mjk5LTg3MzItNzA2ZjYzOWE2MGIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14883538",
+      "imdbRating": 7.5,
+      "imdbVotes": 2251,
+      "imdbID": "tt14883538",
+      "runtime": "88 min",
+      "rated": "PG",
+      "country": "France, United States, United Kingdom",
+      "language": "French, English",
+      "awards": "Nominated for 1 Oscar. 9 wins & 50 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated",
+        "family",
+        "fantasy",
+        "magical",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
