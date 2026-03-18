@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:11.839Z",
+  "updatedAt": "2026-03-18T08:07:12.913Z",
   "items": [
     {
       "title": "Mid90s",
@@ -905,6 +905,43 @@
         "dark",
         "fun",
         "lighthearted"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Avatar: Fire and Ash",
+      "year": "2025",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "James Cameron",
+      "actor": "Sam Worthington",
+      "actors": [
+        "Sam Worthington",
+        "Zoe Saldaña",
+        "Sigourney Weaver"
+      ],
+      "plot": "Jake and Neytiri's family grapples with grief, encountering a new, aggressive Na'vi tribe, the Ash People, who are led by the fiery Varang, as the conflict on Pandora escalates and a new moral focus emerges.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDYxY2I1OGMtN2Y4MS00ZmU1LTgyNDAtODA0MzAyYjI0N2Y2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1757678",
+      "imdbRating": 7.4,
+      "imdbVotes": 134356,
+      "imdbID": "tt1757678",
+      "runtime": "197 min",
+      "rated": "PG-13",
+      "country": "United States, Canada",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 28 wins & 64 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "fast-paced",
+        "animated",
+        "family"
       ],
       "ph": false,
       "source": "manual_bulk"
