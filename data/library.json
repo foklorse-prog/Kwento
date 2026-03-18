@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:06.257Z",
+  "updatedAt": "2026-03-18T08:07:07.806Z",
   "items": [
     {
       "title": "Mid90s",
@@ -757,6 +757,40 @@
         "documentary",
         "informative",
         "romantic"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "A Friend of Dorothy",
+      "year": "1994",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Short"
+      ],
+      "director": "Raoul O'Connell",
+      "actor": "Raoul O'Connell",
+      "actors": [
+        "Raoul O'Connell",
+        "Ann Russo",
+        "Kevin McClatchy"
+      ],
+      "plot": "Winston arrives at NYU as a freshman, knowing he's gay and wondering where that fact will lead him. He falls hard for Tom, his temporary roommate who's soon to leave for L.A., and it's a big risk to express these feelings. Meanwhi...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzgzZmZmZGItODhhMy00NjVkLTg1NmMtYjQ4YWJlZGM0NGM0XkEyXkFqcGdeQXVyNTM3MDMyMDQ@._V1_SX300.jpg",
+      "posterId": "tt0109846",
+      "imdbRating": 7.2,
+      "imdbVotes": 382,
+      "imdbID": "tt0109846",
+      "runtime": "33 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "1 win",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
       ],
       "ph": false,
       "source": "manual_bulk"
