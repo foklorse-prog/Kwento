@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:40:01.456Z",
+  "updatedAt": "2026-03-18T15:40:12.361Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2265,6 +2265,41 @@
       "tags": [
         "documentary",
         "informative"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Horror in the High Desert 3: Firewatch",
+      "year": "2024",
+      "genre": "Horror",
+      "genres": [
+        "Horror",
+        "Mystery"
+      ],
+      "director": "Dutch Marich",
+      "actor": "Laurie Felix Bass",
+      "actors": [
+        "Laurie Felix Bass",
+        "Suziey Block",
+        "Brooke Bradshaw"
+      ],
+      "plot": "As a wildfire bears down on the opposite side of the state, Oscar Mendoza, armed with a secret, takes advantage of the distraction and journeys to Northeastern Nevada in search of missing outdoorsman Gary Hinge's last known wherea...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjEyOGZiNGUtZTJmNS00N2NiLTlmOTEtY2E5YmY2YWY4YzliXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 5.4,
+      "imdbVotes": 648,
+      "imdbID": "tt27523300",
+      "runtime": "88 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": "2 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "scary",
+        "dark",
+        "mysterious"
       ],
       "ph": false,
       "source": "discover"
