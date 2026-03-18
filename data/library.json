@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:12.913Z",
+  "updatedAt": "2026-03-18T08:07:13.657Z",
   "items": [
     {
       "title": "Mid90s",
@@ -942,6 +942,40 @@
         "fast-paced",
         "animated",
         "family"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Train Dreams",
+      "year": "2025",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Clint Bentley",
+      "actor": "Joel Edgerton",
+      "actors": [
+        "Joel Edgerton",
+        "Clifton Collins Jr.",
+        "Felicity Jones"
+      ],
+      "plot": "Based on Denis Johnson's beloved novella, Train Dreams is the moving portrait of Robert Grainier, a logger and railroad worker who leads a life of unexpected depth and beauty in the rapidly-changing America of the early 20th Century.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDkzNzkyNTktYzNhMi00YjhiLWI5YmUtZjliMTY0ZDc5NmMyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt29768334",
+      "imdbRating": 7.5,
+      "imdbVotes": 79359,
+      "imdbID": "tt29768334",
+      "runtime": "102 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 28 wins & 170 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
       ],
       "ph": false,
       "source": "manual_bulk"
