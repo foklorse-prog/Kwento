@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:03.551Z",
+  "updatedAt": "2026-03-18T08:07:05.331Z",
   "items": [
     {
       "title": "Mid90s",
@@ -682,6 +682,43 @@
         "lighthearted",
         "animated",
         "family"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "If I Had Legs I'd Kick You",
+      "year": "2025",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Mary Bronstein",
+      "actor": "Rose Byrne",
+      "actors": [
+        "Rose Byrne",
+        "Conan O'Brien",
+        "Danielle Macdonald"
+      ],
+      "plot": "While trying to manage her own life and career, a woman on the verge of a breakdown must cope with her daughter's illness, an absent husband, a missing person, and an unusual relationship with her therapist.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGRlMjIzMDctNzNkMS00MzEwLTlhZWEtM2FjYmE1ZmFjMzZlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt18382850",
+      "imdbRating": 6.7,
+      "imdbVotes": 20527,
+      "imdbID": "tt18382850",
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 33 wins & 68 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "romantic"
       ],
       "ph": false,
       "source": "manual_bulk"
