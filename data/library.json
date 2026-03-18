@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:51.707Z",
+  "updatedAt": "2026-03-18T08:05:52.708Z",
   "items": [
     {
       "title": "Mid90s",
@@ -220,6 +220,40 @@
         "fast-paced",
         "crime",
         "gritty"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Last Ranger",
+      "year": "2024",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Cindy Lee",
+      "actor": "Avumile Qongqo",
+      "actors": [
+        "Avumile Qongqo",
+        "Liyabona Mroqoza",
+        "Makhaola Ndebele"
+      ],
+      "plot": null,
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDEwMTU4MmUtMDMzMi00NWMwLThmMGMtZWU2MTRmNGYzZTFhXkEyXkFqcGdeQXVyMjM5OTg2Mw@@._V1_SX300.jpg",
+      "posterId": "tt15802124",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "imdbID": "tt15802124",
+      "runtime": "28 min",
+      "rated": null,
+      "country": "South Africa",
+      "language": "Xhosa",
+      "awards": "7 wins",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
       ],
       "ph": false,
       "source": "manual_bulk"
