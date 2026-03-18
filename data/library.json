@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:15.772Z",
+  "updatedAt": "2026-03-18T08:08:43.759Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1016,6 +1016,41 @@
         "sci-fi",
         "futuristic",
         "Korean"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Weapons",
+      "year": "2025",
+      "genre": "Horror",
+      "genres": [
+        "Horror",
+        "Mystery"
+      ],
+      "director": "Zach Cregger",
+      "actor": "Julia Garner",
+      "actors": [
+        "Julia Garner",
+        "Josh Brolin",
+        "Alden Ehrenreich"
+      ],
+      "plot": "When all but one child from the same class mysteriously vanish on the same night at exactly the same time, a community is left questioning who or what is behind their disappearance.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTBhNWJjZWItYzY3NS00M2NkLThmOWYtYTlmNzBmN2UxZWFjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt26581740",
+      "imdbRating": 7.4,
+      "imdbVotes": 312653,
+      "imdbID": "tt26581740",
+      "runtime": "128 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 46 wins & 114 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "scary",
+        "dark",
+        "mysterious"
       ],
       "ph": false,
       "source": "manual_bulk"
