@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   merge:
-    if: contains(github.event.issue.labels.*.name, 'library-candidate')
+    if: contains(github.event.issue.labels.*.name, 'library-candidate') || contains(github.event.issue.labels.*.name, 'library-remove')
     runs-on: ubuntu-latest
     steps:
       - name: Merge candidates into library.json
@@ -20,6 +20,8 @@ jobs:
             const repo = context.repo.repo;
             const path = "data/library.json";
             const issue = context.payload.issue;
+            const labels = (issue.labels || []).map(l => l.name);
+            const isRemove = labels.includes("library-remove");
 
             const body = issue.body || "";
             let jsonText = null;
@@ -33,19 +35,14 @@ jobs:
               }
             }
             if (!jsonText) {
-              core.warning("No JSON block found in issue body; skipping merge.");
+              core.warning("No JSON block found in issue body; skipping.");
               return;
             }
             let payload;
             try {
               payload = JSON.parse(jsonText);
             } catch (e) {
-              core.warning("Invalid JSON payload; skipping merge.");
-              return;
-            }
-            const items = payload.items || [];
-            if (!Array.isArray(items) || items.length === 0) {
-              core.warning("No items to merge.");
+              core.warning("Invalid JSON payload; skipping.");
               return;
             }
 
@@ -63,6 +60,52 @@ jobs:
             }
 
             const byKey = new Map(library.items.map(i => [(i.imdbID || i.title || "").toLowerCase(), i]));
+
+            if (isRemove) {
+              const removeList = payload.remove || payload.items || [];
+              if (!Array.isArray(removeList) || removeList.length === 0) {
+                core.warning("No items to remove.");
+                return;
+              }
+              let removed = 0;
+              for (const it of removeList) {
+                const key = (it.imdbID || it.title || "").toLowerCase();
+                if (!key) continue;
+                if (byKey.has(key)) {
+                  byKey.delete(key);
+                  removed++;
+                }
+              }
+              library.items = Array.from(byKey.values());
+              library.updatedAt = new Date().toISOString();
+
+              const content = Buffer.from(JSON.stringify(library, null, 2)).toString("base64");
+              const sha = file && file.data ? file.data.sha : undefined;
+
+              await github.rest.repos.createOrUpdateFileContents({
+                owner, repo, path,
+                message: `Remove ${removed} library items`,
+                content,
+                sha,
+              });
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issue.number,
+                body: `Removed ${removed} items from ${path}.`
+              });
+
+              await github.rest.issues.update({
+                owner, repo, issue_number: issue.number, state: "closed"
+              });
+              return;
+            }
+
+            const items = payload.items || [];
+            if (!Array.isArray(items) || items.length === 0) {
+              core.warning("No items to merge.");
+              return;
+            }
+
             let added = 0;
             for (const it of items) {
               const key = (it.imdbID || it.title || "").toLowerCase();
