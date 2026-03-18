@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:26:07.726Z",
+  "updatedAt": "2026-03-18T08:26:08.843Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1157,6 +1157,46 @@
         "dark",
         "fun",
         "lighthearted"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Smashing Machine",
+      "year": "2025",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Benny Safdie",
+      "actor": "Dwayne Johnson",
+      "actors": [
+        "Dwayne Johnson",
+        "Emily Blunt",
+        "Ryan Bader"
+      ],
+      "plot": "The story of mixed-martial arts and UFC champion, Mark Kerr.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWYxZTM1ZGMtMjg5MC00NzcyLTk0ZTEtZWI0ZThkNDJiYjZmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt11214558",
+      "imdbRating": 6.4,
+      "imdbVotes": 63958,
+      "imdbID": "tt11214558",
+      "runtime": "123 min",
+      "rated": "R",
+      "country": "United States, Japan, Canada",
+      "language": "English, Japanese",
+      "awards": "Nominated for 1 Oscar. 2 wins & 25 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "fast-paced",
+        "biographical",
+        "inspiring",
+        "Japanese"
       ],
       "ph": false,
       "source": "manual_bulk"
