@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:46.715Z",
+  "updatedAt": "2026-03-18T08:05:48.536Z",
   "items": [
     {
       "title": "Mid90s",
@@ -69,6 +69,40 @@
         "dramatic",
         "emotional",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Marty Supreme",
+      "year": "2025",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Sport"
+      ],
+      "director": "Josh Safdie",
+      "actor": "Timothée Chalamet",
+      "actors": [
+        "Timothée Chalamet",
+        "Gwyneth Paltrow",
+        "Odessa A'zion"
+      ],
+      "plot": "Marty Mauser, a young man with a dream no one respects, goes to hell and back in pursuit of greatness.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTRhYjI1MTItMWYwMi00MjY5LWI1OTktMzQwNzA3MWJlN2QyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt32916440",
+      "imdbRating": 8.1,
+      "imdbVotes": 60529,
+      "imdbID": "tt32916440",
+      "runtime": "149 min",
+      "rated": "R",
+      "country": "Finland, United States",
+      "language": "English, Japanese, French",
+      "awards": "Nominated for 9 Oscars. 30 wins & 254 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
       ],
       "ph": false,
       "source": "manual_bulk"
