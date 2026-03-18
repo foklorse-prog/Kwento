@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T09:08:24.168Z",
+  "updatedAt": "2026-03-18T09:09:27.530Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1738,6 +1738,35 @@
       ],
       "ph": false,
       "source": "manual_bulk"
+    },
+    {
+      "title": "The Wind. A Documentary Thriller",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Michal Bielawski",
+      "actor": null,
+      "actors": [],
+      "plot": "When it starts to blow, there is no way to hide from it or completely shelter oneself. Its destructive power manifests itself in destroyed forests and houses. However, halny is not only a destructive element but also an experience...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmFkOTFhYzktNTQwMS00MzI1LWI3NWUtYTA0YzgwYWRjMzYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 5.9,
+      "imdbVotes": 101,
+      "imdbID": "tt10808762",
+      "runtime": "75 min",
+      "rated": null,
+      "country": "Poland, Slovakia",
+      "language": null,
+      "awards": "2 wins & 4 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative"
+      ],
+      "ph": false,
+      "source": "discover"
     }
   ]
 }
