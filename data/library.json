@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:35:50.037Z",
+  "updatedAt": "2026-03-18T15:36:05.823Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2014,6 +2014,44 @@
       "tags": [
         "dramatic",
         "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Parasite",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Bong Joon Ho",
+      "actor": "Song Kang-ho",
+      "actors": [
+        "Song Kang-ho",
+        "Lee Sun-kyun",
+        "Cho Yeo-jeong"
+      ],
+      "plot": "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjk1Y2U4MjQtY2ZiNS00OWQyLWI3MmYtZWUwNmRjYWRiNWNhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8.5,
+      "imdbVotes": 1148210,
+      "imdbID": "tt6751668",
+      "runtime": "132 min",
+      "rated": "R",
+      "country": "South Korea",
+      "language": "Korean, English",
+      "awards": "Won 4 Oscars. 309 wins & 261 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "Korean",
         "romantic"
       ],
       "ph": false,
