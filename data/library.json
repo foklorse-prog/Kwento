@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:13.657Z",
+  "updatedAt": "2026-03-18T08:07:15.772Z",
   "items": [
     {
       "title": "Mid90s",
@@ -976,6 +976,46 @@
         "dramatic",
         "emotional",
         "romantic"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Bugonia",
+      "year": "2025",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Crime",
+        "Sci-Fi"
+      ],
+      "director": "Yorgos Lanthimos",
+      "actor": "Emma Stone",
+      "actors": [
+        "Emma Stone",
+        "Jesse Plemons",
+        "Aidan Delbis"
+      ],
+      "plot": "Two conspiracy-obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzIzNWQxMjEtZmQ3MS00OTk2LWFlZjktZDUyYWRkM2M3NWVlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt12300742",
+      "imdbRating": 7.4,
+      "imdbVotes": 125994,
+      "imdbID": "tt12300742",
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "Ireland, United Kingdom, Canada, South Korea, United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 9 wins & 120 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime",
+        "gritty",
+        "sci-fi",
+        "futuristic",
+        "Korean"
       ],
       "ph": false,
       "source": "manual_bulk"
