@@ -2398,6 +2398,7 @@ const GH_ISSUES_URL=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`
 const GH_TOKEN_KEY="kwento_gh_token";
 const SHARED_QUEUE_KEY="kwento_shared_queue";
 const SHARED_PENDING_KEY="kwento_shared_pending_count";
+const SHARED_SENT_KEY="kwento_shared_sent_keys";
 const OFFLINE_WATCHLIST_POSTERS=80;
 const OFFLINE_DISCOVER_POSTERS=20;
 const POSTER_MAX_BYTES=260*1024;
@@ -2433,6 +2434,16 @@ function _loadSharedQueue(){
 function _saveSharedQueue(list){
   try{ localStorage.setItem(SHARED_QUEUE_KEY,JSON.stringify(list||[])); }catch(_){}
 }
+function _loadSentKeys(){
+  try{
+    const raw=localStorage.getItem(SHARED_SENT_KEY);
+    const arr=raw?JSON.parse(raw):[];
+    return new Set(Array.isArray(arr)?arr:[]);
+  }catch(_){ return new Set(); }
+}
+function _saveSentKeys(set){
+  try{ localStorage.setItem(SHARED_SENT_KEY,JSON.stringify(Array.from(set||[]))); }catch(_){}
+}
 function _getSharedPendingCount(){
   try{ return parseInt(localStorage.getItem(SHARED_PENDING_KEY)||"0"); }catch(_){ return 0; }
 }
@@ -2453,6 +2464,8 @@ function queueSharedCandidate(item,source="unknown"){
   if(!isActualMovieOrSeries(item)) return;
   const key=(item.imdbID||item.title||"").toLowerCase();
   if(!key) return;
+  const sent=_loadSentKeys();
+  if(sent.has(key)) return;
   const queue=_loadSharedQueue();
   if(queue.some(q=>(q.imdbID||q.title||"").toLowerCase()===key)) return;
   queue.push({
@@ -2493,43 +2506,58 @@ async function queueSharedCandidateWithMeta(item,source="unknown"){
 async function flushSharedQueue(){
   const token=_getGhToken();
   if(!token) return {ok:false,err:"No token"};
-  const queue=_loadSharedQueue();
+  let queue=_loadSharedQueue();
   if(!queue.length) return {ok:true,empty:true};
-  const batch=queue.slice(0,1);
-  const body=[
-    "AUTO-SUBMITTED MOVIE CANDIDATES",
-    "",
-    "```json",
-    JSON.stringify({items:batch},null,2),
-    "```",
-  ].join("\n");
-  try{
-    const res=await fetch(GH_ISSUES_URL,{
-      method:"POST",
-      headers:{
-        "Accept":"application/vnd.github+json",
-        "Authorization":"Bearer "+token,
-        "Content-Type":"application/json",
-      },
-      body:JSON.stringify({
-        title:`Library candidate: ${batch[0]?.title||"Untitled"}`,
-        body
-      })
-    });
-    if(!res.ok){
-      let detail="";
-      try{
-        const j=await res.json();
-        detail=j?.message||JSON.stringify(j);
-      }catch(_){}
-      return {ok:false,err:`Issue create failed (${res.status})${detail?": "+detail:""}`};
+  const sent=_loadSentKeys();
+  // Remove anything already sent
+  queue=queue.filter(q=>{
+    const k=(q.imdbID||q.title||"").toLowerCase();
+    return k && !sent.has(k);
+  });
+  if(!queue.length){ _saveSharedQueue([]); return {ok:true,empty:true}; }
+  let sentCount=0;
+  for(const item of queue){
+    const body=[
+      "AUTO-SUBMITTED MOVIE CANDIDATES",
+      "",
+      "```json",
+      JSON.stringify({items:[item]},null,2),
+      "```",
+    ].join("\n");
+    try{
+      const res=await fetch(GH_ISSUES_URL,{
+        method:"POST",
+        headers:{
+          "Accept":"application/vnd.github+json",
+          "Authorization":"Bearer "+token,
+          "Content-Type":"application/json",
+        },
+        body:JSON.stringify({
+          title:`Library candidate: ${item?.title||"Untitled"}`,
+          body
+        })
+      });
+      if(!res.ok){
+        let detail="";
+        try{
+          const j=await res.json();
+          detail=j?.message||JSON.stringify(j);
+        }catch(_){}
+        _saveSharedQueue(queue.slice(sentCount)); // keep remaining
+        return {ok:false,err:`Issue create failed (${res.status})${detail?": "+detail:""}`};
+      }
+      const k=(item.imdbID||item.title||"").toLowerCase();
+      if(k) sent.add(k);
+      sentCount++;
+    }catch(_){
+      _saveSharedQueue(queue.slice(sentCount));
+      return {ok:false,err:"Network error"};
     }
-    _saveSharedQueue(queue.slice(batch.length));
-    _setSharedPendingCount(_getSharedPendingCount()+batch.length);
-    return {ok:true,count:batch.length};
-  }catch(e){
-    return {ok:false,err:"Network error"};
   }
+  _saveSentKeys(sent);
+  _saveSharedQueue([]);
+  _setSharedPendingCount(_getSharedPendingCount()+sentCount);
+  return {ok:true,count:sentCount};
 }
 function cleanupOmdbLibrary(d){
   const lib=d.libraryMovies||[];
@@ -6889,10 +6917,6 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     setOmdbBulkStatus(`Added ${added}, updated ${updated}, skipped ${skipped}, failed ${failed}.`);
     setOmdbBulkWorking(false);
   };
-  const saveGhToken=()=>{
-    _setGhToken(ghTokenInput.trim());
-    setGhStatus(ghTokenInput.trim()?"Token saved.":"Token cleared.");
-  };
   const testGhSync=async()=>{
     setGhStatus("Sending...");
     const r=await flushSharedQueue();
@@ -7023,12 +7047,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           <div style={{fontSize:11,color:th.sub,marginBottom:6}}>
             {`Shared JSON: ${SHARED_LIBRARY_PATH}`}
           </div>
-          <input type="password" value={ghTokenInput} onChange={e=>setGhTokenInput(e.target.value)} placeholder="GitHub token (stored locally)"
+          <input type="password" value={ghTokenInput} onChange={e=>{const v=e.target.value;setGhTokenInput(v);_setGhToken(v.trim());}} placeholder="GitHub token (stored locally)"
             style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:th.text}}/>
           <div style={{display:"flex",gap:8,marginTop:8}}>
-            <button onClick={saveGhToken} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
-              Save token
-            </button>
             <button onClick={testGhSync} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
               Sync now
             </button>
