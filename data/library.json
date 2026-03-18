@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:42:18.088Z",
+  "updatedAt": "2026-03-18T08:42:19.453Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1342,6 +1342,39 @@
         "gritty",
         "historical",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Sugarcane",
+      "year": "2024",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Emily Kassie, Julian Brave NoiseCat",
+      "actor": "Willie Sellars",
+      "actors": [
+        "Willie Sellars",
+        "Charlene Belleau",
+        "Whitney Spearing"
+      ],
+      "plot": "An investigation into abuse and missing children at an Indian residential school sparks a reckoning on the nearby Sugarcane Reserve.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjMwZjI4NTItNTg1Yi00YTgwLTg0YTUtNGQzZWEzYzEzMTgzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt30319854",
+      "imdbRating": 7,
+      "imdbVotes": 3526,
+      "imdbID": "tt30319854",
+      "runtime": "107 min",
+      "rated": "R",
+      "country": "Canada, United States",
+      "language": "English, Aboriginal, French",
+      "awards": "Nominated for 1 Oscar. 23 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative"
       ],
       "ph": false,
       "source": "manual_bulk"
