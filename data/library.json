@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:35:21.585Z",
+  "updatedAt": "2026-03-18T08:42:14.006Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1226,6 +1226,45 @@
       "tags": [
         "documentary",
         "informative"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Sinners",
+      "year": "2025",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "Horror"
+      ],
+      "director": "Ryan Coogler",
+      "actor": "Michael B. Jordan",
+      "actors": [
+        "Michael B. Jordan",
+        "Jack O'Connell",
+        "Hailee Steinfeld"
+      ],
+      "plot": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjIwZWY4ZDEtMmIxZS00NDA4LTg4ZGMtMzUwZTYyNzgxMzk5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt31193180",
+      "imdbRating": 7.5,
+      "imdbVotes": 407737,
+      "imdbID": "tt31193180",
+      "runtime": "137 min",
+      "rated": "R",
+      "country": "United States, Australia, Canada",
+      "language": "English, Chinese",
+      "awards": "Nominated for 16 Oscars. 256 wins & 488 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "scary",
+        "dark",
+        "action",
+        "fast-paced"
       ],
       "ph": false,
       "source": "manual_bulk"
