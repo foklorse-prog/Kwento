@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:49.749Z",
+  "updatedAt": "2026-03-18T08:05:51.126Z",
   "items": [
     {
       "title": "Mid90s",
@@ -140,6 +140,46 @@
         "lighthearted",
         "animated",
         "family",
+        "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Seed of the Sacred Fig",
+      "year": "2024",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Mohammad Rasoulof",
+      "actor": "Soheila Golestani",
+      "actors": [
+        "Soheila Golestani",
+        "Missagh Zareh",
+        "Setareh Maleki"
+      ],
+      "plot": "An investigating judge struggles with paranoia amid political unrest in Tehran caused by the death of a young woman. When his gun goes missing, he suspects his wife and daughters, imposing harsh measures that fray family ties.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMmYxMTlmODQtZTUyOS00YWE3LWFjYTktOWU4ZjU3ZGYwZDk2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt32178949",
+      "imdbRating": 7.6,
+      "imdbVotes": 15306,
+      "imdbID": "tt32178949",
+      "runtime": "167 min",
+      "rated": "PG-13",
+      "country": "France, Germany, Iran",
+      "language": "Persian",
+      "awards": "Nominated for 1 Oscar. 36 wins & 71 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime",
+        "gritty",
         "French"
       ],
       "ph": false,
