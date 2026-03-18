@@ -22,15 +22,30 @@ jobs:
             const issue = context.payload.issue;
 
             const body = issue.body || "";
+            let jsonText = null;
             const match = body.match(/```json\\s*([\\s\\S]*?)```/i);
-            if (!match) {
-              core.setFailed("No JSON block found in issue body.");
+            if (match) jsonText = match[1];
+            if (!jsonText) {
+              const braceStart = body.indexOf("{");
+              const braceEnd = body.lastIndexOf("}");
+              if (braceStart !== -1 && braceEnd !== -1 && braceEnd > braceStart) {
+                jsonText = body.slice(braceStart, braceEnd + 1);
+              }
+            }
+            if (!jsonText) {
+              core.warning("No JSON block found in issue body; skipping merge.");
               return;
             }
-            const payload = JSON.parse(match[1]);
+            let payload;
+            try {
+              payload = JSON.parse(jsonText);
+            } catch (e) {
+              core.warning("Invalid JSON payload; skipping merge.");
+              return;
+            }
             const items = payload.items || [];
             if (!Array.isArray(items) || items.length === 0) {
-              core.setFailed("No items to merge.");
+              core.warning("No items to merge.");
               return;
             }
 
@@ -81,4 +96,3 @@ jobs:
             await github.rest.issues.update({
               owner, repo, issue_number: issue.number, state: "closed"
             });
-
