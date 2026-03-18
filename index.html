@@ -1062,11 +1062,16 @@ function buildSuggestionQueue(logs, feedback, locationData=null, libraryMovies=[
   return result;
 }
 
-function getArchetype(logs) {
-  if(logs.length < 8) return null;
+function getArchetype(logs, tasteSeed=[]) {
+  const seedLogs=(tasteSeed||[]).flatMap(s=>{
+    const w=Math.max(1,Math.round((typeof s.scoreWeight==="number"?s.scoreWeight:1)*2));
+    return Array.from({length:w},()=>({tags:s.tags||[],category:s.category,title:s.title}));
+  });
+  const allLogs=[...(logs||[]),...seedLogs];
+  if(allLogs.length < 8) return null;
   const cnt = {};
-  logs.forEach(l => (l.tags||[]).forEach(t => { cnt[t]=(cnt[t]||0)+1; }));
-  const phCount = logs.filter(l => {
+  allLogs.forEach(l => (l.tags||[]).forEach(t => { cnt[t]=(cnt[t]||0)+1; }));
+  const phCount = allLogs.filter(l => {
     const lib = LIBRARY[l.category]||[];
     return lib.find(x=>x.title===l.title)?.ph;
   }).length;
@@ -1761,6 +1766,12 @@ function defaultData(){
     discoverIndexes:{},
     discoverSkips:{},
     discoverInteractions:{},
+    discoverSkipYears:{},
+    discoverSkipGenres:{},
+    discoverSkipDirectors:{},
+    discoverSkipTags:{},
+    watchlistRollCount:0,
+    watchlistRollDate:null,
   };
 }
 
@@ -4424,7 +4435,7 @@ const DISCOVER_FREE_LIMIT = 5;
 const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
-function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}) {
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}) {
   const seedLogs=(tasteSeed||[]).map(s=>({
     tags:s.tags||[],
     category:s.category||cat,
@@ -4443,16 +4454,23 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   }
   const logged=new Set(logs.filter(l=>l.category===cat).map(l=>l.title));
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
+  const likedSet=new Set(Object.entries(likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
   const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
 
   // ── Movie-specific signals ────────────────────────────────────────────────
-  let avgYear=null, loggedGenres=new Set();
+  let avgYear=null, loggedGenres=new Set(), loggedDecades={};
   if(cat==="movies"){
     const movieLogs=logs.filter(l=>l.category==="movies"&&!l.fromLetterboxd&&l.year);
     if(movieLogs.length){
       avgYear=movieLogs.reduce((s,l)=>s+parseInt(l.year),0)/movieLogs.length;
     }
+    movieLogs.forEach(l=>{
+      const y=parseInt(l.year,10);
+      if(isNaN(y)) return;
+      const d=`${Math.floor(y/10)*10}s`;
+      loggedDecades[d]=(loggedDecades[d]||0)+1;
+    });
     logs.filter(l=>l.category==="movies").forEach(l=>{
       if(l.genre) loggedGenres.add(l.genre.toLowerCase());
       (l.tags||[]).forEach(t=>loggedGenres.add(t));
@@ -4461,7 +4479,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
 
   const scored = items
     .filter(i=>{
+      const itemKey=(i.imdbID||i.title||"").toLowerCase();
       if(logged.has(i.title)||disliked.has(i.title)) return false;
+      if(itemKey&&likedSet.has(itemKey)) return false;
       // Quality filter for OMDB-enriched movies only
       // Library movies pass through — they're hand-picked
       if(cat==="movies"&&i._fromOmdb){
@@ -4476,6 +4496,10 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       let score=Math.random()*3;
       const itemKey=(i.imdbID||i.title||"").toLowerCase();
       const skipPenalty=(cat==="movies"&&discoverSkips&&itemKey)?Math.min(12,(discoverSkips[itemKey]||0)*3):0;
+      const yearMap=skipSignals.year||{};
+      const genreMap=skipSignals.genre||{};
+      const directorMap=skipSignals.director||{};
+      const tagMap=skipSignals.tag||{};
 
       // Tag relevance
       const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
@@ -4488,6 +4512,38 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
         if(avgYear&&itemYear){
           const diff=Math.abs(itemYear-avgYear);
           score+=Math.max(0,8*(1-diff/20));
+        }
+        if(itemYear){
+          const decade=`${Math.floor(itemYear/10)*10}s`;
+          const seen=loggedDecades[decade]||0;
+          score+=Math.max(0,3-seen*0.35); // encourage year variation
+          score-=Math.min(6,(yearMap[decade]||0)*1.25);
+        }
+        if(i.genre){
+          const gk=i.genre.toLowerCase();
+          score-=Math.min(5,(genreMap[gk]||0)*1.1);
+        }
+        if(i.director){
+          const dk=i.director.toLowerCase();
+          score-=Math.min(4,(directorMap[dk]||0));
+        }
+        if(i.tags&&i.tags.length){
+          const tagPenalty=(i.tags||[]).reduce((s,t)=>s+Math.min(1.2,(tagMap[(t||"").toLowerCase()]||0)*0.3),0);
+          score-=Math.min(8,tagPenalty);
+        }
+        // Balanced novelty scoring: 70% familiar + 30% exploration
+        const itemSignals=new Set([
+          ...(i.genre?[i.genre.toLowerCase()]:[]),
+          ...((i.genres||[]).map(g=>(g||"").toLowerCase())),
+          ...((i.tags||[]).map(t=>(t||"").toLowerCase())),
+        ].filter(Boolean));
+        if(loggedGenres.size>0&&itemSignals.size>0){
+          let overlap=0;
+          itemSignals.forEach(s=>{if(loggedGenres.has(s)) overlap++;});
+          const overlapRatio=overlap/itemSignals.size;
+          const familiar=overlapRatio*7;       // 70%
+          const exploratory=(1-overlapRatio)*3; // 30%
+          score+=familiar+exploratory;
         }
         // Classic bonus
         if(itemYear&&itemYear<1990&&i.imdbRating>=8.0) score+=6;
@@ -4631,7 +4687,11 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const [pool,setPool]=useState(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return saved;
-    return buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{});
+    return buildCatPool(
+      cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
+      {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
+      data.likedSuggestions||{}
+    );
   });
   const [poolIdx,setPoolIdx]=useState(()=>data.discoverIndexes?.[cat]||0);
 
@@ -4668,9 +4728,24 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if((tc[cat]||0)>0) return;
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
   },[]);
+  const hasSavedOnMount=useRef(!!(data.discoverQueues?.[cat]?.length));
   useEffect(()=>{
-    setPool(buildCatPool(cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{}));
-  },[cat,data.tasteSeed,data.discoverSkips]);
+    if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
+    setPool(buildCatPool(
+      cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
+      {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
+      data.likedSuggestions||{}
+    ));
+  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.likedSuggestions]);
+  useEffect(()=>{
+    const saved=data.discoverQueues?.[cat];
+    if(saved&&saved.length) return;
+    if(!pool.length) return;
+    onChange("__batch__",{
+      discoverQueues:{...(data.discoverQueues||{}),[cat]:pool},
+      discoverIndexes:{...(data.discoverIndexes||{}),[cat]:(data.discoverIndexes?.[cat]||poolIdx)}
+    });
+  },[cat,pool]);
 
   // Background OMDB fetch for movie suggestions missing plot/poster
   const fetchingRef=useRef(null);
@@ -4720,7 +4795,11 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     (async()=>{
       const loc=_gpsCache||await getPhRegion();
       if(!loc) return;
-      const boosted=buildCatPool(cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{});
+      const boosted=buildCatPool(
+        cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
+        {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
+        data.likedSuggestions||{}
+      );
       setPool(boosted);
     })();
   },[]);
@@ -4736,7 +4815,35 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         if(interactedMap[key]) return {};
         const ds={...(data.discoverSkips||{})};
         ds[key]=(ds[key]||0)+1;
-        return {discoverSkips:ds};
+        const y={...(data.discoverSkipYears||{})};
+        const g={...(data.discoverSkipGenres||{})};
+        const d={...(data.discoverSkipDirectors||{})};
+        const t={...(data.discoverSkipTags||{})};
+        const yearVal=parseInt(currentItem.year||MOVIE_YEARS[currentItem.title]||"",10);
+        if(!isNaN(yearVal)){
+          const decade=`${Math.floor(yearVal/10)*10}s`;
+          y[decade]=(y[decade]||0)+1;
+        }
+        if(currentItem.genre){
+          const gk=currentItem.genre.toLowerCase();
+          g[gk]=(g[gk]||0)+1;
+        }
+        if(currentItem.director){
+          const dk=currentItem.director.toLowerCase();
+          d[dk]=(d[dk]||0)+1;
+        }
+        (currentItem.tags||[]).forEach(tag=>{
+          const tk=(tag||"").toLowerCase();
+          if(!tk) return;
+          t[tk]=(t[tk]||0)+1;
+        });
+        return {
+          discoverSkips:ds,
+          discoverSkipYears:y,
+          discoverSkipGenres:g,
+          discoverSkipDirectors:d,
+          discoverSkipTags:t,
+        };
       })()
       :{};
     // Persist updated queue state and increment count
@@ -4950,7 +5057,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
                   </>
                 ):(
                   <>
-                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this for you</div>
+                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this now</div>
                     <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
                   </>
                 )}
@@ -5251,11 +5358,9 @@ function BarkadaDeckStack({data,onChange,th}){
   );
 }
 
-function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onChange,onOpenMovieLog,onOpenWatchlist}){
+function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
-  const watchlist=_normalizeWatchlistItems(data);
-  const watchlistPreview=watchlist.filter(w=>w.poster&&w.genre&&w.director);
 
   return(
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -5269,41 +5374,142 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
         <p style={{fontSize:12,color:th.sub,marginBottom:16}}>{(T[data.language]||T.en).barkada_sub}</p>
         <BarkadaDeckStack data={data} onChange={onChange} th={th}/>
       </div>
-      <div style={{paddingTop:22}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:th.text,margin:0}}>Watchlist</h2>
-          <button onClick={onOpenWatchlist} style={{fontSize:12,color:th.accent,textDecoration:"underline",background:"none",border:"none",cursor:"pointer",padding:0}}>
-            Show more
-          </button>
-        </div>
-        {watchlistPreview.length?(
-          <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
-            {watchlistPreview.slice(0,10).map((w,i)=>(
-              <button key={(w.imdbID||w.title||"w")+i} onClick={onOpenWatchlist}
-                style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
-                <img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>
-              </button>
-            ))}
-          </div>
-        ):(
-          <div style={{fontSize:12,color:th.sub}}>Preview shows only watchlist items with full metadata.</div>
-        )}
-      </div>
     </div>
   );
 }
 
 // ─── SHARE CARD MODAL — renders to canvas for saving as image ────────────────
-function WatchlistPage({data,onClose}){
+function WatchlistPage({data,onClose,onChange}){
   const th=THEMES[data.theme];
   const items=_normalizeWatchlistItems(data);
   const [selected,setSelected]=useState(null);
+  const [reminderAt,setReminderAt]=useState("");
+  const [reminderEditing,setReminderEditing]=useState(false);
+  const [randomPick,setRandomPick]=useState(null);
   const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const reminderMap=new Map((data.watchlistReminders||[]).map(r=>[((r.imdbID||r.title||"").toLowerCase()),r]));
+  const detailSwipeStart=useRef(null);
+  useEffect(()=>{
+    setReminderEditing(false);
+    setReminderAt("");
+  },[selected?.imdbID,selected?.title]);
   const enriched=items.map(i=>{
     const key=(i.imdbID||i.title||"").toLowerCase();
     const meta=byKey.get(key)||null;
     return {...meta,...i};
   });
+  if(selected){
+    const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
+    const selectedReminder=reminderMap.get(selectedKey)||null;
+    const castText=selected.actors&&selected.actors.length
+      ?selected.actors.join(", ")
+      :(selected.actor||"");
+    const openReminderEditor=()=>{
+      const base=selectedReminder?.at?new Date(selectedReminder.at):new Date(Date.now()+24*60*60*1000);
+      base.setSeconds(0,0);
+      if(!selectedReminder?.at) base.setHours(20,0,0,0);
+      setReminderAt(base.toISOString().slice(0,16));
+      setReminderEditing(true);
+    };
+    return(
+      <>
+      <div
+        style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}
+        onTouchStart={e=>{
+          const x=e.touches?.[0]?.clientX||0;
+          if(x<=36) detailSwipeStart.current=x;
+          else detailSwipeStart.current=null;
+        }}
+        onTouchEnd={e=>{
+          const sx=detailSwipeStart.current;
+          detailSwipeStart.current=null;
+          if(sx==null) return;
+          const ex=e.changedTouches?.[0]?.clientX||sx;
+          if(ex-sx>80) setSelected(null);
+        }}
+      >
+        <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <button onClick={()=>{setSelected(null);setReminderEditing(false);}} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0}}>← Back</button>
+          </div>
+          <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14,boxShadow:"0 8px 24px rgba(0,0,0,0.22)"}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              {selected.poster&&(
+                <img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>
+              )}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>
+                  {selected.title}
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr",gap:7}}>
+                  {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
+                  {selected.imdbRating&&<div style={{fontSize:12,color:th.sub}}>IMDb: <span style={{color:th.text}}>{selected.imdbRating}/10</span></div>}
+                  {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
+                  {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                  {castText&&<div style={{fontSize:12,color:th.sub}}>Cast: <span style={{color:th.text}}>{castText}</span></div>}
+                </div>
+              </div>
+            </div>
+            {selected.plot&&(
+              <div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>
+                {selected.plot}
+              </div>
+            )}
+            {selectedReminder?.at&&(
+              <div style={{marginTop:22,paddingTop:10,fontSize:12,color:th.sub,opacity:0.9,fontStyle:"italic",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+                <span>Reminder set for {new Date(selectedReminder.at).toLocaleString()}</span>
+                <button onClick={openReminderEditor} style={{background:"none",border:"none",color:th.accent,textDecoration:"underline",fontSize:12,cursor:"pointer",padding:0}}>Edit</button>
+              </div>
+            )}
+            {!selectedReminder?.at&&(
+              <div style={{marginTop:22,paddingTop:10,display:"flex",justifyContent:"flex-start"}}>
+                <button onClick={openReminderEditor} style={{background:"none",border:`1px solid ${th.border}`,borderRadius:999,padding:"7px 11px",fontSize:11,color:th.sub,cursor:"pointer"}}>
+                  Set reminder
+                </button>
+              </div>
+            )}
+            {reminderEditing&&(
+              <div style={{marginTop:10,paddingTop:8,borderTop:`1px dashed ${th.border}`}}>
+                <input type="datetime-local" value={reminderAt} onChange={e=>setReminderAt(e.target.value)}
+                  style={{width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:th.bg,color:th.text,marginBottom:8}}/>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>setReminderEditing(false)} style={{flex:1,padding:"9px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Cancel</button>
+                  <button onClick={()=>{
+                    const atIso=reminderAt?new Date(reminderAt).toISOString():null;
+                    if(!atIso) return;
+                    const key=(selected.imdbID||selected.title||"").toLowerCase();
+                    const clean=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
+                    const next=[...clean,{
+                      id:selectedReminder?.id||Date.now()+"_"+key,
+                      title:selected.title,
+                      imdbID:selected.imdbID||null,
+                      poster:selected.poster||null,
+                      at:atIso,
+                      createdAt:selectedReminder?.createdAt||new Date().toISOString(),
+                      sentAt:null,
+                    }];
+                    onChange&&onChange("watchlistReminders",next);
+                    setReminderEditing(false);
+                  }} style={{flex:1,padding:"9px",borderRadius:10,border:"none",background:th.accent,color:"#fff",fontWeight:700,cursor:"pointer"}}>Save</button>
+                </div>
+                {selectedReminder&&(
+                  <button onClick={()=>{
+                    const key=(selected.imdbID||selected.title||"").toLowerCase();
+                    const next=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
+                    onChange&&onChange("watchlistReminders",next);
+                    setReminderEditing(false);
+                  }} style={{marginTop:8,width:"100%",padding:"9px",borderRadius:10,border:`1px solid #ef444466`,background:"transparent",color:"#ef4444",cursor:"pointer"}}>
+                    Remove reminder
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      </>
+    );
+  }
   return(
     <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
       <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -5328,24 +5534,113 @@ function WatchlistPage({data,onClose}){
           <div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>
         )}
       </div>
-      {selected&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.62)",zIndex:261,display:"flex",alignItems:"flex-end"}} onClick={e=>{if(e.target===e.currentTarget)setSelected(null);}}>
-          <div style={{width:"100%",maxWidth:500,margin:"0 auto",background:th.card,borderTopLeftRadius:20,borderTopRightRadius:20,border:`1px solid ${th.border}`,padding:"16px 18px 22px"}}>
-            <div style={{display:"flex",gap:12}}>
-              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:80,height:120,objectFit:"cover",borderRadius:8,flexShrink:0}}/>}
+      {randomPick&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:269,display:"flex",alignItems:"center",justifyContent:"center",padding:18}} onClick={e=>{if(e.target===e.currentTarget)setRandomPick(null);}}>
+          <div style={{width:"100%",maxWidth:360,background:th.card,border:`1px solid ${th.border}`,borderRadius:14,padding:16}}>
+            <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+              {randomPick.poster&&<img src={randomPick.poster} alt={randomPick.title} style={{width:68,height:102,objectFit:"cover",borderRadius:8,border:`1px solid ${th.border}`}}/>}
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:700,color:th.text,lineHeight:1.2}}>{selected.title}</div>
-                {selected.year&&<div style={{fontSize:12,color:th.sub,marginTop:4}}>Year: {selected.year}</div>}
-                {selected.genre&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
-                {selected.director&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
-                {selected.imdbRating&&<div style={{fontSize:12,color:th.sub,marginTop:3}}>IMDb: <span style={{color:th.text}}>{selected.imdbRating}/10</span></div>}
+                <div style={{fontSize:16,fontWeight:700,color:th.text,lineHeight:1.3}}>{randomPick.title}</div>
+                {randomPick.year&&<div style={{fontSize:12,color:th.sub,marginTop:4}}>{randomPick.year}</div>}
+                {randomPick.genre&&<div style={{fontSize:12,color:th.sub,marginTop:2}}>{randomPick.genre}</div>}
               </div>
             </div>
-            {selected.plot&&<div style={{fontSize:13,color:th.text,opacity:0.88,lineHeight:1.55,marginTop:10}}>{selected.plot}</div>}
-            <button onClick={()=>setSelected(null)} style={{marginTop:12,width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Close</button>
           </div>
         </div>
       )}
+      <div style={{position:"fixed",left:"50%",bottom:"max(84px, calc(env(safe-area-inset-bottom) + 72px))",transform:"translateX(-50%)",zIndex:268}}>
+        <button onClick={()=>{
+          const today=todayKey();
+          const used=(data.watchlistRollDate===today?(data.watchlistRollCount||0):0);
+          const canRoll=data.betaMode||used<5;
+          if(!canRoll||!enriched.length) return;
+          const pick=enriched[Math.floor(Math.random()*enriched.length)];
+          setRandomPick(pick);
+          onChange&&onChange("__batch__",{
+            watchlistRollDate:today,
+            watchlistRollCount:used+1
+          });
+        }} style={{width:56,height:56,borderRadius:999,border:`1px solid ${th.border}`,background:`linear-gradient(160deg,${th.accent}22 0%, ${th.card} 100%)`,boxShadow:"0 10px 26px rgba(0,0,0,0.33)",display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={th.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.4" fill={th.accent}/><circle cx="15" cy="15" r="1.4" fill={th.accent}/><circle cx="15" cy="9" r="1.4" fill={th.accent}/><circle cx="9" cy="15" r="1.4" fill={th.accent}/></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LikedPage({data,onClose}){
+  const th=THEMES[data.theme];
+  const likedKeys=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
+  const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const items=Array.from(likedKeys).map(k=>byKey.get(k)||{title:k}).filter(Boolean);
+  const [selected,setSelected]=useState(null);
+  const [showAll,setShowAll]=useState(false);
+  if(selected){
+    return(
+      <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+        <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          <button onClick={()=>setSelected(null)} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+          <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>{selected.title}</div>
+                {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
+                {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
+                {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+              </div>
+            </div>
+            {selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+      <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Likes</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
+        </div>
+        {items.length?(
+          !showAll?(
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>Movies</div>
+              <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
+                {items.slice(0,8).map((w,i)=>{
+                  const isLastPreview=i===Math.min(items.length,8)-1 && items.length>5;
+                  if(isLastPreview){
+                    return(
+                      <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setShowAll(true)}
+                        style={{width:76,height:114,flex:"0 0 auto",borderRadius:10,border:`1px solid ${th.border}`,background:th.card,color:th.accent,cursor:"pointer",fontSize:11,fontWeight:700}}>
+                        Show more
+                      </button>
+                    );
+                  }
+                  return(
+                    <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
+                      style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
+                      {w.poster?<img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>:<div style={{width:76,height:114,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center",borderRadius:10,border:`1px solid ${th.border}`,background:th.card}}>{w.title}</div>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ):(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {items.map((w,i)=>(
+                <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
+                  style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+                </button>
+              ))}
+            </div>
+          )
+        ):(
+          <div style={{fontSize:13,color:th.sub}}>No liked movies yet.</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -6372,7 +6667,7 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
   );
 }
 
-function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpenWatchlist,onOpenLiked}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -6393,7 +6688,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const [pickerOpen,setPickerOpen]=useState(false);
   const [pendingAvatar,setPendingAvatar]=useState(data.avatar);
   const [pendingPhoto,setPendingPhoto]=useState(data.customPhoto||null);
-  const archetype=getArchetype(data.logs);
+  const archetype=getArchetype(data.logs,data.tasteSeed||[]);
   const weekLogs=getWeekLogs(data.logs);
   const curAv=AVATARS.find(a=>a.id===data.avatar);
   const swipedRight=Object.entries(data.feedback||{}).filter(([,v])=>v==="right").map(([k])=>k);
@@ -6426,6 +6721,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
   const isHapon=data.theme==="hapon";
   const isMN=data.theme==="manila_nights";
   const profileScrollRef=useRef(null);
+  const statsAnchorRef=useRef(null);
   const getDominantFromImage=async(src)=>{
     if(paletteCache.current.has(src) || palettePending.current.has(src)) return;
     palettePending.current.add(src);
@@ -6546,6 +6842,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
         }}>{t.welcome_back} {isHapon
           ?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>
           :"🌟"}</p>
+        <div style={{display:"flex",justifyContent:"center",gap:26,marginTop:14,marginBottom:2}}>
+          <button onClick={()=>{}} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg>
+          </button>
+          <button onClick={onOpenLiked} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/></svg>
+          </button>
+          <button onClick={onOpenWatchlist} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>
+          </button>
+        </div>
       </div>
 
       {/* Archetype */}
@@ -6563,6 +6870,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady}){
       )}
 
       {/* Stats */}
+      <div ref={statsAnchorRef}/>
       {(()=>{
         const PH_TZ="Asia/Manila";
         const phDateFmt=new Intl.DateTimeFormat("en-CA",{timeZone:PH_TZ,year:"numeric",month:"2-digit",day:"2-digit"});
@@ -7975,8 +8283,9 @@ function App(){
   const [logPrefill,setLogPrefill]=useState("");
   const [logFromDiscover,setLogFromDiscover]=useState(false);
   const [showWatchlistPage,setShowWatchlistPage]=useState(false);
+  const [showLikedPage,setShowLikedPage]=useState(false);
 
-  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage;
+  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage;
 
   useEffect(()=>{
     if(!photosReady) return; // don't save until hydration is done
@@ -8287,8 +8596,8 @@ function App(){
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}} onOpenWatchlist={()=>setShowWatchlistPage(true)}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
@@ -8365,8 +8674,9 @@ function App(){
                 </div>
               )}
               {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
-              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)}/>}
-              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
+              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting}/>}
+              {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
+              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
         </div>
