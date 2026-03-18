@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:39:28.478Z",
+  "updatedAt": "2026-03-18T15:39:45.493Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2194,6 +2194,43 @@
       "omdbType": "movie",
       "tags": [
         "romantic",
+        "family"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "The Vault of Horror",
+      "year": "1973",
+      "genre": "Horror",
+      "genres": [
+        "Horror",
+        "Thriller"
+      ],
+      "director": "Roy Ward Baker",
+      "actor": "Curd Jürgens",
+      "actors": [
+        "Curd Jürgens",
+        "Terry-Thomas",
+        "Tom Baker"
+      ],
+      "plot": "An anthology of five horror stories shared by five men trapped in the basement of an office building.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODQzOGQzYmMtZTU4Ny00MjcwLWEyOTctNGQ0OWQxYTQ4ZjIwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 6.5,
+      "imdbVotes": 6426,
+      "imdbID": "tt0070868",
+      "runtime": "87 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "1 nomination",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "scary",
+        "dark",
         "family"
       ],
       "ph": false,
