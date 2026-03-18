@@ -1744,6 +1744,7 @@ function defaultData(){
     omdbCleanedAt:null,
     sharedSyncDone:false,
     sharedLastSyncAt:null,
+    offlinePosterCacheAt:null,
     weekHarmony:{},
     discoverCounts:{},discoverDate:null,
     discoverQueues:{},
@@ -2397,6 +2398,9 @@ const GH_ISSUES_URL=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`
 const GH_TOKEN_KEY="kwento_gh_token";
 const SHARED_QUEUE_KEY="kwento_shared_queue";
 const SHARED_PENDING_KEY="kwento_shared_pending_count";
+const OFFLINE_WATCHLIST_POSTERS=80;
+const OFFLINE_DISCOVER_POSTERS=20;
+const POSTER_MAX_BYTES=260*1024;
 const ALLOWED_OMDB_TYPES=new Set(["movie","series"]);
 function normalizeOmdbType(t){ return (t||"").toLowerCase().trim(); }
 function isAllowedOmdbType(t){ return ALLOWED_OMDB_TYPES.has(normalizeOmdbType(t)); }
@@ -4517,6 +4521,49 @@ function buildRelevantLocalLibrary(curated, logs, existing){
     if(!byKey.has(key)) byKey.set(key,m);
   });
   return Array.from(byKey.values());
+}
+function _normalizeWatchlistItems(d){
+  const raw=d.watchlist||d.watchlistMovies||d.watchlistItems||null;
+  if(!Array.isArray(raw)) return [];
+  return raw.map(x=>{
+    if(typeof x==="string") return {title:x};
+    return x||null;
+  }).filter(Boolean);
+}
+async function _fetchImageDataUrl(url){
+  if(!url) return null;
+  try{
+    const res=await fetch(url);
+    if(!res.ok) return null;
+    const blob=await res.blob();
+    if(blob.size>POSTER_MAX_BYTES) return null;
+    return await new Promise((resolve,reject)=>{
+      const fr=new FileReader();
+      fr.onload=()=>resolve(fr.result||null);
+      fr.onerror=()=>reject(fr.error);
+      fr.readAsDataURL(blob);
+    });
+  }catch(_){ return null; }
+}
+async function cachePostersForItems(items, limit){
+  const list=(items||[]).filter(Boolean).slice(0,limit);
+  const posterMap={};
+  for(const it of list){
+    const posterId=it.posterId||it.imdbID||`t_${_h(it.title||"")}`;
+    if(!posterId) continue;
+    const existing=await idbGet("poster_"+posterId);
+    if(existing) continue;
+    let poster=it.poster||null;
+    if(!poster){
+      const meta=await fetchMovieMeta(it.title,it.omdbType||null);
+      poster=meta?.poster||null;
+    }
+    const dataUrl=await _fetchImageDataUrl(poster);
+    if(dataUrl){
+      posterMap["poster_"+posterId]=dataUrl;
+    }
+  }
+  if(Object.keys(posterMap).length) await idbSetAll(posterMap);
 }
 
 function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}){
@@ -7456,6 +7503,19 @@ function App(){
       setData(d=>({...d,libraryMovies:relevant}));
     }catch(_){}
   },[]);
+  useEffect(()=>{
+    if(!photosReady) return;
+    const last=data.offlinePosterCacheAt?new Date(data.offlinePosterCacheAt).toDateString():null;
+    const today=new Date().toDateString();
+    if(last===today) return;
+    (async()=>{
+      const watchlist=_normalizeWatchlistItems(data);
+      await cachePostersForItems(watchlist,OFFLINE_WATCHLIST_POSTERS);
+      const discover=(data.discoverQueues?.movies)||[];
+      await cachePostersForItems(discover,OFFLINE_DISCOVER_POSTERS);
+      setData(d=>({...d,offlinePosterCacheAt:new Date().toISOString()}));
+    })();
+  },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.discoverQueues]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
 
   // ── OMDB library enrichment — runs silently in background, resumes daily ────
