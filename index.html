@@ -2477,6 +2477,15 @@ function queueSharedCandidate(item,source="unknown"){
   });
   _saveSharedQueue(queue);
 }
+async function queueSharedCandidateWithMeta(item,source="unknown"){
+  if(!item) return;
+  let enriched=item;
+  if(!enriched.poster){
+    const meta=await fetchMovieMeta(enriched.title, enriched.omdbType||null);
+    if(meta) enriched={...enriched,...meta};
+  }
+  queueSharedCandidate(enriched,source);
+}
 async function flushSharedQueue(){
   const token=_getGhToken();
   if(!token) return {ok:false,err:"No token"};
@@ -4579,7 +4588,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev}
           category:"movies",
         };
         onChange("libraryMovies",[...existing,newEntry]);
-        queueSharedCandidate(newEntry,"discover");
+        await queueSharedCandidateWithMeta(newEntry,"discover");
         flushSharedQueue();
       }
       setPool(prev=>prev.map(m=>m.title===currentItem.title?{...m,...meta}:m));
@@ -6850,7 +6859,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       onChange("libraryMovies",existing);
     }
     const newlyAdded=existing.filter(m=>titles.some(t=>(m.title||"").toLowerCase()===(t||"").toLowerCase()));
-    newlyAdded.forEach(m=>queueSharedCandidate(m,"manual_bulk"));
+    for(const m of newlyAdded){
+      await queueSharedCandidateWithMeta(m,"manual_bulk");
+    }
     flushSharedQueue();
     setOmdbBulkStatus(`Added ${added}, updated ${updated}, skipped ${skipped}, failed ${failed}.`);
     setOmdbBulkWorking(false);
@@ -7421,7 +7432,9 @@ function App(){
         const token=_getGhToken();
         const existing=data.libraryMovies||[];
         if(token && !data.sharedSyncDone && existing.length){
-          existing.forEach(m=>queueSharedCandidate(m,"local_migration"));
+          for(const m of existing){
+            await queueSharedCandidateWithMeta(m,"local_migration");
+          }
           const r=await flushSharedQueue();
           if(r.ok){
             setData(d=>({...d,sharedSyncDone:true}));
