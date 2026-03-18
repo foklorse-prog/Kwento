@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:51.126Z",
+  "updatedAt": "2026-03-18T08:05:51.707Z",
   "items": [
     {
       "title": "Mid90s",
@@ -181,6 +181,45 @@
         "crime",
         "gritty",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "One Battle After Another",
+      "year": "2025",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Paul Thomas Anderson",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Sean Penn",
+        "Benicio Del Toro"
+      ],
+      "plot": "When their enemy resurfaces after 16 years, a group of ex-revolutionaries reunite to rescue the daughter of one of their own.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzBkZmQ0NjMtNTZlMy00ZjdlLTg5ODUtYWFlNGM0YzE3MTg0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt30144839",
+      "imdbRating": 7.7,
+      "imdbVotes": 329147,
+      "imdbID": "tt30144839",
+      "runtime": "161 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 13 Oscars. 234 wins & 478 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "fast-paced",
+        "crime",
+        "gritty"
       ],
       "ph": false,
       "source": "manual_bulk"
