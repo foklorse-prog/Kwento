@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:42:22.488Z",
+  "updatedAt": "2026-03-18T08:42:24.368Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1408,6 +1408,41 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Magic Candies",
+      "year": "2024",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short"
+      ],
+      "director": "Daisuke Nishio",
+      "actor": "Yoshifumi Hasegawa",
+      "actors": [
+        "Yoshifumi Hasegawa",
+        "Hiroshi Iwasaki",
+        "Haruto Shima"
+      ],
+      "plot": "The other kids at the park never ask Dong-Dong to play. That's ok. He's fine just playing marbles on his own. One day, he buys a bag of colorful candies instead of new marbles. The first time he pops one of them into his mouth, hi...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODRhNzQ2YzUtMThhZC00NDJjLTg3YWQtZDQyNmEzZjdkODJmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt31888603",
+      "imdbRating": null,
+      "imdbVotes": 10,
+      "imdbID": "tt31888603",
+      "runtime": "21 min",
+      "rated": null,
+      "country": "Japan",
+      "language": "Japanese",
+      "awards": "1 nomination",
+      "omdbType": "movie",
+      "tags": [
+        "animated",
+        "family",
+        "Japanese"
       ],
       "ph": false,
       "source": "manual_bulk"
