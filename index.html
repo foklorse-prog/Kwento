@@ -2495,7 +2495,7 @@ async function flushSharedQueue(){
   if(!token) return {ok:false,err:"No token"};
   const queue=_loadSharedQueue();
   if(!queue.length) return {ok:true,empty:true};
-  const batch=queue.slice(0,200);
+  const batch=queue.slice(0,1);
   const body=[
     "AUTO-SUBMITTED MOVIE CANDIDATES",
     "",
@@ -2512,9 +2512,8 @@ async function flushSharedQueue(){
         "Content-Type":"application/json",
       },
       body:JSON.stringify({
-        title:`Library candidates (${batch.length})`,
-        body,
-        labels:["library-candidate"],
+        title:`Library candidate: ${batch[0]?.title||"Untitled"}`,
+        body
       })
     });
     if(!res.ok){
@@ -6785,7 +6784,6 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [ghTokenInput,setGhTokenInput]=useState("");
   const [ghStatus,setGhStatus]=useState("");
   const [sharedTotal,setSharedTotal]=useState(null);
-  const [pendingCount,setPendingCount]=useState(null);
 
   useEffect(()=>{
     setGhTokenInput(_getGhToken());
@@ -6798,34 +6796,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }catch(_){
       setSharedTotal(null);
     }
-    setPendingCount(_getSharedPendingCount());
   },[data.libraryMovies,ghStatus]);
-  useEffect(()=>{
-    (async()=>{
-      const token=_getGhToken();
-      if(!token) return;
-      try{
-        const res=await fetch(`${GH_ISSUES_URL}?labels=library-candidate&state=open&per_page=100`,{
-          headers:{
-            "Accept":"application/vnd.github+json",
-            "Authorization":"Bearer "+token,
-          }
-        });
-        if(!res.ok) return;
-        const issues=await res.json();
-        let count=0;
-        for(const it of issues){
-          const m=(it.body||"").match(/```json\\s*([\\s\\S]*?)```/i);
-          if(!m) continue;
-          try{
-            const payload=JSON.parse(m[1]);
-            count+=Array.isArray(payload.items)?payload.items.length:0;
-          }catch(_){}
-        }
-        setPendingCount(count);
-      }catch(_){}
-    })();
-  },[ghStatus]);
 
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
@@ -7030,9 +7001,6 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Shared sync status: ${_getGhToken() ? (data.sharedSyncDone ? "Synced" : "Not synced") : "No token"}`}
-        </p>
-        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
-          {`On queue: ${pendingCount!=null?pendingCount:"Unknown"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Last updated: ${data.sharedLastSyncAt ? new Date(data.sharedLastSyncAt).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
