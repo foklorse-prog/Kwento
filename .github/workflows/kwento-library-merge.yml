@@ -3,6 +3,10 @@ on:
   issues:
     types: [opened, edited, labeled]
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   merge:
     if: contains(github.event.issue.labels.*.name, 'library-candidate')
