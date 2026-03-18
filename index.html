@@ -6825,6 +6825,19 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       setSharedTotal(null);
     }
   },[data.libraryMovies,ghStatus]);
+  const refreshSharedLibrary=async()=>{
+    try{
+      const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
+      if(!res.ok) throw new Error("Fetch failed");
+      const json=await res.json();
+      const items=(json.items||json.library||json)||[];
+      setSharedTotal(Array.isArray(items)?items.length:0);
+      onChange("__batch__",{
+        sharedLastSyncAt:json.updatedAt||new Date().toISOString(),
+        sharedSyncDone:true
+      });
+    }catch(_){}
+  };
 
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
@@ -6922,6 +6935,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     const r=await flushSharedQueue();
     if(r.ok){
       setGhStatus(r.empty?"Queue empty.":"Sent to GitHub.");
+      if(!r.empty) refreshSharedLibrary();
     } else {
       setGhStatus(r.err||"Failed.");
     }
@@ -7482,7 +7496,11 @@ function App(){
           }
         }
         const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
-        setData(d=>({...d,libraryMovies:relevant,sharedLastSyncAt:new Date().toISOString()}));
+        setData(d=>({
+          ...d,
+          libraryMovies:relevant,
+          sharedLastSyncAt:json.updatedAt||new Date().toISOString()
+        }));
       }catch(_){}
     })();
   },[]);
