@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:38:38.145Z",
+  "updatedAt": "2026-03-18T15:38:56.005Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2090,6 +2090,43 @@
         "lighthearted",
         "animated",
         "family"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "A Romance of the Redwoods",
+      "year": "1917",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Cecil B. DeMille",
+      "actor": "Mary Pickford",
+      "actors": [
+        "Mary Pickford",
+        "Elliott Dexter",
+        "Tully Marshall"
+      ],
+      "plot": "A young girl travels west to live with her uncle during the California Gold Rush only to find that he has been killed by Indians and his identity assumed by an outlaw.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTRiZjFlY2YtYmJmZC00ZjQ3LTg3MzItNDdlMjNiZGZkNjg3XkEyXkFqcGdeQXVyMjcxNjI4NTk@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 6.2,
+      "imdbVotes": 866,
+      "imdbID": "tt0008519",
+      "runtime": "70 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "None",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "discover"
