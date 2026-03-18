@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:54.630Z",
+  "updatedAt": "2026-03-18T08:05:55.598Z",
   "items": [
     {
       "title": "Mid90s",
@@ -327,6 +327,41 @@
         "intense",
         "suspenseful",
         "historical"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "No Other Land",
+      "year": "2024",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "News"
+      ],
+      "director": "Yuval Abraham, Basel Adra, Hamdan Ballal",
+      "actor": "Yuval Abraham",
+      "actors": [
+        "Yuval Abraham",
+        "Basel Adra",
+        "Hamdan Ballal"
+      ],
+      "plot": "This film made by a Palestinian-Israeli collective shows the destruction of the occupied West Bank's Masafer Yatta by Israeli soldiers and the alliance which develops between the Palestinian activist Basel and Israeli journalist Y...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzdhODkyYmUtMzE3ZS00YmQxLThlMGItNTQwNGJmYTk3ZjE3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt30953759",
+      "imdbRating": 8.3,
+      "imdbVotes": 14732,
+      "imdbID": "tt30953759",
+      "runtime": "92 min",
+      "rated": "Not Rated",
+      "country": "Occupied Palestinian Territory, Norway, Denmark, France, Germany, Belgium",
+      "language": "Arabic, English, Hebrew",
+      "awards": "Won 1 Oscar. 68 wins & 31 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
