@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:07:01.153Z",
+  "updatedAt": "2026-03-18T08:07:01.904Z",
   "items": [
     {
       "title": "Mid90s",
@@ -611,6 +611,40 @@
         "fantasy",
         "magical",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Kokuho",
+      "year": "2025",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Sang-il Lee",
+      "actor": "Ai Mikami",
+      "actors": [
+        "Ai Mikami",
+        "Takahiro Miura",
+        "Emma Miyazawa"
+      ],
+      "plot": "In post-war Japan's economic boom, gangster family-born Kikuo Tachibana finds himself adopted by a kabuki actor. Despite life's challenges, he develops into a gifted performer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWQ3NzRhZmQtMjY0ZC00YTlkLTllZTktOTQyMGJlN2MxNDVmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt35231039",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "imdbID": "tt35231039",
+      "runtime": null,
+      "rated": null,
+      "country": "Japan",
+      "language": "Japanese",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "Japanese"
       ],
       "ph": false,
       "source": "manual_bulk"
