@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:02:18.802Z",
+  "updatedAt": "2026-03-18T08:05:46.715Z",
   "items": [
     {
       "title": "Mid90s",
@@ -35,6 +35,40 @@
         "fun",
         "lighthearted",
         "friendship"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Sentimental Value",
+      "year": "2025",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Joachim Trier",
+      "actor": "Renate Reinsve",
+      "actors": [
+        "Renate Reinsve",
+        "Stellan Skarsgård",
+        "Inga Ibsdotter Lilleaas"
+      ],
+      "plot": "An intimate exploration of family, memories, and the reconciliatory power of art.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTMwMTk0Y2QtY2VhNy00OGYwLThkMjMtZjkwMGI3MTJiMjAyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt27714581",
+      "imdbRating": 7.8,
+      "imdbVotes": 40491,
+      "imdbID": "tt27714581",
+      "runtime": "133 min",
+      "rated": "R",
+      "country": "Norway, Germany, Denmark, France, Sweden, United Kingdom, Turkey",
+      "language": "Norwegian, English, French",
+      "awards": "Nominated for 9 Oscars. 52 wins & 261 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
