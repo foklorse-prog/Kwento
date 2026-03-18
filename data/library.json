@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T09:14:48.156Z",
+  "updatedAt": "2026-03-18T13:16:30.095Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1805,6 +1805,44 @@
       ],
       "ph": false,
       "source": "manual_bulk"
+    },
+    {
+      "title": "Sun, Sand & Romance",
+      "year": "2017",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Family"
+      ],
+      "director": "Mark Rosman",
+      "actor": "Tricia Helfer",
+      "actors": [
+        "Tricia Helfer",
+        "Paul Campbell",
+        "Scott Elrod"
+      ],
+      "plot": "Kate reunites with an old friend when her boyfriend spends too much time working during their vacation.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmRmOGE4OGYtNjgwYS00MGRiLThlOTAtOThhMjQyYjIzM2NlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 6.1,
+      "imdbVotes": 1570,
+      "imdbID": "tt7064954",
+      "runtime": "84 min",
+      "rated": "TV-G",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action",
+        "fast-paced",
+        "friendship"
+      ],
+      "ph": false,
+      "source": "discover"
     }
   ]
 }
