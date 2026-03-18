@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:42:14.992Z",
+  "updatedAt": "2026-03-18T08:42:17.039Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1303,6 +1303,45 @@
         "war",
         "epic",
         "historical"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Girl with the Needle",
+      "year": "2024",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "History"
+      ],
+      "director": "Magnus von Horn",
+      "actor": "Vic Carmen Sonne",
+      "actors": [
+        "Vic Carmen Sonne",
+        "Trine Dyrholm",
+        "Besir Zeciri"
+      ],
+      "plot": "Copenhagen 1919: A young worker finds herself unemployed and pregnant. She meets Dagmar, who runs an underground adoption agency. A strong connection grows but her world shatters when she stumbles on the shocking truth behind her ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzdhMzMzMjMtOWVmYy00MWExLTlhZTAtYjQyNzY3YTY2ZWJkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt10236164",
+      "imdbRating": 7.5,
+      "imdbVotes": 15236,
+      "imdbID": "tt10236164",
+      "runtime": "123 min",
+      "rated": "Unrated",
+      "country": "Denmark, Poland, Sweden, France, Belgium",
+      "language": "Danish",
+      "awards": "Nominated for 1 Oscar. 24 wins & 38 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "gritty",
+        "historical",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
