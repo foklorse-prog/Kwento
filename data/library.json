@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:55.598Z",
+  "updatedAt": "2026-03-18T08:05:56.739Z",
   "items": [
     {
       "title": "Mid90s",
@@ -362,6 +362,42 @@
         "documentary",
         "informative",
         "French"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Memoir of a Snail",
+      "year": "2024",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Drama"
+      ],
+      "director": "Adam Elliot",
+      "actor": "Jacki Weaver",
+      "actors": [
+        "Jacki Weaver",
+        "Sarah Snook",
+        "Charlotte Belsey"
+      ],
+      "plot": "A bittersweet memoir of a melancholic woman called Grace Pudel - a hoarder of snails, romance novels, and guinea pigs.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWQzMzE3ZTUtZmYxMy00NzAyLWIyMzEtZDFlNDgwNzI3MGJjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt23770030",
+      "imdbRating": 7.8,
+      "imdbVotes": 24588,
+      "imdbID": "tt23770030",
+      "runtime": "95 min",
+      "rated": "R",
+      "country": "Australia",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 19 wins & 73 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated",
+        "family"
       ],
       "ph": false,
       "source": "manual_bulk"
