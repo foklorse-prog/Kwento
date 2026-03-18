@@ -1,5 +1,43 @@
 {
   "version": 1,
-  "updatedAt": null,
-  "items": []
+  "updatedAt": "2026-03-18T08:02:18.802Z",
+  "items": [
+    {
+      "title": "Mid90s",
+      "year": "2018",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Jonah Hill",
+      "actor": "Sunny Suljic",
+      "actors": [
+        "Sunny Suljic",
+        "Katherine Waterston",
+        "Lucas Hedges"
+      ],
+      "plot": "Follows Stevie, a thirteen-year-old in 1990s-era Los Angeles who spends his summer navigating between his troubled home life and a group of new friends that he meets at a Motor Avenue skate shop.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjYwYmVjOWMtZDJmOS00N2QyLWFjMjUtYTUwN2JkMjViZTIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5613484",
+      "imdbRating": 7.4,
+      "imdbVotes": 83772,
+      "imdbID": "tt5613484",
+      "runtime": "85 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "4 wins & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "friendship"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    }
+  ]
 }
