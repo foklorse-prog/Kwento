@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:56:19.481Z",
+  "updatedAt": "2026-03-18T08:56:28.312Z",
   "items": [
     {
       "title": "Mid90s",
@@ -1623,6 +1623,45 @@
       "tags": [
         "fun",
         "lighthearted"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "The Secret Agent",
+      "year": "2025",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "Kleber Mendonça Filho",
+      "actor": "Robson Andrade",
+      "actors": [
+        "Robson Andrade",
+        "Rubens Santos",
+        "Licínio Januário"
+      ],
+      "plot": "In 1977, a technology expert flees from a mysterious past and returns to his hometown of Recife in search of peace. He soon realizes that the city is far from being the refuge he seeks.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDlkMzNhYzgtNTk1Yi00M2I1LTlkOTMtY2RmZGU3YzVmMzE2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt27847051",
+      "imdbRating": 7.3,
+      "imdbVotes": 28478,
+      "imdbID": "tt27847051",
+      "runtime": "161 min",
+      "rated": "R",
+      "country": "Brazil, France, Netherlands, Germany",
+      "language": "Portuguese, German, English",
+      "awards": "Nominated for 4 Oscars. 76 wins & 149 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "gritty",
+        "mysterious",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
