@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T08:05:52.708Z",
+  "updatedAt": "2026-03-18T08:05:53.816Z",
   "items": [
     {
       "title": "Mid90s",
@@ -254,6 +254,41 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "manual_bulk"
+    },
+    {
+      "title": "Soundtrack to a Coup d'Etat",
+      "year": "2024",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Music"
+      ],
+      "director": "Johan Grimonprez",
+      "actor": "Patrice Lumumba",
+      "actors": [
+        "Patrice Lumumba",
+        "Dag Hammarskjöld",
+        "Louis Armstrong"
+      ],
+      "plot": "Jazz and decolonization are entwined in this historical rollercoaster that rewrites the Cold War episode that led musicians Abbey Lincoln and Max Roach to crash the UN Security Council in protest against the murder of Patrice Lumu...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWIzNmIxYTUtMTdiMi00Zjk2LWJlYjktMzA5ZTA3YTExY2VkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14452174",
+      "imdbRating": 7.8,
+      "imdbVotes": 3687,
+      "imdbID": "tt14452174",
+      "runtime": "150 min",
+      "rated": null,
+      "country": "Belgium, France, Netherlands",
+      "language": "Dutch, English, Russian, French, Arabic",
+      "awards": "Nominated for 1 Oscar. 17 wins & 35 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "documentary",
+        "informative",
+        "French"
       ],
       "ph": false,
       "source": "manual_bulk"
