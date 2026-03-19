@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-18T15:40:12.361Z",
+  "updatedAt": "2026-03-19T09:27:11.639Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2300,6 +2300,42 @@
         "scary",
         "dark",
         "mysterious"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Spirited Away",
+      "year": "2001",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Family"
+      ],
+      "director": "Hayao Miyazaki",
+      "actor": "Miyu Irino",
+      "actors": [
+        "Miyu Irino",
+        "Rumi Hiiragi",
+        "Mari Natsuki"
+      ],
+      "plot": "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches and spirits, and where humans are changed into beasts.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTEyNmEwOWUtYzkyOC00ZTQ4LTllZmUtMjk0Y2YwOGUzYjRiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8.6,
+      "imdbVotes": 954145,
+      "imdbID": "tt0245429",
+      "runtime": "124 min",
+      "rated": "PG",
+      "country": "Japan, United States",
+      "language": "Japanese, English",
+      "awards": "Won 1 Oscar. 58 wins & 31 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated",
+        "family",
+        "Japanese"
       ],
       "ph": false,
       "source": "discover"
