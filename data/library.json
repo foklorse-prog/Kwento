@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-19T09:27:11.639Z",
+  "updatedAt": "2026-03-19T09:27:27.585Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2336,6 +2336,43 @@
         "animated",
         "family",
         "Japanese"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "Inception",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Christopher Nolan",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Joseph Gordon-Levitt",
+        "Elliot Page"
+      ],
+      "plot": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO, but his tragic past may doom the project and his team to disaster.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8.8,
+      "imdbVotes": 2793322,
+      "imdbID": "tt1375666",
+      "runtime": "148 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom",
+      "language": "English, Japanese, French",
+      "awards": "Won 4 Oscars. 160 wins & 220 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "fast-paced",
+        "sci-fi",
+        "futuristic"
       ],
       "ph": false,
       "source": "discover"
