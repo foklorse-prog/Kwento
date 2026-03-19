@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-19T09:27:27.585Z",
+  "updatedAt": "2026-03-19T14:59:05.663Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2373,6 +2373,44 @@
         "fast-paced",
         "sci-fi",
         "futuristic"
+      ],
+      "ph": false,
+      "source": "discover"
+    },
+    {
+      "title": "La La Land",
+      "year": "2016",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Music"
+      ],
+      "director": "Damien Chazelle",
+      "actor": "Ryan Gosling",
+      "actors": [
+        "Ryan Gosling",
+        "Emma Stone",
+        "Rosemarie DeWitt"
+      ],
+      "plot": "When Sebastian, a pianist, and Mia, an actress, follow their passion and achieve success in their respective fields, they find themselves torn between their love for each other and their careers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzUzNDM2NzM2MV5BMl5BanBnXkFtZTgwNTM3NTg4OTE@._V1_SX300.jpg",
+      "posterId": null,
+      "imdbRating": 8,
+      "imdbVotes": 751618,
+      "imdbID": "tt3783958",
+      "runtime": "128 min",
+      "rated": "PG-13",
+      "country": "United States, Hong Kong",
+      "language": "English, Cantonese",
+      "awards": "Won 6 Oscars. 242 wins & 307 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "romantic"
       ],
       "ph": false,
       "source": "discover"
