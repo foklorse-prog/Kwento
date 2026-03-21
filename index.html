@@ -2726,7 +2726,23 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const dynMovies=(data.libraryMovies||[]).map(m=>({...m,_cat:"movies"}));
   const libTitles=new Set((LIBRARY.movies||[]).map(m=>m.title.toLowerCase()));
   const freshDyn=dynMovies.filter(m=>!libTitles.has(m.title.toLowerCase()));
-  const fullPool=cat==="movies"||!cat?[...pool,...freshDyn]:pool;
+  // Search fallback should also see shared JSON cache, even if item was not curated into local library.
+  let sharedDyn=[];
+  try{
+    const raw=localStorage.getItem("kwento_shared_library_cache");
+    const items=raw?JSON.parse(raw):[];
+    if(Array.isArray(items)){
+      sharedDyn=items.map(m=>({...m,_cat:"movies"}));
+    }
+  }catch(_){}
+  const dedupeTitle=new Set();
+  const mergedMovies=[...freshDyn,...sharedDyn].filter(m=>{
+    const k=(m.title||"").toLowerCase();
+    if(!k||dedupeTitle.has(k)) return false;
+    dedupeTitle.add(k);
+    return true;
+  });
+  const fullPool=cat==="movies"||!cat?[...pool,...mergedMovies]:pool;
       const wordStart=i=>{
         const t=i.title.toLowerCase();
         if(t.startsWith(lq)) return true;
