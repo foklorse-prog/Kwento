@@ -4878,9 +4878,21 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         const g=(s.genre||"").toLowerCase(); if(g) signalCounts[g]=(signalCounts[g]||0)+3;
         (s.tags||[]).forEach(t=>{const k=(t||"").toLowerCase(); if(k) signalCounts[k]=(signalCounts[k]||0)+2;});
       });
-      const topSignals=Object.entries(signalCounts).sort((a,b)=>b[1]-a[1]).map(([k])=>k).filter(k=>k.length>=4).slice(0,6);
-      const fallbackTerms=["drama","thriller","comedy","romance","mystery","sci-fi","adventure","animation","crime","fantasy","action"];
-      const terms=[...new Set([...topSignals,...fallbackTerms])].slice(0,10);
+      const topSignals=Object.entries(signalCounts).sort((a,b)=>b[1]-a[1]).map(([k])=>k).filter(k=>k.length>=4).slice(0,4);
+      const seedTitles=(data.logs||[])
+        .filter(l=>l.category==="movies")
+        .map(l=>l.title||"")
+        .filter(Boolean)
+        .slice(0,4);
+      const seedDirectors=(data.libraryMovies||[])
+        .filter(m=>(m.director||"").trim()!=="")
+        .map(m=>m.director)
+        .filter(Boolean)
+        .slice(0,4);
+      const curatedFallback=["Christopher Nolan","Denis Villeneuve","Hayao Miyazaki","Bong Joon-ho","Martin Scorsese","A24","Pixar"];
+      const terms=[...new Set([...seedTitles,...seedDirectors,...topSignals,...curatedFallback])]
+        .filter(Boolean)
+        .slice(0,10);
       const add=[];
       let callBudget=28;
       for(const term of terms){
@@ -4977,17 +4989,19 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const todayCounts=data.discoverDate===today?(data.discoverCounts||{}):{};
   const usedToday=todayCounts[cat]||0;
   const canGenerate=data.betaMode||usedToday<FREE_LIMIT;
+  const movieLockedByLimit=(cat==="movies"&&!data.betaMode&&!canGenerate);
 
   // Define currentItem before all effects so they can reference it safely
   const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
-  const description=currentItem?generateDescription(currentItem,data.logs,data.feedback,poolIdx):"";
-  const likedKey=(currentItem?.imdbID||currentItem?.title||"").toLowerCase();
+  const displayItem=movieLockedByLimit?null:currentItem;
+  const description=displayItem?generateDescription(displayItem,data.logs,data.feedback,poolIdx):"";
+  const likedKey=(displayItem?.imdbID||displayItem?.title||"").toLowerCase();
   const likedMap=data.likedSuggestions||{};
   const isLiked=!!likedMap[likedKey];
   const interactedMap=data.discoverInteractions||{};
   const watchlist=watchlistAll;
   const isWatchlisted=!!watchlist.find(w=>(w.imdbID||w.title||"").toLowerCase()===likedKey);
-  const isLogged=!!(data.logs||[]).find(l=>l.category==="movies"&&((l.imdbID&&currentItem?.imdbID&&l.imdbID===currentItem.imdbID)||((l.title||"").toLowerCase()===(currentItem?.title||"").toLowerCase())));
+  const isLogged=!!(data.logs||[]).find(l=>l.category==="movies"&&((l.imdbID&&displayItem?.imdbID&&l.imdbID===displayItem.imdbID)||((l.title||"").toLowerCase()===(displayItem?.title||"").toLowerCase())));
   const [reminderMovie,setReminderMovie]=useState(null);
   const [reminderAt,setReminderAt]=useState(()=>{
     const d=new Date();
@@ -5110,10 +5124,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(!currentItem){
       let rebuilt=buildFreshPool();
       if((!rebuilt||!rebuilt.length) && data.betaMode){
-        rebuilt=buildPremiumFallbackPool();
-      }
-      if((!rebuilt||!rebuilt.length) && data.betaMode){
-        refillFromOmdbIfNeeded();
+        const online=(typeof navigator!=="undefined")?navigator.onLine:true;
+        if(online){
+          refillFromOmdbIfNeeded();
+        }else{
+          rebuilt=buildPremiumFallbackPool();
+        }
       }
       setPool(rebuilt);
       setPoolIdx(0);
@@ -5129,10 +5145,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(nextPool.length) nextPool.splice(removeIdx,1);
     let finalPool=nextPool.length?nextPool:buildFreshPool();
     if((!finalPool||!finalPool.length) && data.betaMode){
-      finalPool=buildPremiumFallbackPool();
-    }
-    if((!finalPool||!finalPool.length) && data.betaMode){
-      refillFromOmdbIfNeeded();
+      const online=(typeof navigator!=="undefined")?navigator.onLine:true;
+      if(online){
+        refillFromOmdbIfNeeded();
+      }else{
+        finalPool=buildPremiumFallbackPool();
+      }
     }
     const newIdx=0;
     setPool(finalPool);
@@ -5340,45 +5358,45 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
           </div>
 
           {/* Suggestion */}
-          {currentItem?(
+          {displayItem?(
             <>
               {/* Poster + title row for movies */}
               <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:14}}>
-                {cat==="movies"&&currentItem.poster&&(
-                  <img src={currentItem.poster} alt={currentItem.title}
+                {cat==="movies"&&displayItem.poster&&(
+                  <img src={displayItem.poster} alt={displayItem.title}
                     style={{width:64,height:96,objectFit:"cover",borderRadius:8,flexShrink:0,boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}
                     onError={e=>e.target.style.display="none"}
                   />
                 )}
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:th.text,lineHeight:1.3}}>
-                    {currentItem.title}
-                    {currentItem.category==="movies"&&(()=>{const y=currentItem.year||MOVIE_YEARS[currentItem.title];return y?<span style={{fontSize:13,fontWeight:400,opacity:0.55}}> ({y})</span>:null;})()}
+                    {displayItem.title}
+                    {displayItem.category==="movies"&&(()=>{const y=displayItem.year||MOVIE_YEARS[displayItem.title];return y?<span style={{fontSize:13,fontWeight:400,opacity:0.55}}> ({y})</span>:null;})()}
                   </div>
-                  {cat==="movies"&&currentItem.imdbRating&&(
+                  {cat==="movies"&&displayItem.imdbRating&&(
                     <div style={{fontSize:11,color:th.sub,marginTop:4}}>
-                      ⭐ {currentItem.imdbRating}/10
-                      {currentItem.imdbVotes&&<span style={{opacity:0.6}}> · {Number(currentItem.imdbVotes).toLocaleString()} votes</span>}
+                      ⭐ {displayItem.imdbRating}/10
+                      {displayItem.imdbVotes&&<span style={{opacity:0.6}}> · {Number(displayItem.imdbVotes).toLocaleString()} votes</span>}
                     </div>
                   )}
-                  {cat==="movies"&&currentItem.genre&&(
+                  {cat==="movies"&&displayItem.genre&&(
                     <div style={{fontSize:11,color:th.sub,marginTop:3}}>
-                      Genre: <span style={{color:th.text,opacity:0.88}}>{currentItem.genre}</span>
+                      Genre: <span style={{color:th.text,opacity:0.88}}>{displayItem.genre}</span>
                     </div>
                   )}
-                  {cat==="movies"&&currentItem.director&&(
+                  {cat==="movies"&&displayItem.director&&(
                     <div style={{fontSize:11,color:th.sub,marginTop:2}}>
-                      Director: <span style={{color:th.text,opacity:0.88}}>{currentItem.director}</span>
+                      Director: <span style={{color:th.text,opacity:0.88}}>{displayItem.director}</span>
                     </div>
                   )}
                 </div>
               </div>
               {/* Plot if available, else Why this for you */}
               <div style={{padding:"12px 14px",borderRadius:14,background:`${catInfo.color}12`,borderLeft:`3px solid ${catInfo.color}`,marginBottom:16}}>
-                {cat==="movies"&&currentItem.plot?(
+                {cat==="movies"&&displayItem.plot?(
                   <>
                     <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Plot</div>
-                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,opacity:0.85}}>{currentItem.plot}</div>
+                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,opacity:0.85}}>{displayItem.plot}</div>
                   </>
                 ):(
                   <>
@@ -5389,7 +5407,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
               </div>
               {/* Food: find near me */}
               {cat==="food"&&(
-                <button onClick={()=>handleFindNearMe(currentItem.title)}
+                <button onClick={()=>handleFindNearMe(displayItem.title)}
                   style={{width:"100%",padding:"9px",borderRadius:11,background:"transparent",
                     border:`1px solid ${th.border}`,fontSize:12,fontWeight:600,color:th.sub,
                     display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",marginBottom:12}}>
@@ -5399,17 +5417,24 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
             </>
           ):(
             <div style={{textAlign:"center",padding:"28px 0",color:th.sub}}>
-              <div style={{fontSize:32,marginBottom:8}}>🌿</div>
-              <div style={{fontSize:13}}>Log more to unlock suggestions</div>
+              <div style={{fontSize:32,marginBottom:8}}>{movieLockedByLimit?"🔒":"🌿"}</div>
+              <div style={{fontSize:13}}>
+                {movieLockedByLimit?"Daily movie limit reached":"Log more to unlock suggestions"}
+              </div>
+              {movieLockedByLimit&&(
+                <div style={{fontSize:11,marginTop:6,opacity:0.85}}>
+                  Upgrade to Premium for more movie suggestions today.
+                </div>
+              )}
             </div>
           )}
 
-          {currentItem&&cat==="movies"&&(
+          {displayItem&&cat==="movies"&&(
             <div style={{display:"flex",gap:8,marginTop:2}}>
               <ActionBtn onClick={()=>{
-                const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+                const key=(displayItem.imdbID||displayItem.title||"").toLowerCase();
                 markInteracted(key);
-                onOpenMovieLog&&onOpenMovieLog(currentItem);
+                onOpenMovieLog&&onOpenMovieLog(displayItem);
               }} active={isLogged} title="Log">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill={isLogged?catInfo.color:"none"} stroke={isLogged?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
@@ -5432,12 +5457,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
               </ActionBtn>
             </div>
           )}
-          {currentItem&&cat==="movies"&&!canGenerate&&(
+          {displayItem&&cat==="movies"&&!canGenerate&&(
             <div style={{fontSize:11,color:th.sub,marginTop:8,textAlign:"center"}}>
               Daily generate limit reached.
             </div>
           )}
-          {currentItem&&cat!=="movies"&&(
+          {displayItem&&cat!=="movies"&&(
             canGenerate?(
               <button onClick={handleGenerate} style={{
                 width:"100%",padding:"11px",borderRadius:13,
