@@ -4479,7 +4479,30 @@ const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
 function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}) {
-  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
+  const signalLogs = [
+    ...(logs||[])
+      .filter(l=>!l.fromHealthKit)
+      .map(l=>({
+        ...l,
+        tags:[
+          ...((l.tags||[]).map(t=>(t||"").toLowerCase()).filter(Boolean)),
+          ...((l.genre&&l.category==="movies")?[(l.genre||"").toLowerCase()]:[]),
+          ...((l.genres||[]).map(g=>(g||"").toLowerCase()).filter(Boolean)),
+        ],
+      })),
+    ...((tasteSeed||[])
+      .filter(s=>(s.category||"movies")==="movies")
+      .map(s=>({
+        category:"movies",
+        tags:[
+          ...((s.tags||[]).map(t=>(t||"").toLowerCase()).filter(Boolean)),
+          ...((s.genre)?[(s.genre||"").toLowerCase()]:[]),
+        ],
+        date:s.savedAt||new Date().toISOString(),
+        _weight:s.signal==="like"?2.4:1.4,
+      }))),
+  ];
+  const tc = buildTagScore(signalLogs, feedback);
   let items = LIBRARY[cat]||[];
   if(cat==="movies" && libraryMovies && libraryMovies.length){
     const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
@@ -4612,9 +4635,13 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
           let overlap=0;
           itemSignals.forEach(s=>{if(loggedGenres.has(s)) overlap++;});
           const overlapRatio=overlap/itemSignals.size;
-          const familiar=overlapRatio*7;       // 70%
-          const exploratory=(1-overlapRatio)*3; // 30%
+          const familiar=overlapRatio*12;       // stronger familiarity pull
+          const exploratory=(1-overlapRatio)*2; // still allow exploration
           score+=familiar+exploratory;
+          if(loggedGenres.size>=5 && overlap===0){
+            // Once we know enough about taste, deprioritize fully unrelated movies.
+            score-=10;
+          }
         }
         // Classic bonus
         if(itemYear&&itemYear<1990&&i.imdbRating>=8.0) score+=6;
@@ -4790,6 +4817,153 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     watchlistKeys,
     data.discoverSkipLastAt||{}
   ));
+  const buildPremiumFallbackPool=()=>{
+    if(cat!=="movies"||!data.betaMode) return [];
+    const items=[...(data.libraryMovies||[]),...(LIBRARY.movies||[])].filter(isActualMovieOrSeries);
+    const seen=new Set();
+    const uniq=items.filter(i=>{
+      const key=(i.imdbID||normTitle(i.title)||"").toLowerCase();
+      if(!key||seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const tc=buildTagScore([
+      ...(data.logs||[]).filter(l=>l.category==="movies"&&!l.fromHealthKit),
+      ...((data.tasteSeed||[]).filter(s=>(s.category||"movies")==="movies").map(s=>({
+        category:"movies",tags:s.tags||[],_weight:s.signal==="like"?2.4:1.4,date:s.savedAt||new Date().toISOString()
+      })))
+    ],data.feedback||{});
+    const relaxed=uniq
+      .filter(i=>{
+        const key=(i.imdbID||i.title||"").toLowerCase();
+        const titleKey=normTitle(i.title);
+        if(key&&likedKeysSet.has(key)) return false;
+        if(titleKey&&likedKeysSet.has(titleKey)) return false;
+        if(key&&watchKeysSet.has(key)) return false;
+        if(titleKey&&watchKeysSet.has(titleKey)) return false;
+        if(key&&loggedImdbKeys.has(key)) return false;
+        if(titleKey&&loggedTitleKeys.has(titleKey)) return false;
+        return true;
+      })
+      .map(i=>{
+        const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[(t||"").toLowerCase()]||0),0);
+        return {...i,category:"movies",score:(Math.random()*2)+(tagScore*10)+(i.imdbRating?i.imdbRating*0.25:0)};
+      })
+      .sort((a,b)=>b.score-a.score||Math.random()-0.5);
+    return sanitizePool(relaxed);
+  };
+  const refillInFlightRef=useRef(false);
+  const refillLastAtRef=useRef(0);
+  const refillFromOmdbIfNeeded=async()=>{
+    if(cat!=="movies"||!data.betaMode) return;
+    const now=Date.now();
+    if(refillInFlightRef.current) return;
+    if(now-refillLastAtRef.current<15000) return;
+    refillInFlightRef.current=true;
+    refillLastAtRef.current=now;
+    try{
+      const existingById=new Set((data.libraryMovies||[]).map(m=>(m.imdbID||"").toLowerCase()).filter(Boolean));
+      const existingByTitle=new Set((data.libraryMovies||[]).map(m=>normTitle(m.title||"")).filter(Boolean));
+      const interacted=new Set([
+        ...(data.logs||[]).filter(l=>l.category==="movies").flatMap(l=>[(l.imdbID||"").toLowerCase(),normTitle(l.title||"")]),
+        ...Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).flatMap(([k])=>[(k||"").toLowerCase(),normTitle(k||"")]),
+        ..._normalizeWatchlistItems(data).flatMap(w=>[(w.imdbID||"").toLowerCase(),normTitle(w.title||"")]),
+      ].filter(Boolean));
+      const signalCounts={};
+      (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
+        const g=(l.genre||"").toLowerCase(); if(g) signalCounts[g]=(signalCounts[g]||0)+2;
+        (l.tags||[]).forEach(t=>{const k=(t||"").toLowerCase(); if(k) signalCounts[k]=(signalCounts[k]||0)+1;});
+      });
+      (data.tasteSeed||[]).filter(s=>(s.category||"movies")==="movies").forEach(s=>{
+        const g=(s.genre||"").toLowerCase(); if(g) signalCounts[g]=(signalCounts[g]||0)+3;
+        (s.tags||[]).forEach(t=>{const k=(t||"").toLowerCase(); if(k) signalCounts[k]=(signalCounts[k]||0)+2;});
+      });
+      const topSignals=Object.entries(signalCounts).sort((a,b)=>b[1]-a[1]).map(([k])=>k).filter(k=>k.length>=4).slice(0,6);
+      const fallbackTerms=["drama","thriller","comedy","romance","mystery","sci-fi","adventure","animation","crime","fantasy","action"];
+      const terms=[...new Set([...topSignals,...fallbackTerms])].slice(0,10);
+      const add=[];
+      let callBudget=28;
+      for(const term of terms){
+        if(callBudget<=0||add.length>=18) break;
+        for(let page=1; page<=2; page++){
+          if(callBudget<=0||add.length>=18) break;
+          let j=null;
+          try{
+            const r=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(term)}&type=movie&page=${page}`);
+            callBudget--;
+            j=await r.json();
+          }catch(_){ break; }
+          if(!j||j.Response==="False"||!j.Search) break;
+          for(const it of j.Search){
+            if(callBudget<=0||add.length>=18) break;
+            const sid=(it.imdbID||"").toLowerCase();
+            if(!sid||existingById.has(sid)||interacted.has(sid)) continue;
+            let d=null;
+            try{
+              const dr=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${it.imdbID}&plot=short`);
+              callBudget--;
+              d=await dr.json();
+            }catch(_){ continue; }
+            if(!d||d.Response==="False") continue;
+            const omdbType=normalizeOmdbType(d.Type);
+            if(!isAllowedOmdbType(omdbType)) continue;
+            if(isListLikeTitle(d.Title)) continue;
+            const titleKey=normTitle(d.Title||"");
+            if(!titleKey||existingByTitle.has(titleKey)||interacted.has(titleKey)) continue;
+            const imdbRating=d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null;
+            const imdbVotes=d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt((d.imdbVotes||"").replace(/,/g,"")):null;
+            const ph=d.Country&&d.Country.toLowerCase().includes("philippines");
+            if(imdbRating!=null&&imdbRating<6.0) continue;
+            if(!ph&&imdbVotes!=null&&imdbVotes<1000) continue;
+            const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
+            const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
+            const movie={
+              title:d.Title||it.Title,
+              year:d.Year?d.Year.slice(0,4):null,
+              genre:genres[0]||"Film",
+              genres,
+              director:d.Director&&d.Director!=="N/A"?d.Director:null,
+              actor:actors[0]||null,
+              actors,
+              plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
+              poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
+              posterId:d.imdbID||`t_${_h(d.Title||it.Title||"")}`,
+              imdbID:d.imdbID&&d.imdbID!=="N/A"?d.imdbID:null,
+              imdbRating,
+              imdbVotes,
+              awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
+              omdbType,
+              isNominee:isNomineeFromAwards(d.Awards),
+              tags:buildTagsFromOmdb(d),
+              ph:!!ph,
+              _fromOmdb:true,
+              category:"movies",
+            };
+            add.push(movie);
+            existingById.add((movie.imdbID||"").toLowerCase());
+            existingByTitle.add(normTitle(movie.title||""));
+          }
+        }
+      }
+      if(add.length){
+        onChange("libraryMovies",[...(data.libraryMovies||[]),...add]);
+        setTimeout(()=>{
+          const next=buildFreshPool();
+          if(next&&next.length){
+            setPool(next);
+            setPoolIdx(0);
+            onChange("__batch__",{
+              discoverQueues:{...(data.discoverQueues||{}),[cat]:next},
+              discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+              discoverDate:today,
+            });
+          }
+        },80);
+      }
+    } finally {
+      refillInFlightRef.current=false;
+    }
+  };
 
   // Per-category queue — persisted in data.discoverQueues
   const [pool,setPool]=useState(()=>{
@@ -4855,6 +5029,18 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       discoverDate:today,
     });
   },[currentItem?.imdbID,currentItem?.title,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
+  useEffect(()=>{
+    if(cat!=="movies"||!data.betaMode) return;
+    if(pool&&pool.length) return;
+    refillFromOmdbIfNeeded();
+  },[cat,data.betaMode,pool?.length,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
+  useEffect(()=>{
+    // Premium prefetch: refill before queue fully empties.
+    if(cat!=="movies"||!data.betaMode) return;
+    const remaining=Math.max(0,(pool||[]).length-poolIdx);
+    if(remaining>3) return;
+    refillFromOmdbIfNeeded();
+  },[cat,data.betaMode,pool?.length,poolIdx]);
   useEffect(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return;
@@ -4922,7 +5108,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const {recordSkip=false}=opts;
     if(!canGenerate) return false;
     if(!currentItem){
-      const rebuilt=buildFreshPool();
+      let rebuilt=buildFreshPool();
+      if((!rebuilt||!rebuilt.length) && data.betaMode){
+        rebuilt=buildPremiumFallbackPool();
+      }
+      if((!rebuilt||!rebuilt.length) && data.betaMode){
+        refillFromOmdbIfNeeded();
+      }
       setPool(rebuilt);
       setPoolIdx(0);
       onChange("__batch__",{
@@ -4935,7 +5127,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextPool=[...pool];
     const removeIdx=Math.min(poolIdx,Math.max(nextPool.length-1,0));
     if(nextPool.length) nextPool.splice(removeIdx,1);
-    const finalPool=nextPool.length?nextPool:buildFreshPool();
+    let finalPool=nextPool.length?nextPool:buildFreshPool();
+    if((!finalPool||!finalPool.length) && data.betaMode){
+      finalPool=buildPremiumFallbackPool();
+    }
+    if((!finalPool||!finalPool.length) && data.betaMode){
+      refillFromOmdbIfNeeded();
+    }
     const newIdx=0;
     setPool(finalPool);
     setPoolIdx(newIdx);
@@ -7899,6 +8097,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           {`Shared library total: ${sharedTotal!=null?sharedTotal:"Unknown"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`Local movie library total: ${(data.libraryMovies||[]).length}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Shared sync status: ${_getGhToken() ? (data.sharedSyncDone ? "Synced" : "Not synced") : "No token"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
@@ -8424,6 +8625,39 @@ function App(){
       try{
         const cursor={...(data.omdbCursor||{})};
         const existing=new Set((data.libraryMovies||[]).map(m=>m.title.toLowerCase()));
+        const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+        const interactedKeys=new Set();
+        (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
+          const k1=(l.imdbID||"").toLowerCase();
+          const k2=(l.title||"").toLowerCase();
+          const k3=normTitle(l.title||"");
+          if(k1) interactedKeys.add(k1);
+          if(k2) interactedKeys.add(k2);
+          if(k3) interactedKeys.add(k3);
+        });
+        Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).forEach(([k])=>{
+          const lk=(k||"").toLowerCase();
+          if(lk) interactedKeys.add(lk);
+          const nk=normTitle(k||"");
+          if(nk) interactedKeys.add(nk);
+        });
+        _normalizeWatchlistItems(data).forEach(w=>{
+          const k1=(w.imdbID||"").toLowerCase();
+          const k2=(w.title||"").toLowerCase();
+          const k3=normTitle(w.title||"");
+          if(k1) interactedKeys.add(k1);
+          if(k2) interactedKeys.add(k2);
+          if(k3) interactedKeys.add(k3);
+        });
+        const tasteSignals=new Set();
+        (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
+          if(l.genre) tasteSignals.add((l.genre||"").toLowerCase());
+          (l.tags||[]).forEach(t=>tasteSignals.add((t||"").toLowerCase()));
+        });
+        (data.tasteSeed||[]).filter(s=>s.category==="movies").forEach(s=>{
+          if(s.genre) tasteSignals.add((s.genre||"").toLowerCase());
+          (s.tags||[]).forEach(t=>tasteSignals.add((t||"").toLowerCase()));
+        });
         const newMovies=[];
         const posterMap={};
         let calls=0;
@@ -8477,6 +8711,7 @@ function App(){
                     plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
                     poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
                     posterId,
+                    imdbID:d.imdbID&&d.imdbID!=="N/A"?d.imdbID:null,
                     imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
                     imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
                     awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
@@ -8486,6 +8721,20 @@ function App(){
                     ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
                     _fromOmdb:true,
                   };
+                  const movieKey=(movie.imdbID||movie.title||"").toLowerCase();
+                  const movieTitleKey=normTitle(movie.title||"");
+                  if((movieKey&&interactedKeys.has(movieKey))||interactedKeys.has(movieTitleKey)) continue;
+                  // Relevance gate: if user already has movie taste signals, keep candidates
+                  // that overlap with those signals.
+                  if(tasteSignals.size){
+                    const movieSignals=new Set([
+                      (movie.genre||"").toLowerCase(),
+                      ...(movie.genres||[]).map(g=>(g||"").toLowerCase()),
+                      ...(movie.tags||[]).map(t=>(t||"").toLowerCase())
+                    ].filter(Boolean));
+                    const overlap=[...movieSignals].some(s=>tasteSignals.has(s));
+                    if(!overlap) continue;
+                  }
                   existing.add(movie.title.toLowerCase());
                   newMovies.push(movie);
                   queueSharedCandidate(movie,"omdb_enrich");
