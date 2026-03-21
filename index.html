@@ -3712,17 +3712,12 @@ function _fuzzyScore(customTitle, libTitle) {
   return sub * 0.55 + overlap * 0.30 + lev * 0.15;
 }
 
-// Per session cache: entryId → best suggestion (or null)
-const _suggCache = {};
-
 function getBestLibrarySuggestion(log, dismissedSugg) {
-  if(_suggCache[log.id] !== undefined) return _suggCache[log.id];
-  if(log.genre !== "Custom" || log.fromHealthKit || log.fromLetterboxd){
-    _suggCache[log.id]=null; return null;
-  }
+  const allowCategoryMatch = (log.category==="games") || (log.genre==="Custom");
+  if(!allowCategoryMatch || log.fromHealthKit || log.fromLetterboxd) return null;
   const titleKey=`${log.category}::${log.title}`;
   const dismissed = (dismissedSugg||{})[titleKey] || {};
-  if(dismissed.never){ _suggCache[log.id]=null; return null; }
+  if(dismissed.never) return null;
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
   let best = null, bestScore = 0.45;
@@ -3731,7 +3726,6 @@ function getBestLibrarySuggestion(log, dismissedSugg) {
     const score = _fuzzyScore(log.title, item.title);
     if(score > bestScore){ best = item; bestScore = score; }
   });
-  _suggCache[log.id] = best;
   return best;
 }
 
