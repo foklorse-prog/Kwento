@@ -3689,16 +3689,18 @@ function HomePage({data,onOpenLog,onRelog}){
 // Returns best match above threshold, or null.
 
 function _wordOverlap(a, b) {
-  const wa = new Set(a.toLowerCase().split(/\s+/).filter(w=>w.length>2));
-  const wb = new Set(b.toLowerCase().split(/\s+/).filter(w=>w.length>2));
+  const na = (a||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const nb = (b||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const wa = new Set(na.split(/\s+/).filter(w=>w.length>2));
+  const wb = new Set(nb.split(/\s+/).filter(w=>w.length>2));
   let shared = 0;
   wa.forEach(w=>{ if(wb.has(w)) shared++; });
   return shared / Math.max(wa.size, wb.size, 1);
 }
 
 function _substringScore(custom, libTitle) {
-  const a = custom.toLowerCase().trim();
-  const b = libTitle.toLowerCase().trim();
+  const a = (custom||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const b = (libTitle||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
   // Don't match if custom title is too short to be meaningful
   if(a.length < 3) return 0;
   // Don't match if custom title is less than 40% of library title length (e.g. "T" vs "Concert")
@@ -3718,8 +3720,8 @@ function _levenshtein(a, b) {
 }
 
 function _fuzzyScore(customTitle, libTitle) {
-  const a = customTitle.toLowerCase().trim();
-  const b = libTitle.toLowerCase().trim();
+  const a = (customTitle||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const b = (libTitle||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
   const sub = _substringScore(a, b);
   const overlap = _wordOverlap(a, b);
   const maxLen = Math.max(a.length, b.length, 1);
