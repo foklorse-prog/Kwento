@@ -1759,7 +1759,7 @@ function defaultData(){
     stickerGenCount:0,stickerGenDate:null,
     betaMode:false,
     libraryMovies:[], // dynamic movie library (enriched)
-    omdbCursor:{},    // {term: nextPage} — tracks progress across days
+    omdbCursor:{},    // legacy key (kept for backward compatibility)
     omdbCleanedAt:null,
     sharedSyncDone:false,
     sharedLastSyncAt:null,
@@ -4852,130 +4852,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       .sort((a,b)=>b.score-a.score||Math.random()-0.5);
     return sanitizePool(relaxed);
   };
-  const refillInFlightRef=useRef(false);
-  const refillLastAtRef=useRef(0);
-  const refillFromOmdbIfNeeded=async()=>{
-    if(cat!=="movies"||!data.betaMode) return;
-    const now=Date.now();
-    if(refillInFlightRef.current) return;
-    if(now-refillLastAtRef.current<15000) return;
-    refillInFlightRef.current=true;
-    refillLastAtRef.current=now;
-    try{
-      const existingById=new Set((data.libraryMovies||[]).map(m=>(m.imdbID||"").toLowerCase()).filter(Boolean));
-      const existingByTitle=new Set((data.libraryMovies||[]).map(m=>normTitle(m.title||"")).filter(Boolean));
-      const interacted=new Set([
-        ...(data.logs||[]).filter(l=>l.category==="movies").flatMap(l=>[(l.imdbID||"").toLowerCase(),normTitle(l.title||"")]),
-        ...Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).flatMap(([k])=>[(k||"").toLowerCase(),normTitle(k||"")]),
-        ..._normalizeWatchlistItems(data).flatMap(w=>[(w.imdbID||"").toLowerCase(),normTitle(w.title||"")]),
-      ].filter(Boolean));
-      const signalCounts={};
-      (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
-        const g=(l.genre||"").toLowerCase(); if(g) signalCounts[g]=(signalCounts[g]||0)+2;
-        (l.tags||[]).forEach(t=>{const k=(t||"").toLowerCase(); if(k) signalCounts[k]=(signalCounts[k]||0)+1;});
-      });
-      (data.tasteSeed||[]).filter(s=>(s.category||"movies")==="movies").forEach(s=>{
-        const g=(s.genre||"").toLowerCase(); if(g) signalCounts[g]=(signalCounts[g]||0)+3;
-        (s.tags||[]).forEach(t=>{const k=(t||"").toLowerCase(); if(k) signalCounts[k]=(signalCounts[k]||0)+2;});
-      });
-      const topSignals=Object.entries(signalCounts).sort((a,b)=>b[1]-a[1]).map(([k])=>k).filter(k=>k.length>=4).slice(0,4);
-      const seedTitles=(data.logs||[])
-        .filter(l=>l.category==="movies")
-        .map(l=>l.title||"")
-        .filter(Boolean)
-        .slice(0,4);
-      const seedDirectors=(data.libraryMovies||[])
-        .filter(m=>(m.director||"").trim()!=="")
-        .map(m=>m.director)
-        .filter(Boolean)
-        .slice(0,4);
-      const curatedFallback=["Christopher Nolan","Denis Villeneuve","Hayao Miyazaki","Bong Joon-ho","Martin Scorsese","A24","Pixar"];
-      const terms=[...new Set([...seedTitles,...seedDirectors,...topSignals,...curatedFallback])]
-        .filter(Boolean)
-        .slice(0,10);
-      const add=[];
-      let callBudget=28;
-      for(const term of terms){
-        if(callBudget<=0||add.length>=18) break;
-        for(let page=1; page<=2; page++){
-          if(callBudget<=0||add.length>=18) break;
-          let j=null;
-          try{
-            const r=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(term)}&type=movie&page=${page}`);
-            callBudget--;
-            j=await r.json();
-          }catch(_){ break; }
-          if(!j||j.Response==="False"||!j.Search) break;
-          for(const it of j.Search){
-            if(callBudget<=0||add.length>=18) break;
-            const sid=(it.imdbID||"").toLowerCase();
-            if(!sid||existingById.has(sid)||interacted.has(sid)) continue;
-            let d=null;
-            try{
-              const dr=await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${it.imdbID}&plot=short`);
-              callBudget--;
-              d=await dr.json();
-            }catch(_){ continue; }
-            if(!d||d.Response==="False") continue;
-            const omdbType=normalizeOmdbType(d.Type);
-            if(!isAllowedOmdbType(omdbType)) continue;
-            if(isListLikeTitle(d.Title)) continue;
-            const titleKey=normTitle(d.Title||"");
-            if(!titleKey||existingByTitle.has(titleKey)||interacted.has(titleKey)) continue;
-            const imdbRating=d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null;
-            const imdbVotes=d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt((d.imdbVotes||"").replace(/,/g,"")):null;
-            const ph=d.Country&&d.Country.toLowerCase().includes("philippines");
-            if(imdbRating!=null&&imdbRating<6.0) continue;
-            if(!ph&&imdbVotes!=null&&imdbVotes<1000) continue;
-            const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
-            const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
-            const movie={
-              title:d.Title||it.Title,
-              year:d.Year?d.Year.slice(0,4):null,
-              genre:genres[0]||"Film",
-              genres,
-              director:d.Director&&d.Director!=="N/A"?d.Director:null,
-              actor:actors[0]||null,
-              actors,
-              plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
-              poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
-              posterId:d.imdbID||`t_${_h(d.Title||it.Title||"")}`,
-              imdbID:d.imdbID&&d.imdbID!=="N/A"?d.imdbID:null,
-              imdbRating,
-              imdbVotes,
-              awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
-              omdbType,
-              isNominee:isNomineeFromAwards(d.Awards),
-              tags:buildTagsFromOmdb(d),
-              ph:!!ph,
-              _fromOmdb:true,
-              category:"movies",
-            };
-            add.push(movie);
-            existingById.add((movie.imdbID||"").toLowerCase());
-            existingByTitle.add(normTitle(movie.title||""));
-          }
-        }
-      }
-      if(add.length){
-        onChange("libraryMovies",[...(data.libraryMovies||[]),...add]);
-        setTimeout(()=>{
-          const next=buildFreshPool();
-          if(next&&next.length){
-            setPool(next);
-            setPoolIdx(0);
-            onChange("__batch__",{
-              discoverQueues:{...(data.discoverQueues||{}),[cat]:next},
-              discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
-              discoverDate:today,
-            });
-          }
-        },80);
-      }
-    } finally {
-      refillInFlightRef.current=false;
-    }
-  };
 
   // Per-category queue — persisted in data.discoverQueues
   const [pool,setPool]=useState(()=>{
@@ -5043,18 +4919,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       discoverDate:today,
     });
   },[currentItem?.imdbID,currentItem?.title,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
-  useEffect(()=>{
-    if(cat!=="movies"||!data.betaMode) return;
-    if(pool&&pool.length) return;
-    refillFromOmdbIfNeeded();
-  },[cat,data.betaMode,pool?.length,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
-  useEffect(()=>{
-    // Premium prefetch: refill before queue fully empties.
-    if(cat!=="movies"||!data.betaMode) return;
-    const remaining=Math.max(0,(pool||[]).length-poolIdx);
-    if(remaining>3) return;
-    refillFromOmdbIfNeeded();
-  },[cat,data.betaMode,pool?.length,poolIdx]);
   useEffect(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return;
@@ -5124,12 +4988,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(!currentItem){
       let rebuilt=buildFreshPool();
       if((!rebuilt||!rebuilt.length) && data.betaMode){
-        const online=(typeof navigator!=="undefined")?navigator.onLine:true;
-        if(online){
-          refillFromOmdbIfNeeded();
-        }else{
-          rebuilt=buildPremiumFallbackPool();
-        }
+        rebuilt=buildPremiumFallbackPool();
       }
       setPool(rebuilt);
       setPoolIdx(0);
@@ -5145,12 +5004,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(nextPool.length) nextPool.splice(removeIdx,1);
     let finalPool=nextPool.length?nextPool:buildFreshPool();
     if((!finalPool||!finalPool.length) && data.betaMode){
-      const online=(typeof navigator!=="undefined")?navigator.onLine:true;
-      if(online){
-        refillFromOmdbIfNeeded();
-      }else{
-        finalPool=buildPremiumFallbackPool();
-      }
+      finalPool=buildPremiumFallbackPool();
     }
     const newIdx=0;
     setPool(finalPool);
@@ -8617,177 +8471,53 @@ function App(){
   },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.discoverQueues]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
 
-  // ── OMDB library enrichment — runs silently in background, resumes daily ────
-  // Each app open checks if there are remaining search terms to process.
-  // Fetches up to DAILY_LIMIT pages per session, stores results in data.libraryMovies.
-  // data.omdbCursor tracks which terms are done and which page to resume from.
+  // ── OMDB metadata hydration only (no discovery search) ────────────────────
   useEffect(()=>{
-    const DAILY_LIMIT=80; // max API calls per session (~800 movies)
-    const TERMS=[
-      // Acclaimed studios & labels
-      "A24","Miramax","Focus Features","Sony Pictures Classics","Neon",
-      "Studio Ghibli","Pixar","Universal Classics",
-      // Filipino cinema — primary regional focus
-      "Star Cinema","TBA Studios","Viva Films","Black Sheep",
-      // Acclaimed international directors
-      "Bong Joon-ho","Park Chan-wook","Wong Kar-wai","Hayao Miyazaki",
-      "Hirokazu Kore-eda","Apichatpong Weerasethakul",
-      "Lav Diaz","Brillante Mendoza","Erik Matti","Antoinette Jadaone",
-      "Quentin Tarantino","Christopher Nolan","Denis Villeneuve",
-      "Alfonso Cuaron","Guillermo del Toro","Pedro Almodovar",
-      "Wes Anderson","Richard Linklater","Darren Aronofsky",
-      "Martin Scorsese","Steven Spielberg","Stanley Kubrick",
-      "Francis Ford Coppola","David Fincher","Ridley Scott",
-      // Regional cinema
-      "Korean film","Japanese cinema","French cinema","Italian cinema",
-      "Hong Kong cinema","Thai film","Indonesian film",
-      // Timeless quality signals
-      "cult classic","film noir","new wave","masterpiece",
-      "Ingmar Bergman","Akira Kurosawa","Federico Fellini","Jean-Luc Godard",
-      "Francois Truffaut","Luis Bunuel","Andrei Tarkovsky",
-    ];
     (async()=>{
       try{
-        const cursor={...(data.omdbCursor||{})};
-        const existing=new Set((data.libraryMovies||[]).map(m=>m.title.toLowerCase()));
-        const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
-        const interactedKeys=new Set();
-        (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
-          const k1=(l.imdbID||"").toLowerCase();
-          const k2=(l.title||"").toLowerCase();
-          const k3=normTitle(l.title||"");
-          if(k1) interactedKeys.add(k1);
-          if(k2) interactedKeys.add(k2);
-          if(k3) interactedKeys.add(k3);
-        });
-        Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).forEach(([k])=>{
-          const lk=(k||"").toLowerCase();
-          if(lk) interactedKeys.add(lk);
-          const nk=normTitle(k||"");
-          if(nk) interactedKeys.add(nk);
-        });
-        _normalizeWatchlistItems(data).forEach(w=>{
-          const k1=(w.imdbID||"").toLowerCase();
-          const k2=(w.title||"").toLowerCase();
-          const k3=normTitle(w.title||"");
-          if(k1) interactedKeys.add(k1);
-          if(k2) interactedKeys.add(k2);
-          if(k3) interactedKeys.add(k3);
-        });
-        const tasteSignals=new Set();
-        (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
-          if(l.genre) tasteSignals.add((l.genre||"").toLowerCase());
-          (l.tags||[]).forEach(t=>tasteSignals.add((t||"").toLowerCase()));
-        });
-        (data.tasteSeed||[]).filter(s=>s.category==="movies").forEach(s=>{
-          if(s.genre) tasteSignals.add((s.genre||"").toLowerCase());
-          (s.tags||[]).forEach(t=>tasteSignals.add((t||"").toLowerCase()));
-        });
-        const newMovies=[];
-        const posterMap={};
-        let calls=0;
-
-        for(const term of TERMS){
-          if(calls>=DAILY_LIMIT) break;
-          // Skip terms that are fully exhausted (page set to null)
-          if(cursor[term]===null) continue;
-          const startPage=cursor[term]||1;
-
-          for(let page=startPage;page<=10;page++){
-            if(calls>=DAILY_LIMIT) break;
-            try{
-              const res=await fetch(
-                `https://www.omdbapi.com/?apikey=${OMDB_KEY}&s=${encodeURIComponent(term)}&type=movie&page=${page}`
-              );
-              calls++;
-              const json=await res.json();
-              if(json.Response==="False"||!json.Search){
-                // No more results for this term
-                cursor[term]=null;
-                break;
-              }
-              // Fetch full details for each result to get director/actor
-              for(const m of json.Search){
-                if(calls>=DAILY_LIMIT) break;
-                if(existing.has(m.Title.toLowerCase())) continue;
-                // Skip clearly non-movie results
-                if(m.Type&&m.Type!=="movie") continue;
-                try{
-                  const detail=await fetch(
-                    `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${m.imdbID}&plot=short`
-                  );
-                  calls++;
-                  const d=await detail.json();
-                  if(d.Response==="False") continue;
-                  const omdbType=normalizeOmdbType(d.Type);
-                  if(!isAllowedOmdbType(omdbType)) continue;
-                  if(isListLikeTitle(d.Title)) continue;
-                  const genres=d.Genre&&d.Genre!=="N/A"?d.Genre.split(",").map(g=>g.trim()).filter(Boolean):[];
-                  const actors=d.Actors&&d.Actors!=="N/A"?d.Actors.split(",").map(a=>a.trim()).filter(Boolean):[];
-                  const posterId=d.imdbID||`t_${_h(d.Title||"")}`;
-                  const movie={
-                    title:d.Title,
-                    year:d.Year?d.Year.slice(0,4):null,
-                    genre:genres[0]||"Film",
-                    genres,
-                    director:d.Director&&d.Director!=="N/A"?d.Director:null,
-                    actor:actors[0]||null,
-                    actors,
-                    plot:d.Plot&&d.Plot!=="N/A"?d.Plot:null,
-                    poster:d.Poster&&d.Poster!=="N/A"?d.Poster:null,
-                    posterId,
-                    imdbID:d.imdbID&&d.imdbID!=="N/A"?d.imdbID:null,
-                    imdbRating:d.imdbRating&&d.imdbRating!=="N/A"?parseFloat(d.imdbRating):null,
-                    imdbVotes:d.imdbVotes&&d.imdbVotes!=="N/A"?parseInt(d.imdbVotes.replace(/,/g,"")):null,
-                    awards:d.Awards&&d.Awards!=="N/A"?d.Awards:null,
-                    omdbType,
-                    isNominee:isNomineeFromAwards(d.Awards),
-                    tags:buildTagsFromOmdb(d),
-                    ph:d.Country&&d.Country.toLowerCase().includes("philippines"),
-                    _fromOmdb:true,
-                  };
-                  const movieKey=(movie.imdbID||movie.title||"").toLowerCase();
-                  const movieTitleKey=normTitle(movie.title||"");
-                  if((movieKey&&interactedKeys.has(movieKey))||interactedKeys.has(movieTitleKey)) continue;
-                  // Relevance gate: if user already has movie taste signals, keep candidates
-                  // that overlap with those signals.
-                  if(tasteSignals.size){
-                    const movieSignals=new Set([
-                      (movie.genre||"").toLowerCase(),
-                      ...(movie.genres||[]).map(g=>(g||"").toLowerCase()),
-                      ...(movie.tags||[]).map(t=>(t||"").toLowerCase())
-                    ].filter(Boolean));
-                    const overlap=[...movieSignals].some(s=>tasteSignals.has(s));
-                    if(!overlap) continue;
-                  }
-                  existing.add(movie.title.toLowerCase());
-                  newMovies.push(movie);
-                  queueSharedCandidate(movie,"omdb_enrich");
-                  if(movie.posterId && movie.poster){
-                    posterMap["poster_"+movie.posterId]=movie.poster;
-                  }
-                }catch(_){}
-              }
-              // Store the next page to resume from
-              cursor[term]=page+1;
-            }catch(_){ break; }
-          }
+        const lib=[...(data.libraryMovies||[])];
+        const updatedLib=[...lib];
+        let libChanged=false;
+        const missingLib=lib
+          .map((m,i)=>({m,i}))
+          .filter(({m})=>!m.plot||!m.poster||!m.director||!m.actors||!m.imdbRating)
+          .slice(0,30); // bounded per app mount
+        for(const {m,i} of missingLib){
+          const meta=await fetchMovieMeta(m.title,m.omdbType||"movie");
+          if(!meta) continue;
+          updatedLib[i]={...m,...meta,_fromOmdb:!!m._fromOmdb};
+          libChanged=true;
         }
 
-        if(newMovies.length>0||JSON.stringify(cursor)!==JSON.stringify(data.omdbCursor||{})){
-          if(Object.keys(posterMap).length) await idbSetAll(posterMap);
-          setData(d=>({
-            ...d,
-            libraryMovies:[...(d.libraryMovies||[]),...newMovies],
-            omdbCursor:cursor,
-            omdbLastUpdated:new Date().toISOString(),
-            omdbLibrary:undefined,
-          }));
-          flushSharedQueue();
+        const logs=[...(data.logs||[])];
+        const updatedLogs=[...logs];
+        let logsChanged=false;
+        const missingLogs=logs
+          .map((l,i)=>({l,i}))
+          .filter(({l})=>
+            l.category==="movies" &&
+            !l.fromHealthKit &&
+            (!l.year || !l.genre || !l.director || !l.actor || !l.poster)
+          )
+          .slice(0,30);
+        for(const {l,i} of missingLogs){
+          const meta=await fetchMovieMeta(l.title,"movie");
+          if(!meta) continue;
+          updatedLogs[i]={...l,...meta};
+          logsChanged=true;
         }
+
+        if(!libChanged && !logsChanged) return;
+        setData(d=>({
+          ...d,
+          libraryMovies:updatedLib,
+          logs:updatedLogs,
+          omdbLastUpdated:new Date().toISOString(),
+          omdbLibrary:undefined,
+        }));
       }catch(_){}
     })();
-  },[]); // runs once per app mount;
+  },[]); // runs once per app mount
   const [showLog,setShowLog]=useState(false);
   const [editEntry,setEditEntry]=useState(null);
   const [timelineUnread,setTimelineUnread]=useState(0);
