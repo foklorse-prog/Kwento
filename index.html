@@ -6830,7 +6830,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           :card.value;
         const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
-        const vibeValueSize=isVibe?"18px":valSz;
+        const vibeValueSize=isVibe?"16px":valSz;
 
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
@@ -7367,7 +7367,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const wTagCount={};
             weekManualLogs.forEach(l=>(l.tags||[]).forEach(tag=>{
               const t=(tag||"").toLowerCase();
-              if(t==="global"||t==="filipino") return;
+              if(t==="global"||t==="filipino"||t==="volleyball") return;
               wTagCount[tag]=(wTagCount[tag]||0)+1;
             }));
             if(Object.keys(wTagCount).length>0){
