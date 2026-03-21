@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-21T11:24:07.801Z",
+  "updatedAt": "2026-03-21T14:54:45.530Z",
   "items": [
     {
       "title": "Mid90s",
@@ -2485,6 +2485,192 @@
       ],
       "ph": false,
       "source": "discover"
+    },
+    {
+      "title": "A Complete Unknown",
+      "year": "2024",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "James Mangold",
+      "actor": "Timothée Chalamet",
+      "actors": [
+        "Timothée Chalamet",
+        "Edward Norton",
+        "Elle Fanning"
+      ],
+      "plot": "In 1961, an unknown 19-year-old Bob Dylan arrives in New York City with his guitar and forges relationships with musical icons on his meteoric rise, culminating in a groundbreaking performance that reverberates around the world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTA2NTA5NDYtMzlkOC00MTQxLWI0NDQtMzk2M2YzMGE4MTkxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt11563598",
+      "imdbID": "tt11563598",
+      "imdbRating": 7.3,
+      "imdbVotes": 98546,
+      "runtime": "141 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 8 Oscars. 26 wins & 129 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Anora",
+      "year": "2024",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Sean Baker",
+      "actor": "Mikey Madison",
+      "actors": [
+        "Mikey Madison",
+        "Paul Weissman",
+        "Lindsey Normington"
+      ],
+      "plot": "A young stripper from Brooklyn meets and impulsively marries the son of a Russian oligarch. Once the news reaches Russia, her fairy tale is threatened as his parents set out for New York to get the marriage annulled.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYThiN2M0NTItODRmNC00NDhlLWFiYTgtMWM2YTEyYzI3ZTY1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt28607951",
+      "imdbID": "tt28607951",
+      "imdbRating": 7.4,
+      "imdbVotes": 264278,
+      "runtime": "139 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Russian, Armenian",
+      "awards": "Won 5 Oscars. 154 wins & 275 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Dune: Part Two",
+      "year": "2024",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Denis Villeneuve",
+      "actor": "Timothée Chalamet",
+      "actors": [
+        "Timothée Chalamet",
+        "Zendaya",
+        "Rebecca Ferguson"
+      ],
+      "plot": "Paul Atreides unites with the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible fu...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTc0YmQxMjEtODI5MC00NjFiLTlkMWUtOGQ5NjFmYWUyZGJhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt15239678",
+      "imdbID": "tt15239678",
+      "imdbRating": 8.4,
+      "imdbVotes": 713701,
+      "runtime": "166 min",
+      "rated": "PG-13",
+      "country": "United States, Canada, United Arab Emirates, Hungary, Italy, New Zealand, Jordan, Gambia",
+      "language": "English",
+      "awards": "Won 2 Oscars. 122 wins & 374 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Substance",
+      "year": "2024",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Horror",
+        "Sci-Fi"
+      ],
+      "director": "Coralie Fargeat",
+      "actor": "Demi Moore",
+      "actors": [
+        "Demi Moore",
+        "Margaret Qualley",
+        "Dennis Quaid"
+      ],
+      "plot": "A fading celebrity takes a black-market drug: a cell-replicating substance that helps her create a younger, better version of herself.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDQ1NGE5MGMtYzdlZC00ODExLWJlMDMtNWU4NjA5OWYwMDEwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt17526714",
+      "imdbID": "tt17526714",
+      "imdbRating": 7.2,
+      "imdbVotes": 405994,
+      "runtime": "141 min",
+      "rated": "R",
+      "country": "United Kingdom, France",
+      "language": "English",
+      "awards": "Won 1 Oscar. 146 wins & 289 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "dark",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Maestro",
+      "year": "2023",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Bradley Cooper",
+      "actor": "Carey Mulligan",
+      "actors": [
+        "Carey Mulligan",
+        "Bradley Cooper",
+        "Matt Bomer"
+      ],
+      "plot": "This love story chronicles the lifelong relationship of conductor-composer Leonard Bernstein and actress Felicia Montealegre Cohn Bernstein.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2M1MWUyYzctMzk1Zi00M2RkLTkwY2YtMzE4MDhiZGQwZmU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5535276",
+      "imdbID": "tt5535276",
+      "imdbRating": 6.5,
+      "imdbVotes": 67592,
+      "runtime": "129 min",
+      "rated": "R",
+      "country": "United States, Canada",
+      "language": "English",
+      "awards": "Nominated for 7 Oscars. 27 wins & 180 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
     }
   ]
 }
