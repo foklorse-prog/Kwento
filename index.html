@@ -6821,14 +6821,16 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         const isVibe=String(card.iconId).includes("week_breakdown");
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
+        const vibeTop3=isVibe?(vibeParts||[]).slice(0,3):null;
         const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
         const vibeTall=isVibe&&rowSpan>=2;
         const vibeDisplay=isVibe
-          ?(vibeCompact?(vibeParts[0]||card.value):(vibeWide?vibeParts.join(" · "):vibeParts.join("\n")))
+          ?(vibeCompact?(vibeTop3[0]||card.value):(vibeWide?vibeTop3.join(" · "):vibeTop3.join("\n")))
           :card.value;
         const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
+        const vibeValueSize=isVibe?"18px":valSz;
 
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
@@ -6887,12 +6889,15 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 </>
               )}
 
-              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+              {!isVibe&&(
+                <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+              )}
               <div style={{
-                fontSize:valSz,fontWeight:800,color:valColor,
+                fontSize:vibeValueSize,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont,position:"relative",zIndex:1
+                fontFamily:valueFont,position:"relative",zIndex:1,
+                wordBreak:isVibe?"normal":"normal",
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
@@ -9074,5 +9079,3 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
-
-
