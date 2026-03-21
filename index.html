@@ -3518,12 +3518,15 @@ function HomePage({data,onOpenLog,onRelog}){
   const t=T[data.language]||T.en;
   const h=new Date().getHours();
   const gr=h<12?t.greeting_morning:h<18?t.greeting_afternoon:t.greeting_evening;
-        // Calendar week (Sun–Sat) for vibe breakdown.
-        // NOTE: For now, use a fixed range requested by user.
-        const weekStart=new Date("2026-03-08T00:00:00");
-        const weekEnd=new Date("2026-03-15T00:00:00"); // exclusive
+        // Calendar week (Sun–Sat), current local week.
+        const now=new Date();
+        const weekStart=new Date(now);
+        weekStart.setHours(0,0,0,0);
+        weekStart.setDate(now.getDate()-now.getDay()); // Sunday
+        const weekEnd=new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate()+7); // exclusive
         const weekLogs=data.logs.filter(l=>{
-          const d=new Date(l.date);
+          const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date);
           return d>=weekStart&&d<weekEnd;
         });
   const catCounts=Object.fromEntries(CATEGORIES.map(c=>[c.id,weekLogs.filter(l=>l.category===c.id).length]));
