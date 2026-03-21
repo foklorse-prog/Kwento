@@ -1770,8 +1770,10 @@ function defaultData(){
     discoverSkipGenres:{},
     discoverSkipDirectors:{},
     discoverSkipTags:{},
+    discoverSkipLastAt:{},
     watchlistRollCount:0,
     watchlistRollDate:null,
+    betaRedeemLocked:false,
   };
 }
 
@@ -2822,7 +2824,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
     }
     if(!finalQueue.length)return;
     const toSave=await Promise.all(finalQueue.map(async(item,i)=>{
-      const entry={...item,note:initialCat?note:"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
+      const entry={...item,note:note||"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
       if(item.category==="movies"||cat==="movies"){
         const meta=await fetchMovieMeta(item.title);
         if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
@@ -4431,18 +4433,12 @@ function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada,on
 // Generate button fetches the next suggestion per category (5/day free).
 // Beta mode bypasses the daily limit entirely.
 
-const DISCOVER_FREE_LIMIT = 5;
+const DISCOVER_FREE_LIMIT = 10;
 const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
-function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}) {
-  const seedLogs=(tasteSeed||[]).map(s=>({
-    tags:s.tags||[],
-    category:s.category||cat,
-    date:s.savedAt||new Date().toISOString(),
-    _weight:typeof s.scoreWeight==="number"?s.scoreWeight:1,
-  }));
-  const tc = buildTagScore([...logs.filter(l=>!l.fromHealthKit),...seedLogs], feedback);
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}) {
+  const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
   let items = LIBRARY[cat]||[];
   if(cat==="movies" && libraryMovies && libraryMovies.length){
     const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
@@ -4452,9 +4448,22 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   if(cat==="movies"){
     items=items.filter(isActualMovieOrSeries);
   }
-  const logged=new Set(logs.filter(l=>l.category===cat).map(l=>l.title));
+  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+  const loggedTitleKeys=new Set(
+    logs
+      .filter(l=>l.category===cat)
+      .map(l=>normTitle(l.title))
+      .filter(Boolean)
+  );
+  const loggedImdbKeys=new Set(
+    logs
+      .filter(l=>l.category===cat&&l.imdbID)
+      .map(l=>(l.imdbID||"").toLowerCase())
+      .filter(Boolean)
+  );
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
   const likedSet=new Set(Object.entries(likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
+  const watchSet=new Set((watchlistKeys||[]).map(k=>(k||"").toLowerCase()).filter(Boolean));
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
   const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
 
@@ -4480,8 +4489,18 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   const scored = items
     .filter(i=>{
       const itemKey=(i.imdbID||i.title||"").toLowerCase();
-      if(logged.has(i.title)||disliked.has(i.title)) return false;
+      if(disliked.has(i.title)) return false;
+      if(itemKey&&loggedImdbKeys.has(itemKey)) return false;
+      if(loggedTitleKeys.has(normTitle(i.title))) return false;
       if(itemKey&&likedSet.has(itemKey)) return false;
+      if(itemKey&&watchSet.has(itemKey)) return false;
+      if(cat==="movies"&&itemKey&&(discoverSkips[itemKey]||0)>0){
+        const count=discoverSkips[itemKey]||0;
+        const lastAt=skipLastAt[itemKey]?new Date(skipLastAt[itemKey]).getTime():0;
+        const ageDays=lastAt?((Date.now()-lastAt)/86400000):9999;
+        const cooldown=count>=3?120:(count===2?45:14);
+        if(ageDays<cooldown) return false;
+      }
       // Quality filter for OMDB-enriched movies only
       // Library movies pass through — they're hand-picked
       if(cat==="movies"&&i._fromOmdb){
@@ -4682,18 +4701,22 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const lang=data.language;
   const catInfo=CAT_MAP[cat];
   const FREE_LIMIT=DISCOVER_FREE_LIMIT;
+  const watchlistAll=_normalizeWatchlistItems(data);
+  const watchlistKeys=watchlistAll.map(w=>(w.imdbID||w.title||"").toLowerCase()).filter(Boolean);
 
   // Per-category queue — persisted in data.discoverQueues
   const [pool,setPool]=useState(()=>{
     const saved=data.discoverQueues?.[cat];
-    if(saved&&saved.length) return saved;
+    if(saved&&saved.length&&data.discoverDate===today) return saved;
     return buildCatPool(
       cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
       {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-      data.likedSuggestions||{}
+      data.likedSuggestions||{},
+      watchlistKeys,
+      data.discoverSkipLastAt||{}
     );
   });
-  const [poolIdx,setPoolIdx]=useState(()=>data.discoverIndexes?.[cat]||0);
+  const [poolIdx,setPoolIdx]=useState(()=>data.discoverDate===today?(data.discoverIndexes?.[cat]||0):0);
 
   // Daily generate count per category
   const todayCounts=data.discoverDate===today?(data.discoverCounts||{}):{};
@@ -4707,7 +4730,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const likedMap=data.likedSuggestions||{};
   const isLiked=!!likedMap[likedKey];
   const interactedMap=data.discoverInteractions||{};
-  const watchlist=_normalizeWatchlistItems(data);
+  const watchlist=watchlistAll;
   const isWatchlisted=!!watchlist.find(w=>(w.imdbID||w.title||"").toLowerCase()===likedKey);
   const isLogged=!!(data.logs||[]).find(l=>l.category==="movies"&&((l.imdbID&&currentItem?.imdbID&&l.imdbID===currentItem.imdbID)||((l.title||"").toLowerCase()===(currentItem?.title||"").toLowerCase())));
   const [reminderMovie,setReminderMovie]=useState(null);
@@ -4734,9 +4757,11 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     setPool(buildCatPool(
       cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
       {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-      data.likedSuggestions||{}
+      data.likedSuggestions||{},
+      watchlistKeys,
+      data.discoverSkipLastAt||{}
     ));
-  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.likedSuggestions]);
+  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
   useEffect(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return;
@@ -4798,7 +4823,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       const boosted=buildCatPool(
         cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
         {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-        data.likedSuggestions||{}
+        data.likedSuggestions||{},
+        watchlistKeys,
+        data.discoverSkipLastAt||{}
       );
       setPool(boosted);
     })();
@@ -4814,7 +4841,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         if(!key) return {};
         if(interactedMap[key]) return {};
         const ds={...(data.discoverSkips||{})};
+        const dl={...(data.discoverSkipLastAt||{})};
         ds[key]=(ds[key]||0)+1;
+        dl[key]=new Date().toISOString();
         const y={...(data.discoverSkipYears||{})};
         const g={...(data.discoverSkipGenres||{})};
         const d={...(data.discoverSkipDirectors||{})};
@@ -4839,6 +4868,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         });
         return {
           discoverSkips:ds,
+          discoverSkipLastAt:dl,
           discoverSkipYears:y,
           discoverSkipGenres:g,
           discoverSkipDirectors:d,
@@ -4873,7 +4903,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextSkips={...(data.discoverSkips||{})};
     if(nextLiked[key]){
       delete nextLiked[key];
-      nextSeed=nextSeed.filter(s=>((s.imdbID||s.title||"").toLowerCase()!==key||s.signal!=="like"));
+      nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===key)&&s.signal==="like"));
     } else {
       nextLiked[key]=true;
       delete nextSkips[key];
@@ -4903,7 +4933,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     markInteracted(key);
     const existing=_normalizeWatchlistItems(data);
     const has=existing.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
-    const seed=[...(data.tasteSeed||[])];
     const next=has
       ?existing.filter(w=>((w.imdbID||w.title||"").toLowerCase()!==key))
       :[...existing,{
@@ -4916,20 +4945,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         director:currentItem.director||null,
         tags:currentItem.tags||[]
       }];
-    let nextSeed=seed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===key)&&s.signal==="watchlist"));
     const nextSkips={...(data.discoverSkips||{})};
     if(!has){
       delete nextSkips[key];
-      nextSeed.push({
-        title:currentItem.title,
-        imdbID:currentItem.imdbID||null,
-        category:"movies",
-        tags:currentItem.tags||[],
-        genre:currentItem.genre||null,
-        signal:"watchlist",
-        scoreWeight:1.1,
-        savedAt:new Date().toISOString(),
-      });
     }
     const nextReminders=has
       ?(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key))
@@ -4937,7 +4955,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     onChange("__batch__",{
       watchlist:next,
       watchlistReminders:nextReminders,
-      tasteSeed:nextSeed,
       discoverSkips:nextSkips,
     });
     if(!has){
@@ -5366,7 +5383,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
     <div className="fade-in" style={{padding:"20px 20px 100px",position:"relative",zIndex:2,height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:th.text,marginBottom:6}}>Discover</h1>
       <p style={{fontSize:12,color:th.sub,marginBottom:24,lineHeight:1.5}}>
-        {data.betaMode?"Unlimited · calibrated by recent + overall taste":"5 per category · calibrated by recent + overall taste"}
+        {data.betaMode?"Unlimited · calibrated by recent + overall taste":"10 per category · calibrated by recent + overall taste"}
       </p>
       <DiscoverDeck data={data} onChange={onChange} onOpenMovieLog={onOpenMovieLog}/>
       <div style={{paddingTop:24}}>
@@ -5379,7 +5396,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
 }
 
 // ─── SHARE CARD MODAL — renders to canvas for saving as image ────────────────
-function WatchlistPage({data,onClose,onChange}){
+function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
   const items=_normalizeWatchlistItems(data);
   const [selected,setSelected]=useState(null);
@@ -5401,6 +5418,7 @@ function WatchlistPage({data,onClose,onChange}){
   if(selected){
     const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
     const selectedReminder=reminderMap.get(selectedKey)||null;
+    const selectedLiked=!!(data.likedSuggestions||{})[selectedKey];
     const castText=selected.actors&&selected.actors.length
       ?selected.actors.join(", ")
       :(selected.actor||"");
@@ -5451,10 +5469,46 @@ function WatchlistPage({data,onClose,onChange}){
               </div>
             </div>
             {selected.plot&&(
-              <div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>
+              <div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:4}}>
                 {selected.plot}
               </div>
             )}
+            <div style={{display:"flex",gap:8,marginTop:12}}>
+              <button onClick={()=>{
+                onOpenMovieLog&&onOpenMovieLog(selected);
+              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+              </button>
+              <button onClick={()=>{
+                const next={...(data.likedSuggestions||{})};
+                let nextSeed=[...(data.tasteSeed||[])];
+                if(next[selectedKey]) delete next[selectedKey];
+                else next[selectedKey]=true;
+                if(next[selectedKey]){
+                  if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===selectedKey&&s.signal==="like"))){
+                    nextSeed.push({
+                      title:selected.title,
+                      imdbID:selected.imdbID||null,
+                      category:"movies",
+                      tags:selected.tags||[],
+                      genre:selected.genre||null,
+                      signal:"like",
+                      scoreWeight:1.35,
+                      savedAt:new Date().toISOString(),
+                    });
+                  }
+                } else {
+                  nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===selectedKey)&&s.signal==="like"));
+                }
+                onChange&&onChange("__batch__",{likedSuggestions:next,tasteSeed:nextSeed});
+              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:selectedLiked?`${th.accent}22`:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={selectedLiked?th.accent:"none"} stroke={selectedLiked?th.accent:th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
+                </svg>
+              </button>
+            </div>
             {selectedReminder?.at&&(
               <div style={{marginTop:22,paddingTop:10,fontSize:12,color:th.sub,opacity:0.9,fontStyle:"italic",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
                 <span>Reminder set for {new Date(selectedReminder.at).toLocaleString()}</span>
@@ -5615,23 +5669,18 @@ function LikedPage({data,onClose}){
             <div>
               <div style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>Movies</div>
               <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
-                {items.slice(0,8).map((w,i)=>{
-                  const isLastPreview=i===Math.min(items.length,8)-1 && items.length>5;
-                  if(isLastPreview){
-                    return(
-                      <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setShowAll(true)}
-                        style={{width:76,height:114,flex:"0 0 auto",borderRadius:10,border:`1px solid ${th.border}`,background:th.card,color:th.accent,cursor:"pointer",fontSize:11,fontWeight:700}}>
-                        Show more
-                      </button>
-                    );
-                  }
-                  return(
-                    <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
-                      style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
-                      {w.poster?<img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>:<div style={{width:76,height:114,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center",borderRadius:10,border:`1px solid ${th.border}`,background:th.card}}>{w.title}</div>}
-                    </button>
-                  );
-                })}
+                {items.slice(0,4).map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
+                    style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
+                    {w.poster?<img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>:<div style={{width:76,height:114,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center",borderRadius:10,border:`1px solid ${th.border}`,background:th.card}}>{w.title}</div>}
+                  </button>
+                ))}
+                {items.length>4&&(
+                  <button onClick={()=>setShowAll(true)}
+                    style={{width:76,height:114,flex:"0 0 auto",borderRadius:10,border:`1px solid ${th.border}`,background:th.card,color:th.accent,cursor:"pointer",fontSize:11,fontWeight:700}}>
+                    Show more
+                  </button>
+                )}
               </div>
             </div>
           ):(
@@ -5646,6 +5695,67 @@ function LikedPage({data,onClose}){
           )
         ):(
           <div style={{fontSize:13,color:th.sub}}>No liked movies yet.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WatchedMoviesPage({data,onClose}){
+  const th=THEMES[data.theme];
+  const logs=(data.logs||[]).filter(l=>l.category==="movies");
+  const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const seen=new Set();
+  const items=[];
+  logs.forEach(l=>{
+    const key=(l.imdbID||l.title||"").toLowerCase();
+    const norm=(l.title||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+    const dedupeKey=key||norm;
+    if(!dedupeKey||seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    items.push({...byKey.get(key),...l});
+  });
+  const [selected,setSelected]=useState(null);
+  if(selected){
+    return(
+      <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+        <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          <button onClick={()=>setSelected(null)} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+          <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>{selected.title}</div>
+                {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
+                {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
+                {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                {selected.date&&<div style={{fontSize:12,color:th.sub,marginTop:6}}>Logged: <span style={{color:th.text}}>{new Date(selected.date).toLocaleDateString()}</span></div>}
+              </div>
+            </div>
+            {selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+      <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Watched</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
+        </div>
+        {items.length?(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+            {items.map((w,i)=>(
+              <button key={(w.imdbID||w.title||"w")+i} onClick={()=>setSelected(w)}
+                style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+              </button>
+            ))}
+          </div>
+        ):(
+          <div style={{fontSize:13,color:th.sub}}>No watched movies yet.</div>
         )}
       </div>
     </div>
@@ -6674,7 +6784,7 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
   );
 }
 
-function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpenWatchlist,onOpenLiked}){
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpenWatchlist,onOpenLiked,onOpenWatched}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -6858,6 +6968,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           </button>
           <button onClick={onOpenWatchlist} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>
+          </button>
+          <button onClick={onOpenWatched} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
         </div>
       </div>
@@ -7568,10 +7681,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   };
 
   const handleRedeem=()=>{
-    if(redeemInput.trim().toLowerCase()==="beta"){
-      onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null});
+    if(redeemInput.trim().toLowerCase()==="beta" && !data.betaRedeemLocked){
+      onChange("__batch__",{betaMode:true,stickerGenCount:0,stickerGenDate:null,betaRedeemLocked:true});
       setRedeemMsg("✅ Beta mode activated — unlimited sticker saves!");
       setRedeemInput("");
+    } else if(redeemInput.trim().toLowerCase()==="beta" && data.betaRedeemLocked){
+      setRedeemMsg("❌ Beta code already used.");
     } else {
       setRedeemMsg("❌ Invalid code.");
     }
@@ -8289,10 +8404,12 @@ function App(){
   const [logCat,setLogCat]=useState(null);
   const [logPrefill,setLogPrefill]=useState("");
   const [logFromDiscover,setLogFromDiscover]=useState(false);
+  const [removeWatchOnLogKey,setRemoveWatchOnLogKey]=useState(null);
   const [showWatchlistPage,setShowWatchlistPage]=useState(false);
   const [showLikedPage,setShowLikedPage]=useState(false);
+  const [showWatchedPage,setShowWatchedPage]=useState(false);
 
-  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage;
+  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage||showWatchedPage;
 
   useEffect(()=>{
     if(!photosReady) return; // don't save until hydration is done
@@ -8484,6 +8601,15 @@ function App(){
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
     const arr=Array.isArray(entries)?entries:[entries];
+    if(removeWatchOnLogKey){
+      const loggedKeys=new Set(arr.map(e=>(e.imdbID||e.title||"").toLowerCase()).filter(Boolean));
+      if(loggedKeys.has(removeWatchOnLogKey)){
+        const nextWatch=_normalizeWatchlistItems(data).filter(w=>((w.imdbID||w.title||"").toLowerCase()!==removeWatchOnLogKey));
+        const nextRem=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==removeWatchOnLogKey));
+        update({watchlist:nextWatch,watchlistReminders:nextRem});
+      }
+      setRemoveWatchOnLogKey(null);
+    }
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
     const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
     const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
@@ -8604,7 +8730,7 @@ function App(){
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)} onOpenWatched={()=>setShowWatchedPage(true)}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
@@ -8680,10 +8806,11 @@ function App(){
                   </div>
                 </div>
               )}
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
-              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);setRemoveWatchOnLogKey(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
+              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowWatchlistPage(false);setShowLog(true);}}/>}
               {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
-              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
+              {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)}/>}
+              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
         </div>
