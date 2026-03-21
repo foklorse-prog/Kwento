@@ -1384,7 +1384,11 @@ function formatDate(iso) {
   try{return new Date(iso).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}catch{return iso;}
 }
 
-function todayKey() { return new Date().toISOString().split("T")[0]; }
+function todayKey() {
+  // Use PH date boundaries for daily limits/resets.
+  const fmt=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit"});
+  return fmt.format(new Date());
+}
 
 // ─── TASTE PROFILE BUILDER ────────────────────────────────────────────────────
 // Liked = logged + swiped right (union, no duplicates)
@@ -2696,6 +2700,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const [actPhotos,setActPhotos]=useState(editEntry?.actPhotos||[]);
   const [pinOnSave,setPinOnSave]=useState(false);
   const [previewIdx,setPreviewIdx]=useState(0);
+  const [isSaving,setIsSaving]=useState(false);
   const actPhotoRef=useRef(null);
   const inputRef=useRef(null);
   const catRowRef=useRef(null);
@@ -2801,9 +2806,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const removeFromQueue=idx=>setQueue(q=>q.filter((_,i)=>i!==idx));
 
   const handleSave=async()=>{
+    if(isSaving) return;
+    setIsSaving(true);
     const date=useCustomDate?new Date(customDate+"T12:00:00").toISOString():(editEntry?.date||new Date().toISOString());
     if(isEdit){
-      if(!selected&&!query.trim())return;
+      if(!selected&&!query.trim()){ setIsSaving(false); return; }
       const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
@@ -2831,6 +2838,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         onSave({...entry, pinOnProfile: pinOnSave&&entry.actPhotos?.length>0});
       } finally {
         onClose();
+        setIsSaving(false);
       }
       return;
     }
@@ -2840,7 +2848,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       const genre=getGenreForCat(base,cat);
       finalQueue.push({...base,genre,category:cat,mood:ITEM_MOOD[base.title]||null,year:null});
     }
-    if(!finalQueue.length)return;
+    if(!finalQueue.length){ setIsSaving(false); return; }
     const toSave=await Promise.all(finalQueue.map(async(item,i)=>{
       const isMovieItem=(item.category==="movies"||cat==="movies");
       const movieText=(review||note||"");
@@ -2865,6 +2873,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       onSave(toSaveWithPin);
     } finally {
       onClose();
+      setIsSaving(false);
     }
   };
 
@@ -3173,16 +3182,16 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
 
           {/* Save — full width pill, DM Sans 15 bold, primary CTA */}
           <button onClick={handleSave}
-            disabled={isEdit?(!selected&&!query.trim()):totalToSave===0}
+            disabled={isSaving||(isEdit?(!selected&&!query.trim()):totalToSave===0)}
             style={{
               width:"100%",padding:"12px",borderRadius:14,
               background:isEdit?(selected||query.trim())?th.accent:"gray":totalToSave>0?th.accent:"gray",
               color:"#fff",fontWeight:600,fontSize:14,border:"none",cursor:"pointer",
-              opacity:isEdit?(selected||query.trim())?1:0.3:totalToSave>0?1:0.3,
+              opacity:isSaving?0.7:(isEdit?(selected||query.trim())?1:0.3:totalToSave>0?1:0.3),
               boxShadow:totalToSave>0||(isEdit&&(selected||query.trim()))?`0 3px 12px ${th.accent}38`:"none",
               transition:"opacity 0.2s, box-shadow 0.2s",letterSpacing:0.3
             }}>
-            {isEdit?"Save changes":totalToSave>1?`Log ${totalToSave} entries`:t.log_it}
+            {isSaving?"Saving...":(isEdit?"Save changes":totalToSave>1?`Log ${totalToSave} entries`:t.log_it)}
           </button>
         </div>
       </div>
@@ -4749,7 +4758,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const watchlistKeys=watchlistAll.flatMap(w=>[(w.imdbID||"").toLowerCase(),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
   const loggedTitleKeys=new Set((data.logs||[]).filter(l=>l.category===cat).map(l=>normTitle(l.title)).filter(Boolean));
   const loggedImdbKeys=new Set((data.logs||[]).filter(l=>l.category===cat&&l.imdbID).map(l=>(l.imdbID||"").toLowerCase()));
-  const likedKeysSet=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
+  const likedKeysSet=new Set(
+    Object.entries(data.likedSuggestions||{})
+      .filter(([,v])=>!!v)
+      .flatMap(([k])=>[(k||"").toLowerCase(),normTitle(k||"")])
+      .filter(Boolean)
+  );
   const watchKeysSet=new Set(watchlistKeys);
   const sanitizePool=(arr)=>{
     const seen=new Set();
@@ -4760,7 +4774,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       if(!dedupeKey) return false;
       if(seen.has(dedupeKey)) return false;
       if(key&&likedKeysSet.has(key)) return false;
+      if(titleKey&&likedKeysSet.has(titleKey)) return false;
       if(key&&watchKeysSet.has(key)) return false;
+      if(titleKey&&watchKeysSet.has(titleKey)) return false;
       if(key&&loggedImdbKeys.has(key)) return false;
       if(titleKey&&loggedTitleKeys.has(titleKey)) return false;
       seen.add(dedupeKey);
@@ -4828,6 +4844,18 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     setPoolIdx(i=>Math.min(i,Math.max(next.length-1,0)));
   },[data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
   useEffect(()=>{
+    if(!currentItem) return;
+    const next=sanitizePool(pool);
+    if(next.length===pool.length) return;
+    setPool(next);
+    setPoolIdx(0);
+    onChange("__batch__",{
+      discoverQueues:{...(data.discoverQueues||{}),[cat]:next},
+      discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+      discoverDate:today,
+    });
+  },[currentItem?.imdbID,currentItem?.title,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
+  useEffect(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return;
     if(!pool.length) return;
@@ -4890,8 +4918,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     })();
   },[]);
 
-  const handleGenerate=()=>{
-    if(!canGenerate) return;
+  const advanceSuggestion=(opts={})=>{
+    const {recordSkip=false}=opts;
+    if(!canGenerate) return false;
     if(!currentItem){
       const rebuilt=buildFreshPool();
       setPool(rebuilt);
@@ -4901,7 +4930,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
         discoverDate:today,
       });
-      return;
+      return true;
     }
     const nextPool=[...pool];
     const removeIdx=Math.min(poolIdx,Math.max(nextPool.length-1,0));
@@ -4910,7 +4939,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const newIdx=0;
     setPool(finalPool);
     setPoolIdx(newIdx);
-    const skipPatch=(cat==="movies"&&currentItem)
+    const skipPatch=(recordSkip&&cat==="movies"&&currentItem)
       ?(()=>{
         const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
         if(!key) return {};
@@ -4962,6 +4991,10 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       discoverIndexes:newIndexes,
       ...skipPatch,
     });
+    return true;
+  };
+  const handleGenerate=()=>{
+    advanceSuggestion({recordSkip:true});
   };
   const markInteracted=(key)=>{
     if(!key) return;
@@ -5000,6 +5033,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       tasteSeed:nextSeed,
       discoverSkips:nextSkips,
     });
+    // Liking also consumes one daily discover slot and advances to next movie.
+    advanceSuggestion({recordSkip:false});
   };
   const handleWatchlist=()=>{
     if(cat!=="movies"||!currentItem) return;
@@ -8699,22 +8734,31 @@ function App(){
         review:cat==="movies"?movieText:(e.review||""),
       };
     });
-    if(removeWatchOnLogKey){
-      const nextWatch=_normalizeWatchlistItems(data).filter(w=>((w.imdbID||w.title||"").toLowerCase()!==removeWatchOnLogKey));
-      const nextRem=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==removeWatchOnLogKey));
-      update({watchlist:nextWatch,watchlistReminders:nextRem});
-      setRemoveWatchOnLogKey(null);
-    }
+    if(removeWatchOnLogKey) setRemoveWatchOnLogKey(null);
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
     const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    const loggedMovieKeys=new Set(
+      cleanArr
+        .filter(e=>e.category==="movies")
+        .flatMap(e=>[(e.imdbID||"").toLowerCase(),(e.title||"").toLowerCase()])
+        .filter(Boolean)
+    );
+    if(removeWatchOnLogKey) loggedMovieKeys.add(removeWatchOnLogKey);
     const getWeekStart=d=>{const s=new Date(d);s.setHours(0,0,0,0);s.setDate(s.getDate()-s.getDay());return s.getTime();};
     if(editEntry&&cleanArr.length===1){
-      update({logs:data.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l)});
+      setData(d=>{
+        const nextLogs=d.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l);
+        const nextWatch=_normalizeWatchlistItems(d).filter(w=>!loggedMovieKeys.has((w.imdbID||w.title||"").toLowerCase()));
+        const nextRem=(d.watchlistReminders||[]).filter(r=>!loggedMovieKeys.has((r.imdbID||r.title||"").toLowerCase()));
+        return {...d,logs:nextLogs,watchlist:nextWatch,watchlistReminders:nextRem};
+      });
     } else {
       setData(d=>{
         const cur=d.profilePhotoIds||[];
         // Only add pins that don't exceed 3 for their Sun-Sat calendar week
         const newLogs=[...cleanArr,...d.logs];
+        const nextWatch=_normalizeWatchlistItems(d).filter(w=>!loggedMovieKeys.has((w.imdbID||w.title||"").toLowerCase()));
+        const nextRem=(d.watchlistReminders||[]).filter(r=>!loggedMovieKeys.has((r.imdbID||r.title||"").toLowerCase()));
         const newPins=[...cur];
         pinIds.forEach(id=>{
           if(newPins.includes(id)) return;
@@ -8724,7 +8768,7 @@ function App(){
           const weekCount=newPins.filter(pid=>{const e=newLogs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
           if(weekCount<3) newPins.push(id);
         });
-        return {...d,logs:newLogs,profilePhotoIds:newPins};
+        return {...d,logs:newLogs,profilePhotoIds:newPins,watchlist:nextWatch,watchlistReminders:nextRem};
       });
       return;
     }
