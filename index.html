@@ -4257,24 +4257,17 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
       (l.title===log.title&&l.category===log.category&&l.genre==="Custom")
         ?{...l,title:match.title,genre:match.genre||l.genre,tags:match.tags||l.tags}
         :l);
-    // Clear session cache for all affected entries
-    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=null;});
     onUpdateData({logs:updated});
   };
   const handleMatchSkip=(log,match)=>{
     const titleKey=`${log.category}::${log.title}`;
     const prev=data.dismissedSugg||{};
     const entry=prev[titleKey]||{skipped:[],never:false};
-    // null = done for this session (won't re-prompt until next app load)
-    data.logs.forEach(l=>{
-      if(l.title===log.title&&l.category===log.category) _suggCache[l.id]=null;
-    });
     onUpdateData({dismissedSugg:{...prev,[titleKey]:{...entry,skipped:[...(entry.skipped||[]),match.title]}}});
   };
   const handleMatchNever=(log)=>{
     const titleKey=`${log.category}::${log.title}`;
     const prev=data.dismissedSugg||{};
-    data.logs.forEach(l=>{if(l.title===log.title&&l.category===log.category)_suggCache[l.id]=null;});
     onUpdateData({dismissedSugg:{...prev,[titleKey]:{skipped:[],never:true}}});
   };
   const filteredWeek=applyFilter(thisWeek);
@@ -4527,7 +4520,10 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
     items=[...dyn,...items.filter(i=>!dynTitles.has(i.title.toLowerCase()))];
   }
   if(cat==="movies"){
-    items=items.filter(isActualMovieOrSeries);
+    items=items
+      .filter(isActualMovieOrSeries)
+      // Never surface placeholder/custom-only movie stubs in Discover.
+      .filter(i=>!(((i.genre||"").toLowerCase()==="custom") && !i.imdbID));
   }
   const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
   const loggedTitleKeys=new Set(
@@ -8802,12 +8798,13 @@ function App(){
       });
       (entries||[]).forEach(e=>{
         if(e.category!=="movies") return;
-        const hasMeta=!!(e.imdbID||e.poster||e.plot||e.genre||e.director||e.actor||e.actors||e.imdbRating);
+        const hasUsefulGenre=!!(e.genre && String(e.genre).toLowerCase()!=="custom");
+        const hasMeta=!!(e.imdbID||e.poster||e.plot||hasUsefulGenre||e.director||e.actor||e.actors||e.imdbRating);
         if(!hasMeta) return;
         const candidate={
           title:e.title||null,
           year:e.year||null,
-          genre:e.genre||null,
+          genre:hasUsefulGenre?e.genre:null,
           genres:e.genres||[],
           director:e.director||null,
           actor:e.actor||null,
