@@ -2807,13 +2807,31 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       const base=selected||{title:query.trim(),tags:[],genre:"Custom",year:null};
       const genre=getGenreForCat(base,cat||"movies");
       const yr=base.year||((cat||"movies")==="movies"?MOVIE_YEARS[base.title]:null)||null;
-      const entry={...base,genre,category:cat,note,review:cat==="movies"?review:"",rating:cat==="movies"?rating:null,mood:ITEM_MOOD[base.title]||null,date,customDate:useCustomDate?customDate:null,id:editEntry.id,year:yr,actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])};
+      const isMovieCat=(cat==="movies");
+      const movieText=(review||note||"");
+      const entry={
+        ...base,
+        genre,
+        category:cat,
+        note:isMovieCat?movieText:(note||""),
+        review:isMovieCat?movieText:"",
+        rating:isMovieCat?rating:null,
+        mood:ITEM_MOOD[base.title]||null,
+        date,
+        customDate:useCustomDate?customDate:null,
+        id:editEntry.id,
+        year:yr,
+        actPhotos:cat==="activities"?actPhotos:(editEntry.actPhotos||[])
+      };
       if(cat==="movies"){
         const meta=await fetchMovieMeta(entry.title);
         if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
       }
-      onSave({...entry, pinOnProfile: pinOnSave&&entry.actPhotos?.length>0});
-      onClose();
+      try{
+        onSave({...entry, pinOnProfile: pinOnSave&&entry.actPhotos?.length>0});
+      } finally {
+        onClose();
+      }
       return;
     }
     let finalQueue=[...queue];
@@ -2824,7 +2842,18 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
     }
     if(!finalQueue.length)return;
     const toSave=await Promise.all(finalQueue.map(async(item,i)=>{
-      const entry={...item,note:note||"",review:(item.category==="movies"||cat==="movies")?review:"",rating:(item.category==="movies"||cat==="movies")?rating:null,date,customDate:useCustomDate?customDate:null,id:Date.now()+i,actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]};
+      const isMovieItem=(item.category==="movies"||cat==="movies");
+      const movieText=(review||note||"");
+      const entry={
+        ...item,
+        note:isMovieItem?movieText:(note||""),
+        review:isMovieItem?movieText:"",
+        rating:isMovieItem?rating:null,
+        date,
+        customDate:useCustomDate?customDate:null,
+        id:Date.now()+i,
+        actPhotos:(cat==="activities"||item.category==="activities")?actPhotos:[]
+      };
       if(item.category==="movies"||cat==="movies"){
         const meta=await fetchMovieMeta(item.title);
         if(meta){ if(meta.director) entry.director=meta.director; if(meta.actor) entry.actor=meta.actor; if(meta.poster) entry.poster=meta.poster; if(meta.year&&!entry.year) entry.year=meta.year; if(meta.genre) entry.genre=meta.genre; }
@@ -2832,14 +2861,17 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       return entry;
     }));
     const toSaveWithPin=toSave.map((e,i)=>i===0&&pinOnSave&&e.actPhotos?.length>0?{...e,pinOnProfile:true}:e);
-    onSave(toSaveWithPin);
-    onClose();
+    try{
+      onSave(toSaveWithPin);
+    } finally {
+      onClose();
+    }
   };
 
   const totalToSave=queue.length+(query.trim()&&cat?1:0);
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%",touchAction:"none"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:420,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"32%",touchAction:"none"}} onClick={e=>e.target===e.currentTarget&&closeWithAnim()}>
       <div
         className={data.theme==="fiesta"?"fiesta-modal":data.theme==="ulan"?"ulan-modal":""}
         style={{
@@ -4462,8 +4494,17 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       .filter(Boolean)
   );
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
-  const likedSet=new Set(Object.entries(likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
-  const watchSet=new Set((watchlistKeys||[]).map(k=>(k||"").toLowerCase()).filter(Boolean));
+  const likedSet=new Set(
+    Object.entries(likedSuggestions||{})
+      .filter(([,v])=>!!v)
+      .flatMap(([k])=>[(k||"").toLowerCase(),normTitle(k||"")])
+      .filter(Boolean)
+  );
+  const watchSet=new Set(
+    (watchlistKeys||[])
+      .flatMap(k=>[(k||"").toLowerCase(),normTitle(k||"")])
+      .filter(Boolean)
+  );
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
   const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
 
@@ -4493,7 +4534,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       if(itemKey&&loggedImdbKeys.has(itemKey)) return false;
       if(loggedTitleKeys.has(normTitle(i.title))) return false;
       if(itemKey&&likedSet.has(itemKey)) return false;
+      if(likedSet.has(normTitle(i.title))) return false;
       if(itemKey&&watchSet.has(itemKey)) return false;
+      if(watchSet.has(normTitle(i.title))) return false;
       if(cat==="movies"&&itemKey&&(discoverSkips[itemKey]||0)>0){
         const count=discoverSkips[itemKey]||0;
         const lastAt=skipLastAt[itemKey]?new Date(skipLastAt[itemKey]).getTime():0;
@@ -4702,19 +4745,41 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const catInfo=CAT_MAP[cat];
   const FREE_LIMIT=DISCOVER_FREE_LIMIT;
   const watchlistAll=_normalizeWatchlistItems(data);
-  const watchlistKeys=watchlistAll.map(w=>(w.imdbID||w.title||"").toLowerCase()).filter(Boolean);
+  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+  const watchlistKeys=watchlistAll.flatMap(w=>[(w.imdbID||"").toLowerCase(),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
+  const loggedTitleKeys=new Set((data.logs||[]).filter(l=>l.category===cat).map(l=>normTitle(l.title)).filter(Boolean));
+  const loggedImdbKeys=new Set((data.logs||[]).filter(l=>l.category===cat&&l.imdbID).map(l=>(l.imdbID||"").toLowerCase()));
+  const likedKeysSet=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
+  const watchKeysSet=new Set(watchlistKeys);
+  const sanitizePool=(arr)=>{
+    const seen=new Set();
+    return (arr||[]).filter(it=>{
+      const key=(it.imdbID||it.title||"").toLowerCase();
+      const titleKey=normTitle(it.title);
+      const dedupeKey=key||titleKey;
+      if(!dedupeKey) return false;
+      if(seen.has(dedupeKey)) return false;
+      if(key&&likedKeysSet.has(key)) return false;
+      if(key&&watchKeysSet.has(key)) return false;
+      if(key&&loggedImdbKeys.has(key)) return false;
+      if(titleKey&&loggedTitleKeys.has(titleKey)) return false;
+      seen.add(dedupeKey);
+      return true;
+    });
+  };
+  const buildFreshPool=(loc=null)=>sanitizePool(buildCatPool(
+    cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
+    {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
+    data.likedSuggestions||{},
+    watchlistKeys,
+    data.discoverSkipLastAt||{}
+  ));
 
   // Per-category queue — persisted in data.discoverQueues
   const [pool,setPool]=useState(()=>{
     const saved=data.discoverQueues?.[cat];
-    if(saved&&saved.length&&data.discoverDate===today) return saved;
-    return buildCatPool(
-      cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
-      {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-      data.likedSuggestions||{},
-      watchlistKeys,
-      data.discoverSkipLastAt||{}
-    );
+    if(saved&&saved.length&&data.discoverDate===today) return sanitizePool(saved);
+    return buildFreshPool();
   });
   const [poolIdx,setPoolIdx]=useState(()=>data.discoverDate===today?(data.discoverIndexes?.[cat]||0):0);
 
@@ -4754,14 +4819,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const hasSavedOnMount=useRef(!!(data.discoverQueues?.[cat]?.length));
   useEffect(()=>{
     if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
-    setPool(buildCatPool(
-      cat,data.logs,data.feedback,null,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
-      {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-      data.likedSuggestions||{},
-      watchlistKeys,
-      data.discoverSkipLastAt||{}
-    ));
+    setPool(buildFreshPool());
   },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
+  useEffect(()=>{
+    const next=sanitizePool(pool);
+    if(next.length===pool.length) return;
+    setPool(next);
+    setPoolIdx(i=>Math.min(i,Math.max(next.length-1,0)));
+  },[data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
   useEffect(()=>{
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length) return;
@@ -4820,20 +4885,30 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     (async()=>{
       const loc=_gpsCache||await getPhRegion();
       if(!loc) return;
-      const boosted=buildCatPool(
-        cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
-        {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-        data.likedSuggestions||{},
-        watchlistKeys,
-        data.discoverSkipLastAt||{}
-      );
+      const boosted=buildFreshPool(loc);
       setPool(boosted);
     })();
   },[]);
 
   const handleGenerate=()=>{
     if(!canGenerate) return;
-    const newIdx=poolIdx+1;
+    if(!currentItem){
+      const rebuilt=buildFreshPool();
+      setPool(rebuilt);
+      setPoolIdx(0);
+      onChange("__batch__",{
+        discoverQueues:{...(data.discoverQueues||{}),[cat]:rebuilt},
+        discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+        discoverDate:today,
+      });
+      return;
+    }
+    const nextPool=[...pool];
+    const removeIdx=Math.min(poolIdx,Math.max(nextPool.length-1,0));
+    if(nextPool.length) nextPool.splice(removeIdx,1);
+    const finalPool=nextPool.length?nextPool:buildFreshPool();
+    const newIdx=0;
+    setPool(finalPool);
     setPoolIdx(newIdx);
     const skipPatch=(cat==="movies"&&currentItem)
       ?(()=>{
@@ -4878,7 +4953,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       :{};
     // Persist updated queue state and increment count
     const newCounts={...todayCounts,[cat]:(usedToday+1)};
-    const newQueues={...(data.discoverQueues||{}),[cat]:pool};
+    const newQueues={...(data.discoverQueues||{}),[cat]:finalPool};
     const newIndexes={...(data.discoverIndexes||{}),[cat]:newIdx};
     onChange("__batch__",{
       discoverCounts:newCounts,
@@ -5415,6 +5490,16 @@ function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
     const meta=byKey.get(key)||null;
     return {...meta,...i};
   });
+  useEffect(()=>{
+    if(!selected) return;
+    const key=(selected.imdbID||selected.title||"").toLowerCase();
+    const exists=items.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
+    if(!exists){
+      setSelected(null);
+      setReminderEditing(false);
+      setReminderAt("");
+    }
+  },[items,selected]);
   if(selected){
     const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
     const selectedReminder=reminderMap.get(selectedKey)||null;
@@ -8600,14 +8685,24 @@ function App(){
   const update=patch=>setData(d=>({...d,...patch}));
   const handleOnboard=({language,theme,userName,avatar,customPhoto,photoPos})=>update({onboarded:true,language,theme,userName,avatar,customPhoto:customPhoto||null,photoPos:photoPos||{x:50,y:50,scale:1}});
   const handleLog=entries=>{
-    const arr=Array.isArray(entries)?entries:[entries];
+    const arr=(Array.isArray(entries)?entries:[entries]).map((entry,idx)=>{
+      const e={...(entry||{})};
+      const cat=e.category||"activities";
+      const pickText=(...vals)=>vals.find(v=>typeof v==="string"&&v.trim()!=="")||"";
+      const movieText=pickText(e.review,e.note,e.notes,e.comment,e.reflection);
+      const noteText=pickText(e.note,e.notes,e.comment,e.reflection,e.review);
+      return {
+        ...e,
+        id:e.id||Date.now()+idx,
+        category:cat,
+        note:cat==="movies"?movieText:noteText,
+        review:cat==="movies"?movieText:(e.review||""),
+      };
+    });
     if(removeWatchOnLogKey){
-      const loggedKeys=new Set(arr.map(e=>(e.imdbID||e.title||"").toLowerCase()).filter(Boolean));
-      if(loggedKeys.has(removeWatchOnLogKey)){
-        const nextWatch=_normalizeWatchlistItems(data).filter(w=>((w.imdbID||w.title||"").toLowerCase()!==removeWatchOnLogKey));
-        const nextRem=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==removeWatchOnLogKey));
-        update({watchlist:nextWatch,watchlistReminders:nextRem});
-      }
+      const nextWatch=_normalizeWatchlistItems(data).filter(w=>((w.imdbID||w.title||"").toLowerCase()!==removeWatchOnLogKey));
+      const nextRem=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==removeWatchOnLogKey));
+      update({watchlist:nextWatch,watchlistReminders:nextRem});
       setRemoveWatchOnLogKey(null);
     }
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
@@ -8806,8 +8901,21 @@ function App(){
                   </div>
                 </div>
               )}
-              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);setRemoveWatchOnLogKey(null);}} onSave={(entries)=>{handleLog(entries);const cnt=Array.isArray(entries)?entries.length:1;setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
-              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowWatchlistPage(false);setShowLog(true);}}/>}
+              {showLog&&<LogModal data={data} onClose={()=>{setShowLog(false);setEditEntry(null);setLogCat(null);setLogPrefill("");setLogFromDiscover(false);setRemoveWatchOnLogKey(null);}} onSave={(entries)=>{
+                try{
+                  handleLog(entries);
+                  const cnt=Array.isArray(entries)?entries.length:1;
+                  setTimelineUnread(n=>n+cnt);
+                  setBadgeAnimKey(k=>k+1);
+                } finally {
+                  setShowLog(false);
+                  setEditEntry(null);
+                  setLogCat(null);
+                  setLogPrefill("");
+                  setLogFromDiscover(false);
+                }
+              }} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
+              {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
               {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)}/>}
               <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
