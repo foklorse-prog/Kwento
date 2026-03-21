@@ -4708,7 +4708,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   return scored;
 }
 
-function curateSharedLibrary(sharedItems, logs, feedback, limit=300){
+function curateSharedLibrary(sharedItems, logs, feedback, limit=1200){
   const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
   const scored=(sharedItems||[]).map(i=>{
     let score=Math.random()*2;
@@ -5898,7 +5898,7 @@ function LikedPage({data,onClose}){
   );
 }
 
-function WatchedMoviesPage({data,onClose}){
+function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
   const logs=(data.logs||[]).filter(l=>l.category==="movies");
   const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
@@ -5914,6 +5914,9 @@ function WatchedMoviesPage({data,onClose}){
   });
   const [selected,setSelected]=useState(null);
   if(selected){
+    const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
+    const selectedLiked=!!(data.likedSuggestions||{})[selectedKey];
+    const loggedDate=selected.customDate||((selected.date||"").split("T")[0]||"");
     return(
       <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
         <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -5926,10 +5929,48 @@ function WatchedMoviesPage({data,onClose}){
                 {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
                 {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
                 {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
-                {selected.date&&<div style={{fontSize:12,color:th.sub,marginTop:6}}>Logged: <span style={{color:th.text}}>{new Date(selected.date).toLocaleDateString()}</span></div>}
               </div>
             </div>
             {selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
+          </div>
+          <div style={{marginTop:12,border:`1px solid ${th.border}`,borderRadius:12,background:th.card,padding:"12px 14px"}}>
+            <div style={{fontSize:12,color:th.sub,lineHeight:1.5,marginBottom:10}}>
+              {loggedDate?`You logged this on ${new Date(loggedDate+"T12:00:00").toLocaleDateString()}.`:"You logged this movie."}
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={()=>{onOpenMovieLog&&onOpenMovieLog(selected);}} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+              </button>
+              <button onClick={()=>{
+                const next={...(data.likedSuggestions||{})};
+                let nextSeed=[...(data.tasteSeed||[])];
+                if(next[selectedKey]) delete next[selectedKey];
+                else next[selectedKey]=true;
+                if(next[selectedKey]){
+                  if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===selectedKey&&s.signal==="like"))){
+                    nextSeed.push({
+                      title:selected.title,
+                      imdbID:selected.imdbID||null,
+                      category:"movies",
+                      tags:selected.tags||[],
+                      genre:selected.genre||null,
+                      signal:"like",
+                      scoreWeight:1.35,
+                      savedAt:new Date().toISOString(),
+                    });
+                  }
+                } else {
+                  nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===selectedKey)&&s.signal==="like"));
+                }
+                onChange&&onChange("__batch__",{likedSuggestions:next,tasteSeed:nextSeed});
+              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:selectedLiked?`${th.accent}22`:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={selectedLiked?th.accent:"none"} stroke={selectedLiked?th.accent:th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -6744,30 +6785,21 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
             onTouchCancel={handleTouchEnd}
           >
             <div style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative"}}>
-              {card._photoPlaceholder?(
-                <div style={{
-                  position:"absolute",inset:0,
-                  background:`linear-gradient(145deg,${card._photoColor||"#1b1330"},${card._photoColor||"#120b24"})`,
-                }}/>
-              ):(
-                <>
-                  <img src={card._photoSrc} style={{
-                    width:(100*(card._photoPos.scale||1))+"%",
-                    height:(100*(card._photoPos.scale||1))+"%",
-                    objectFit:"cover",position:"absolute",
-                    left:((1-(card._photoPos.scale||1))*(card._photoPos.x||50)/100*100)+"%",
-                    top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
-                    pointerEvents:"none",
-                  }}/>
-                  <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 10px",
-                    background:"linear-gradient(transparent,rgba(0,0,0,0.6))",
-                    fontSize:10,color:"rgba(255,255,255,0.9)",fontWeight:500,
-                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                    userSelect:"none",WebkitUserSelect:"none"}}>
-                    {card.label}
-                  </div>
-                </>
-              )}
+              <img src={card._photoSrc} style={{
+                width:(100*(card._photoPos.scale||1))+"%",
+                height:(100*(card._photoPos.scale||1))+"%",
+                objectFit:"cover",position:"absolute",
+                left:((1-(card._photoPos.scale||1))*(card._photoPos.x||50)/100*100)+"%",
+                top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
+                pointerEvents:"none",
+              }}/>
+              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 10px",
+                background:"linear-gradient(transparent,rgba(0,0,0,0.6))",
+                fontSize:10,color:"rgba(255,255,255,0.9)",fontWeight:500,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                userSelect:"none",WebkitUserSelect:"none"}}>
+                {card.label}
+              </div>
             </div>
           </div>
         );
@@ -7383,10 +7415,12 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           // ── Card registry — ordered by priority ───────────────────────────────
           // This defines which card gets the first available slot, second, etc.
           // If a card has no data it is simply absent and the next card moves up.
-          const weekPhotoCards=(photosReady?(data.profilePhotoIds||[]):[]).map(id=>{
+          const pinnedIds=(data.profilePhotoIds||[]);
+          const weekPhotoCards=pinnedIds.map(id=>{
             const entry=data.logs.find(l=>l.id===id);
+            if(!entry) return null;
             const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
-            if(!entry||!entryDate||isNaN(entryDate)) return null;
+            if(!entryDate||isNaN(entryDate)) return null;
             if(phWeekStartKey(entryDate)!==weekKey) return null;
             const photo=entry?.actPhotos?.[0];
             if(!photo) return null;
@@ -8424,7 +8458,7 @@ function App(){
         const json=await res.json();
         const sharedItems=(json.items||json.library||json)||[];
         try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
-        const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,300);
+        const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,1200);
         const token=_getGhToken();
         const existing=data.libraryMovies||[];
         if(token && !data.sharedSyncDone && existing.length){
@@ -8451,7 +8485,7 @@ function App(){
       const raw=localStorage.getItem("kwento_shared_library_cache");
       if(!raw) return;
       const sharedItems=JSON.parse(raw)||[];
-      const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,300);
+      const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,1200);
       const relevant=buildRelevantLocalLibrary(curated,data.logs,data.libraryMovies||[]);
       setData(d=>({...d,libraryMovies:relevant}));
     }catch(_){}
@@ -8741,6 +8775,49 @@ function App(){
     if(removeWatchOnLogKey) setRemoveWatchOnLogKey(null);
     const pinIds=arr.filter(e=>e.pinOnProfile).map(e=>e.id);
     const cleanArr=arr.map(({pinOnProfile,...rest})=>rest);
+    const mergeLibraryFromLogs=(baseLib, entries)=>{
+      const existing=[...(baseLib||[])];
+      const byKey=new Map();
+      existing.forEach(m=>{
+        const key=(m.imdbID||m.title||"").toLowerCase();
+        if(!key) return;
+        if(!byKey.has(key)) byKey.set(key,m);
+      });
+      (entries||[]).forEach(e=>{
+        if(e.category!=="movies") return;
+        const hasMeta=!!(e.imdbID||e.poster||e.plot||e.genre||e.director||e.actor||e.actors||e.imdbRating);
+        if(!hasMeta) return;
+        const candidate={
+          title:e.title||null,
+          year:e.year||null,
+          genre:e.genre||null,
+          genres:e.genres||[],
+          director:e.director||null,
+          actor:e.actor||null,
+          actors:e.actors||[],
+          plot:e.plot||null,
+          poster:e.poster||null,
+          posterId:e.posterId||e.imdbID||`t_${_h(e.title||"")}`,
+          imdbID:e.imdbID||null,
+          imdbRating:e.imdbRating!=null?e.imdbRating:null,
+          imdbVotes:e.imdbVotes!=null?e.imdbVotes:null,
+          runtime:e.runtime||null,
+          rated:e.rated||null,
+          country:e.country||null,
+          language:e.language||null,
+          awards:e.awards||null,
+          omdbType:e.omdbType||"movie",
+          tags:e.tags||[],
+          ph:!!e.ph,
+          _fromOmdb:!!e._fromOmdb,
+        };
+        const key=(candidate.imdbID||candidate.title||"").toLowerCase();
+        if(!key) return;
+        const prev=byKey.get(key)||null;
+        byKey.set(key,prev?{...prev,...candidate}:candidate);
+      });
+      return Array.from(byKey.values());
+    };
     const loggedMovieKeys=new Set(
       cleanArr
         .filter(e=>e.category==="movies")
@@ -8754,7 +8831,8 @@ function App(){
         const nextLogs=d.logs.map(l=>l.id===cleanArr[0].id?cleanArr[0]:l);
         const nextWatch=_normalizeWatchlistItems(d).filter(w=>!loggedMovieKeys.has((w.imdbID||w.title||"").toLowerCase()));
         const nextRem=(d.watchlistReminders||[]).filter(r=>!loggedMovieKeys.has((r.imdbID||r.title||"").toLowerCase()));
-        return {...d,logs:nextLogs,watchlist:nextWatch,watchlistReminders:nextRem};
+        const nextLib=mergeLibraryFromLogs(d.libraryMovies||[],cleanArr);
+        return {...d,logs:nextLogs,watchlist:nextWatch,watchlistReminders:nextRem,libraryMovies:nextLib};
       });
     } else {
       setData(d=>{
@@ -8763,6 +8841,7 @@ function App(){
         const newLogs=[...cleanArr,...d.logs];
         const nextWatch=_normalizeWatchlistItems(d).filter(w=>!loggedMovieKeys.has((w.imdbID||w.title||"").toLowerCase()));
         const nextRem=(d.watchlistReminders||[]).filter(r=>!loggedMovieKeys.has((r.imdbID||r.title||"").toLowerCase()));
+        const nextLib=mergeLibraryFromLogs(d.libraryMovies||[],cleanArr);
         const newPins=[...cur];
         pinIds.forEach(id=>{
           if(newPins.includes(id)) return;
@@ -8772,7 +8851,7 @@ function App(){
           const weekCount=newPins.filter(pid=>{const e=newLogs.find(l=>l.id===pid);return e&&getWeekStart(new Date(e.customDate?e.customDate+"T12:00:00":e.date))===entryWeek;}).length;
           if(weekCount<3) newPins.push(id);
         });
-        return {...d,logs:newLogs,profilePhotoIds:newPins,watchlist:nextWatch,watchlistReminders:nextRem};
+        return {...d,logs:newLogs,profilePhotoIds:newPins,watchlist:nextWatch,watchlistReminders:nextRem,libraryMovies:nextLib};
       });
       return;
     }
@@ -8965,7 +9044,7 @@ function App(){
               }} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
               {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
-              {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)}/>}
+              {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
