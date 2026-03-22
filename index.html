@@ -6842,7 +6842,30 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const showStatEmoji=isPace||isTimeVibe;
         const isMusicCard=card._baseId==="most_logged"&&(card.label==="Top Artist"||card.label==="Top Song"||card.label==="Top Album");
         const showEqualizer=isMusicCard&&colSpan===2&&rowSpan===1;
-        const vibeDisplay=isVibe?String(card.value||"").replace(/,\s*/g,",\n"):card.value;
+        // Vibe layout — character-count estimation to decide tag arrangement
+        // Average ~9px per char at 17px Playfair. Card widths: 1-col ~120px usable, 2-col ~260px usable.
+        const vibeDisplay=(()=>{
+          if(!isVibe) return card.value;
+          const parts=String(card.value||"").split(", ").filter(Boolean);
+          if(parts.length===0) return "";
+          if(parts.length===1) return parts[0];
+          // For 1x1 — only 1 row available, show top tag only
+          if(colSpan===1&&rowSpan===1) return parts[0];
+          // For tall cards (rowSpan>=2) — one tag per row, all fit
+          if(rowSpan>=2) return parts.join("\n");
+          // For 2x1 — try preferred: tag1 on row1, tag2+tag3 on row2
+          // Estimate usable width ~260px, each char ~9px
+          const usable=260;
+          const charW=9;
+          const tag2and3=parts.slice(1).join(", ");
+          if(tag2and3.length*charW<=usable){
+            // tag2+tag3 fit on row2 — preferred layout
+            return parts[0]+"\n"+tag2and3;
+          }
+          // Fallback: tag1+tag2 on row1, tag3 on row2
+          const tag1and2=parts.slice(0,2).join(", ");
+          return tag1and2+(parts[2]?"\n"+parts[2]:"");
+        })();
         const vibeWhiteSpace=isVibe?"pre-line":"normal";
         const valueFont="var(--font-display)";
 
