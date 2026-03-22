@@ -240,7 +240,7 @@ function normalizeMoodKey(mood){
   return MOOD_KEY_MIGRATION[mood] || mood;
 }
 
-const VIBE_TAG_ALLOWLIST = new Set(["acoustic","action","action adventure","action rpg","adventure","adventurous","aesthetic","ambition","animation","aromatic","art game","arthouse","artistic","atmospheric","balanced","battle royale","beautiful","bold","bright","calm","calming","casual","challenge","challenging","cheerleading","chill","cinematic","classic","classic rock","clean","clever","colorful","comedy","comfort","complex","contemporary","co-op","cozy","cozy fantasy","creative","crude","cultural","cute","dark","deep","discovery","disturbing","documentary","drama","dramatic","dreamy","earthy","educational","elegant","emotional","empowering","energetic","ensemble","entertainment","epic","everyday","exciting","fantasy","fantasy drama","fantasy romance","fascinating","fast","feel-good","female-led","feminist","festive","fiction","fps","fresh","friendship","fruity","fun","gritty","healing","heartwarming","hearty","historical","historical drama","historical fiction","hopeful","horror","horror comedy","iconic","indie","indie folk","indie pop","indoor","inspirational","inspiring","intense","interactive","intimate","jrpg","k-pop","life sim","light","lighthearted","literary","loud","magical","main","management","meditative","melancholic","memoir","memorable","meta","mind-bending","mindful","moba","musical","mystery","mythological fiction","narrative","natural","nonfiction","nostalgic","opm","opm classic","opm indie","opm r&b","opm soul","outdoor","peaceful","philosophical","platformer","political","pop","practical","provocative","psychological","quiet","quirky","realistic","redemption","reflective","refreshing","relaxed","rich","rivalry","roguelike","romance","romantic","rowdy","rpg","sandbox","satisfying","scenic","sci-fi","seasonal","self-help","self-improvement","silly","simple","simulation","slow","slow-burn","smart","smoky","social","social deduction","soft","solo","soulful","special","spicy","sport","sports strategy","stylish","summer","surreal","suspense","sweet","tension","theatrical","thriller","timeless","trending","trendy","twist","unique","upbeat","uplifting","warm","wholesome"]);
+const VIBE_TAG_ALLOWLIST = new Set(["acoustic","action","action adventure","action rpg","adventure","adventurous","aesthetic","ambition","animation","aromatic","art game","arthouse","artistic","atmospheric","balanced","battle royale","beautiful","bold","bright","calm","calming","casual","challenge","challenging","cheerleading","chill","cinematic","classic","classic rock","clean","clever","colorful","comedy","comfort","complex","contemporary","co-op","cozy","cozy fantasy","creative","crude","focused","raw","cultural","cute","dark","deep","discovery","disturbing","documentary","drama","dramatic","dreamy","earthy","educational","elegant","emotional","empowering","energetic","ensemble","entertainment","epic","everyday","exciting","fantasy","fantasy drama","fantasy romance","fascinating","fast","feel-good","female-led","feminist","festive","fiction","fps","fresh","friendship","fruity","fun","gritty","healing","heartwarming","hearty","historical","historical drama","historical fiction","hopeful","horror","horror comedy","iconic","indie","indie folk","indie pop","indoor","inspirational","inspiring","intense","interactive","intimate","jrpg","k-pop","life sim","light","lighthearted","literary","loud","magical","main","management","meditative","melancholic","memoir","memorable","meta","mind-bending","mindful","moba","musical","mystery","mythological fiction","narrative","natural","nonfiction","nostalgic","opm","opm classic","opm indie","opm r&b","opm soul","outdoor","peaceful","philosophical","platformer","political","pop","practical","provocative","psychological","quiet","quirky","realistic","redemption","reflective","refreshing","relaxed","rich","rivalry","roguelike","romance","romantic","rowdy","rpg","sandbox","satisfying","scenic","sci-fi","seasonal","self-help","self-improvement","silly","simple","simulation","slow","slow-burn","smart","smoky","social","social deduction","soft","solo","soulful","special","spicy","sport","sports strategy","stylish","summer","surreal","suspense","sweet","tension","theatrical","thriller","timeless","trending","trendy","twist","unique","upbeat","uplifting","warm","wholesome"]);
 const VIBE_TAG_DROPLIST = new Set(["active","addiction","adult","american","animated","anime","annatto","anthology","art","asian","asian-american","bacolod","baked","ballet","banana","banana-fritter","bangus","barcelona","barkada","batangas","battle-royale","beef","bicolano","biographical","birthday","bitter","boat","bone-marrow","braised","breakfast","british","bro","brown","brunch","budget","building","campy","caramelized","cebu","cebuano","celebratory","cheap","cheese","chewy","chicken","chinese","chinese-filipino","chocolate","choice-driven","christmas","coconut","coffee","cold","coming-of-age","competition","competitive","con-artist","corn","creamy","crime","crispy","crunchy","cured","curry","dance","date-night","death","deduction","dessert","drink","duck-egg","egg","enemies-to-lovers","erotic","expat","exploration","family","farming","fashion","fast-food","fermented","ferry","filipino","filipino-american","fish","food","fragrant","freedom","french","fried","fried-dough","fried-rice","fusion","gacha","garlic","garlic-rice","ginger","glass-noodles","global","gothic","green","grief","grilled","grinding","ground-pork","guitar","healthy","heritage","history","holiday","ilocano","iloilo","ilonggo","indian","indonesian","indulgent","italian","jackfruit","japanese","journey","korean","la","lgbtq+","live","long-distance","luca guadagnino","lunch","luzon","marriage","masochistic","meatloaf","merienda","middle-eastern","mild","milkfish","mixed","morning","multigenerational","music","must-play","mythology","nature","new york","night","noir","noodles","norwegian","octopus","offal","ofw","omelette","one-night","online","open-world","orange","origin-story","pampanga","party","patriotic","period","piano","pixel","pop-culture","popular","pork","porridge","portable","pregnancy","pulutan","purple","purple-yam","quail-egg","quick","r&b","rainy-day","raw","rice","rice-cake","rice-roll","road-trip","roasted","rock","roulade","salad","sam raimi","samgyup","sandra bullock","sandwich","sausage","savory","seafood","sequel","sesame","sharing","shaved-ice","shooter","short","shrimp","sick-day","silog","sinangag","sizzling","slasher","slow-cooked","snack","snacks","soft-tofu","soup","sour","southeast-asian","space","sports","spring-roll","spy","squad","steamed","stew","sticky","stir-fried","story","strategy","street-food","strong","stuffed","suburban","superhero","survival","synth-pop","tactical","tangy","tapa","team","teen","temptation","thai","thick","time-loop","time-travel","tofu","tom cruise","tomato","traditional","tropical","tv","umami","urban","useful","valentine's day","vampire","variety","vegetables","vietnamese","vinegar","visayan","volleyball","war","water","weekend","woody allen","wordless","wrap","wrapped","wwii","ya","yogurt","yorgos lanthimos"]);
 
 
@@ -6860,11 +6860,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           const tag2and3=parts.slice(1).join(", ");
           if(tag2and3.length*charW<=usable){
             // tag2+tag3 fit on row2 — preferred layout
-            return parts[0]+"\n"+tag2and3;
+            return parts[0]+",\n"+tag2and3;
           }
           // Fallback: tag1+tag2 on row1, tag3 on row2
           const tag1and2=parts.slice(0,2).join(", ");
-          return tag1and2+(parts[2]?"\n"+parts[2]:"");
+          return tag1and2+(parts[2]?",\n"+parts[2]:"");
         })();
         const vibeWhiteSpace=isVibe?"pre-line":"normal";
         const valueFont="var(--font-display)";
@@ -7435,34 +7435,54 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           movieLogs.forEach(l=>{ if(l.actor) actorCount[l.actor]=(actorCount[l.actor]||0)+1; });
           const topActor=Object.entries(actorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
 
-          // Week vibe — weighted scoring, diversity-first, no percentages
+          // Week vibe — three-level sort: breadth first, then avg rating, then log frequency
           let weekBreakdownValue=null;
           if(weekManualLogs.length>=3){
-            // Deduplicate by title so logging Harry Styles 9x counts as 1 entry
-            const seenTitles=new Set();
-            const distinctEntries=weekManualLogs.filter(l=>{
+            // Deduplicate by title — repeated logs of same entry count as one distinct entry
+            // but we still track total log count and avg rating across all logs of that title
+            const entryMap={};
+            weekManualLogs.forEach(l=>{
               const key=(l.title||l.id||"").toLowerCase();
-              if(seenTitles.has(key)) return false;
-              seenTitles.add(key);
-              return true;
+              if(!entryMap[key]){
+                entryMap[key]={entry:l,totalCount:0,ratingSum:0,ratingCount:0};
+              }
+              entryMap[key].totalCount++;
+              if(l.rating!=null){
+                entryMap[key].ratingSum+=l.rating;
+                entryMap[key].ratingCount++;
+              }
             });
-            // Each entry gets voting power of 1.0 split equally among its valid tags
-            // tagScores: { tag -> { score, entryKey } } — entryKey for diversity enforcement
+            const distinctEntries=Object.values(entryMap);
+            // For each tag, track: distinctCount (how many unique entries have it),
+            // totalCount (sum of log frequencies across those entries),
+            // avgRating (average rating of entries that have this tag),
+            // entryKey (the entry that contributed most, for diversity rule)
             const tagScores={};
-            distinctEntries.forEach(l=>{
+            distinctEntries.forEach(({entry:l,totalCount,ratingSum,ratingCount})=>{
               const validTags=(l.tags||[]).map(t=>(t||"").toLowerCase()).filter(t=>t&&!VIBE_TAG_DROPLIST.has(t)&&VIBE_TAG_ALLOWLIST.has(t));
               if(!validTags.length) return;
-              const weight=1/validTags.length;
               const entryKey=(l.title||l.id||"").toLowerCase();
+              const avgRating=ratingCount>0?ratingSum/ratingCount:3; // default to neutral if no rating
               validTags.forEach(t=>{
-                if(!tagScores[t]) tagScores[t]={score:0,entryKey};
-                tagScores[t].score+=weight;
-                // Track the entry that contributed most to this tag
-                if(tagScores[t].score>weight) tagScores[t].entryKey=entryKey;
+                if(!tagScores[t]) tagScores[t]={distinctCount:0,totalCount:0,ratingSum:0,ratingCount:0,entryKey};
+                tagScores[t].distinctCount+=1;
+                tagScores[t].totalCount+=totalCount;
+                tagScores[t].ratingSum+=avgRating;
+                tagScores[t].ratingCount+=1;
+                // Track which entry contributed the most distinct count to this tag
+                tagScores[t].entryKey=entryKey;
               });
             });
             if(Object.keys(tagScores).length>0){
-              const sorted=Object.entries(tagScores).sort((a,b)=>b[1].score-a[1].score);
+              // Sort by: 1) distinctCount desc, 2) avg rating desc, 3) totalCount desc
+              const sorted=Object.entries(tagScores).sort((a,b)=>{
+                const [,sa]=a, [,sb]=b;
+                if(sb.distinctCount!==sa.distinctCount) return sb.distinctCount-sa.distinctCount;
+                const avgA=sa.ratingCount>0?sa.ratingSum/sa.ratingCount:3;
+                const avgB=sb.ratingCount>0?sb.ratingSum/sb.ratingCount:3;
+                if(avgB!==avgA) return avgB-avgA;
+                return sb.totalCount-sa.totalCount;
+              });
               // Pick top 3 preferring tags from different entries (diversity rule)
               const picked=[];
               const usedEntries=new Set();
