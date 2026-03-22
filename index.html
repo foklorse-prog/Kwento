@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ================================================================
   KWENTO PATCH NOTES (dev only - update this every release)
 ================================================================
@@ -7680,14 +7680,14 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
                   </div>
                     {isOpen&&(
                       <>
-                        <StatGrid
+                        {photosReady&&<StatGrid
                           cards={cards} data={data} onChange={onChange}
                           th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
                           onStickerOpen={onStickerOpen}
                           onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
                           scrollRef={profileScrollRef}
                           sharedGlass={false}
-                        />
+                        />}
                         {slots<=9&&(()=>{
                           const allLogs=data.logs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
                           const firstDate=allLogs.length?new Date(allLogs.map(l=>l.date).filter(Boolean).sort()[0]):null;
@@ -8580,7 +8580,7 @@ function App(){
         setData(d=>({
           ...d,
           libraryMovies:updatedLib,
-          logs:updatedLogs,
+          logs:updatedLogs.map((l,i)=>({...l,actPhotos:d.logs[i]?.actPhotos??l.actPhotos})),
           omdbLastUpdated:new Date().toISOString(),
           omdbLibrary:undefined,
         }));
