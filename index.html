@@ -6841,7 +6841,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const isTimeVibe=String(card.iconId).includes("time_vibe");
         const showStatEmoji=isPace||isTimeVibe;
         const isMusicCard=String(card.iconId).includes("most_logged")&&(card.label==="Top Artist"||card.label==="Top Song");
-        const showEqualizer=isMusicCard;
+        const showEqualizer=isMusicCard&&colSpan===2&&rowSpan===1;
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
         const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
@@ -6911,8 +6911,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
               {showEqualizer&&(
                 <div style={{lineHeight:1,position:"relative",zIndex:1,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"2px"}}>
-                  {[4,6,9,5,10,8,9,5,7,4].map((h,i)=>(
-                    <div key={i} style={{width:3,height:h,borderRadius:2,background:valColor,flexShrink:0}}/>
+                  {[3,4,6,3,7,5,6,3,5,3].map((h,i)=>(
+                    <div key={i} style={{width:2,height:h,borderRadius:1,background:valColor,flexShrink:0}}/>
                   ))}
                 </div>
               )}
