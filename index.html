@@ -6841,7 +6841,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const isTimeVibe=String(card.iconId).includes("time_vibe");
         const showStatEmoji=isPace||isTimeVibe;
         const isMusicCard=card._baseId==="most_logged"&&(card.label==="Top Artist"||card.label==="Top Song"||card.label==="Top Album");
-        const showEqualizer=isMusicCard;
+        const showEqualizer=isMusicCard&&colSpan===2&&rowSpan===1;
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
         const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
