@@ -6842,8 +6842,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const showStatEmoji=isPace||isTimeVibe;
         const isMusicCard=card._baseId==="most_logged"&&(card.label==="Top Artist"||card.label==="Top Song"||card.label==="Top Album");
         const showEqualizer=isMusicCard&&colSpan===2&&rowSpan===1;
-        const vibeDisplay=isVibe?String(card.value||""):card.value;
-        const vibeWhiteSpace=isVibe?"normal":"normal";
+        const vibeDisplay=isVibe?String(card.value||"").replace(/,\s*/g,",\n"):card.value;
+        const vibeWhiteSpace=isVibe?"pre-line":"normal";
         const valueFont="var(--font-display)";
 
         const palette=card._palette;
@@ -6931,11 +6931,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont,position:"relative",zIndex:1,
-                overflow:"hidden",
-                ...(isVibe
-                  ?{display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",width:"100%"}
-                  :{textOverflow:"ellipsis",whiteSpace:"nowrap"})
+                fontFamily:valueFont,position:"relative",zIndex:1
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
