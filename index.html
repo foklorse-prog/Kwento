@@ -6848,7 +6848,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
           ?(vibeCompact?(vibeParts[0]||card.value):vibeParts.join(",\n"))
           :card.value;
         const vibeWhiteSpace=isVibe?"pre-line":"normal";
-        const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
+        const valueFont="var(--font-body)";
 
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
