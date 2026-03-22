@@ -6845,9 +6845,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
         const vibeTall=isVibe&&rowSpan>=2;
         const vibeDisplay=isVibe
-          ?(vibeCompact?(vibeParts[0]||card.value):(vibeWide?vibeParts.join(" · "):vibeParts.join("\n")))
+          ?(vibeCompact?(vibeParts[0]||card.value):vibeParts.join(",\n"))
           :card.value;
-        const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
+        const vibeWhiteSpace=isVibe?"pre-line":"normal";
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
 
         const palette=card._palette;
@@ -7368,6 +7368,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           weekManualLogs.forEach(l=>{ if(l.title) titleCount[l.title]=(titleCount[l.title]||0)+1; });
           const mostLoggedEntry=Object.entries(titleCount).filter(([,c])=>c>=3).sort((a,b)=>b[1]-a[1])[0];
           const mostLoggedTitle=mostLoggedEntry?.[0];
+          const mostLoggedLog=mostLoggedTitle?weekManualLogs.find(l=>l.title===mostLoggedTitle):null;
+          const mostLoggedLabel=mostLoggedLog?.category==="music"?(mostLoggedTitle.includes("—")?"Top Song":"Top Artist"):"Most Logged";
 
           // Top director / actor
           const movieLogs=weekManualLogs.filter(l=>l.category==="movies");
@@ -7467,12 +7469,12 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
 
           // Stat cards in priority order — matches your registry 1,2,4,5,7,8,10,11,12,13
           const statRegistry=[
-            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:"Vibe",value:weekBreakdownValue,min:1}]:[]),
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:"This Week's Vibe",value:weekBreakdownValue,min:1}]:[]),
             ...(weekPulse?[{iconId:wkId("week_pulse"),_baseId:"week_pulse",emoji:weekPulseEmoji,label:"",value:weekPulse,min:1}]:[]),
             ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌅",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
             ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
             ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
-            ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:"Most Logged",value:mostLoggedTitle,min:1}]:[]),
+            ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:mostLoggedLabel,value:mostLoggedTitle,min:1}]:[]),
             ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
             ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
             ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
