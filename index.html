@@ -6908,7 +6908,27 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               )}
 
               {showStatEmoji&&(
-                <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+                <div style={{lineHeight:1,position:"relative",zIndex:1}}>
+                  {isTimeVibe?(
+                    <svg width="22" height="14" viewBox="0 0 54 34" fill="none" stroke={valColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <g transform="translate(27,34)">
+                        <line x1="-27" y1="0" x2="27" y2="0"/>
+                        <path d="M-18,0 A18,18 0 0,1 18,0" fill="none"/>
+                        <line x1="0" y1="0" x2="0" y2="-27" strokeWidth="1.8"/>
+                        <line x1="0" y1="0" x2="8" y2="-26" strokeWidth="1.6"/>
+                        <line x1="0" y1="0" x2="-8" y2="-26" strokeWidth="1.6"/>
+                        <line x1="0" y1="0" x2="15" y2="-23" strokeWidth="1.4"/>
+                        <line x1="0" y1="0" x2="-15" y2="-23" strokeWidth="1.4"/>
+                        <line x1="0" y1="0" x2="22" y2="-17" strokeWidth="1.2"/>
+                        <line x1="0" y1="0" x2="-22" y2="-17" strokeWidth="1.2"/>
+                        <line x1="0" y1="0" x2="27" y2="-7" strokeWidth="1"/>
+                        <line x1="0" y1="0" x2="-27" y2="-7" strokeWidth="1"/>
+                      </g>
+                    </svg>
+                  ):(
+                    <div style={{fontSize:emojiSz,fontFamily:"var(--font-body)"}}>{card.emoji}</div>
+                  )}
+                </div>
               )}
               <div style={{
                 fontSize:valSz,fontWeight:800,color:valColor,
