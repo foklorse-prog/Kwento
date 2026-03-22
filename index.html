@@ -67,9 +67,12 @@ function isOffensive(t){ return OFFENSIVE.some(w=>t.toLowerCase().replace(/[^a-z
 // ─── COLOR HELPERS ───────────────────────────────────────────────────────────
 const _clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 function _hexToRgb(hex){
+  if(!hex||typeof hex!=="string") return {r:0,g:0,b:0};
   const h=hex.replace("#","").trim();
+  if(!h) return {r:0,g:0,b:0};
   const n=h.length===3? h.split("").map(c=>c+c).join(""):h;
   const i=parseInt(n,16);
+  if(isNaN(i)) return {r:0,g:0,b:0};
   return {r:(i>>16)&255,g:(i>>8)&255,b:i&255};
 }
 function _rgbToHex({r,g,b}){
@@ -127,9 +130,6 @@ function _adjustForCard(rgb){
 function _pickReadableText(bgRgb, th){
   const light=_hexToRgb("#ffffff");
   const dark=_hexToRgb("#0b0f1a");
-  const prefer=_hexToRgb(th.text||"#ffffff");
-  const c1=_contrast(bgRgb,prefer);
-  if(c1>=3) return _rgbToHex(prefer);
   const c2=_contrast(bgRgb,light);
   const c3=_contrast(bgRgb,dark);
   return c2>=c3?_rgbToHex(light):_rgbToHex(dark);
@@ -6853,11 +6853,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
         const bg=palette?`linear-gradient(145deg,${palette.bg},${palette.bg2})`:th.card;
-        // photo_bg cards sit on top of a dark photo+scrim so we force white-anchored
-        // text colors regardless of what the palette computed from the harmonized hue
-        const valColor=isPhotoBg?"rgba(255,255,255,0.97)":palette?palette.accent:accentColor;
-        const lblColor=isPhotoBg?"rgba(255,255,255,0.6)":palette?palette.label:labelColor;
-        const textColor=isPhotoBg?"#ffffff":palette?palette.text:th.text;
+        const cardBgRgb=_hexToRgb(palette?palette.bg:th.card);
+        const bestText=_pickReadableText(cardBgRgb,th);
+        const valColor=isPhotoBg?"rgba(255,255,255,0.97)":palette?palette.accent:_pickReadableText(_hexToRgb(th.card),th);
+        const lblColor=isPhotoBg?"rgba(255,255,255,0.6)":palette?palette.label:_pickReadableText(_hexToRgb(th.card),th);
+        const textColor=isPhotoBg?"#ffffff":palette?palette.text:bestText;
 
         return(
           <div key={card.iconId} data-cardid={card.iconId}
@@ -7584,13 +7584,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const bgRgb=_hexToRgb(base);
             const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
             let text=_pickReadableText(bgRgb, th);
-            let accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.35));
-            let label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#ffffff"),0.55));
-            if(_luminance(bgRgb)>0.7){
-              text="#0b0f1a";
-              accent=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.8));
-              label=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#0b0f1a"),0.6));
-            }
+            let accent=_pickReadableText(bgRgb, th);
+            let label=_pickReadableText(bgRgb, th);
             const palette={bg:base,bg2,text,accent,label};
             c._palette=palette;
             // photo_bg wins over any other role assignment
