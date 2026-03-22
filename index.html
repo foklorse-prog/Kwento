@@ -220,8 +220,8 @@ const AVATARS = [
 
 // ─── MOOD MAPS ────────────────────────────────────────────────────────────────
 const MOOD_TAGS = {
-  masaya:["upbeat","fun","social","light","feel-good"],
-  malungkot:["emotional","reflective","slow","melancholic","intimate"],
+  happy:["upbeat","fun","social","light","feel-good"],
+  sad:["emotional","reflective","slow","melancholic","intimate"],
   excited:["upbeat","adventure","epic","energetic","bold"],
   relaxed:["cozy","calm","chill","peaceful","acoustic"],
   nostalgic:["classic","nostalgic","Filipino","OPM","heartwarming"],
@@ -229,6 +229,20 @@ const MOOD_TAGS = {
   inspired:["inspirational","creative","cultural","artistic","literary"],
   stressed:["cozy","calm","comfort","warm","simple"],
 };
+
+const MOOD_KEY_MIGRATION = {
+  masaya:"happy",
+  malungkot:"sad",
+};
+
+function normalizeMoodKey(mood){
+  if(!mood) return mood;
+  return MOOD_KEY_MIGRATION[mood] || mood;
+}
+
+const VIBE_TAG_ALLOWLIST = new Set(["acoustic","action","action adventure","action rpg","adventure","adventurous","aesthetic","ambition","animation","aromatic","art game","arthouse","artistic","atmospheric","balanced","battle royale","beautiful","bold","bright","calm","calming","casual","challenge","challenging","cheerleading","chill","cinematic","classic","classic rock","clean","clever","colorful","comedy","comfort","complex","contemporary","co-op","cozy","cozy fantasy","creative","crude","cultural","cute","dark","deep","discovery","disturbing","documentary","drama","dramatic","dreamy","earthy","educational","elegant","emotional","empowering","energetic","ensemble","entertainment","epic","everyday","exciting","fantasy","fantasy drama","fantasy romance","fascinating","fast","feel-good","female-led","feminist","festive","fiction","fps","fresh","friendship","fruity","fun","gritty","healing","heartwarming","hearty","historical","historical drama","historical fiction","hopeful","horror","horror comedy","iconic","indie","indie folk","indie pop","indoor","inspirational","inspiring","intense","interactive","intimate","jrpg","k-pop","life sim","light","lighthearted","literary","loud","magical","main","management","meditative","melancholic","memoir","memorable","meta","mind-bending","mindful","moba","musical","mystery","mythological fiction","narrative","natural","nonfiction","nostalgic","opm","opm classic","opm indie","opm r&b","opm soul","outdoor","peaceful","philosophical","platformer","political","pop","practical","provocative","psychological","quiet","quirky","realistic","redemption","reflective","refreshing","relaxed","rich","rivalry","roguelike","romance","romantic","rowdy","rpg","sandbox","satisfying","scenic","sci-fi","seasonal","self-help","self-improvement","silly","simple","simulation","slow","slow-burn","smart","smoky","social","social deduction","soft","solo","soulful","special","spicy","sport","sports strategy","stylish","summer","surreal","suspense","sweet","tension","theatrical","thriller","timeless","trending","trendy","twist","unique","upbeat","uplifting","warm","wholesome"]);
+const VIBE_TAG_DROPLIST = new Set(["active","addiction","adult","american","animated","anime","annatto","anthology","art","asian","asian-american","bacolod","baked","ballet","banana","banana-fritter","bangus","barcelona","barkada","batangas","battle-royale","beef","bicolano","biographical","birthday","bitter","boat","bone-marrow","braised","breakfast","british","bro","brown","brunch","budget","building","campy","caramelized","cebu","cebuano","celebratory","cheap","cheese","chewy","chicken","chinese","chinese-filipino","chocolate","choice-driven","christmas","coconut","coffee","cold","coming-of-age","competition","competitive","con-artist","corn","creamy","crime","crispy","crunchy","cured","curry","dance","date-night","death","deduction","dessert","drink","duck-egg","egg","enemies-to-lovers","erotic","expat","exploration","family","farming","fashion","fast-food","fermented","ferry","filipino","filipino-american","fish","food","fragrant","freedom","french","fried","fried-dough","fried-rice","fusion","gacha","garlic","garlic-rice","ginger","glass-noodles","global","gothic","green","grief","grilled","grinding","ground-pork","guitar","healthy","heritage","history","holiday","ilocano","iloilo","ilonggo","indian","indonesian","indulgent","italian","jackfruit","japanese","journey","korean","la","lgbtq+","live","long-distance","luca guadagnino","lunch","luzon","marriage","masochistic","meatloaf","merienda","middle-eastern","mild","milkfish","mixed","morning","multigenerational","music","must-play","mythology","nature","new york","night","noir","noodles","norwegian","octopus","offal","ofw","omelette","one-night","online","open-world","orange","origin-story","pampanga","party","patriotic","period","piano","pixel","pop-culture","popular","pork","porridge","portable","pregnancy","pulutan","purple","purple-yam","quail-egg","quick","r&b","rainy-day","raw","rice","rice-cake","rice-roll","road-trip","roasted","rock","roulade","salad","sam raimi","samgyup","sandra bullock","sandwich","sausage","savory","seafood","sequel","sesame","sharing","shaved-ice","shooter","short","shrimp","sick-day","silog","sinangag","sizzling","slasher","slow-cooked","snack","snacks","soft-tofu","soup","sour","southeast-asian","space","sports","spring-roll","spy","squad","steamed","stew","sticky","stir-fried","story","strategy","street-food","strong","stuffed","suburban","superhero","survival","synth-pop","tactical","tangy","tapa","team","teen","temptation","thai","thick","time-loop","time-travel","tofu","tom cruise","tomato","traditional","tropical","tv","umami","urban","useful","valentine's day","vampire","variety","vegetables","vietnamese","vinegar","visayan","volleyball","war","water","weekend","woody allen","wordless","wrap","wrapped","wwii","ya","yogurt","yorgos lanthimos"]);
+
 
 // ─── MOVIE YEARS LOOKUP ───────────────────────────────────────────────────────
 const MOVIE_YEARS = {
@@ -264,42 +278,42 @@ const MOVIE_YEARS = {
 
 
 const ITEM_MOOD = {
-  "Heneral Luna":"inspired","Gomburza":"inspired","Fan Girl":"malungkot",
-  "Ang Babae sa Septic Tank":"masaya","Magnifico":"inspired","Anak":"nostalgic",
-  "On the Job":"excited","Patay na si Hesus":"masaya","Birdshot":"excited",
-  "Kita Kita":"masaya","Hintayan ng Langit":"nostalgic","Past Lives":"nostalgic",
+  "Heneral Luna":"inspired","Gomburza":"inspired","Fan Girl":"sad",
+  "Ang Babae sa Septic Tank":"happy","Magnifico":"inspired","Anak":"nostalgic",
+  "On the Job":"excited","Patay na si Hesus":"happy","Birdshot":"excited",
+  "Kita Kita":"happy","Hintayan ng Langit":"nostalgic","Past Lives":"nostalgic",
   "Everything Everywhere All at Once":"excited","Spirited Away":"relaxed",
   "Parasite":"excited","Interstellar":"inspired","Coco":"nostalgic","Soul":"inspired",
-  "La La Land":"masaya","Whiplash":"inspired","Moonlight":"malungkot",
-  "The Farewell":"nostalgic","Minari":"nostalgic","Aftersun":"malungkot",
+  "La La Land":"happy","Whiplash":"inspired","Moonlight":"sad",
+  "The Farewell":"nostalgic","Minari":"nostalgic","Aftersun":"sad",
   "Forrest Gump":"nostalgic","Inception":"excited","Oppenheimer":"inspired",
-  "Araw-Araw — IV of Spades":"masaya","Mundo — IV of Spades":"nostalgic",
+  "Araw-Araw — IV of Spades":"happy","Mundo — IV of Spades":"nostalgic",
   "Ere — Eraserheads":"relaxed","Alapaap — Eraserheads":"nostalgic",
-  "Huling El Bimbo — Eraserheads":"nostalgic","With a Smile — Eraserheads":"masaya",
-  "Buwan — Juan Karlos":"relaxed","Paalam — Ben&Ben":"malungkot",
+  "Huling El Bimbo — Eraserheads":"nostalgic","With a Smile — Eraserheads":"happy",
+  "Buwan — Juan Karlos":"relaxed","Paalam — Ben&Ben":"sad",
   "Leaves — Ben&Ben":"relaxed","Kathang Isip — Ben&Ben":"nostalgic",
-  "Pano — Zack Tabudlo":"malungkot","Binibini — Zack Tabudlo":"masaya",
-  "Sa Susunod na Habambuhay — Arthur Nery":"malungkot",
-  "Golden Hour — JVKE":"masaya","As It Was — Harry Styles":"relaxed",
-  "Cruel Summer — Taylor Swift":"masaya","All Too Well — Taylor Swift":"malungkot",
+  "Pano — Zack Tabudlo":"sad","Binibini — Zack Tabudlo":"happy",
+  "Sa Susunod na Habambuhay — Arthur Nery":"sad",
+  "Golden Hour — JVKE":"happy","As It Was — Harry Styles":"relaxed",
+  "Cruel Summer — Taylor Swift":"happy","All Too Well — Taylor Swift":"sad",
   "Heat Waves — Glass Animals":"nostalgic","Blinding Lights — The Weeknd":"excited",
-  "Butter — BTS":"masaya","Hype Boy — NewJeans":"masaya",
-  "Sinigang na Baboy":"relaxed","Adobo":"relaxed","Lechon Baboy":"masaya",
-  "Halo-Halo":"masaya","Sisig":"masaya","Bulalo":"relaxed",
+  "Butter — BTS":"happy","Hype Boy — NewJeans":"happy",
+  "Sinigang na Baboy":"relaxed","Adobo":"relaxed","Lechon Baboy":"happy",
+  "Halo-Halo":"happy","Sisig":"happy","Bulalo":"relaxed",
   "Arroz Caldo":"stressed","Champorado":"relaxed","Ramen":"relaxed",
-  "Korean BBQ":"masaya","Samgyeopsal":"masaya","Tteokbokki":"excited",
+  "Korean BBQ":"happy","Samgyeopsal":"happy","Tteokbokki":"excited",
   "Stardew Valley":"relaxed","Animal Crossing: New Horizons":"relaxed",
   "Genshin Impact":"relaxed","Elden Ring":"excited","Hades":"excited",
   "Celeste":"inspired","Undertale":"inspired","Journey":"relaxed",
-  "Minecraft":"masaya","Valorant":"excited","Baldur's Gate 3":"inspired",
-  "It Takes Two":"masaya","Among Us":"masaya","Persona 5 Royal":"inspired",
-  "The Last of Us":"malungkot","Spiritfarer":"malungkot",
-  "Beach trip":"masaya","Island hopping":"excited","Night walk":"relaxed",
-  "Karaoke":"masaya","Movie marathon":"relaxed","Journaling":"relaxed",
+  "Minecraft":"happy","Valorant":"excited","Baldur's Gate 3":"inspired",
+  "It Takes Two":"happy","Among Us":"happy","Persona 5 Royal":"inspired",
+  "The Last of Us":"sad","Spiritfarer":"sad",
+  "Beach trip":"happy","Island hopping":"excited","Night walk":"relaxed",
+  "Karaoke":"happy","Movie marathon":"relaxed","Journaling":"relaxed",
   "Sunset watching":"relaxed","Photography walk":"inspired","Pickleball":"excited",
   "Basketball":"excited","Swimming":"relaxed","Hiking":"excited",
-  "Coffee shop hopping":"relaxed","Concert":"excited","Night market":"masaya",
-  "Family bonding":"nostalgic","Barkada overnight":"masaya","Roadtrip":"excited",
+  "Coffee shop hopping":"relaxed","Concert":"excited","Night market":"happy",
+  "Family bonding":"nostalgic","Barkada overnight":"happy","Roadtrip":"excited",
 };
 
 // ─── ARCHETYPES ───────────────────────────────────────────────────────────────
@@ -854,12 +868,12 @@ function generateDescription(item, logs, feedback, index) {
 
   // Mood label map
   const moodAdj = {
-    masaya:"upbeat and feel-good",malungkot:"emotional and reflective",
+    happy:"upbeat and feel-good",sad:"emotional and reflective",
     excited:"high-energy",relaxed:"slow and chill",nostalgic:"nostalgic",
     inspired:"inspired",stressed:"comforting",bored:"social and engaging"
   };
   const moodVerb = {
-    masaya:"happy",malungkot:"a bit heavy-hearted",excited:"buzzing",
+    happy:"happy",sad:"a bit heavy-hearted",excited:"buzzing",
     relaxed:"in a slow, easy mood",nostalgic:"nostalgic",
     inspired:"inspired",stressed:"stressed",bored:"bored"
   };
@@ -898,7 +912,7 @@ function generateDescription(item, logs, feedback, index) {
 
   // --- POETIC ---
   if(tone === "poetic") {
-    if(weekMood === "malungkot" || topMood === "malungkot")
+    if(weekMood === "sad" || topMood === "sad")
       return `Some things don't fix what's heavy — they just sit with you in it. This might be one of those.`;
     if(weekMood === "nostalgic" || topMood === "nostalgic")
       return `You keep returning to things that carry memory. There's wisdom in that. This one carries some too.`;
@@ -1461,7 +1475,7 @@ function buildTasteProfile(logs, feedback) {
 
   // ── NARRATIVE — mix of stats + poetic observation ──
   const moodDescriptions = {
-    masaya:"upbeat, joyful things",malungkot:"emotional, reflective experiences",
+    happy:"upbeat, joyful things",sad:"emotional, reflective experiences",
     excited:"high-energy and adventurous picks",relaxed:"calm, cozy content",
     nostalgic:"things that carry memory and warmth",inspired:"creative, thought-provoking work",
     stressed:"familiar comfort and quiet things",bored:"social, fun, interactive picks",
@@ -1598,6 +1612,8 @@ function loadData(){
           l.fromLetterboxd&&l.note&&l.note.startsWith("Letterboxd rating:")
             ?{...l,note:""}:l
         );
+        // Migrate legacy Filipino mood keys to canonical English keys.
+        parsed.logs=parsed.logs.map(l=>l?.mood?{...l,mood:normalizeMoodKey(l.mood)}:l);
       }
       // Migrate: ensure dismissedSugg exists
       if(!parsed.dismissedSugg) parsed.dismissedSugg={};
@@ -6822,16 +6838,14 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
 
         const isVibe=String(card.iconId).includes("week_breakdown");
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
-        const vibeTop3=isVibe?(vibeParts||[]).slice(0,3):null;
         const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
         const vibeTall=isVibe&&rowSpan>=2;
         const vibeDisplay=isVibe
-          ?(vibeCompact?(vibeTop3[0]||card.value):(vibeWide?vibeTop3.join(" · "):vibeTop3.join("\n")))
+          ?(vibeCompact?(vibeParts[0]||card.value):(vibeWide?vibeParts.join(" · "):vibeParts.join("\n")))
           :card.value;
         const vibeWhiteSpace=isVibe?(vibeWide?"nowrap":"pre-line"):"normal";
         const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
-        const vibeValueSize=isVibe?"16px":valSz;
 
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
@@ -6890,15 +6904,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 </>
               )}
 
-              {!isVibe&&(
-                <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
-              )}
+              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
               <div style={{
-                fontSize:vibeValueSize,fontWeight:800,color:valColor,
+                fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont,position:"relative",zIndex:1,
-                wordBreak:isVibe?"normal":"normal",
+                fontFamily:valueFont,position:"relative",zIndex:1
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
@@ -7368,8 +7379,10 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const wTagCount={};
             weekManualLogs.forEach(l=>(l.tags||[]).forEach(tag=>{
               const t=(tag||"").toLowerCase();
-              if(t==="global"||t==="filipino"||t==="volleyball") return;
-              wTagCount[tag]=(wTagCount[tag]||0)+1;
+              if(!t) return;
+              if(VIBE_TAG_DROPLIST.has(t)) return;
+              if(!VIBE_TAG_ALLOWLIST.has(t)) return;
+              wTagCount[t]=(wTagCount[t]||0)+1;
             }));
             if(Object.keys(wTagCount).length>0){
               const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
@@ -7455,6 +7468,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
             ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
             ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:"Most Logged",value:mostLoggedTitle,min:1}]:[]),
+            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"),_baseId:"top_cat",emoji:topCatEmoji,label:"Top Category",value:topCatLabel,min:1}]:[]),
+            ...(thisWeekCount>0?[{iconId:wkId("week"),_baseId:"week",emoji:"📅",label:"Entries",value:thisWeekCount,min:1}]:[]),
             ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
             ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
             ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
@@ -9078,3 +9093,6 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
+
