@@ -6875,7 +6875,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               background:bg,
               border:`1px solid ${borderColor}`,
               boxShadow:"none",
-              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:showEqualizer?"flex-end":"center",
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
               position:"relative",overflow:"hidden",color:textColor,
             }}>
