@@ -6717,9 +6717,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const BASE_H=95;
         const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
         const area=colSpan*rowSpan;
-        const emojiSz=area>=4?"var(--stat-emoji-lg)":area>=2?"var(--stat-emoji-md)":"var(--stat-emoji-sm)";
-        const valSz=area>=4?"var(--stat-xl)":area>=2?"var(--stat-lg)":"var(--stat-md)";
-        const lblSz=area>=4?"var(--stat-label-lg)":area>=2?"var(--stat-label-md)":"var(--stat-label-sm)";
+        const emojiSz="20px";
+        const valSz="21px";
+        const lblSz="12px";
         const pad=area>=4
           ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
           :area>=2
@@ -6837,6 +6837,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         // Sticker system archived for now — Manila Nights uses standard cards
 
         const isVibe=String(card.iconId).includes("week_breakdown");
+        const isPace=String(card.iconId).includes("week_pulse");
+        const isTimeVibe=String(card.iconId).includes("time_vibe");
+        const showStatEmoji=isPace||isTimeVibe;
         const vibeParts=isVibe?String(card.value||"").split(" · "):null;
         const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
         const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
@@ -6904,7 +6907,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 </>
               )}
 
-              <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+              {showStatEmoji&&(
+                <div style={{fontSize:emojiSz,lineHeight:1,fontFamily:"var(--font-body)",position:"relative",zIndex:1}}>{card.emoji}</div>
+              )}
               <div style={{
                 fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
@@ -7468,8 +7473,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
             ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
             ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:"Most Logged",value:mostLoggedTitle,min:1}]:[]),
-            ...(topCatId&&topCatCount>=3?[{iconId:wkId("top_cat"),_baseId:"top_cat",emoji:topCatEmoji,label:"Top Category",value:topCatLabel,min:1}]:[]),
-            ...(thisWeekCount>0?[{iconId:wkId("week"),_baseId:"week",emoji:"📅",label:"Entries",value:thisWeekCount,min:1}]:[]),
             ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
             ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
             ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
