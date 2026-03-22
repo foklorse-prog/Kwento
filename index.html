@@ -6875,7 +6875,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               background:bg,
               border:`1px solid ${borderColor}`,
               boxShadow:"none",
-              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:showEqualizer?"flex-end":"center",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
               textAlign:"center",gap:gapSize,boxSizing:"border-box",
               position:"relative",overflow:"hidden",color:textColor,
             }}>
@@ -6910,7 +6910,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               )}
 
               {showEqualizer&&(
-                <div style={{position:"absolute",top:10,left:0,right:0,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"2px",zIndex:2}}>
+                <div style={{lineHeight:1,position:"relative",zIndex:1,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"2px"}}>
                   {[4,6,9,5,10,8,9,5,7,4].map((h,i)=>(
                     <div key={i} style={{width:3,height:h,borderRadius:2,background:valColor,flexShrink:0}}/>
                   ))}
