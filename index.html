@@ -7113,6 +7113,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
   const [showStatsShare,setShowStatsShare]=useState(false);
   const [weekOpen,setWeekOpen]=useState({});
   const [weekDetailsOpen,setWeekDetailsOpen]=useState({});
+  const [monthView,setMonthView]=useState({}); // monthKey -> true if in monthly view
+  const monthStarTap=React.useRef({}); // monthKey -> last tap timestamp
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
   const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
@@ -7694,22 +7696,147 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           return `${rangeFmt.format(start)}–${rangeFmt.format(end)}`;
         };
 
+        // ── Month grouping ────────────────────────────────────────────────────
+        const monthFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,month:"long",year:"numeric"});
+        const phMonthKey=weekKey=>{
+          const d=new Date(`${weekKey}T00:00:00+08:00`);
+          return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+        };
+
+        // Group weekKeys by calendar month
+        const monthGroups={}; // monthKey -> [weekKey, ...]
+        weekKeys.forEach(wk=>{
+          const mk=phMonthKey(wk);
+          if(!monthGroups[mk]) monthGroups[mk]=[];
+          monthGroups[mk].push(wk);
+        });
+
+        // Determine if a month is eligible for monthly toggle
+        // A month is eligible if its last week's end date has already passed into the next month
+        // OR if the next 7 days from today cross into a new month (last week of month)
+        const isMonthEligible=monthKey=>{
+          const weeks=monthGroups[monthKey]||[];
+          return weeks.length>=4; // TEST MODE — eligible as soon as 4 weeks of data exist
+        };
+
+        // Build monthly cards — same logic as buildWeekCards but over a month range
+        const buildMonthCards=(monthKey,prevPalette)=>{
+          const weeks=monthGroups[monthKey]||[];
+          // Collect all logs across all weeks in this month
+          const monthLogs=weeks.flatMap(wk=>weekMap[wk]||[]);
+          // Collect photo cards — first pinned from each week only
+          const monthPhotoCards=weeks.map(wk=>{
+            const pinnedIds=(data.profilePhotoIds||[]);
+            const weekPinned=pinnedIds.filter(id=>{
+              const entry=data.logs.find(l=>l.id===id);
+              if(!entry) return false;
+              const entryDate=entry?.customDate?new Date(entry.customDate+"T12:00:00"):entry?.date?new Date(entry.date):null;
+              if(!entryDate||isNaN(entryDate)) return false;
+              return phWeekStartKey(entryDate)===wk;
+            });
+            if(!weekPinned.length) return null;
+            const id=weekPinned[0];
+            const entry=data.logs.find(l=>l.id===id);
+            const photo=entry?.actPhotos?.[0];
+            if(!photo) return null;
+            const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
+            return {iconId:`profile_photo_${id}`,_baseId:"photo",label:entry.title||"",value:"📷",_photo:true,_photoSrc:photo,_entryId:id,_photoPos:pos,min:1};
+          }).filter(Boolean);
+
+          // Re-use buildWeekCards logic but with monthLogs — create a fake weekKey for the month
+          // by temporarily replacing weekMap entry
+          const fakeKey=`month_${monthKey}`;
+          weekMap[fakeKey]=monthLogs;
+          const result=buildWeekCards(fakeKey,prevPalette);
+          delete weekMap[fakeKey];
+
+          // Replace photo cards with monthly ones (first pinned per week)
+          const nonPhotoCards=result.cards.filter(c=>!c._photo);
+          const cards=[...monthPhotoCards,...nonPhotoCards];
+          return {cards,slots:result.slots,weekDominant:result.weekDominant};
+        };
+
+        const monthFmtLabel=monthKey=>{
+          const [y,m]=monthKey.split("-");
+          const d=new Date(parseInt(y),parseInt(m)-1,1);
+          return d.toLocaleString("en-US",{month:"long",year:"numeric"});
+        };
+
+        // Get ordered month keys (newest first)
+        const orderedMonthKeys=Object.keys(monthGroups).sort((a,b)=>b.localeCompare(a));
+
         return(
           <div style={{marginBottom:16}}>
             {(()=>{
               let lastPalette=null;
-              return weekKeys.map(weekKey=>{
-                const {cards, slots, weekDominant}=buildWeekCards(weekKey, lastPalette);
-                if(weekDominant) lastPalette=weekDominant;
-                if(!cards.length) return null;
-                const isOpen=weekOpen[weekKey]!==false;
-                const showDetails=weekDetailsOpen[weekKey]===true;
-                return(
+              return orderedMonthKeys.map(monthKey=>{
+                const weeksInMonth=monthGroups[monthKey]; // already sorted newest first
+                const eligible=isMonthEligible(monthKey);
+                const isMonthly=eligible&&monthView[monthKey]===true;
+
+                // MONTHLY VIEW — single section for the whole month
+                if(isMonthly){
+                  const {cards,slots,weekDominant}=buildMonthCards(monthKey,lastPalette);
+                  if(weekDominant) lastPalette=weekDominant;
+                  if(!cards.length) return null;
+                  const isOpen=true;
+                  return(
+                    <div key={monthKey} style={{marginBottom:16}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                        <button
+                          onClick={()=>{
+                            const now=Date.now();
+                            const last=monthStarTap.current[monthKey]||0;
+                            if(now-last<400){
+                              monthStarTap.current[monthKey]=0;
+                              setMonthView(prev=>({...prev,[monthKey]:false}));
+                            } else {
+                              monthStarTap.current[monthKey]=now;
+                            }
+                          }}
+                          style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:0.9}}
+                        >
+                          <WeekStar/>
+                        </button>
+                        <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{monthFmtLabel(monthKey)}</span>
+                      </div>
+                      {photosReady&&<StatGrid
+                        cards={cards} data={data} onChange={onChange}
+                        th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
+                        onStickerOpen={onStickerOpen}
+                        onPhotoTap={(id,pos,colSpan,rowSpan,cardH,realW)=>{ setCropPhotoId(id); setPhotoCropPos({x:pos?.x??50,y:pos?.y??50,scale:Math.max(2,pos?.scale||2)}); setCropShape({colSpan:colSpan||2,rowSpan:rowSpan||2,cardH:cardH||95,cardW:realW||null}); }}
+                        scrollRef={profileScrollRef}
+                        sharedGlass={false}
+                      />}
+                    </div>
+                  );
+                }
+
+                // WEEKLY VIEW — render each week separately as before
+                return weeksInMonth.map(weekKey=>{
+                  const {cards, slots, weekDominant}=buildWeekCards(weekKey, lastPalette);
+                  if(weekDominant) lastPalette=weekDominant;
+                  if(!cards.length) return null;
+                  const isOpen=weekOpen[weekKey]!==false;
+                  const showDetails=weekDetailsOpen[weekKey]===true;
+                  // Check if this weekKey is the first (newest) in its month for placing the toggle star
+                  const isFirstWeekOfMonth=weeksInMonth[0]===weekKey;
+                  return(
                   <div key={weekKey} style={{marginBottom:16}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <button
-                      onClick={()=>setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}))}
-                      style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:0.7}}
+                      onClick={()=>{
+                        const now=Date.now();
+                        const last=monthStarTap.current[monthKey]||0;
+                        if(now-last<400&&eligible){
+                          monthStarTap.current[monthKey]=0;
+                          setMonthView(prev=>({...prev,[monthKey]:true}));
+                        } else {
+                          monthStarTap.current[monthKey]=now;
+                          setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}));
+                        }
+                      }}
+                      style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:eligible&&isFirstWeekOfMonth?1:0.7}}
                       aria-label="Toggle week details"
                     >
                       <WeekStar/>
@@ -7792,7 +7919,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
                     )}
                 </div>
               );
-              });
+              }); // end weeksInMonth.map
+              }); // end orderedMonthKeys.map
             })()}
           </div>
         );
