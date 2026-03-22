@@ -6910,7 +6910,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
               )}
 
               {showEqualizer&&(
-                <div style={{lineHeight:1,position:"relative",zIndex:1,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"2px"}}>
+                <div style={{lineHeight:1,position:"relative",zIndex:1,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"2px",width:"100%"}}>
                   {[3,4,6,3,7,5,6,3,5,3].map((h,i)=>(
                     <div key={i} style={{width:2,height:h,borderRadius:1,background:valColor,flexShrink:0}}/>
                   ))}
