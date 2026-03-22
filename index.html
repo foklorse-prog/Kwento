@@ -576,7 +576,7 @@ const LIBRARY = {
     {title:"Binibini — Zack Tabudlo",tags:["OPM","romantic","upbeat","Filipino","contemporary","fun","feel-good"],genre:"OPM R&B",ph:true},
     {title:"Sa Susunod na Habambuhay — Arthur Nery",tags:["OPM","romantic","emotional","Filipino","soulful","contemporary","melancholic"],genre:"OPM Soul",ph:true},
     {title:"Golden Hour — JVKE",tags:["global","romantic","upbeat","pop","feel-good","summer","bright"],genre:"Pop",ph:false},
-    {title:"Harry Styles",tags:["global","pop","indie","romantic","upbeat","chill","feel-good","stylish","British","contemporary"],genre:"Pop",ph:false},
+    {title:"Harry Styles",tags:["global","pop","indie","upbeat","chill","feel-good","stylish","British","contemporary"],genre:"Pop",ph:false},
     {title:"As It Was — Harry Styles",tags:["global","upbeat","chill","pop","feel-good","indie","bright"],genre:"Pop",ph:false},
     {title:"Cruel Summer — Taylor Swift",tags:["global","pop","upbeat","summer","fun","romantic","bright"],genre:"Pop",ph:false},
     {title:"All Too Well — Taylor Swift",tags:["global","emotional","nostalgic","reflective","romantic","intense","literary"],genre:"Pop",ph:false},
@@ -6345,9 +6345,9 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
   ctx.shadowColor=accent;
 
   if(isMultiline){
-    const parts=String(value).split(" · ");
+    const parts=String(value).split(", ");
     const lines=breakdownMode==="wide"
-      ?[parts.join(" · ")]
+      ?[parts.join(", ")]
       :breakdownMode==="compact"
         ?[parts[0]||String(value)]
         :parts;
@@ -6842,15 +6842,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const showStatEmoji=isPace||isTimeVibe;
         const isMusicCard=card._baseId==="most_logged"&&(card.label==="Top Artist"||card.label==="Top Song"||card.label==="Top Album");
         const showEqualizer=isMusicCard&&colSpan===2&&rowSpan===1;
-        const vibeParts=isVibe?String(card.value||"").split(" · "):null;
-        const vibeCompact=isVibe&&colSpan===1&&rowSpan===1;
-        const vibeWide=isVibe&&colSpan>=2&&rowSpan===1;
-        const vibeTall=isVibe&&rowSpan>=2;
-        const vibeDisplay=isVibe
-          ?(vibeCompact?(vibeParts[0]||card.value):vibeParts.join(",\n"))
-          :card.value;
-        const vibeWhiteSpace=isVibe?"pre-line":"normal";
-        const valueFont=isVibe?"var(--font-mono)":"var(--font-display)";
+        const vibeDisplay=isVibe?String(card.value||""):card.value;
+        const vibeWhiteSpace=isVibe?"normal":"normal";
+        const valueFont="var(--font-display)";
 
         const palette=card._palette;
         const isPhotoBg=card._slotRole==="photo_bg"&&card._bgImage;
@@ -6937,7 +6931,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont,position:"relative",zIndex:1
+                fontFamily:valueFont,position:"relative",zIndex:1,
+                overflow:"hidden",
+                ...(isVibe
+                  ?{display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",width:"100%"}
+                  :{textOverflow:"ellipsis",whiteSpace:"nowrap"})
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
@@ -7418,43 +7416,53 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           movieLogs.forEach(l=>{ if(l.actor) actorCount[l.actor]=(actorCount[l.actor]||0)+1; });
           const topActor=Object.entries(actorCount).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1])[0]?.[0];
 
-          // Week breakdown (top 3 tags, excludes global/filipino, sums to 100)
+          // Week vibe — weighted scoring, diversity-first, no percentages
           let weekBreakdownValue=null;
           if(weekManualLogs.length>=3){
-            const wTagCount={};
-            weekManualLogs.forEach(l=>(l.tags||[]).forEach(tag=>{
-              const t=(tag||"").toLowerCase();
-              if(!t) return;
-              if(VIBE_TAG_DROPLIST.has(t)) return;
-              if(!VIBE_TAG_ALLOWLIST.has(t)) return;
-              wTagCount[t]=(wTagCount[t]||0)+1;
-            }));
-            if(Object.keys(wTagCount).length>0){
-              const topTags=Object.entries(wTagCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
-              const topTotal=topTags.reduce((s,[,cnt])=>s+cnt,0);
-              const pcts=topTags.map(([tag,cnt])=>({tag,pct:Math.round(cnt/topTotal*100)}));
-              const sum=pcts.reduce((s,c)=>s+c.pct,0);
-              const remainder=100-sum;
-              if(pcts.length>0&&remainder!==0){
-                const maxCount=Math.max(...topTags.map(([,cnt])=>cnt));
-                const tied=topTags.map(([tag,cnt],i)=>({tag,cnt,i})).filter(t=>t.cnt===maxCount);
-                let targetIndex=tied[0]?.i??0;
-                if(tied.length>1){
-                  let bestTime=-Infinity;
-                  tied.forEach(t=>{
-                    const last=weekManualLogs.reduce((acc,l)=>{
-                      if((l.tags||[]).includes(t.tag)){
-                        const ts=new Date(l.date).getTime();
-                        return ts>acc?ts:acc;
-                      }
-                      return acc;
-                    },-Infinity);
-                    if(last>bestTime){bestTime=last;targetIndex=t.i;}
-                  });
+            // Deduplicate by title so logging Harry Styles 9x counts as 1 entry
+            const seenTitles=new Set();
+            const distinctEntries=weekManualLogs.filter(l=>{
+              const key=(l.title||l.id||"").toLowerCase();
+              if(seenTitles.has(key)) return false;
+              seenTitles.add(key);
+              return true;
+            });
+            // Each entry gets voting power of 1.0 split equally among its valid tags
+            // tagScores: { tag -> { score, entryKey } } — entryKey for diversity enforcement
+            const tagScores={};
+            distinctEntries.forEach(l=>{
+              const validTags=(l.tags||[]).map(t=>(t||"").toLowerCase()).filter(t=>t&&!VIBE_TAG_DROPLIST.has(t)&&VIBE_TAG_ALLOWLIST.has(t));
+              if(!validTags.length) return;
+              const weight=1/validTags.length;
+              const entryKey=(l.title||l.id||"").toLowerCase();
+              validTags.forEach(t=>{
+                if(!tagScores[t]) tagScores[t]={score:0,entryKey};
+                tagScores[t].score+=weight;
+                // Track the entry that contributed most to this tag
+                if(tagScores[t].score>weight) tagScores[t].entryKey=entryKey;
+              });
+            });
+            if(Object.keys(tagScores).length>0){
+              const sorted=Object.entries(tagScores).sort((a,b)=>b[1].score-a[1].score);
+              // Pick top 3 preferring tags from different entries (diversity rule)
+              const picked=[];
+              const usedEntries=new Set();
+              for(const [tag,{score,entryKey}] of sorted){
+                if(picked.length===3) break;
+                if(!usedEntries.has(entryKey)){
+                  picked.push(tag);
+                  usedEntries.add(entryKey);
                 }
-                pcts[targetIndex].pct+=remainder;
               }
-              weekBreakdownValue=pcts.map(c=>`${c.pct}% ${c.tag}`).join(" · ");
+              // Fallback — fill remaining slots from any tag not yet picked
+              if(picked.length<3){
+                const pickedSet=new Set(picked);
+                for(const [tag] of sorted){
+                  if(picked.length===3) break;
+                  if(!pickedSet.has(tag)) picked.push(tag);
+                }
+              }
+              if(picked.length>0) weekBreakdownValue=picked.join(", ");
             }
           }
 
