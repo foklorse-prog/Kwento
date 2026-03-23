@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-23T14:18:00.479Z",
+  "updatedAt": "2026-03-23T15:40:08.821Z",
   "items": [
     {
       "title": "Mid90s",
@@ -4382,6 +4382,1678 @@
       "awards": "Nominated for 1 Oscar. 25 wins & 16 nominations total",
       "omdbType": "movie",
       "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Turning Red",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Domee Shi",
+      "actor": "Rosalie Chiang",
+      "actors": [
+        "Rosalie Chiang",
+        "Sandra Oh",
+        "Ava Morse"
+      ],
+      "plot": "A thirteen-year-old girl named Mei Lee is torn between staying her mother's dutiful daughter and the changes of adolescence. And as if the challenges were not enough, whenever she gets overly excited Mei transforms into a giant re...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODY2NjExYmUtZTQ4NS00NzM2LWE2NWYtZWY2NGIyOTBmNzI3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8097030",
+      "imdbID": "tt8097030",
+      "imdbRating": 6.9,
+      "imdbVotes": 171863,
+      "runtime": "100 min",
+      "rated": "PG",
+      "country": "United States, Canada",
+      "language": "English, Cantonese, Korean",
+      "awards": "Nominated for 1 Oscar. 9 wins & 92 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "To Leslie",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Michael Morris",
+      "actor": "Andrea Riseborough",
+      "actors": [
+        "Andrea Riseborough",
+        "Drew Youngblood",
+        "Tom Virtue"
+      ],
+      "plot": "A single mother tries to reclaim her life and connection with her son after winning the lottery and spending all her money on parties and alcohol.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzVkMTQ1ZTgtMjY1Yy00NzUwLThjN2UtY2I5MzVkYzJmMzUyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8129806",
+      "imdbID": "tt8129806",
+      "imdbRating": 7.1,
+      "imdbVotes": 18768,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 9 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Sea Beast",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Chris Williams",
+      "actor": "Karl Urban",
+      "actors": [
+        "Karl Urban",
+        "Zaris-Angel Hator",
+        "Jared Harris"
+      ],
+      "plot": "When a young girl stows away on the ship of a legendary sea monster hunter, they launch an epic journey into uncharted waters - and make history to boot.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDhjZmY1ZDEtNGQ1ZC00ZDgwLWI2YjEtMWFiOGY3M2Q2YWViXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9288046",
+      "imdbID": "tt9288046",
+      "imdbRating": 7,
+      "imdbVotes": 64140,
+      "runtime": "115 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Persian",
+      "awards": "Nominated for 1 Oscar. 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Red Suitcase",
+      "year": "2022",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Cyrus Neshvad",
+      "actor": "Nawelle Evad",
+      "actors": [
+        "Nawelle Evad",
+        "Sarkaw Gorany",
+        "Anne Klein"
+      ],
+      "plot": "Luxembourg Airport. Late in the evening. A veiled 16-year-old Iranian girl is frightened to take her red suitcase on the automatic carpet. She keeps pushing back the moment to go through the arrival gate and seems more and more te...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzhkODM4MTktYWJhZi00NDg4LTlmNDItZWNiOTIzZjdiOWM4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt22763378",
+      "imdbID": "tt22763378",
+      "imdbRating": 7.4,
+      "imdbVotes": 1409,
+      "runtime": "18 min",
+      "rated": null,
+      "country": "Luxembourg",
+      "language": "Persian, English, Luxembourgish, French",
+      "awards": "Nominated for 1 Oscar. 24 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Quiet Girl",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Colm Bairéad",
+      "actor": "Carrie Crowley",
+      "actors": [
+        "Carrie Crowley",
+        "Andrew Bennett",
+        "Catherine Clinch"
+      ],
+      "plot": "In rural Ireland, a quiet, neglected girl is sent away from her dysfunctional family to live with relatives for the summer where she blossoms and learns what it is to be loved.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BM2EwMjM2MzktZWE3Yy00ZTE2LTgyNTMtZmU2MGI0ZGY0MDQ5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt15109082",
+      "imdbID": "tt15109082",
+      "imdbRating": 7.7,
+      "imdbVotes": 25030,
+      "runtime": "95 min",
+      "rated": "PG-13",
+      "country": "Ireland",
+      "language": "Irish Gaelic, English, Gaelic",
+      "awards": "Nominated for 1 Oscar. 33 wins & 43 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Martha Mitchell Effect",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "History"
+      ],
+      "director": "Anne Alvergue, Debra McClutchy",
+      "actor": "Martha Mitchell",
+      "actors": [
+        "Martha Mitchell",
+        "Dwight Chapin",
+        "Connie Chung"
+      ],
+      "plot": "The Cabinet wife who spoke out during Watergate and the Nixon administration's campaign to gaslight her into silence.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmZhNDg3NjctNmFhNi00ZTczLWJkNDEtNTYzYWViNWY2OWRlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt16379454",
+      "imdbID": "tt16379454",
+      "imdbRating": 6.6,
+      "imdbVotes": 3112,
+      "runtime": "40 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Stranger at the Gate",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Joshua Seftel",
+      "actor": "Bibi Bahrami",
+      "actors": [
+        "Bibi Bahrami",
+        "Saber Bahrami",
+        "Zaki Bahrami"
+      ],
+      "plot": "A U.S. Marine plots a terrorist attack on a small-town American mosque, but his plan takes an unexpected turn when he comes face-to-face with the people he is about to kill.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODMyZTM2NWQtMTQ5NC00ZjIwLWE3YTktNDdjYTUzYWI1MTEyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt20784118",
+      "imdbID": "tt20784118",
+      "imdbRating": 6.6,
+      "imdbVotes": 1716,
+      "runtime": "29 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Puss in Boots: The Last Wish",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Joel Crawford, Januel Mercado",
+      "actor": "Antonio Banderas",
+      "actors": [
+        "Antonio Banderas",
+        "Salma Hayek",
+        "Harvey Guillén"
+      ],
+      "plot": "When Puss in Boots discovers that his passion for adventure has taken its toll and he has burned through eight of his nine lives, he launches an epic journey to restore them by finding the mythical Last Wish.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzg0MWUzMjctYjVlOS00NzVjLWIwZDMtNzg1YzNkYzdjNTMwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3915174",
+      "imdbID": "tt3915174",
+      "imdbRating": 7.8,
+      "imdbVotes": 218530,
+      "runtime": "102 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 8 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "My Year of Dicks",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Sara Gunnarsdóttir",
+      "actor": "Brie Tilton",
+      "actors": [
+        "Brie Tilton",
+        "Jackson Kelly",
+        "Klarissa Hernandez"
+      ],
+      "plot": "Pam tries very hard to lose her virginity and always searches for \"the one.\" She's not alone; her best friends are with her.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTE0MTdiMmYtZDY2NC00NzNmLWFiYTctZTcxNWIzNDU2ZTVkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt17663790",
+      "imdbID": "tt17663790",
+      "imdbRating": 7.1,
+      "imdbVotes": 3040,
+      "runtime": "24 min",
+      "rated": "16+",
+      "country": "United States, Iceland",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 8 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mrs. Harris Goes to Paris",
+      "year": "2022",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Anthony Fabian",
+      "actor": "Lesley Manville",
+      "actors": [
+        "Lesley Manville",
+        "Isabelle Huppert",
+        "Lambert Wilson"
+      ],
+      "plot": "In 1950s London, a widowed cleaning lady falls madly in love with a couture Dior dress, deciding she must have one. She embarks on an adventure to Paris that will change not only her own outlook -- but the very future of the House...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmZiNzk2ZGItOTAwNi00M2NiLTgxN2UtMjA2ZjA5ZTQ2YmNhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5151570",
+      "imdbID": "tt5151570",
+      "imdbRating": 7.1,
+      "imdbVotes": 34620,
+      "runtime": "115 min",
+      "rated": "PG",
+      "country": "United Kingdom, Canada, France, Hungary, Belgium",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 4 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Marcel the Shell with Shoes On",
+      "year": "2021",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Dean Fleischer Camp",
+      "actor": "Jenny Slate",
+      "actors": [
+        "Jenny Slate",
+        "Dean Fleischer Camp",
+        "Isabella Rossellini"
+      ],
+      "plot": "A cash-strapped documentary maker decides to make his newest documentary about a mollusk shell he finds living in his Airbnb with his friends.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMmVhYWEzMGEtZjhkYS00ZWE0LTlhOWQtZTRlODZlMTM0Y2JmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt15339456",
+      "imdbID": "tt15339456",
+      "imdbRating": 7.6,
+      "imdbVotes": 33460,
+      "runtime": "90 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 38 wins & 67 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Le pupille",
+      "year": "2022",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Alice Rohrwacher",
+      "actor": "Alba Rohrwacher",
+      "actors": [
+        "Alba Rohrwacher",
+        "Greta Zuccheri Montanari",
+        "Carmen Pommella"
+      ],
+      "plot": "Follow the rebellious girls of a Catholic boarding school before Christmas, a time of war and scarcity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTZlNDQzMjYtMDZjMS00YTRhLTk5ZTUtZjU1OWJjM2U1OWM1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt20215392",
+      "imdbID": "tt20215392",
+      "imdbRating": 6.8,
+      "imdbVotes": 3910,
+      "runtime": "39 min",
+      "rated": "PG",
+      "country": "Italy, United States",
+      "language": "Italian",
+      "awards": "Nominated for 1 Oscar. 3 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ivalu",
+      "year": "2023",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Anders Walter, Pipaluk K. Jørgensen",
+      "actor": "Mila Heilmann Kreutzmann",
+      "actors": [
+        "Mila Heilmann Kreutzmann",
+        "Nivi Larsen",
+        "Angunnguaq Larsen"
+      ],
+      "plot": "Ivalu is gone. Her little sister is desperate to find her. Her father does not care. The vast Greenlandic nature holds secrets. The search for Ivalu is on.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzM5NGY2YmUtNjZiMi00MGJmLWFhZWMtYzk2ZDMyZDBlNTdiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt22054902",
+      "imdbID": "tt22054902",
+      "imdbRating": 6.3,
+      "imdbVotes": 1379,
+      "runtime": "16 min",
+      "rated": null,
+      "country": "Denmark, Greenland",
+      "language": "Greenlandic",
+      "awards": "Nominated for 1 Oscar. 12 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ice Merchants",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "João Gonzalez",
+      "actor": null,
+      "actors": [],
+      "plot": "Every day, a father and his son jump with a parachute from their vertiginous cold house, attached to a cliff, to go to the village on the ground, far away where they sell the ice they produce daily.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2I1NTg1NjgtNDI4MS00NmI4LTk2ZWYtMzQ3NzdjZGJlYzFlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt19781688",
+      "imdbID": "tt19781688",
+      "imdbRating": 7.6,
+      "imdbVotes": 3021,
+      "runtime": "14 min",
+      "rated": null,
+      "country": "Portugal, United Kingdom, France",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 30 wins & 22 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "How Do You Measure a Year?",
+      "year": "2021",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Jay Rosenblatt",
+      "actor": "Ella Rosenblatt",
+      "actors": [
+        "Ella Rosenblatt",
+        "Jay Rosenblatt"
+      ],
+      "plot": "From the time she was two years old and until she turned 18, they had a ritual: Dad asked (and filmed), and Ella answered. What do you dream about? What scares you? What do you think about our relationship? This is a little story ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDkzMGE2MmMtNmI0ZC00YzQ4LTlhMzItZmI3NWQ3OGRkMTk3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt15026956",
+      "imdbID": "tt15026956",
+      "imdbRating": 6.9,
+      "imdbVotes": 1337,
+      "runtime": "29 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Glass Onion: A Knives Out Mystery (2022)",
+      "year": "2022",
+      "genre": null,
+      "genres": [],
+      "director": null,
+      "actor": null,
+      "actors": [],
+      "plot": null,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzAxOGJiYmMtZDEwNS00MzdhLTg1NDctNTM5OGRkNDI5OWI0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt24734444",
+      "imdbID": "tt24734444",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": null,
+      "rated": null,
+      "country": null,
+      "language": null,
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fire of Love",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography"
+      ],
+      "director": "Sara Dosa",
+      "actor": "Miranda July",
+      "actors": [
+        "Miranda July",
+        "Katia Krafft",
+        "Maurice Krafft"
+      ],
+      "plot": "Intrepid scientists and lovers Katia and Maurice Krafft died in a volcanic explosion doing the very thing that brought them together: unraveling the mysteries of volcanoes by capturing the most explosive imagery ever recorded.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDg0ZmViMWUtMGQ1Ni00NTEyLWFkYzgtMWViYjkwZDQ2ZWVkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt16227014",
+      "imdbID": "tt16227014",
+      "imdbRating": 7.6,
+      "imdbVotes": 16131,
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "Canada, United States",
+      "language": "French, English",
+      "awards": "Nominated for 1 Oscar. 35 wins & 70 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "EO",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Jerzy Skolimowski",
+      "actor": "Hola",
+      "actors": [
+        "Hola",
+        "Tako",
+        "Marietta"
+      ],
+      "plot": "Follows a donkey who encounters on his journeys good and bad people, experiences joy and pain, exploring a vision of modern Europe through his eyes.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjNlZWRlMjgtYzllMC00Y2RkLTk2ZTMtMmIwODY4NmJlOTIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt19652910",
+      "imdbID": "tt19652910",
+      "imdbRating": 6.7,
+      "imdbVotes": 16339,
+      "runtime": "88 min",
+      "rated": "Not Rated",
+      "country": "Poland, Italy",
+      "language": "Polish, Italian, English, French, Spanish",
+      "awards": "Nominated for 1 Oscar. 33 wins & 67 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Empire of Light",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Sam Mendes",
+      "actor": "Olivia Colman",
+      "actors": [
+        "Olivia Colman",
+        "Micheal Ward",
+        "Colin Firth"
+      ],
+      "plot": "A drama about the power of human connection during turbulent times, set in an English coastal town in the early 1980s.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjNmYjhkMDgtNGM3Yi00ODNiLTk5NGUtZjFjZTUxYTI0ZjkyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14402146",
+      "imdbID": "tt14402146",
+      "imdbRating": 6.7,
+      "imdbVotes": 26353,
+      "runtime": "115 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 39 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Close",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Lukas Dhont",
+      "actor": "Eden Dambrine",
+      "actors": [
+        "Eden Dambrine",
+        "Gustav De Waele",
+        "Émilie Dequenne"
+      ],
+      "plot": "The intense friendship between two thirteen-year old boys Leo and Remi suddenly gets disrupted. Struggling to understand what has happened, Léo approaches Sophie, Rémi's mother. \"Close\" is a film about friendship and responsibility.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzg4NmE0NzctMjBkMC00YjQyLWFjZDktNDBkMjU5ZGFlZDU3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9660502",
+      "imdbID": "tt9660502",
+      "imdbRating": 7.8,
+      "imdbVotes": 46812,
+      "runtime": "104 min",
+      "rated": "PG-13",
+      "country": "Belgium, Netherlands, France",
+      "language": "French, Flemish, Dutch, English",
+      "awards": "Nominated for 1 Oscar. 58 wins & 85 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Causeway",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Lila Neugebauer",
+      "actor": "Jennifer Lawrence",
+      "actors": [
+        "Jennifer Lawrence",
+        "Brian Tyree Henry",
+        "Linda Emond"
+      ],
+      "plot": "A US soldier suffers a traumatic brain injury while fighting in Afghanistan and struggles to adjust to life back home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjVmZDgwZDItOWVjMy00MDE2LTljMWQtNTRiOTFmMjU4ZWQzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt10192406",
+      "imdbID": "tt10192406",
+      "imdbRating": 6.6,
+      "imdbVotes": 25949,
+      "runtime": "94 min",
+      "rated": "R",
+      "country": "United States, Finland",
+      "language": "English, American Sign ",
+      "awards": "Nominated for 1 Oscar. 4 wins & 38 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bardo: False Chronicle of a Handful of Truths",
+      "year": "2022",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Alejandro G. Iñárritu",
+      "actor": "Daniel Giménez Cacho",
+      "actors": [
+        "Daniel Giménez Cacho",
+        "Griselda Siciliani",
+        "Ximena Lamadrid"
+      ],
+      "plot": "An acclaimed documentarian goes on an introspective journey through surreal dreamscapes to reconcile with the past, the present and his Mexican identity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDgxNjdhZWMtYjNjMi00YTE3LTg1OTItMTU5NmViMDRjNDg5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14176542",
+      "imdbID": "tt14176542",
+      "imdbRating": 6.7,
+      "imdbVotes": 16368,
+      "runtime": "159 min",
+      "rated": "R",
+      "country": "Mexico",
+      "language": "Spanish, English",
+      "awards": "Nominated for 1 Oscar. 17 wins & 50 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Argentina, 1985",
+      "year": "2022",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Santiago Mitre",
+      "actor": "Ricardo Darín",
+      "actors": [
+        "Ricardo Darín",
+        "Gina Mastronicola",
+        "Francisco Bertín"
+      ],
+      "plot": "A team of lawyers takes on the heads of Argentina's bloody military dictatorship during the 1980s in a battle against odds and a race against time.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGQxYTQyNDUtNmZkMi00MzQ4LWFhMTktNTYzOGQ1ZGMzYjQ2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt15301048",
+      "imdbID": "tt15301048",
+      "imdbRating": 7.6,
+      "imdbVotes": 34313,
+      "runtime": "140 min",
+      "rated": "R",
+      "country": "Argentina, United Kingdom, United States",
+      "language": "Spanish, English",
+      "awards": "Nominated for 1 Oscar. 49 wins & 45 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "An Ostrich Told Me the World Is Fake and I Think I Believe It",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Lachlan Pendragon",
+      "actor": "Lachlan Pendragon",
+      "actors": [
+        "Lachlan Pendragon",
+        "John Cavanagh",
+        "Michael Richard"
+      ],
+      "plot": "A young office worker uncovers the flaws in his stop-motion universe with the help of a mysterious talking ostrich.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzQ3MDk3MzgtODg4My00MWJjLWE4MzgtNzVmZDQ4NmM0NDEyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt20115114",
+      "imdbID": "tt20115114",
+      "imdbRating": 7.2,
+      "imdbVotes": 2208,
+      "runtime": "11 min",
+      "rated": null,
+      "country": "Australia",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "All the Beauty and the Bloodshed",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History"
+      ],
+      "director": "Laura Poitras",
+      "actor": "Nan Goldin",
+      "actors": [
+        "Nan Goldin",
+        "David Velasco",
+        "Megan Kapler"
+      ],
+      "plot": "Follows the life of artist Nan Goldin and the downfall of the Sackler family, the pharmaceutical dynasty who was greatly responsible for the opioid epidemic's unfathomable death toll.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2Y5YjA3ZDctODFlMi00NmQyLTk2MWMtOGE5OTJmYzUzNTQ1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt21374850",
+      "imdbID": "tt21374850",
+      "imdbRating": 7.5,
+      "imdbVotes": 8840,
+      "runtime": "113 min",
+      "rated": "Unrated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 36 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "All That Breathes",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Shaunak Sen",
+      "actor": "Salik Rehman",
+      "actors": [
+        "Salik Rehman",
+        "Mohammad Saud",
+        "Nadeem Shehzad"
+      ],
+      "plot": "Amidst the darkening backdrop of Delhi's apocalyptic air and escalating violence, two brothers devote their lives to protect one casualty of the turbulent times: the bird known as the Black Kite.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTE4OTAzMTYtYTBhMi00YTE2LWExOTAtMzViN2RhMTFjNjAwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt16377862",
+      "imdbID": "tt16377862",
+      "imdbRating": 7,
+      "imdbVotes": 5246,
+      "runtime": "97 min",
+      "rated": "Not Rated",
+      "country": "United Kingdom, India, United States",
+      "language": "Hindi",
+      "awards": "Nominated for 1 Oscar. 24 wins & 44 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Aftersun",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Charlotte Wells",
+      "actor": "Paul Mescal",
+      "actors": [
+        "Paul Mescal",
+        "Frankie Corio",
+        "Celia Rowlson-Hall"
+      ],
+      "plot": "Sophie reflects on the shared joy and private melancholy of a holiday she took with her father twenty years earlier. Memories real and imagined fill the gaps between as she tries to reconcile the father she knew with the man she d...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWU5Y2MyZjQtNGVjYi00ZDRkLTk1MGYtYmNlMzI0MTFmNDU2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt19770238",
+      "imdbID": "tt19770238",
+      "imdbRating": 7.6,
+      "imdbVotes": 111460,
+      "runtime": "102 min",
+      "rated": "R",
+      "country": "United Kingdom, United States, Turkey, Philippines, Netherlands",
+      "language": "English, Turkish, Spanish",
+      "awards": "Nominated for 1 Oscar. 96 wins & 186 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": true,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A House Made of Splinters",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Simon Lereng Wilmont",
+      "actor": "Marharyta Burlutska",
+      "actors": [
+        "Marharyta Burlutska",
+        "Anjelika Stolyarova",
+        "Olga Tronova"
+      ],
+      "plot": "Children and staff in a special kind of home: an institution for children who have been removed from their homes while awaiting court custody decisions. Staff do their best to make the time children have there safe and supportive.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2RiMjA4N2EtYWE5NC00ZjY2LTlkNTQtYmUzNWE4NDU4YWJhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt16377920",
+      "imdbID": "tt16377920",
+      "imdbRating": 7.2,
+      "imdbVotes": 2207,
+      "runtime": "87 min",
+      "rated": null,
+      "country": "Denmark, Ukraine, Sweden, Germany, Finland",
+      "language": "Russian, Ukrainian",
+      "awards": "Nominated for 1 Oscar. 10 wins & 19 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Living",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Oliver Hermanus",
+      "actor": "Bill Nighy",
+      "actors": [
+        "Bill Nighy",
+        "Aimee Lou Wood",
+        "Alex Sharp"
+      ],
+      "plot": "In 1950s London, a humorless bureaucrat decides to take time off work to experience life after receiving a grim diagnosis.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjI3ZDNlNDAtMmY0OS00ZWU5LThjZTktZGRmMmE3YjllODZhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9051908",
+      "imdbID": "tt9051908",
+      "imdbRating": 7.2,
+      "imdbVotes": 37298,
+      "runtime": "102 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Japan, Sweden, Belgium, Finland",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 10 wins & 49 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Triangle of Sadness",
+      "year": "2022",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Ruben Östlund",
+      "actor": "Thobias Thorwid",
+      "actors": [
+        "Thobias Thorwid",
+        "Harris Dickinson",
+        "Charlbi Dean"
+      ],
+      "plot": "A fashion model celebrity couple join an eventful cruise for the super-rich.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTViNzUyNDUtZTg3Yy00OTY4LWEyMTYtMmUzYjE3ZmZjYzUwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7322224",
+      "imdbID": "tt7322224",
+      "imdbRating": 7.2,
+      "imdbVotes": 211865,
+      "runtime": "147 min",
+      "rated": "R",
+      "country": "United Kingdom, Sweden, Germany, Mexico, France, Turkey, Denmark, United States, Switzerland, Greece",
+      "language": "English, Swedish, German, French, Greek, Tagalog, Akan",
+      "awards": "Nominated for 3 Oscars. 24 wins & 83 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Batman",
+      "year": "2022",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Matt Reeves",
+      "actor": "Robert Pattinson",
+      "actors": [
+        "Robert Pattinson",
+        "Zoë Kravitz",
+        "Jeffrey Wright"
+      ],
+      "plot": "When a sadistic serial killer begins murdering key political figures in Gotham, the Batman is forced to investigate the city's hidden corruption and question his family's involvement.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMmU5NGJlMzAtMGNmOC00YjJjLTgyMzUtNjAyYmE4Njg5YWMyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1877830",
+      "imdbID": "tt1877830",
+      "imdbRating": 7.8,
+      "imdbVotes": 917588,
+      "runtime": "176 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Spanish, Latin, Italian",
+      "awards": "Nominated for 3 Oscars. 40 wins & 175 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Babylon",
+      "year": "2022",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Damien Chazelle",
+      "actor": "Brad Pitt",
+      "actors": [
+        "Brad Pitt",
+        "Margot Robbie",
+        "Jean Smart"
+      ],
+      "plot": "A tale of outsized ambition and outrageous excess, it traces the rise and fall of multiple characters during an era of unbridled decadence and depravity in early Hollywood.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGY3M2NkN2QtZTdhOS00YTNjLTgyYmMtMGY3Y2U0OTk2NjA0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt10640346",
+      "imdbID": "tt10640346",
+      "imdbRating": 7.1,
+      "imdbVotes": 204188,
+      "runtime": "189 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish, Italian, Cantonese, French, Hungarian, German",
+      "awards": "Nominated for 3 Oscars. 45 wins & 158 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Fabelmans",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Steven Spielberg",
+      "actor": "Michelle Williams",
+      "actors": [
+        "Michelle Williams",
+        "Gabriel LaBelle",
+        "Paul Dano"
+      ],
+      "plot": "Growing up in post-World War II era Arizona, young Sammy Fabelman aspires to become a filmmaker as he reaches adolescence, but soon discovers a shattering family secret and explores how the power of films can help him see the truth.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDY5OWY4ZWYtYTM3OC00Zjg5LWFlYzYtYWI5ZGM1MDcxYzY4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14208870",
+      "imdbID": "tt14208870",
+      "imdbRating": 7.5,
+      "imdbVotes": 133423,
+      "runtime": "151 min",
+      "rated": "PG-13",
+      "country": "United States, India",
+      "language": "English",
+      "awards": "Nominated for 7 Oscars. 32 wins & 298 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tár",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "director": "Todd Field",
+      "actor": "Cate Blanchett",
+      "actors": [
+        "Cate Blanchett",
+        "Noémie Merlant",
+        "Nina Hoss"
+      ],
+      "plot": "Set in the international world of Western classical music, the film centers on Lydia Tár, widely considered one of the greatest living composer-conductors and the very first female director of a major German orchestra.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWY5YThhOGUtNDU4OS00NTk3LWI0ODQtNmRiYTk0ZjVkZWU2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14444726",
+      "imdbID": "tt14444726",
+      "imdbRating": 7.4,
+      "imdbVotes": 108148,
+      "runtime": "158 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, German, Filipino, French",
+      "awards": "Nominated for 6 Oscars. 79 wins & 271 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Elvis",
+      "year": "2022",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "Baz Luhrmann",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Austin Butler",
+        "Olivia DeJonge"
+      ],
+      "plot": "The life of American music icon Elvis Presley, from his childhood to becoming a rock and movie star in the 1950s while maintaining a complex relationship with his manager, Colonel Tom Parker.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTVhZmUyMDQtY2I5Ny00OWNiLTgzNjUtMTg4YTQwMTc0OTQxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3704428",
+      "imdbID": "tt3704428",
+      "imdbRating": 7.3,
+      "imdbVotes": 259379,
+      "runtime": "159 min",
+      "rated": "PG-13",
+      "country": "United States, Australia",
+      "language": "English",
+      "awards": "Nominated for 8 Oscars. 92 wins & 236 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Banshees of Inisherin",
+      "year": "2022",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Martin McDonagh",
+      "actor": "Colin Farrell",
+      "actors": [
+        "Colin Farrell",
+        "Brendan Gleeson",
+        "Kerry Condon"
+      ],
+      "plot": "Two lifelong friends find themselves at an impasse when one abruptly ends their relationship, with alarming consequences for both of them.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTkzMWI4OTEtMTk0MS00MTUxLWI4NTYtYmRiNWM4Zjc1MGRhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt11813216",
+      "imdbID": "tt11813216",
+      "imdbRating": 7.6,
+      "imdbVotes": 292905,
+      "runtime": "114 min",
+      "rated": "R",
+      "country": "Ireland, United Kingdom, United States",
+      "language": "English, Latin",
+      "awards": "Nominated for 9 Oscars. 150 wins & 374 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Elephant Whisperers",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Kartiki Gonsalves",
+      "actor": "Bellie",
+      "actors": [
+        "Bellie",
+        "Bomman"
+      ],
+      "plot": "Bomman and Bellie, a couple in South India, devote their lives to caring for an orphaned baby elephant named Raghu, forging a family like no other that tests the barrier between the human and the animal world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWU5NTNmOTQtMjllZi00NmQzLWIwZWItMTlhMTY0MDk2ODM1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt23628262",
+      "imdbID": "tt23628262",
+      "imdbRating": 7.5,
+      "imdbVotes": 10090,
+      "runtime": "41 min",
+      "rated": "PG",
+      "country": "India",
+      "language": "Tamil",
+      "awards": "Won 1 Oscar. 3 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Boy, the Mole, the Fox and the Horse",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Adventure"
+      ],
+      "director": "Peter Baynton, Charlie Mackesy",
+      "actor": "Jude Coward Nicoll",
+      "actors": [
+        "Jude Coward Nicoll",
+        "Tom Hollander",
+        "Idris Elba"
+      ],
+      "plot": "Follows a boy, a mole, a fox and a horse, as they create an unexpected friendship and travel together in the boy's search for home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDg4MjI3NGMtOTcwMC00ZWQ0LWI0YjMtNDA0YmZjN2FlYzg2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt22667880",
+      "imdbID": "tt22667880",
+      "imdbRating": 7.8,
+      "imdbVotes": 20803,
+      "runtime": "32 min",
+      "rated": "TV-G",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 6 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "RRR",
+      "year": "2022",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "S.S. Rajamouli",
+      "actor": "N.T. Rama Rao Jr.",
+      "actors": [
+        "N.T. Rama Rao Jr.",
+        "Ram Charan",
+        "Ajay Devgn"
+      ],
+      "plot": "A fearless warrior on a perilous mission comes face to face with a steely cop serving British forces in this epic saga set in pre-independent India.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWMwODYyMjQtMTczMi00NTQ1LWFkYjItMGJhMWRkY2E3NDAyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8178634",
+      "imdbID": "tt8178634",
+      "imdbRating": 7.8,
+      "imdbVotes": 201689,
+      "runtime": "187 min",
+      "rated": "TV-MA",
+      "country": "India",
+      "language": "Telugu",
+      "awards": "Won 1 Oscar. 93 wins & 152 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Guillermo del Toro's Pinocchio",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Guillermo del Toro, Mark Gustafson",
+      "actor": "Ewan McGregor",
+      "actors": [
+        "Ewan McGregor",
+        "David Bradley",
+        "Gregory Mann"
+      ],
+      "plot": "A father's wish magically brings a wooden boy to life in Italy, giving him a chance to care for the child.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2I3NDQzZmQtODJmOS00M2QyLWIxZTItYTA1ZTYzOWJlM2ZmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1488589",
+      "imdbID": "tt1488589",
+      "imdbRating": 7.6,
+      "imdbVotes": 142865,
+      "runtime": "117 min",
+      "rated": "PG",
+      "country": "United States, Mexico, France",
+      "language": "English, Italian",
+      "awards": "Won 1 Oscar. 78 wins & 135 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Navalny",
+      "year": "2022",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography"
+      ],
+      "director": "Daniel Roher",
+      "actor": "Alexei Navalny",
+      "actors": [
+        "Alexei Navalny",
+        "Yulia Navalnaya",
+        "Christo Grozev"
+      ],
+      "plot": "Follows the man who survived an assassination attempt by poisoning with a lethal nerve agent in August 2020. During his months-long recovery he makes shocking discoveries about the attempt on his life and decides to return home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjEzNTdlYzEtMGVkZi00ZWFhLWIzOTUtNjBiZjQyYWRmMGQyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt17041964",
+      "imdbID": "tt17041964",
+      "imdbRating": 7.8,
+      "imdbVotes": 47808,
+      "runtime": "99 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Russian, German",
+      "awards": "Won 1 Oscar. 17 wins & 35 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "An Irish Goodbye",
+      "year": "2022",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Tom Berkeley, Ross White",
+      "actor": "Seamus O'Hara",
+      "actors": [
+        "Seamus O'Hara",
+        "James Martin",
+        "Paddy Jenkins"
+      ],
+      "plot": "In rural Northern Ireland, a pair of estranged brothers reunite following their mother's untimely death.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGJhY2IxZTItODYwNS00NWI0LWEyNjAtOTk1ZTQwMTU5MTJhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt14625872",
+      "imdbID": "tt14625872",
+      "imdbRating": 7.2,
+      "imdbVotes": 3616,
+      "runtime": "23 min",
+      "rated": null,
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 23 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Women Talking",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Sarah Polley",
+      "actor": "Rooney Mara",
+      "actors": [
+        "Rooney Mara",
+        "Claire Foy",
+        "Jessie Buckley"
+      ],
+      "plot": "Do nothing, stay and fight, or leave. In 2010, the women of an isolated religious community grapple with reconciling a brutal reality with their faith.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzM2YzEzOTktNTJiNy00YjAwLWI2N2YtNjBkZWM5Y2U1OTRlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt13669038",
+      "imdbID": "tt13669038",
+      "imdbRating": 6.9,
+      "imdbVotes": 44731,
+      "runtime": "104 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 65 wins & 164 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Avatar: The Way of Water",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "James Cameron",
+      "actor": "Sam Worthington",
+      "actors": [
+        "Sam Worthington",
+        "Zoe Saldaña",
+        "Sigourney Weaver"
+      ],
+      "plot": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWI0Y2NkOWEtMmM2OC00MjQ3LWI1YzItZGQxYzQ3NzI4NWZmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1630029",
+      "imdbID": "tt1630029",
+      "imdbRating": 7.5,
+      "imdbVotes": 601100,
+      "runtime": "192 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 74 wins & 153 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Black Panther: Wakanda Forever",
+      "year": "2022",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Ryan Coogler",
+      "actor": "Letitia Wright",
+      "actors": [
+        "Letitia Wright",
+        "Lupita Nyong'o",
+        "Danai Gurira"
+      ],
+      "plot": "The people of Wakanda fight to protect their home from intervening world powers as they mourn the death of King T'Challa.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWY5NDY1ZjItZDQxMy00MTAzLTgyOGQtNTQxYjFiMzZjMjUyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9114286",
+      "imdbID": "tt9114286",
+      "imdbRating": 6.6,
+      "imdbVotes": 365500,
+      "runtime": "161 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Xhosa, Maya, Spanish, Haitian, French",
+      "awards": "Won 1 Oscar. 51 wins & 173 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Top Gun: Maverick",
+      "year": "2022",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama"
+      ],
+      "director": "Joseph Kosinski",
+      "actor": "Tom Cruise",
+      "actors": [
+        "Tom Cruise",
+        "Jennifer Connelly",
+        "Miles Teller"
+      ],
+      "plot": "The story involves Maverick confronting his past while training a group of younger Top Gun graduates, including the son of his deceased best friend, for a dangerous mission.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDBkZDNjMWEtOTdmMi00NmExLTg5MmMtNTFlYTJlNWY5YTdmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1745960",
+      "imdbID": "tt1745960",
+      "imdbRating": 8.2,
+      "imdbVotes": 845767,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 111 wins & 237 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Whale",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Darren Aronofsky",
+      "actor": "Brendan Fraser",
+      "actors": [
+        "Brendan Fraser",
+        "Sadie Sink",
+        "Ty Simpkins"
+      ],
+      "plot": "A reclusive, morbidly obese English teacher attempts to reconnect with his estranged teenage daughter.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmNhOWMyNTYtNTljNC00NTU3LWFiYmQtMDBhOGU5NWFhNGU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt13833688",
+      "imdbID": "tt13833688",
+      "imdbRating": 7.6,
+      "imdbVotes": 254748,
+      "runtime": "117 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 50 wins & 122 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "All Quiet on the Western Front",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History",
+        "War"
+      ],
+      "director": "Edward Berger",
+      "actor": "Felix Kammerer",
+      "actors": [
+        "Felix Kammerer",
+        "Albrecht Schuch",
+        "Aaron Hilmer"
+      ],
+      "plot": "A young German soldier's eagerness to serve his country quickly fades when he witnesses the horrors of combat on the Western Front during World War I.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWJiYWMyYTktZThhOS00ZjgxLWE0YTQtZDMyNTQxMjMyYjI2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1016150",
+      "imdbID": "tt1016150",
+      "imdbRating": 7.8,
+      "imdbVotes": 310448,
+      "runtime": "148 min",
+      "rated": "R",
+      "country": "Germany, United States, United Kingdom",
+      "language": "German, French",
+      "awards": "Won 4 Oscars. 59 wins & 89 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
