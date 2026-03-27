@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-27T08:08:58.640Z",
+  "updatedAt": "2026-03-27T14:11:35.246Z",
   "items": [
     {
       "title": "Mid90s",
@@ -9425,6 +9425,3491 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lion King",
+      "year": "1994",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Roger Allers, Rob Minkoff",
+      "actor": "Matthew Broderick",
+      "actors": [
+        "Matthew Broderick",
+        "Jeremy Irons",
+        "James Earl Jones"
+      ],
+      "plot": "Lion prince Simba and his father are targeted by his bitter uncle, who wants to ascend the throne himself.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGRiZDZhZjItM2M3ZC00Y2IyLTk3Y2MtMWY5YjliNDFkZTJlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0110357",
+      "imdbID": "tt0110357",
+      "imdbRating": 8.5,
+      "imdbVotes": 1248136,
+      "runtime": "88 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English, Swahili, Xhosa, Zulu",
+      "awards": "Won 2 Oscars. 43 wins & 35 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lighthouse",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Fantasy",
+        "Horror"
+      ],
+      "director": "Robert Eggers",
+      "actor": "Robert Pattinson",
+      "actors": [
+        "Robert Pattinson",
+        "Willem Dafoe",
+        "Valeriia Karaman"
+      ],
+      "plot": "Two lighthouse keepers try to maintain their sanity while living on a remote and mysterious New England island in the 1890s.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI4MjFhMjAtNmQxYi00N2IxLWJjMGEtYWY1YmU3OTQ0Zjk3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7984734",
+      "imdbID": "tt7984734",
+      "imdbRating": 7.4,
+      "imdbVotes": 291926,
+      "runtime": "109 min",
+      "rated": "R",
+      "country": "Canada, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 34 wins & 139 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "dark",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Edge of Democracy",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History"
+      ],
+      "director": "Petra Costa",
+      "actor": "Dilma Rousseff",
+      "actors": [
+        "Dilma Rousseff",
+        "Luiz Inácio Lula da Silva",
+        "Marisa Letícia Lula da Silva"
+      ],
+      "plot": "An exploration into the complex truth behind the unraveling of two Brazilian presidencies.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzA1NWFiZGUtZjQ4Ni00NmE1LThjMzAtMjA0YzE1MzM2ODlmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6016744",
+      "imdbID": "tt6016744",
+      "imdbRating": 7.3,
+      "imdbVotes": 16271,
+      "runtime": "121 min",
+      "rated": "TV-14",
+      "country": "Brazil, United Kingdom",
+      "language": "Portuguese, English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 16 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sister",
+      "year": "2012",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Ursula Meier",
+      "actor": "Léa Seydoux",
+      "actors": [
+        "Léa Seydoux",
+        "Kacey Mottet Klein",
+        "Martin Compston"
+      ],
+      "plot": "A drama set at a Swiss ski resort and centered on a boy who supports his sister by stealing from wealthy guests.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODNiYmE1OTktOTdlZi00ZjZkLTlkNDYtYTJkMWQwMzhjMmRjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2062969",
+      "imdbID": "tt2062969",
+      "imdbRating": 7,
+      "imdbVotes": 7376,
+      "runtime": "97 min",
+      "rated": "Unrated",
+      "country": "Switzerland, France",
+      "language": "French, English",
+      "awards": "12 wins & 10 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Saria",
+      "year": "2019",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Bryan Buckley",
+      "actor": "Estefanía Tellez",
+      "actors": [
+        "Estefanía Tellez",
+        "Gabriela Ramírez",
+        "Verónica Zúñiga"
+      ],
+      "plot": "SARIA explores the unimaginable hardships faced by young female orphans at the Virgen de La Asuncion Safe Home in Guatemala, leading up to the tragic fire which claimed 41 of their lives in 2017. We follow the story of two insepar...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMThmNjhjODItYjFjYy00NDA1LWEwYjgtZWU1ODI2ZjM2NDNhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt11421246",
+      "imdbID": "tt11421246",
+      "imdbRating": 7.2,
+      "imdbVotes": 1079,
+      "runtime": "22 min",
+      "rated": null,
+      "country": "United States",
+      "language": "Spanish",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Richard Jewell",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Clint Eastwood",
+      "actor": "Paul Walter Hauser",
+      "actors": [
+        "Paul Walter Hauser",
+        "Sam Rockwell",
+        "Brandon Stanley"
+      ],
+      "plot": "Security guard Richard Jewell is an instant hero after foiling a bomb attack at the 1996 Atlanta Olympics, but his life becomes a nightmare when the FBI leaks to the media that he is a suspect in the case.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI3ZThhNTYtM2ZlMy00OWMwLTk3M2MtM2IyYzYzN2IwMDA2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3513548",
+      "imdbID": "tt3513548",
+      "imdbRating": 7.5,
+      "imdbVotes": 105838,
+      "runtime": "131 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Nefta Football Club",
+      "year": "2018",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Yves Piat",
+      "actor": "Eltayef Dhaoui",
+      "actors": [
+        "Eltayef Dhaoui",
+        "Mohamed Ali Ayari",
+        "Lyès Salem"
+      ],
+      "plot": "In a Tunisian village, children are playing football on a wasteland. Meanwhile, Abdallah and Mohammed come across a donkey with headphones on his ears and bags full of a white powder on his back. The two young brothers decide to b...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTU3ZmU2ZTQtNTk4NS00NWZlLTlhODMtMGY4MWUwZGQwZjU0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8551848",
+      "imdbID": "tt8551848",
+      "imdbRating": 7.2,
+      "imdbVotes": 2062,
+      "runtime": "17 min",
+      "rated": null,
+      "country": "France, Tunisia, Algeria",
+      "language": "Arabic",
+      "awards": "Nominated for 1 Oscar. 24 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Missing Link",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Chris Butler",
+      "actor": "Hugh Jackman",
+      "actors": [
+        "Hugh Jackman",
+        "David Walliams",
+        "Stephen Fry"
+      ],
+      "plot": "Mr. Link recruits explorer Sir Lionel Frost to help find his long-lost relatives in the fabled valley of Shangri-La. Along with adventurer Adelina Fortnight, this trio of explorers travel the world to help their new friend.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTBiMzZiM2MtYTMxMS00M2Q3LTkwYTItOWMzMDkyMTdlOGU2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6348138",
+      "imdbID": "tt6348138",
+      "imdbRating": 6.7,
+      "imdbVotes": 30144,
+      "runtime": "93 min",
+      "rated": "PG",
+      "country": "United States, Canada, Netherlands, Japan",
+      "language": "English, Spanish, Tibetan",
+      "awards": "Nominated for 1 Oscar. 5 wins & 43 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "En ce jour mémorable",
+      "year": "1971",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Maurice Bulbulian",
+      "actor": null,
+      "actors": [],
+      "plot": null,
+      "poster": null,
+      "posterId": "tt0269193",
+      "imdbID": "tt0269193",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": "15 min",
+      "rated": null,
+      "country": "Canada",
+      "language": "French",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Maleficent: Mistress of Evil",
+      "year": "2019",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Family"
+      ],
+      "director": "Joachim Rønning",
+      "actor": "Angelina Jolie",
+      "actors": [
+        "Angelina Jolie",
+        "Elle Fanning",
+        "Harris Dickinson"
+      ],
+      "plot": "Maleficent and her goddaughter Aurora begin to question the complex family ties that bind them as they are pulled in different directions by impending nuptials, unexpected allies, and dark new forces at play.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTY4YjYwYzMtYTg1NC00ZmJiLTk0OTYtMWMzM2Y4Yzc5MDc2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4777008",
+      "imdbID": "tt4777008",
+      "imdbRating": 6.6,
+      "imdbVotes": 130828,
+      "runtime": "119 min",
+      "rated": "PG",
+      "country": "United Kingdom, Canada, United States, France",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 11 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Life Overtakes Me",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "John Haptas, Kristine Samuelson",
+      "actor": "Henry Ascher",
+      "actors": [
+        "Henry Ascher",
+        "Nadja Hatem",
+        "Mikael Billing"
+      ],
+      "plot": "In the grip of trauma, hundreds of refugee children in Sweden withdraw from life's uncertainties into a coma-like illness called Resignation Syndrome.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzY3YTQwZjItNTcwYi00ZmQyLTkwYWUtZTY5ZjdlMTNkOTA5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9204606",
+      "imdbID": "tt9204606",
+      "imdbRating": 6.5,
+      "imdbVotes": 2184,
+      "runtime": "39 min",
+      "rated": "TV-PG",
+      "country": "Sweden, United States",
+      "language": "Swedish, Ukrainian, English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Les Misérables",
+      "year": "2012",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Musical",
+        "Romance"
+      ],
+      "director": "Tom Hooper",
+      "actor": "Hugh Jackman",
+      "actors": [
+        "Hugh Jackman",
+        "Russell Crowe",
+        "Anne Hathaway"
+      ],
+      "plot": "In 19th-century France, Jean Valjean, who, for decades, has been hunted by the ruthless policeman Javert after breaking parole, agrees to care for a factory worker's daughter. The decision changes their lives forever.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2Q1YjIxZTAtZTU0YS00ZmE5LWEwODEtY2IyYWM2ZTJlOWE1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1707386",
+      "imdbID": "tt1707386",
+      "imdbRating": 7.5,
+      "imdbVotes": 360640,
+      "runtime": "158 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 3 Oscars. 85 wins & 177 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Knives Out",
+      "year": "2019",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Rian Johnson",
+      "actor": "Daniel Craig",
+      "actors": [
+        "Daniel Craig",
+        "Chris Evans",
+        "Ana de Armas"
+      ],
+      "plot": "When renowned crime novelist Harlan Thrombey is found dead at his estate just after his 85th birthday, the inquisitive and debonair Detective Benoit Blanc is mysteriously enlisted to investigate.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDU5ZTRkYmItZjg0Mi00ZTQwLThjMWItNWM3MTMxMzVjZmVjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8946378",
+      "imdbID": "tt8946378",
+      "imdbRating": 7.9,
+      "imdbVotes": 869648,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 52 wins & 114 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Klaus",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Sergio Pablos, Carlos Martínez López",
+      "actor": "Jason Schwartzman",
+      "actors": [
+        "Jason Schwartzman",
+        "J.K. Simmons",
+        "Rashida Jones"
+      ],
+      "plot": "A simple act of kindness always sparks another, even in a frozen, faraway place. When Smeerensburg's new postman, Jesper, befriends toymaker Klaus, their gifts melt an age-old feud and deliver a sleigh full of holiday traditions.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDA4ODhlMzctNGRmYi00NmViLTkxZGYtZjRkNGQ5YzYwYWVlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4729430",
+      "imdbID": "tt4729430",
+      "imdbRating": 8.2,
+      "imdbVotes": 232782,
+      "runtime": "96 min",
+      "rated": "PG",
+      "country": "Spain, United Kingdom, United States, Austria, Canada, France",
+      "language": "English, Saami",
+      "awards": "Nominated for 1 Oscar. 11 wins & 26 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Kitbull",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Rosana Sullivan",
+      "actor": null,
+      "actors": [],
+      "plot": "An unlikely connection sparks between two creatures: a fiercely independent stray kitten and a pit bull. Together, they experience friendship for the first time.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODA4YmFkMGYtY2MwNC00ZDc0LTgyMjUtZDAzMjdmYTRkNDkyXkEyXkFqcGdeQXVyNTE1NjY5Mg@@._V1_SX300.jpg",
+      "posterId": "tt9536832",
+      "imdbID": "tt9536832",
+      "imdbRating": 8,
+      "imdbVotes": 7322,
+      "runtime": "9 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "In the Absence",
+      "year": "2020",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Jordan Danelz",
+      "actor": null,
+      "actors": [],
+      "plot": null,
+      "poster": null,
+      "posterId": "tt11203314",
+      "imdbID": "tt11203314",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": "90 min",
+      "rated": null,
+      "country": "USA",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "I Lost My Body",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Drama",
+        "Fantasy"
+      ],
+      "director": "Jérémy Clapin",
+      "actor": "Hakim Faris",
+      "actors": [
+        "Hakim Faris",
+        "Victoire Du Bois",
+        "Patrick d'Assumçao"
+      ],
+      "plot": "A story of Naoufel, a young man who is in love with Gabrielle. In another part of town, a severed hand escapes from a dissection lab, determined to find its body again.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzI5ZmNmMmUtYTc2NS00OTNjLThiNGQtYjRjMDJjYzk3ZWQyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9806192",
+      "imdbID": "tt9806192",
+      "imdbRating": 7.5,
+      "imdbVotes": 37311,
+      "runtime": "81 min",
+      "rated": "TV-MA",
+      "country": "France, United Kingdom, United States",
+      "language": "French",
+      "awards": "Nominated for 1 Oscar. 32 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "How to Train Your Dragon: The Hidden World",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Dean DeBlois",
+      "actor": "Jay Baruchel",
+      "actors": [
+        "Jay Baruchel",
+        "America Ferrera",
+        "F. Murray Abraham"
+      ],
+      "plot": "When Hiccup discovers Toothless isn't the only Night Fury, he must seek the Hidden World, a secret Dragon Utopia before a hired tyrant named Grimmel finds it first.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIwMDIwNjAyOF5BMl5BanBnXkFtZTgwNDE1MDc2NTM@._V1_SX300.jpg",
+      "posterId": "tt2386490",
+      "imdbID": "tt2386490",
+      "imdbRating": 7.4,
+      "imdbVotes": 175859,
+      "runtime": "104 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 66 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Frozen II",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Chris Buck, Jennifer Lee",
+      "actor": "Kristen Bell",
+      "actors": [
+        "Kristen Bell",
+        "Idina Menzel",
+        "Josh Gad"
+      ],
+      "plot": "Anna, Elsa, Kristoff, Olaf and Sven leave Arendelle to travel to an ancient, autumn-bound forest of an enchanted land. They set out to find the origin of Elsa's powers in order to save their kingdom.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTE1YjlmZjctNjIwNi00NDQ0LTlmMzgtYWZkY2RkZTMwNTdmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4520988",
+      "imdbID": "tt4520988",
+      "imdbRating": 6.8,
+      "imdbVotes": 216694,
+      "runtime": "103 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 18 wins & 95 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "For Sama",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "War"
+      ],
+      "director": "Waad Al-Kateab, Edward Watts",
+      "actor": "Waad Al-Kateab",
+      "actors": [
+        "Waad Al-Kateab",
+        "Sama Al-Khateab",
+        "Hamza Al-Khateab"
+      ],
+      "plot": "An intimate and epic journey into a young woman's experience of war during the revolution in Aleppo, Syria.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmI3OTZiZDktMDg1Mi00MjhjLTkyZmUtNzhhOTkyZWVlMTQxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9617456",
+      "imdbID": "tt9617456",
+      "imdbRating": 8.5,
+      "imdbVotes": 13617,
+      "runtime": "100 min",
+      "rated": "TV-PG",
+      "country": "United Kingdom, Syria, United States",
+      "language": "Arabic, English",
+      "awards": "Nominated for 1 Oscar. 71 wins & 51 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Corpus Christi",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Jan Komasa",
+      "actor": "Bartosz Bielenia",
+      "actors": [
+        "Bartosz Bielenia",
+        "Anna Biernacik",
+        "Lidia Bogaczówna"
+      ],
+      "plot": "Daniel experiences a spiritual transformation in a detention center. Although his criminal record prevents him from applying to the seminary, he has no intention of giving up his dream and decides to minister a small-town parish.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWRmNDM1ZTEtNjE1ZC00MGJkLWJhNzYtYWFiNTIwNjdjN2VmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8649186",
+      "imdbID": "tt8649186",
+      "imdbRating": 7.7,
+      "imdbVotes": 23814,
+      "runtime": "115 min",
+      "rated": "Unrated",
+      "country": "Poland, France",
+      "language": "Polish",
+      "awards": "Nominated for 1 Oscar. 56 wins & 39 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Brotherhood",
+      "year": "2006",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": null,
+      "actor": "Jason Isaacs",
+      "actors": [
+        "Jason Isaacs",
+        "Jason Clarke",
+        "Annabeth Gish"
+      ],
+      "plot": "Set in an Irish neighborhood in Providence, Rhode Island, the series revolves around two brothers on opposite sides of the law: one a gangster (Jason Isaacs) and the other a state politician (Jason Clarke).",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmExZTViMjktZjBmZi00NjgzLTk3MTYtZjM1YTMyMGIzMTVhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0457229",
+      "imdbID": "tt0457229",
+      "imdbRating": 7.7,
+      "imdbVotes": 8351,
+      "runtime": "60 min",
+      "rated": "TV-MA",
+      "country": "United States",
+      "language": "English",
+      "awards": "4 wins & 5 nominations total",
+      "omdbType": "series",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Breakthrough",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Roxann Dawson",
+      "actor": "Marcel Ruiz",
+      "actors": [
+        "Marcel Ruiz",
+        "Topher Grace",
+        "Sarah Constible"
+      ],
+      "plot": "When her 14-year-old son drowns in a lake, a faithful mother prays for him to come back from the brink of death and be healed.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmU1NWU3MWYtMWIzZC00YzgwLWI3ODktZGYyNzJmNTIwZDgxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7083526",
+      "imdbID": "tt7083526",
+      "imdbRating": 6.3,
+      "imdbVotes": 11613,
+      "runtime": "116 min",
+      "rated": "PG",
+      "country": "United States, Canada",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 11 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Avengers: Endgame",
+      "year": "2019",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Anthony Russo, Joe Russo",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Chris Evans",
+        "Mark Ruffalo"
+      ],
+      "plot": "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_SX300.jpg",
+      "posterId": "tt4154796",
+      "imdbID": "tt4154796",
+      "imdbRating": 8.4,
+      "imdbVotes": 1426944,
+      "runtime": "181 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Japanese, Xhosa, German",
+      "awards": "Nominated for 1 Oscar. 70 wins & 132 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ad Astra",
+      "year": "2019",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "James Gray",
+      "actor": "Brad Pitt",
+      "actors": [
+        "Brad Pitt",
+        "Tommy Lee Jones",
+        "Ruth Negga"
+      ],
+      "plot": "An astronaut embarks on a space mission to investigate a threat to the universe and uncover the truth about his father who disappeared thirty years ago.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGRhOGNjZjEtNTU2Ni00MDlmLWI3MWEtNzc1OGE2ZmEwZGNhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2935510",
+      "imdbID": "tt2935510",
+      "imdbRating": 6.5,
+      "imdbVotes": 278389,
+      "runtime": "123 min",
+      "rated": "PG-13",
+      "country": "United States, China, Brazil",
+      "language": "English, Norwegian",
+      "awards": "Nominated for 1 Oscar. 11 wins & 75 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Sister",
+      "year": "2018",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Delphine Girard",
+      "actor": "Veerle Baetens",
+      "actors": [
+        "Veerle Baetens",
+        "Selma Alaoui",
+        "Guillaume Duhesme"
+      ],
+      "plot": "A night. A car. Alie is in danger. To get by she must make the most important phone call of her life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWNiM2RjOWMtYWZiZi00MmRhLWJjYzEtYmQwN2Q2NzBhNGJjXkEyXkFqcGdeQXVyOTYyNDcxODE@._V1_SX300.jpg",
+      "posterId": "tt8767544",
+      "imdbID": "tt8767544",
+      "imdbRating": 7.5,
+      "imdbVotes": 1621,
+      "runtime": "17 min",
+      "rated": null,
+      "country": "Belgium",
+      "language": "French",
+      "awards": "Nominated for 1 Oscar. 5 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Beautiful Day in the Neighborhood",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Family"
+      ],
+      "director": "Marielle Heller",
+      "actor": "Matthew Rhys",
+      "actors": [
+        "Matthew Rhys",
+        "Tom Hanks",
+        "Chris Cooper"
+      ],
+      "plot": "Lloyd Vogel, a cynical journalist, gets acquainted with a kind-hearted television host Fred Rogers while writing an article on him. With time, they strike an unlikely friendship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzE5MjVhNDMtMDJhYi00NDJhLWFmZjQtNzc2MWFkYmIzYzU4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3224458",
+      "imdbID": "tt3224458",
+      "imdbRating": 7.2,
+      "imdbVotes": 93419,
+      "runtime": "109 min",
+      "rated": "PG",
+      "country": "United States, China",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 10 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Pain and Glory",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Pedro Almodóvar",
+      "actor": "Antonio Banderas",
+      "actors": [
+        "Antonio Banderas",
+        "Asier Etxeandia",
+        "Leonardo Sbaraglia"
+      ],
+      "plot": "A film director reflects on the choices he's made in life as the past and present come crashing down around him.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmIxMTRhMjAtYzE2ZS00NDJiLTllYjktMzRlN2FiMGI2MmI4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8291806",
+      "imdbID": "tt8291806",
+      "imdbRating": 7.5,
+      "imdbVotes": 66539,
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "Spain, France",
+      "language": "Spanish",
+      "awards": "Nominated for 2 Oscars. 71 wins & 179 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Honeyland",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Tamara Kotevska, Ljubomir Stefanov",
+      "actor": "Hatidze Muratova",
+      "actors": [
+        "Hatidze Muratova",
+        "Nazife Muratova",
+        "Hussein Sam"
+      ],
+      "plot": "The last female bee-hunter in Europe must save the bees and return the natural balance in Honeyland, when a family of nomadic beekeepers invade her land and threaten her livelihood.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWViMTZlMzUtZjU3My00MzQ3LWI0YTYtNzg4NzcyOTZkZjUxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8991268",
+      "imdbID": "tt8991268",
+      "imdbRating": 8,
+      "imdbVotes": 20324,
+      "runtime": "89 min",
+      "rated": "Unrated",
+      "country": "North Macedonia, United States, Switzerland",
+      "language": "Serbo-Croatian, Serbian, Croatian, Turkish, Macedonian, Bosnian",
+      "awards": "Nominated for 2 Oscars. 37 wins & 55 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Harriet",
+      "year": "2019",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Kasi Lemmons",
+      "actor": "Cynthia Erivo",
+      "actors": [
+        "Cynthia Erivo",
+        "Janelle Monáe",
+        "Leslie Odom Jr."
+      ],
+      "plot": "The extraordinary tale of Harriet Tubman's escape from slavery and transformation into one of America's greatest heroines, whose courage, ingenuity and tenacity freed hundreds of slaves and changed the course of history.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTVlNGQ0ZWQtZTkzZC00YmQxLTg5MzQtYjFhYjVhMTdmM2I3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4648786",
+      "imdbID": "tt4648786",
+      "imdbRating": 6.7,
+      "imdbVotes": 34447,
+      "runtime": "125 min",
+      "rated": "PG-13",
+      "country": "China, United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 21 wins & 56 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Two Popes",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Fernando Meirelles",
+      "actor": "Jonathan Pryce",
+      "actors": [
+        "Jonathan Pryce",
+        "Anthony Hopkins",
+        "Juan Minujín"
+      ],
+      "plot": "Behind Vatican walls, the conservative Pope Benedict XVI and the liberal future Pope Francis must find common ground to forge a new path for the Catholic Church.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2NlYjdkOGEtMGYyOC00MzM5LWE5MzYtYzUyZjE3NTM5NGIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8404614",
+      "imdbID": "tt8404614",
+      "imdbRating": 7.6,
+      "imdbVotes": 145921,
+      "runtime": "125 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Italy, Argentina, United States, Brazil",
+      "language": "English, Spanish, Italian, Latin, Portuguese, French, German",
+      "awards": "Nominated for 3 Oscars. 11 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Irishman",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Martin Scorsese",
+      "actor": "Robert De Niro",
+      "actors": [
+        "Robert De Niro",
+        "Al Pacino",
+        "Joe Pesci"
+      ],
+      "plot": "An illustration of Frank Sheeran's life, from W.W.II veteran to hit-man for the Bufalino crime family and his alleged assassination of his close friend Jimmy Hoffa.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY2YThkNmQtOWJhYy00ZDc3LWEzOGEtMmQwNzM0YjFmZWIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1302006",
+      "imdbID": "tt1302006",
+      "imdbRating": 7.8,
+      "imdbVotes": 468945,
+      "runtime": "209 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Italian, Latin, Spanish, German",
+      "awards": "Nominated for 10 Oscars. 72 wins & 354 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Neighbors' Window",
+      "year": "2019",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Marshall Curry",
+      "actor": "Maria Dizzia",
+      "actors": [
+        "Maria Dizzia",
+        "Greg Keller",
+        "Juliana Canfield"
+      ],
+      "plot": "It tells the story of a middle aged woman with small children whose life is shaken up when two free-spirited twenty-somethings move in across the street.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2Q0MjhiZDktNzEwZS00NTdlLTkzMjgtNTdkMGI2NDAzYzEzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8163822",
+      "imdbID": "tt8163822",
+      "imdbRating": 7.3,
+      "imdbVotes": 6169,
+      "runtime": "21 min",
+      "rated": null,
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 12 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Rocketman",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "Dexter Fletcher",
+      "actor": "Taron Egerton",
+      "actors": [
+        "Taron Egerton",
+        "Jamie Bell",
+        "Richard Madden"
+      ],
+      "plot": "The musical fantasy about Elton John's breakthrough years, from his time as a prodigy at the Royal Academy of Music through his influential and enduring musical partnership with Bernie Taupin.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDNmM2U1MDAtNmE3NS00ZWVjLWFiZDktZTkwZjY5YWU2ZjZkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2066051",
+      "imdbID": "tt2066051",
+      "imdbRating": 7.3,
+      "imdbVotes": 207025,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 25 wins & 87 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Learning to Skateboard in a Warzone (If You're a Girl)",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "Sport"
+      ],
+      "director": "Carol Dysinger",
+      "actor": "Fatima",
+      "actors": [
+        "Fatima",
+        "Kashida"
+      ],
+      "plot": "Learning To Skateboard In A Warzone (If You're A Girl) is the story of young Afghan girls learning to read, write-and skateboard-in Kabul.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmJjNDcwMmItNGMwNy00MGZkLTg0OTUtZmYwMGU0NGM0Y2M3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt10397932",
+      "imdbID": "tt10397932",
+      "imdbRating": 7.5,
+      "imdbVotes": 1111,
+      "runtime": "39 min",
+      "rated": "TV-MA",
+      "country": "United Kingdom",
+      "language": "Dari",
+      "awards": "Won 1 Oscar. 5 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hair Love",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Matthew A. Cherry, Everett Downing Jr., Bruce W. Smith",
+      "actor": "Issa Rae",
+      "actors": [
+        "Issa Rae"
+      ],
+      "plot": "A father tries to do his daughter's hair for the first time.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjc4NDE2Y2UtMzAzYi00ZjQ0LWE0ZmEtOTY0ODMxZjFiZjgyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7129636",
+      "imdbID": "tt7129636",
+      "imdbRating": 7.4,
+      "imdbVotes": 7253,
+      "runtime": "7 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 4 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "American Factory",
+      "year": "2019",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Steven Bognar, Julia Reichert",
+      "actor": "Junming 'Jimmy' Wang",
+      "actors": [
+        "Junming 'Jimmy' Wang",
+        "Robert Allen",
+        "Sherrod Brown"
+      ],
+      "plot": "In post-industrial Ohio, a Chinese billionaire opens a factory in an abandoned General Motors plant, hiring two thousand Americans. Early days of hope and optimism give way to setbacks as high-tech China clashes with working-class...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2I1ZWJmNDUtMzc5OC00YzVmLTliZWItNTczZDQ0YTNiOTZjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt9351980",
+      "imdbID": "tt9351980",
+      "imdbRating": 7.4,
+      "imdbVotes": 24863,
+      "runtime": "110 min",
+      "rated": "TV-14",
+      "country": "United States",
+      "language": "English, Mandarin",
+      "awards": "Won 1 Oscar. 19 wins & 49 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Toy Story 4",
+      "year": "2019",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Josh Cooley",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Tim Allen",
+        "Annie Potts"
+      ],
+      "plot": "When Woody, Buzz, and the gang join Bonnie on a road trip with her new craft project turned toy, Forky, the innocent little spork's antics launch Woody on a wild quest.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYzMDM4NzkxOV5BMl5BanBnXkFtZTgwNzM1Mzg2NzM@._V1_SX300.jpg",
+      "posterId": "tt1979376",
+      "imdbID": "tt1979376",
+      "imdbRating": 7.6,
+      "imdbVotes": 310352,
+      "runtime": "100 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 61 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Judy",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "Rupert Goold",
+      "actor": "Renée Zellweger",
+      "actors": [
+        "Renée Zellweger",
+        "Jessie Buckley",
+        "Finn Wittrock"
+      ],
+      "plot": "Legendary performer Judy Garland arrives in London in the winter of 1968 to perform a series of sold-out concerts.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjY1OTJlZmQtNTEwNy00MjI1LWE4MWQtMzJlNTZmN2FmN2U5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7549996",
+      "imdbID": "tt7549996",
+      "imdbRating": 6.8,
+      "imdbVotes": 58121,
+      "runtime": "118 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, France, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 24 wins & 68 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bombshell",
+      "year": "2019",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Jay Roach",
+      "actor": "Charlize Theron",
+      "actors": [
+        "Charlize Theron",
+        "Nicole Kidman",
+        "Margot Robbie"
+      ],
+      "plot": "A group of women take on Fox News head Roger Ailes and the toxic atmosphere he presided over at the network.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODY3ODVkYTAtZDFmNS00ZDYyLTlkOTEtNTY3NTFhNDE4ZjFjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6394270",
+      "imdbID": "tt6394270",
+      "imdbRating": 6.8,
+      "imdbVotes": 132894,
+      "runtime": "109 min",
+      "rated": "R",
+      "country": "Canada, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 25 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Marriage Story",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Noah Baumbach",
+      "actor": "Adam Driver",
+      "actors": [
+        "Adam Driver",
+        "Scarlett Johansson",
+        "Julia Greer"
+      ],
+      "plot": "A stage director and his actor wife struggle through a grueling divorce that pushes them to their personal and creative extremes. Noah Baumbach's incisive and compassionate look at a marriage breaking up and a family staying toget...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmE0OWJlM2MtNzhmMi00YmQyLTlmY2EtZmUzNzBiNGRlN2JkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7653254",
+      "imdbID": "tt7653254",
+      "imdbRating": 7.9,
+      "imdbVotes": 369658,
+      "runtime": "137 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English, Spanish",
+      "awards": "Won 1 Oscar. 129 wins & 269 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Little Women",
+      "year": "2019",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Greta Gerwig",
+      "actor": "Saoirse Ronan",
+      "actors": [
+        "Saoirse Ronan",
+        "Emma Watson",
+        "Florence Pugh"
+      ],
+      "plot": "In 19th century Massachusetts, the March sisters--Meg, Jo, Beth, and Amy--on the threshold of womanhood, go through many ups and downs in life and endeavor to make important decisions about their futures.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWMzYjNiZWMtMDg4NS00MDgyLTk5MWItOTFmNjg4NzRhZmExXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3281548",
+      "imdbID": "tt3281548",
+      "imdbRating": 7.8,
+      "imdbVotes": 278609,
+      "runtime": "135 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Won 1 Oscar. 73 wins & 229 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Jojo Rabbit",
+      "year": "2019",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "War"
+      ],
+      "director": "Taika Waititi",
+      "actor": "Roman Griffin Davis",
+      "actors": [
+        "Roman Griffin Davis",
+        "Thomasin McKenzie",
+        "Scarlett Johansson"
+      ],
+      "plot": "A young German boy in the Hitler Youth, whose hero and imaginary friend is the country's dictator, is shocked to discover that his mother is hiding a Jewish girl in their home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmFmNmUyMjYtZTFjNS00OWQyLThhZmMtMGZkYTQ3YjY0ZDQ1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2584384",
+      "imdbID": "tt2584384",
+      "imdbRating": 7.9,
+      "imdbVotes": 483917,
+      "runtime": "108 min",
+      "rated": "PG-13",
+      "country": "New Zealand, United States, Czech Republic",
+      "language": "English, German",
+      "awards": "Won 1 Oscar. 53 wins & 191 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ford v Ferrari",
+      "year": "2019",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "James Mangold",
+      "actor": "Matt Damon",
+      "actors": [
+        "Matt Damon",
+        "Christian Bale",
+        "Jon Bernthal"
+      ],
+      "plot": "American car designer Carroll Shelby and driver Ken Miles battle corporate interference and the laws of physics to build a revolutionary race car for Ford in order to defeat Ferrari at the 24 Hours of Le Mans in 1966.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTBjNTEyNjYtYjdkNi00YzE5LTljYzUtZjVlYmYwZmJmZWYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1950186",
+      "imdbID": "tt1950186",
+      "imdbRating": 8.1,
+      "imdbVotes": 553839,
+      "runtime": "152 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Italian, French, Japanese",
+      "awards": "Won 2 Oscars. 26 wins & 86 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Once Upon a Time in Hollywood",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Vladislav Kozlov",
+      "actor": null,
+      "actors": [],
+      "plot": null,
+      "poster": null,
+      "posterId": "tt4010884",
+      "imdbID": "tt4010884",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": null,
+      "rated": null,
+      "country": "USA",
+      "language": null,
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Joker",
+      "year": "2019",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Todd Phillips",
+      "actor": "Joaquin Phoenix",
+      "actors": [
+        "Joaquin Phoenix",
+        "Robert De Niro",
+        "Zazie Beetz"
+      ],
+      "plot": "Arthur Fleck, a party clown and a failed stand-up comedian, leads an impoverished life with his ailing mother. However, when society shuns him and brands him as a freak, he decides to embrace the life of chaos in Gotham City.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzY3OWQ5NDktNWQ2OC00ZjdlLThkMmItMDhhNDk3NTFiZGU4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7286456",
+      "imdbID": "tt7286456",
+      "imdbRating": 8.3,
+      "imdbVotes": 1675451,
+      "runtime": "122 min",
+      "rated": "R",
+      "country": "United States, Canada, Australia",
+      "language": "English, German",
+      "awards": "Won 2 Oscars. 120 wins & 246 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "1917",
+      "year": "2019",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "War"
+      ],
+      "director": "Sam Mendes",
+      "actor": "Dean-Charles Chapman",
+      "actors": [
+        "Dean-Charles Chapman",
+        "George MacKay",
+        "Daniel Mays"
+      ],
+      "plot": "April 6th, 1917. As an infantry battalion assembles to wage war deep in enemy territory, two soldiers are assigned to race against time and deliver a message that will stop 1,600 men from walking straight into a deadly trap.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzkxZjg2NDQtMGVjMy00NWZkLTk0ZDEtZWE3NDYwYjAyMTg1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8579674",
+      "imdbID": "tt8579674",
+      "imdbRating": 8.2,
+      "imdbVotes": 762191,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English, French, German",
+      "awards": "Won 3 Oscars. 137 wins & 202 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Weekends",
+      "year": "2017",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Trevor Jimenez",
+      "actor": null,
+      "actors": [],
+      "plot": "'Weekends' is the story of a young boy shuffling between the homes of his recently divorced parents. Surreal dream-like moments mix with the domestic realities of a broken up family in this hand-animated film set in 1980s Toronto.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjg4ZTQ5MDctNjU1Mi00YjU4LWJlMDAtMTdlMjY1NWI2MGFjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7375186",
+      "imdbID": "tt7375186",
+      "imdbRating": 7.2,
+      "imdbVotes": 1656,
+      "runtime": "15 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 17 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Wife",
+      "year": "2017",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Björn Runge",
+      "actor": "Glenn Close",
+      "actors": [
+        "Glenn Close",
+        "Jonathan Pryce",
+        "Max Irons"
+      ],
+      "plot": "A wife questions her life choices as she travels to Stockholm to see her husband receive the Nobel Prize for Literature.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjMyYzVjNzYtNzNjNS00NzliLThiYWUtYWJmMmI0Zjc0MmNjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3750872",
+      "imdbID": "tt3750872",
+      "imdbRating": 7.2,
+      "imdbVotes": 44471,
+      "runtime": "99 min",
+      "rated": "R",
+      "country": "United Kingdom, Sweden, United States, Switzerland, Denmark",
+      "language": "English, Swedish",
+      "awards": "Nominated for 1 Oscar. 19 wins & 30 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Solo: A Star Wars Story",
+      "year": "2018",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Ron Howard",
+      "actor": "Alden Ehrenreich",
+      "actors": [
+        "Alden Ehrenreich",
+        "Woody Harrelson",
+        "Emilia Clarke"
+      ],
+      "plot": "During an adventure in the criminal underworld, Han Solo meets his future co-pilot Chewbacca and Lando Calrissian years before joining the Rebel Alliance.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTM2NTI3NTc3Nl5BMl5BanBnXkFtZTgwNzM1OTQyNTM@._V1_SX300.jpg",
+      "posterId": "tt3778644",
+      "imdbID": "tt3778644",
+      "imdbRating": 6.9,
+      "imdbVotes": 406107,
+      "runtime": "135 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 26 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Shoplifters",
+      "year": "2018",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Hirokazu Koreeda",
+      "actor": "Lily Franky",
+      "actors": [
+        "Lily Franky",
+        "Sakura Andô",
+        "Kirin Kiki"
+      ],
+      "plot": "On the margins of Tokyo, a dysfunctional band of outsiders are united by loyalty, a penchant for petty theft and playful grifting. When the young son is arrested, secrets are exposed that upend their tenuous, below-the-radar exist...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjY2NGZlZDUtMDUwMi00YTUxLTljNzEtZTE3YjAyNTQyNzU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8075192",
+      "imdbID": "tt8075192",
+      "imdbRating": 7.9,
+      "imdbVotes": 94390,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "Japan",
+      "language": "Japanese",
+      "awards": "Nominated for 1 Oscar. 49 wins & 98 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ready Player One",
+      "year": "2018",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Steven Spielberg",
+      "actor": "Tye Sheridan",
+      "actors": [
+        "Tye Sheridan",
+        "Olivia Cooke",
+        "Ben Mendelsohn"
+      ],
+      "plot": "When the creator of a virtual reality called the OASIS dies, he makes a posthumous challenge to all OASIS users to find his Easter Egg, which will give the finder his fortune and control of his world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzVkMTgzODQtMWIwZC00NzE4LTgzZjYtMzAwM2I5OGZhNjE4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1677720",
+      "imdbID": "tt1677720",
+      "imdbRating": 7.4,
+      "imdbVotes": 536233,
+      "runtime": "140 min",
+      "rated": "PG-13",
+      "country": "United States, India, Singapore, Canada, United Kingdom, Japan, Australia",
+      "language": "English, Japanese",
+      "awards": "Nominated for 1 Oscar. 11 wins & 58 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ralph Breaks the Internet",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Phil Johnston, Rich Moore",
+      "actor": "John C. Reilly",
+      "actors": [
+        "John C. Reilly",
+        "Sarah Silverman",
+        "Gal Gadot"
+      ],
+      "plot": "On a quest to save the video game 'Sugar Rush' and to find a replacement, Ralph and his best friend Vanellope travel to the World Wide Web through a Wi-Fi router they find at the arcade.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYyNzEyNDAzOV5BMl5BanBnXkFtZTgwNTk3NDczNjM@._V1_SX300.jpg",
+      "posterId": "tt5848272",
+      "imdbID": "tt5848272",
+      "imdbRating": 7,
+      "imdbVotes": 202975,
+      "runtime": "112 min",
+      "rated": "PG",
+      "country": "United States, Singapore",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 67 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "One Small Step",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Adventure"
+      ],
+      "director": "Andrew Chesworth, Bobby Pontillas",
+      "actor": null,
+      "actors": [],
+      "plot": "TAIKO Studios presents the story of Luna, a Chinese American girl who dreams of becoming an astronaut.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGM3MTE3YWEtOWZmOC00ZmJkLTg4NzUtMjcyNzk3NGQ4OTZhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8783042",
+      "imdbID": "tt8783042",
+      "imdbRating": 7.4,
+      "imdbVotes": 3081,
+      "runtime": "8 min",
+      "rated": "Not Rated",
+      "country": "United States, China",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 9 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Of Fathers and Sons",
+      "year": "2017",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "War"
+      ],
+      "director": "Talal Derki",
+      "actor": "Tia Alkerdi",
+      "actors": [
+        "Tia Alkerdi",
+        "Yara Ibrahim",
+        "Abu Osama"
+      ],
+      "plot": "Talal Derki returns to his homeland where he gains the trust of a radical Islamist family, sharing their daily life for over two years.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzE2MTYyZGUtNjJiZC00ZmY4LTk4NWYtMjZiNTlmYzdhZGNlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7519174",
+      "imdbID": "tt7519174",
+      "imdbRating": 7.3,
+      "imdbVotes": 2780,
+      "runtime": "99 min",
+      "rated": "Not Rated",
+      "country": "Germany, United States, Syria, Lebanon, Netherlands, Qatar",
+      "language": "Arabic",
+      "awards": "Nominated for 1 Oscar. 25 wins & 22 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mother",
+      "year": "2009",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "Bong Joon Ho",
+      "actor": "Kim Hye-ja",
+      "actors": [
+        "Kim Hye-ja",
+        "Won Bin",
+        "Jin Goo"
+      ],
+      "plot": "A mother desperately searches for the killer who framed her son for a girl's horrific murder.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQzMTg0NDA1M15BMl5BanBnXkFtZTgwODUzMTE0MjE@._V1_SX300.jpg",
+      "posterId": "tt1216496",
+      "imdbID": "tt1216496",
+      "imdbRating": 7.7,
+      "imdbVotes": 79751,
+      "runtime": "129 min",
+      "rated": "R",
+      "country": "South Korea",
+      "language": "Korean",
+      "awards": "45 wins & 49 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mirai",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Mamoru Hosoda",
+      "actor": "Haru Kuroki",
+      "actors": [
+        "Haru Kuroki",
+        "Moka Kamishiraishi",
+        "Gen Hoshino"
+      ],
+      "plot": "A young boy encounters a magical garden which enables him to travel through time and meet his relatives from different eras, with guidance by his younger sister from the future.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGMxNzNjY2EtMTUxNi00MTU0LTg3NDUtYmM1YWRhYmFlMGE2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6900448",
+      "imdbID": "tt6900448",
+      "imdbRating": 7,
+      "imdbVotes": 19634,
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "Japan",
+      "language": "Japanese, English",
+      "awards": "Nominated for 1 Oscar. 5 wins & 36 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Minding the Gap",
+      "year": "2018",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Sport"
+      ],
+      "director": "Bing Liu",
+      "actor": "Kent Abernathy",
+      "actors": [
+        "Kent Abernathy",
+        "Mengyue Bolen",
+        "Nina Bowgren"
+      ],
+      "plot": "Filmmaker Bing Liu searches for correlations between his skateboarder friends' turbulent upbringings and the complexities of modern masculinity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGI1YTIwMDctOGNlOS00MTk2LWEwZWUtZjMxMzJmMGZjYzAxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7476236",
+      "imdbID": "tt7476236",
+      "imdbRating": 8,
+      "imdbVotes": 10773,
+      "runtime": "93 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 60 wins & 53 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Marguerite",
+      "year": "2015",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Music"
+      ],
+      "director": "Xavier Giannoli",
+      "actor": "Catherine Frot",
+      "actors": [
+        "Catherine Frot",
+        "André Marcon",
+        "Michel Fau"
+      ],
+      "plot": "It is party day at Marguerite Dumont's castle. She sings wholeheartedly, but terribly out of tune. Marguerite has been living her passion in her own bubble, and the hypocrite audience acts as if she was the diva she believes she is.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI2MTE0NzM2N15BMl5BanBnXkFtZTgwMjc0Mjg3NzE@._V1_SX300.jpg",
+      "posterId": "tt4428788",
+      "imdbID": "tt4428788",
+      "imdbRating": 6.9,
+      "imdbVotes": 5722,
+      "runtime": "129 min",
+      "rated": "R",
+      "country": "France, Czech Republic, Belgium",
+      "language": "French, English, Italian",
+      "awards": "7 wins & 15 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Lifeboat",
+      "year": "1944",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "War"
+      ],
+      "director": "Alfred Hitchcock",
+      "actor": "Tallulah Bankhead",
+      "actors": [
+        "Tallulah Bankhead",
+        "John Hodiak",
+        "Walter Slezak"
+      ],
+      "plot": "Several survivors of a torpedoed merchant ship in World War II find themselves in the same lifeboat with one of the crew members of the U-boat that sank their ship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzliZGI1NmMtN2NjOC00MzA0LTg2YmUtZjNmMGEzMzFlYTUwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0037017",
+      "imdbID": "tt0037017",
+      "imdbRating": 7.6,
+      "imdbVotes": 32542,
+      "runtime": "97 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, German, French",
+      "awards": "Nominated for 3 Oscars. 5 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Late Afternoon",
+      "year": "2017",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Louise Bagnall",
+      "actor": "Fionnula Flanagan",
+      "actors": [
+        "Fionnula Flanagan",
+        "Niamh Moyles",
+        "Lucy O'Connell"
+      ],
+      "plot": "An elderly woman drifts back through her memories. She exists between two states, the past and the present.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWU0ZmM2MzktMzk0ZS00NTMzLWE3NTAtNTU3MzU2Zjg5MzY1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7077824",
+      "imdbID": "tt7077824",
+      "imdbRating": 7.4,
+      "imdbVotes": 2072,
+      "runtime": "9 min",
+      "rated": null,
+      "country": "Ireland",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Incredibles 2",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Brad Bird",
+      "actor": "Craig T. Nelson",
+      "actors": [
+        "Craig T. Nelson",
+        "Holly Hunter",
+        "Sarah Vowell"
+      ],
+      "plot": "The Incredibles family takes on a new mission which involves a change in family roles: Bob Parr (Mr. Incredible) must manage the house while his wife Helen (Elastigirl) goes out to save the world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTEzNzY0OTg0NTdeQTJeQWpwZ15BbWU4MDU3OTg3MjUz._V1_SX300.jpg",
+      "posterId": "tt3606756",
+      "imdbID": "tt3606756",
+      "imdbRating": 7.5,
+      "imdbVotes": 366471,
+      "runtime": "118 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 14 wins & 81 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hale County This Morning, This Evening",
+      "year": "2018",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "RaMell Ross",
+      "actor": "Latrenda 'Boosie' Ash",
+      "actors": [
+        "Latrenda 'Boosie' Ash",
+        "Karmyn Bryant",
+        "Korbyn Bryant"
+      ],
+      "plot": "A kaleidoscopic and humanistic view of the Black community in Hale County, Alabama.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2ZmZDQ0ZWQtZmZhMC00N2RjLTlmZjctYTQ3ZGZiYjQ3YTljXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6634646",
+      "imdbID": "tt6634646",
+      "imdbRating": 6.4,
+      "imdbVotes": 2256,
+      "runtime": "76 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 16 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "First Reformed",
+      "year": "2017",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Thriller"
+      ],
+      "director": "Paul Schrader",
+      "actor": "Ethan Hawke",
+      "actors": [
+        "Ethan Hawke",
+        "Amanda Seyfried",
+        "Cedric The Entertainer"
+      ],
+      "plot": "A minister of a small congregation in upstate New York grapples with mounting despair brought on by tragedy, worldly concerns and a tormented past.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTRkOTUxZDItNDU0OC00ODQzLWJkMWEtYjBiODViNGMyYjhjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6053438",
+      "imdbID": "tt6053438",
+      "imdbRating": 7.1,
+      "imdbVotes": 65739,
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "United States, United Kingdom, Australia",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 62 wins & 108 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fauve",
+      "year": "2018",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Jérémy Comte",
+      "actor": "Félix Grenier",
+      "actors": [
+        "Félix Grenier",
+        "Alexandre Perreault",
+        "Louise Bombardier"
+      ],
+      "plot": "Set in a surface mine, two boys sink into a seemingly innocent power game with Mother Nature as the sole observer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTQ2ZmVlNjgtY2QzOS00MWQ2LWI1YTYtZjc4ZWI0NDRiZTgzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7467476",
+      "imdbID": "tt7467476",
+      "imdbRating": 7.6,
+      "imdbVotes": 3659,
+      "runtime": "17 min",
+      "rated": null,
+      "country": "Canada",
+      "language": "French",
+      "awards": "Nominated for 1 Oscar. 29 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Detainment",
+      "year": "2018",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Vincent Lambe",
+      "actor": "Ely Solan",
+      "actors": [
+        "Ely Solan",
+        "Leon Hughes",
+        "Caleb Mason"
+      ],
+      "plot": "Two ten year-old boys are detained by police under suspicion of abducting and murdering a toddler. A true story based on interview transcripts and records from the James Bulger case, which shocked the world in 1993.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2YxNDRlNTQtOGM5ZC00NzM5LWEwMDEtN2RlYWVmNTI4ODVmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6813264",
+      "imdbID": "tt6813264",
+      "imdbRating": 7.1,
+      "imdbVotes": 5647,
+      "runtime": "30 min",
+      "rated": "12",
+      "country": "Ireland, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 27 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Christopher Robin",
+      "year": "2018",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Marc Forster",
+      "actor": "Ewan McGregor",
+      "actors": [
+        "Ewan McGregor",
+        "Hayley Atwell",
+        "Bronte Carmichael"
+      ],
+      "plot": "A working-class family man, Christopher Robin, encounters his childhood friend Winnie-the-Pooh, who helps him to rediscover the joys of life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAzOTM2OTAyNF5BMl5BanBnXkFtZTgwNTg5ODg1NTM@._V1_SX300.jpg",
+      "posterId": "tt4575576",
+      "imdbID": "tt4575576",
+      "imdbRating": 7.2,
+      "imdbVotes": 89573,
+      "runtime": "104 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States, Australia, Canada, Denmark",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Capernaum",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Nadine Labaki",
+      "actor": "Zain Al Rafeea",
+      "actors": [
+        "Zain Al Rafeea",
+        "Yordanos Shifera",
+        "Boluwatife Treasure Bankole"
+      ],
+      "plot": "While serving a five-year sentence for a violent crime, a 12-year-old boy sues his parents for neglect.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzEyMzQ1OTktZTljZi00OWQzLWE2ZmUtZjQyNzBjYjE1NTc0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8267604",
+      "imdbID": "tt8267604",
+      "imdbRating": 8.4,
+      "imdbVotes": 122730,
+      "runtime": "126 min",
+      "rated": "R",
+      "country": "Lebanon, United States, France, Cyprus, Qatar, United Kingdom",
+      "language": "Arabic, Amharic",
+      "awards": "Nominated for 1 Oscar. 37 wins & 56 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Border",
+      "year": "2018",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Fantasy"
+      ],
+      "director": "Ali Abbasi",
+      "actor": "Eva Melander",
+      "actors": [
+        "Eva Melander",
+        "Eero Milonoff",
+        "Jörgen Thorsson"
+      ],
+      "plot": "A customs officer who can smell fear develops an unusual attraction to a strange traveler while aiding a police investigation which will call into question her entire existence.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzc5MWVlZWYtM2E2MS00OWM5LTg5ODgtZDJmMzM0ZTc0YzFlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5501104",
+      "imdbID": "tt5501104",
+      "imdbRating": 7,
+      "imdbVotes": 36168,
+      "runtime": "110 min",
+      "rated": "R",
+      "country": "Sweden, Denmark",
+      "language": "Swedish, English",
+      "awards": "Nominated for 1 Oscar. 20 wins & 30 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Black Sheep",
+      "year": "1996",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": "Penelope Spheeris",
+      "actor": "Chris Farley",
+      "actors": [
+        "Chris Farley",
+        "David Spade",
+        "Tim Matheson"
+      ],
+      "plot": "A gubernatorial candidate hires a wormy special assistant whose only job is to make sure the candidate's well-meaning but incompetent brother doesn't ruin the election.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTYyMWE0MDUtMjkwZi00ZDNiLTg0MjUtZWQ5ZjMxNzA1N2ZjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0115697",
+      "imdbID": "tt0115697",
+      "imdbRating": 6.2,
+      "imdbVotes": 45618,
+      "runtime": "87 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Avengers: Infinity War",
+      "year": "2018",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Anthony Russo, Joe Russo",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Chris Hemsworth",
+        "Mark Ruffalo"
+      ],
+      "plot": "The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz of devastation and ruin puts an end to the universe.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjMxNjY2MDU1OV5BMl5BanBnXkFtZTgwNzY1MTUwNTM@._V1_SX300.jpg",
+      "posterId": "tt4154756",
+      "imdbID": "tt4154756",
+      "imdbRating": 8.4,
+      "imdbVotes": 1353948,
+      "runtime": "149 min",
+      "rated": "PG-13",
+      "country": "United States, Norway",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 48 wins & 80 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "At Eternity's Gate",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Julian Schnabel",
+      "actor": "Willem Dafoe",
+      "actors": [
+        "Willem Dafoe",
+        "Rupert Friend",
+        "Oscar Isaac"
+      ],
+      "plot": "A look at the life of painter Vincent van Gogh during the time he lived in Arles and Auvers-sur-Oise, France.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWJkOWMyNTUtNTFmZi00ZmUyLWExZGQtMjYwOGRlNTQ1YTkwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6938828",
+      "imdbID": "tt6938828",
+      "imdbRating": 6.9,
+      "imdbVotes": 43835,
+      "runtime": "111 min",
+      "rated": "PG-13",
+      "country": "Ireland, Switzerland, United Kingdom, France, United States",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 3 wins & 16 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Animal Behaviour",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "David Fine, Alison Snowden",
+      "actor": "Ryan Beil",
+      "actors": [
+        "Ryan Beil",
+        "Taz Van Rassel",
+        "Leah Juel"
+      ],
+      "plot": "Animated anthropomorphized characters in a therapy session.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjgwOGQ5NTYtZGUxNC00YTlmLTgxNjUtYTljMTJhZmE4N2ZkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8615478",
+      "imdbID": "tt8615478",
+      "imdbRating": 6.5,
+      "imdbVotes": 2027,
+      "runtime": "14 min",
+      "rated": null,
+      "country": "Canada",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 5 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Quiet Place",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Horror",
+        "Sci-Fi"
+      ],
+      "director": "John Krasinski",
+      "actor": "Emily Blunt",
+      "actors": [
+        "Emily Blunt",
+        "John Krasinski",
+        "Millicent Simmonds"
+      ],
+      "plot": "A family struggles for survival in a world invaded by blind alien creatures with ultra-sensitive hearing.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI0MDMzNTQ0M15BMl5BanBnXkFtZTgwMTM5NzM3NDM@._V1_SX300.jpg",
+      "posterId": "tt6644200",
+      "imdbID": "tt6644200",
+      "imdbRating": 7.5,
+      "imdbVotes": 652123,
+      "runtime": "90 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, American Sign ",
+      "awards": "Nominated for 1 Oscar. 38 wins & 129 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "dark",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Night at the Garden",
+      "year": "2017",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "History"
+      ],
+      "director": "Marshall Curry",
+      "actor": "Fritz Kuhn",
+      "actors": [
+        "Fritz Kuhn"
+      ],
+      "plot": "Archival footage of an American Nazi rally that attracted 20,000 people at Madison Square Garden in 1939, shortly before the beginning of World War II.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTM5NDk2OTgtNmE1My00ODQ4LWJhYzAtOGUzZDZlOTk4NWRlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7535612",
+      "imdbID": "tt7535612",
+      "imdbRating": 6.6,
+      "imdbVotes": 1633,
+      "runtime": "7 min",
+      "rated": "TV-PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "RBG",
+      "year": "2018",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography"
+      ],
+      "director": "Julie Cohen, Betsy West",
+      "actor": "Ruth Bader Ginsburg",
+      "actors": [
+        "Ruth Bader Ginsburg",
+        "Ann Kittner",
+        "Harryette Helsel"
+      ],
+      "plot": "The exceptional life and career of U.S. Supreme Court Justice Ruth Bader Ginsburg, who has developed a breathtaking legal legacy while becoming an unexpected pop culture icon.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTE4Nzc0NDU3Nl5BMl5BanBnXkFtZTgwODIzMTQzNTM@._V1_SX300.jpg",
+      "posterId": "tt7689964",
+      "imdbID": "tt7689964",
+      "imdbRating": 7.6,
+      "imdbVotes": 15456,
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Italian, German, French",
+      "awards": "Nominated for 2 Oscars. 13 wins & 51 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Never Look Away",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Florian Henckel von Donnersmarck",
+      "actor": "Tom Schilling",
+      "actors": [
+        "Tom Schilling",
+        "Sebastian Koch",
+        "Paula Beer"
+      ],
+      "plot": "German artist Kurt Barnert has escaped East Germany and now lives in West Germany, but is tormented by his childhood under the Nazis and the GDR-regime.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzQ5MTI3MDc5MF5BMl5BanBnXkFtZTgwNTY2NjQ3NjM@._V1_SX300.jpg",
+      "posterId": "tt5311542",
+      "imdbID": "tt5311542",
+      "imdbRating": 7.7,
+      "imdbVotes": 27275,
+      "runtime": "189 min",
+      "rated": "R",
+      "country": "Germany, Italy, United States",
+      "language": "German, Russian",
+      "awards": "Nominated for 2 Oscars. 5 wins & 18 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mary Queen of Scots",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Josie Rourke",
+      "actor": "Saoirse Ronan",
+      "actors": [
+        "Saoirse Ronan",
+        "Margot Robbie",
+        "Jack Lowden"
+      ],
+      "plot": "Mary Stuart's (Saoirse Ronan's) attempt to overthrow her cousin Elizabeth I (Margot Robbie), Queen of England, finds her condemned to years of imprisonment before facing execution.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTk2ZjI2ZWMtMTg4Yy00NTZkLTk5ZjAtNDc0ZjE4YzEzZjJmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2328900",
+      "imdbID": "tt2328900",
+      "imdbRating": 6.3,
+      "imdbVotes": 59106,
+      "runtime": "124 min",
+      "rated": "R",
+      "country": "United Kingdom, United States, China",
+      "language": "English, French, Gaelic, Latin",
+      "awards": "Nominated for 2 Oscars. 8 wins & 31 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Isle of Dogs",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Wes Anderson",
+      "actor": "Bryan Cranston",
+      "actors": [
+        "Bryan Cranston",
+        "Koyu Rankin",
+        "Edward Norton"
+      ],
+      "plot": "Set in Japan, Isle of Dogs follows a boy's odyssey in search of his lost dog.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTVmZWFmYWYtZTY1NC00Yjg5LTkxZGItZjhiYTExNTExNjA3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5104604",
+      "imdbID": "tt5104604",
+      "imdbRating": 7.8,
+      "imdbVotes": 209321,
+      "runtime": "101 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom, Germany, Japan",
+      "language": "English, Japanese",
+      "awards": "Nominated for 2 Oscars. 34 wins & 95 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Ballad of Buster Scruggs",
+      "year": "2018",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Musical"
+      ],
+      "director": "Ethan Coen, Joel Coen",
+      "actor": "Tim Blake Nelson",
+      "actors": [
+        "Tim Blake Nelson",
+        "Willie Watson",
+        "Clancy Brown"
+      ],
+      "plot": "Six tales of life and violence in the Old West, following a singing gunslinger, a bank robber, a traveling impresario, an elderly prospector, a wagon train and a perverse pair of bounty hunters.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTc0MzZjYTktYzBlZC00MmViLTgyNDYtNjljNTcxMzdjODRkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6412452",
+      "imdbID": "tt6412452",
+      "imdbRating": 7.2,
+      "imdbVotes": 177474,
+      "runtime": "133 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 3 Oscars. 6 wins & 38 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Cold War",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Romance"
+      ],
+      "director": "Pawel Pawlikowski",
+      "actor": "Joanna Kulig",
+      "actors": [
+        "Joanna Kulig",
+        "Tomasz Kot",
+        "Borys Szyc"
+      ],
+      "plot": "In the 1950s, a music director falls in love with a singer and tries to persuade her to flee communist Poland for France.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWQ5ZjYyMjAtNzBkMS00ZDJkLThmMmQtYTBjOTRiMjhkNGNkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6543652",
+      "imdbID": "tt6543652",
+      "imdbRating": 7.5,
+      "imdbVotes": 64846,
+      "runtime": "89 min",
+      "rated": "R",
+      "country": "Poland, United Kingdom, France, Belgium, India",
+      "language": "Polish, French, Croatian, German, Russian, Serbian, Italian",
+      "awards": "Nominated for 3 Oscars. 52 wins & 126 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Can You Ever Forgive Me?",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Marielle Heller",
+      "actor": "Melissa McCarthy",
+      "actors": [
+        "Melissa McCarthy",
+        "Richard E. Grant",
+        "Dolly Wells"
+      ],
+      "plot": "When Lee Israel falls out of step with current tastes, she turns her art form to deception.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWQ0YmU1YzktMTFmYi00YzNjLWFjNmItNTIwMThkNjdmYmIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4595882",
+      "imdbID": "tt4595882",
+      "imdbRating": 7.1,
+      "imdbVotes": 58228,
+      "runtime": "106 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 54 wins & 101 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mary Poppins Returns",
+      "year": "2018",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Family"
+      ],
+      "director": "Rob Marshall",
+      "actor": "Emily Blunt",
+      "actors": [
+        "Emily Blunt",
+        "Lin-Manuel Miranda",
+        "Ben Whishaw"
+      ],
+      "plot": "A few decades after her original visit, Mary Poppins, the magical nanny, returns to help the Banks siblings and Michael's children through a difficult time in their lives.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTk0NDIzMTA1MF5BMl5BanBnXkFtZTgwMzM0MTUzNjM@._V1_SX300.jpg",
+      "posterId": "tt5028340",
+      "imdbID": "tt5028340",
+      "imdbRating": 6.7,
+      "imdbVotes": 98768,
+      "runtime": "130 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom, Denmark, Australia, Canada, India",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 24 wins & 112 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Spider-Man: Into the Spider-Verse",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Bob Persichetti, Peter Ramsey, Rodney Rothman",
+      "actor": "Shameik Moore",
+      "actors": [
+        "Shameik Moore",
+        "Jake Johnson",
+        "Hailee Steinfeld"
+      ],
+      "plot": "Teen Miles Morales becomes the Spider-Man of his universe and must join with five spider-powered individuals from other dimensions to stop a threat for all realities.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjMwNDkxMTgzOF5BMl5BanBnXkFtZTgwNTkwNTQ3NjM@._V1_SX300.jpg",
+      "posterId": "tt4633694",
+      "imdbID": "tt4633694",
+      "imdbRating": 8.4,
+      "imdbVotes": 777014,
+      "runtime": "117 min",
+      "rated": "PG",
+      "country": "Canada, United States",
+      "language": "English, Spanish",
+      "awards": "Won 1 Oscar. 85 wins & 60 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Skin",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Guy Nattiv",
+      "actor": "Jamie Bell",
+      "actors": [
+        "Jamie Bell",
+        "Danielle Macdonald",
+        "Daniel Henshall"
+      ],
+      "plot": "A destitute young man, raised by racist skinheads and notorious among white supremacists, turns his back on hatred and violence to transform his life, with the help of a black activist and the woman he loves.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzI5YWFhZjgtNzZjZS00OGY2LWE4NzktMWQ1ZjMzZmQyNjNiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6043142",
+      "imdbID": "tt6043142",
+      "imdbRating": 6.8,
+      "imdbVotes": 20170,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "United States, Canada, Brazil, China",
+      "language": "English",
+      "awards": "1 win & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Period. End of Sentence.",
+      "year": "2018",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Rayka Zehtabchi",
+      "actor": "Ajeya",
+      "actors": [
+        "Ajeya",
+        "Anita",
+        "Gouri Choudari"
+      ],
+      "plot": "Indian women fight the stigma surrounding menstruation and begin manufacturing sanitary pads.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWEwZmI5MDQtODU4Ni00YTFkLTlmNzItOWFjYWU3MzRkN2IyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6939026",
+      "imdbID": "tt6939026",
+      "imdbRating": 7.4,
+      "imdbVotes": 6771,
+      "runtime": "26 min",
+      "rated": "TV-PG",
+      "country": "United States",
+      "language": "Hindi, English",
+      "awards": "Won 1 Oscar. 13 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Free Solo",
+      "year": "2018",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Adventure",
+        "Sport"
+      ],
+      "director": "Jimmy Chin, Elizabeth Chai Vasarhelyi",
+      "actor": "Alex Honnold",
+      "actors": [
+        "Alex Honnold",
+        "Tommy Caldwell",
+        "Jimmy Chin"
+      ],
+      "plot": "Alex Honnold faces the biggest challenge of his career, climbing El Capitan in Yosemite National Park. He pursues it Free Solo, which means climbing without a rope and alone.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA2YTAxMzMtNzA2Mi00NTcyLTg4NzUtODIxYzFiYzdiNWNlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7775622",
+      "imdbID": "tt7775622",
+      "imdbRating": 8.1,
+      "imdbVotes": 83687,
+      "runtime": "100 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 31 wins & 54 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bao",
+      "year": "2018",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Domee Shi",
+      "actor": "Sindy Lau",
+      "actors": [
+        "Sindy Lau",
+        "Kai Li",
+        "Sharmaine Yeoh"
+      ],
+      "plot": "A Chinese-Canadian woman suffering from empty nest syndrome gets a second shot at motherhood when one of her handmade dumplings comes alive.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjdkZGRhMWMtZGNmNy00OTAyLTlhODktYWFkZjRmN2UzMDY2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8075496",
+      "imdbID": "tt8075496",
+      "imdbRating": 7.5,
+      "imdbVotes": 35095,
+      "runtime": "8 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "None",
+      "awards": "Won 1 Oscar. 1 win & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "If Beale Street Could Talk",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Barry Jenkins",
+      "actor": "KiKi Layne",
+      "actors": [
+        "KiKi Layne",
+        "Stephan James",
+        "Regina King"
+      ],
+      "plot": "A young woman embraces her pregnancy while she and her family set out to prove her childhood friend and lover innocent of a crime he didn't commit.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmJlMWY1ZDMtMmU3ZS00MzVmLWE2MjQtYWVhNDAxOWY2MWI0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt7125860",
+      "imdbID": "tt7125860",
+      "imdbRating": 7.1,
+      "imdbVotes": 54907,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Won 1 Oscar. 108 wins & 194 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "First Man",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Damien Chazelle",
+      "actor": "Ryan Gosling",
+      "actors": [
+        "Ryan Gosling",
+        "Claire Foy",
+        "Jason Clarke"
+      ],
+      "plot": "A look back at the life of astronaut Neil Armstrong and the legendary space mission that led him to become the first man to walk on the Moon on July 20, 1969.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmIzYmViN2UtMDRhYy00OTMwLWI5YzctMTQxYzg2ODMwMTIwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1213641",
+      "imdbID": "tt1213641",
+      "imdbRating": 7.3,
+      "imdbVotes": 214353,
+      "runtime": "141 min",
+      "rated": "PG-13",
+      "country": "United States, China, Japan",
+      "language": "English",
+      "awards": "Won 1 Oscar. 32 wins & 192 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "BlacKkKlansman",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Spike Lee",
+      "actor": "Alec Baldwin",
+      "actors": [
+        "Alec Baldwin",
+        "John David Washington",
+        "Isiah Whitlock Jr."
+      ],
+      "plot": "In this story inspired by true events, Ron Stallworth, an African-American Colorado police officer, successfully infiltrates the local branch of the Ku Klux Klan with the help of a white Jewish colleague.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjUyOTE1NjI0OF5BMl5BanBnXkFtZTgwMTM4ODQ5NTM@._V1_SX300.jpg",
+      "posterId": "tt7349662",
+      "imdbID": "tt7349662",
+      "imdbRating": 7.5,
+      "imdbVotes": 311571,
+      "runtime": "135 min",
+      "rated": "R",
+      "country": "United States, China",
+      "language": "English",
+      "awards": "Won 1 Oscar. 46 wins & 215 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Vice",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Adam McKay",
+      "actor": "Christian Bale",
+      "actors": [
+        "Christian Bale",
+        "Amy Adams",
+        "Steve Carell"
+      ],
+      "plot": "The story of Dick Cheney, an unassuming bureaucratic Washington insider, who quietly wielded immense power as Vice President to George W. Bush, reshaping the country and the globe in ways that are still felt today.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY1NjM0MzgxMV5BMl5BanBnXkFtZTgwNDc4NTY0NjM@._V1_SX300.jpg",
+      "posterId": "tt6266538",
+      "imdbID": "tt6266538",
+      "imdbRating": 7.2,
+      "imdbVotes": 171470,
+      "runtime": "132 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Arabic",
+      "awards": "Won 1 Oscar. 35 wins & 139 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Star Is Born",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Romance"
+      ],
+      "director": "Bradley Cooper",
+      "actor": "Lady Gaga",
+      "actors": [
+        "Lady Gaga",
+        "Bradley Cooper",
+        "Sam Elliott"
+      ],
+      "plot": "A hard-drinking country music star falls in love with a singer whose career quickly takes off.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGUxZTc0NTAtNzQwMy00MmM2LTgzMGYtZWIyY2E1MGFjYmM5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1517451",
+      "imdbID": "tt1517451",
+      "imdbRating": 7.6,
+      "imdbVotes": 445763,
+      "runtime": "136 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Won 1 Oscar. 99 wins & 288 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Favourite",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Yorgos Lanthimos",
+      "actor": "Olivia Colman",
+      "actors": [
+        "Olivia Colman",
+        "Emma Stone",
+        "Rachel Weisz"
+      ],
+      "plot": "In early 18th-century England, the status quo at the court is upset when a new servant arrives and endears herself to a frail Queen Anne.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg1NzQwMDQxNV5BMl5BanBnXkFtZTgwNDg2NDYyNjM@._V1_SX300.jpg",
+      "posterId": "tt5083738",
+      "imdbID": "tt5083738",
+      "imdbRating": 7.5,
+      "imdbVotes": 256902,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "Ireland, United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 187 wins & 352 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Black Panther",
+      "year": "2018",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Ryan Coogler",
+      "actor": "Chadwick Boseman",
+      "actors": [
+        "Chadwick Boseman",
+        "Michael B. Jordan",
+        "Lupita Nyong'o"
+      ],
+      "plot": "T'Challa, heir to the hidden but advanced kingdom of Wakanda, must step forward to lead his people into a new future and must confront a challenger from his country's past.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg1MTY2MjYzNV5BMl5BanBnXkFtZTgwMTc4NTMwNDI@._V1_SX300.jpg",
+      "posterId": "tt1825683",
+      "imdbID": "tt1825683",
+      "imdbRating": 7.3,
+      "imdbVotes": 900774,
+      "runtime": "134 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Swahili, Nama, Xhosa, Korean",
+      "awards": "Won 3 Oscars. 125 wins & 289 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Roma",
+      "year": "2018",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Alfonso Cuarón",
+      "actor": "Yalitza Aparicio",
+      "actors": [
+        "Yalitza Aparicio",
+        "Marina de Tavira",
+        "Diego Cortina Autrey"
+      ],
+      "plot": "A year in the life of an upper-middle-class family's maid in Mexico City in the early 1970s.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU0OTc3ODk4Ml5BMl5BanBnXkFtZTgwMzM4NzI5NjM@._V1_SX300.jpg",
+      "posterId": "tt6155172",
+      "imdbID": "tt6155172",
+      "imdbRating": 7.6,
+      "imdbVotes": 176987,
+      "runtime": "135 min",
+      "rated": "R",
+      "country": "Mexico, United States",
+      "language": "Spanish, Mixtec, English, Japanese, German, French, Norwegian",
+      "awards": "Won 3 Oscars. 255 wins & 229 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bohemian Rhapsody",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "Bryan Singer",
+      "actor": "Rami Malek",
+      "actors": [
+        "Rami Malek",
+        "Lucy Boynton",
+        "Gwilym Lee"
+      ],
+      "plot": "With his impeccable vocal abilities, Freddie Mercury and his rock band, Queen, achieve superstardom. However, amidst his skyrocketing success, he grapples with his ego, sexuality and a fatal illness.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTA2NDc3Njg5NDVeQTJeQWpwZ15BbWU4MDc1NDcxNTUz._V1_SX300.jpg",
+      "posterId": "tt1727824",
+      "imdbID": "tt1727824",
+      "imdbRating": 7.9,
+      "imdbVotes": 638785,
+      "runtime": "134 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, British Sign ",
+      "awards": "Won 4 Oscars. 50 wins & 80 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Green Book",
+      "year": "2018",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Peter Farrelly",
+      "actor": "Viggo Mortensen",
+      "actors": [
+        "Viggo Mortensen",
+        "Mahershala Ali",
+        "Linda Cardellini"
+      ],
+      "plot": "A working-class Italian-American bouncer becomes the driver for an African-American classical pianist on a tour of venues through the 1960s American South.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDU5YTNmMmItN2QxNy00OGQ0LTg5MTctNzFmYjEzZjcwN2UwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6966692",
+      "imdbID": "tt6966692",
+      "imdbRating": 8.2,
+      "imdbVotes": 675063,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "United States, China, Japan",
+      "language": "English, Italian, Russian, German",
+      "awards": "Won 3 Oscars. 58 wins & 124 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "auto_candidates",
