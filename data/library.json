@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-29T15:23:02.475Z",
+  "updatedAt": "2026-03-29T15:36:15.445Z",
   "items": [
     {
       "title": "Mid90s",
@@ -15760,6 +15760,2726 @@
         "emotional",
         "romantic",
         "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "20th Century Women",
+      "year": "2016",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Mike Mills",
+      "actor": "Annette Bening",
+      "actors": [
+        "Annette Bening",
+        "Elle Fanning",
+        "Greta Gerwig"
+      ],
+      "plot": "In 1979 Santa Barbara, Dorothea is a determined single mother who is raising her son, Jamie. Dorothea enlists the help of two women -- Abbie, a free-spirited punk artist and Julie, a savvy teenager -- to help with Jamie's upbringing.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkwNDE4NzQwM15BMl5BanBnXkFtZTgwNzQ5Nzg0MDI@._V1_SX300.jpg",
+      "posterId": "tt4385888",
+      "imdbID": "tt4385888",
+      "imdbRating": 7.3,
+      "imdbVotes": 52059,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 15 wins & 82 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "13th",
+      "year": "2016",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Crime",
+        "History"
+      ],
+      "director": "Ava DuVernay",
+      "actor": "Melina Abdullah",
+      "actors": [
+        "Melina Abdullah",
+        "Michelle Alexander",
+        "Cory Booker"
+      ],
+      "plot": "An in-depth look at the prison system in the United States and how it reveals the nation's history of racial inequality.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAwMjU5NTAzOF5BMl5BanBnXkFtZTgwMjQwODQxMDI@._V1_SX300.jpg",
+      "posterId": "tt5895028",
+      "imdbID": "tt5895028",
+      "imdbRating": 8.2,
+      "imdbVotes": 38474,
+      "runtime": "100 min",
+      "rated": "TV-MA",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 32 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "13 Hours: The Secret Soldiers of Benghazi",
+      "year": "2016",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "director": "Michael Bay",
+      "actor": "John Krasinski",
+      "actors": [
+        "John Krasinski",
+        "Pablo Schreiber",
+        "James Badge Dale"
+      ],
+      "plot": "During an attack on a U.S. compound in Libya, a security team struggles to make sense out of the chaos.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGM1MWUzZjktMWY0MS00N2ZhLWJmZjQtNjIxOGVlNzA1OGI0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4172430",
+      "imdbID": "tt4172430",
+      "imdbRating": 7.3,
+      "imdbVotes": 177750,
+      "runtime": "144 min",
+      "rated": "R",
+      "country": "Malta, United States",
+      "language": "English, Arabic",
+      "awards": "Nominated for 1 Oscar. 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Rogue One: A Star Wars Story",
+      "year": "2016",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Gareth Edwards",
+      "actor": "Felicity Jones",
+      "actors": [
+        "Felicity Jones",
+        "Diego Luna",
+        "Alan Tudyk"
+      ],
+      "plot": "In a time of conflict, a group of unlikely heroes band together on a mission to steal the plans to the Death Star, the Empire's ultimate weapon of destruction.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjEwMzMxODIzOV5BMl5BanBnXkFtZTgwNzg3OTAzMDI@._V1_SX300.jpg",
+      "posterId": "tt3748528",
+      "imdbID": "tt3748528",
+      "imdbRating": 7.8,
+      "imdbVotes": 748381,
+      "runtime": "133 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 24 wins & 85 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Passengers",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "Sci-Fi"
+      ],
+      "director": "Morten Tyldum",
+      "actor": "Jennifer Lawrence",
+      "actors": [
+        "Jennifer Lawrence",
+        "Chris Pratt",
+        "Michael Sheen"
+      ],
+      "plot": "A malfunction in a sleeping pod on a spacecraft traveling to a distant colony planet wakes one passenger 90 years early.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzRjNTFmMzQtM2JhZi00ZTI0LTlhMjMtNzQ4YWRhZGVmZWRmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1355644",
+      "imdbID": "tt1355644",
+      "imdbRating": 7,
+      "imdbVotes": 488312,
+      "runtime": "116 min",
+      "rated": "PG-13",
+      "country": "United States, Australia, Hong Kong",
+      "language": "English, Spanish, Japanese, French",
+      "awards": "Nominated for 2 Oscars. 2 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Moana",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Ron Clements, John Musker, Don Hall",
+      "actor": "Auli'i Cravalho",
+      "actors": [
+        "Auli'i Cravalho",
+        "Dwayne Johnson",
+        "Rachel House"
+      ],
+      "plot": "In ancient Polynesia, when a terrible curse incurred by the demigod Maui reaches Moana's island, she answers the Ocean's call to seek out Maui to set things right.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI4MzU5NTExNF5BMl5BanBnXkFtZTgwNzY1MTEwMDI@._V1_SX300.jpg",
+      "posterId": "tt3521164",
+      "imdbID": "tt3521164",
+      "imdbRating": 7.6,
+      "imdbVotes": 436011,
+      "runtime": "107 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 2 Oscars. 22 wins & 90 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Kubo and the Two Strings",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Travis Knight",
+      "actor": "Charlize Theron",
+      "actors": [
+        "Charlize Theron",
+        "Art Parkinson",
+        "Matthew McConaughey"
+      ],
+      "plot": "A young boy named Kubo must locate a magical suit of armour worn by his late father in order to defeat a vengeful spirit from the past.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA2Mzg2NDMzNl5BMl5BanBnXkFtZTgwMjcwODUzOTE@._V1_SX300.jpg",
+      "posterId": "tt4302938",
+      "imdbID": "tt4302938",
+      "imdbRating": 7.7,
+      "imdbVotes": 145993,
+      "runtime": "101 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 33 wins & 67 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Florence Foster Jenkins",
+      "year": "2016",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Stephen Frears",
+      "actor": "Meryl Streep",
+      "actors": [
+        "Meryl Streep",
+        "Hugh Grant",
+        "Simon Helberg"
+      ],
+      "plot": "The story of Florence Foster Jenkins, a New York heiress who dreamed of becoming an opera singer, despite having a terrible singing voice.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0Mzc4MjMxMl5BMl5BanBnXkFtZTgwODIwNTQxODE@._V1_SX300.jpg",
+      "posterId": "tt4136084",
+      "imdbID": "tt4136084",
+      "imdbRating": 6.8,
+      "imdbVotes": 61582,
+      "runtime": "111 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, France",
+      "language": "English, German, Italian, Russian",
+      "awards": "Nominated for 2 Oscars. 10 wins & 48 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Deepwater Horizon",
+      "year": "2016",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "director": "Peter Berg",
+      "actor": "Mark Wahlberg",
+      "actors": [
+        "Mark Wahlberg",
+        "Kurt Russell",
+        "Douglas M. Griffin"
+      ],
+      "plot": "A dramatization of the disaster in April 2010, when the offshore drilling rig called the Deepwater Horizon exploded, resulting in the worst oil spill in history.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTEzNDU0OTgxM15BMl5BanBnXkFtZTgwNjA0ODM2OTE@._V1_SX300.jpg",
+      "posterId": "tt1860357",
+      "imdbID": "tt1860357",
+      "imdbRating": 7.1,
+      "imdbVotes": 197573,
+      "runtime": "107 min",
+      "rated": "PG-13",
+      "country": "United States, Hong Kong",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 4 wins & 15 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Man Called Ove",
+      "year": "2015",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Hannes Holm",
+      "actor": "Rolf Lassgård",
+      "actors": [
+        "Rolf Lassgård",
+        "Bahar Pars",
+        "Filip Berg"
+      ],
+      "plot": "Ove, an ill-tempered, isolated retiree who spends his days enforcing block association rules and visiting his wife's grave, has finally given up on life just as an unlikely friendship develops with his boisterous new neighbors.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE0NDUyOTc2MV5BMl5BanBnXkFtZTgwODk2NzU3OTE@._V1_SX300.jpg",
+      "posterId": "tt4080728",
+      "imdbID": "tt4080728",
+      "imdbRating": 7.7,
+      "imdbVotes": 73332,
+      "runtime": "116 min",
+      "rated": "PG-13",
+      "country": "Sweden, Denmark, Norway",
+      "language": "Swedish, Persian, Spanish",
+      "awards": "Nominated for 2 Oscars. 15 wins & 29 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Jackie",
+      "year": "2016",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Pablo Larraín",
+      "actor": "Natalie Portman",
+      "actors": [
+        "Natalie Portman",
+        "Peter Sarsgaard",
+        "Greta Gerwig"
+      ],
+      "plot": "Following the assassination of President John F. Kennedy, First Lady Jacqueline Kennedy Onassis fights through grief and trauma to regain her faith, console her children, and define her husband's historic legacy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzg4MjYzNjk5N15BMl5BanBnXkFtZTgwODgwODI3MDI@._V1_SX300.jpg",
+      "posterId": "tt1619029",
+      "imdbID": "tt1619029",
+      "imdbRating": 6.6,
+      "imdbVotes": 86546,
+      "runtime": "100 min",
+      "rated": "R",
+      "country": "United States, France, Chile, China",
+      "language": "English, Spanish",
+      "awards": "Nominated for 3 Oscars. 44 wins & 170 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hidden Figures",
+      "year": "2016",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Theodore Melfi",
+      "actor": "Taraji P. Henson",
+      "actors": [
+        "Taraji P. Henson",
+        "Octavia Spencer",
+        "Janelle Monáe"
+      ],
+      "plot": "Three female African-American mathematicians play a pivotal role in astronaut John Glenn's launch into orbit while dealing with racial and gender discrimination.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2RhNDRhNzctZTllMy00NTc2LWJjZmUtMzg3MTNiNjhhODMxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4846340",
+      "imdbID": "tt4846340",
+      "imdbRating": 7.8,
+      "imdbVotes": 285729,
+      "runtime": "127 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 37 wins & 94 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hell or High Water",
+      "year": "2016",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "David Mackenzie",
+      "actor": "Chris Pine",
+      "actors": [
+        "Chris Pine",
+        "Ben Foster",
+        "Jeff Bridges"
+      ],
+      "plot": "Toby is a divorced father who's trying to make a better life. His brother is an ex-con with a short temper and a loose trigger finger. Together, they plan a series of heists against the bank that's about to foreclose on their fami...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg4NDA1OTA5NF5BMl5BanBnXkFtZTgwMDQ2MDM5ODE@._V1_SX300.jpg",
+      "posterId": "tt2582782",
+      "imdbID": "tt2582782",
+      "imdbRating": 7.6,
+      "imdbVotes": 274536,
+      "runtime": "102 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 47 wins & 174 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Lion",
+      "year": "2016",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Garth Davis",
+      "actor": "Dev Patel",
+      "actors": [
+        "Dev Patel",
+        "Nicole Kidman",
+        "Rooney Mara"
+      ],
+      "plot": "A five-year-old Indian boy is adopted by an Australian couple after getting lost hundreds of kilometers from home. 25 years later, he sets out to find his lost family.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA3NjkzNjg2MF5BMl5BanBnXkFtZTgwMDkyMzgzMDI@._V1_SX300.jpg",
+      "posterId": "tt3741834",
+      "imdbID": "tt3741834",
+      "imdbRating": 8,
+      "imdbVotes": 263268,
+      "runtime": "118 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Australia, United States",
+      "language": "English, Hindi, Bengali",
+      "awards": "Nominated for 6 Oscars. 59 wins & 110 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The White Helmets",
+      "year": "2016",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "War"
+      ],
+      "director": "Orlando von Einsiedel",
+      "actor": "Dana Abed",
+      "actors": [
+        "Dana Abed",
+        "Tia Alkerdi",
+        "Khalid Farah"
+      ],
+      "plot": "As daily airstrikes pound civilian targets in Syria, a group of indomitable first responders risk their lives to rescue victims from the rubble.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjVlNzYxMmUtNzY0OS00OGQzLTk5ODctN2UyNTdmZTEwYTQ5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt6073176",
+      "imdbID": "tt6073176",
+      "imdbRating": 7.5,
+      "imdbVotes": 8339,
+      "runtime": "41 min",
+      "rated": "TV-14",
+      "country": "United Kingdom",
+      "language": "Arabic, English",
+      "awards": "Won 1 Oscar. 5 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Salesman",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Asghar Farhadi",
+      "actor": "Shahab Hosseini",
+      "actors": [
+        "Shahab Hosseini",
+        "Taraneh Alidoosti",
+        "Mina Sadati"
+      ],
+      "plot": "While Ranaa and Emad, a married couple, are participating in a production of \"Death of a Salesman,\" she is assaulted in their new home, which leaves him determined to find the perpetrator over his wife's traumatized objections.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg2MTc0ODEwOV5BMl5BanBnXkFtZTgwNDAyOTY1MDI@._V1_SX300.jpg",
+      "posterId": "tt5186714",
+      "imdbID": "tt5186714",
+      "imdbRating": 7.7,
+      "imdbVotes": 66807,
+      "runtime": "124 min",
+      "rated": "PG-13",
+      "country": "Iran, France, Qatar, United States",
+      "language": "Persian, English",
+      "awards": "Won 1 Oscar. 17 wins & 32 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Jungle Book",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Jon Favreau",
+      "actor": "Neel Sethi",
+      "actors": [
+        "Neel Sethi",
+        "Bill Murray",
+        "Ben Kingsley"
+      ],
+      "plot": "After a threat from the tiger Shere Khan forces him to flee the jungle, a man-cub named Mowgli embarks on a journey of self discovery with the help of panther Bagheera and free-spirited bear Baloo.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc3NTUzNTI4MV5BMl5BanBnXkFtZTgwNjU0NjU5NzE@._V1_SX300.jpg",
+      "posterId": "tt3040964",
+      "imdbID": "tt3040964",
+      "imdbRating": 7.3,
+      "imdbVotes": 304379,
+      "runtime": "106 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States, New Zealand, France, Canada, India",
+      "language": "English",
+      "awards": "Won 1 Oscar. 33 wins & 56 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sing",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "director": "Garth Jennings, Christophe Lourdelet",
+      "actor": "Matthew McConaughey",
+      "actors": [
+        "Matthew McConaughey",
+        "Reese Witherspoon",
+        "Seth MacFarlane"
+      ],
+      "plot": "In a city of humanoid animals, a hustling theater impresario's attempt to save his theater with a singing competition becomes grander than he anticipates even as its finalists find that their lives will never be the same.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYzODYzODU2Ml5BMl5BanBnXkFtZTgwNTc1MTA2NzE@._V1_SX300.jpg",
+      "posterId": "tt3470600",
+      "imdbID": "tt3470600",
+      "imdbRating": 7.1,
+      "imdbVotes": 210521,
+      "runtime": "108 min",
+      "rated": "PG",
+      "country": "Japan, United States",
+      "language": "English, Japanese",
+      "awards": "3 wins & 25 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Piper",
+      "year": "2016",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Family"
+      ],
+      "director": "Alan Barillaro",
+      "actor": "Bui Quoc Huy Steve",
+      "actors": [
+        "Bui Quoc Huy Steve"
+      ],
+      "plot": "A hungry sandpiper hatchling ventures from her nest for the first time to dig for food by the shoreline. The problem is, the food is buried in the sand where scary waves roll up.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDU1ZTYwNmYtNjM1Zi00NTlkLWI5ZmQtNjM2OWM0ZTMxYTFlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5613056",
+      "imdbID": "tt5613056",
+      "imdbRating": 8.3,
+      "imdbVotes": 33637,
+      "runtime": "6 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "None",
+      "awards": "Won 1 Oscar. 2 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "O.J.: Made in America",
+      "year": "2016",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Crime"
+      ],
+      "director": "Ezra Edelman",
+      "actor": "Willie Brown",
+      "actors": [
+        "Willie Brown",
+        "Harry Edwards",
+        "John McKay"
+      ],
+      "plot": "A chronicle of the rise and fall of O.J. Simpson, whose high-profile murder trial exposed the extent of American racial tensions, revealing a fractured and divided nation.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGY0NWIxNTEtYzVhOS00ZWY1LTkyNTctODBkMDBlMjI0YTI4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5275892",
+      "imdbID": "tt5275892",
+      "imdbRating": 8.9,
+      "imdbVotes": 23775,
+      "runtime": "467 min",
+      "rated": "TV-MA",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 49 wins & 35 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fantastic Beasts and Where to Find Them",
+      "year": "2016",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Family",
+        "Fantasy"
+      ],
+      "director": "David Yates",
+      "actor": "Eddie Redmayne",
+      "actors": [
+        "Eddie Redmayne",
+        "Katherine Waterston",
+        "Alison Sudol"
+      ],
+      "plot": "In 1926, magizoologist Newt Scamander arrives in New York during his worldwide tour to research and rescue magical creatures as something mysterious leaves trails of destruction in the city, threatening to expose the wizarding world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjMxOTM1OTI4MV5BMl5BanBnXkFtZTgwODE5OTYxMDI@._V1_SX300.jpg",
+      "posterId": "tt3183660",
+      "imdbID": "tt3183660",
+      "imdbRating": 7.2,
+      "imdbVotes": 537711,
+      "runtime": "132 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, Central Khmer",
+      "awards": "Won 1 Oscar. 15 wins & 54 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fences",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Denzel Washington",
+      "actor": "Denzel Washington",
+      "actors": [
+        "Denzel Washington",
+        "Viola Davis",
+        "Stephen McKinley Henderson"
+      ],
+      "plot": "A working-class African-American father tries to raise his family in the 1950s, while coming to terms with the events of his life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTg0Nzc1NjA0MV5BMl5BanBnXkFtZTgwNTcyNDQ0MDI@._V1_SX300.jpg",
+      "posterId": "tt2671706",
+      "imdbID": "tt2671706",
+      "imdbRating": 7.2,
+      "imdbVotes": 122477,
+      "runtime": "139 min",
+      "rated": "PG-13",
+      "country": "United States, Canada",
+      "language": "English",
+      "awards": "Won 1 Oscar. 60 wins & 122 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Arrival",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Sci-Fi"
+      ],
+      "director": "Denis Villeneuve",
+      "actor": "Amy Adams",
+      "actors": [
+        "Amy Adams",
+        "Jeremy Renner",
+        "Forest Whitaker"
+      ],
+      "plot": "Linguist Louise Banks leads a team of investigators when gigantic spaceships touch down around the world. As nations teeter on the verge of global war, Banks and her crew must find a way to communicate with the extraterrestrial vi...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTExMzU0ODcxNDheQTJeQWpwZ15BbWU4MDE1OTI4MzAy._V1_SX300.jpg",
+      "posterId": "tt2543164",
+      "imdbID": "tt2543164",
+      "imdbRating": 7.9,
+      "imdbVotes": 852057,
+      "runtime": "116 min",
+      "rated": "PG-13",
+      "country": "Canada, United States",
+      "language": "English, Mandarin, Russian",
+      "awards": "Won 1 Oscar. 71 wins & 268 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Manchester by the Sea",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Kenneth Lonergan",
+      "actor": "Casey Affleck",
+      "actors": [
+        "Casey Affleck",
+        "Michelle Williams",
+        "Kyle Chandler"
+      ],
+      "plot": "A depressed uncle is asked to take care of his teenage nephew after the boy's father dies.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYxMjk0NDg4Ml5BMl5BanBnXkFtZTgwODcyNjA5OTE@._V1_SX300.jpg",
+      "posterId": "tt4034228",
+      "imdbID": "tt4034228",
+      "imdbRating": 7.8,
+      "imdbVotes": 352390,
+      "runtime": "137 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 128 wins & 268 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hacksaw Ridge",
+      "year": "2016",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Mel Gibson",
+      "actor": "Andrew Garfield",
+      "actors": [
+        "Andrew Garfield",
+        "Sam Worthington",
+        "Luke Bracey"
+      ],
+      "plot": "World War II American Army Medic Desmond T. Doss, serving during the Battle of Okinawa, refuses to kill people and becomes the first man in American history to receive the Medal of Honor without firing a shot.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjQ1NjM3MTUxNV5BMl5BanBnXkFtZTgwMDc5MTY5OTE@._V1_SX300.jpg",
+      "posterId": "tt2119532",
+      "imdbID": "tt2119532",
+      "imdbRating": 8.1,
+      "imdbVotes": 672364,
+      "runtime": "139 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Japanese",
+      "awards": "Won 2 Oscars. 57 wins & 115 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Moonlight",
+      "year": "2016",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Barry Jenkins",
+      "actor": "Mahershala Ali",
+      "actors": [
+        "Mahershala Ali",
+        "Naomie Harris",
+        "Trevante Rhodes"
+      ],
+      "plot": "A young African-American man grapples with his identity and sexuality while experiencing the everyday struggles of childhood, adolescence, and burgeoning adulthood.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzQxNTIyODAxMV5BMl5BanBnXkFtZTgwNzQyMDA3OTE@._V1_SX300.jpg",
+      "posterId": "tt4975722",
+      "imdbID": "tt4975722",
+      "imdbRating": 7.4,
+      "imdbVotes": 349429,
+      "runtime": "111 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 3 Oscars. 235 wins & 310 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Youth",
+      "year": "2015",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Music"
+      ],
+      "director": "Paolo Sorrentino",
+      "actor": "Michael Caine",
+      "actors": [
+        "Michael Caine",
+        "Harvey Keitel",
+        "Rachel Weisz"
+      ],
+      "plot": "Retired orchestra conductor Fred Ballinger is on vacation with his daughter Lena and his film director best friend Mick Boyle in the Alps when he receives an invitation from Queen Elizabeth II to perform for Prince Philip's birthday.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI2OTk5MzYyMl5BMl5BanBnXkFtZTgwMzY1MjE3NjE@._V1_SX300.jpg",
+      "posterId": "tt3312830",
+      "imdbID": "tt3312830",
+      "imdbRating": 7.3,
+      "imdbVotes": 87903,
+      "runtime": "124 min",
+      "rated": "R",
+      "country": "Italy, France, United Kingdom, Switzerland",
+      "language": "English, Spanish, Swiss German",
+      "awards": "Nominated for 1 Oscar. 24 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "World of Tomorrow",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Don Hertzfeldt",
+      "actor": "Julia Pott",
+      "actors": [
+        "Julia Pott",
+        "Winona Mae",
+        "Sara Cushman"
+      ],
+      "plot": "A little girl is taken on a mind-bending tour of her distant future.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2Y2Y2U3MDgtZmFkYi00YzRmLTllMDQtYTlmMjg3Nzc3MmE3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4171032",
+      "imdbID": "tt4171032",
+      "imdbRating": 8.1,
+      "imdbVotes": 10674,
+      "runtime": "17 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 27 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Winter on Fire: Ukraine's Fight for Freedom",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History"
+      ],
+      "director": "Evgeny Afineevsky",
+      "actor": "His Beatitude Sviatoslav",
+      "actors": [
+        "His Beatitude Sviatoslav",
+        "Said Ismagilov",
+        "Bishop Agapit"
+      ],
+      "plot": "A documentary on the unrest in Ukraine during 2013 and 2014, as student demonstrations supporting European integration grew into a violent revolution calling for the resignation of President Viktor F. Yanukovich.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTY4MDgwOTI3M15BMl5BanBnXkFtZTgwNjYxMjU3NjE@._V1_SX300.jpg",
+      "posterId": "tt4908644",
+      "imdbID": "tt4908644",
+      "imdbRating": 8.3,
+      "imdbVotes": 21234,
+      "runtime": "102 min",
+      "rated": "Not Rated",
+      "country": "United Kingdom, Ukraine, United States",
+      "language": "Ukrainian, Russian, English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "When Marnie Was There",
+      "year": "2014",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Drama",
+        "Family"
+      ],
+      "director": "Hiromasa Yonebayashi",
+      "actor": "Sara Takatsuki",
+      "actors": [
+        "Sara Takatsuki",
+        "Kasumi Arimura",
+        "Nanako Matsushima"
+      ],
+      "plot": "Anna, a shy 12-year-old girl, is sent to spend time with her aunt and uncle who live in the countryside, where she meets Marnie. The two become best friends. But Anna gradually discovers that Marnie is not quite who she appears to...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjc4MDI2ZGUtOGZkNS00ZDFiLTllYTYtNGRmZDgxN2FiMjUzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3398268",
+      "imdbID": "tt3398268",
+      "imdbRating": 7.6,
+      "imdbVotes": 54089,
+      "runtime": "103 min",
+      "rated": "PG",
+      "country": "Japan",
+      "language": "Japanese",
+      "awards": "Nominated for 1 Oscar. 4 wins & 18 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "What Happened, Miss Simone?",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Music"
+      ],
+      "director": "Liz Garbus",
+      "actor": "Nina Simone",
+      "actors": [
+        "Nina Simone",
+        "Lisa Simone Kelly",
+        "Roger Nupie"
+      ],
+      "plot": "A documentary about the life and legend Nina Simone, an American singer, pianist, and civil rights activist labeled the \"High Priestess of Soul.\"",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGNmNTdiM2YtMDkyZC00OGFhLTgwNTktMDczODFjM2Y0MDVjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4284010",
+      "imdbID": "tt4284010",
+      "imdbRating": 7.6,
+      "imdbVotes": 14993,
+      "runtime": "101 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 7 wins & 19 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "We Can't Live Without Cosmos",
+      "year": "2014",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Konstantin Bronzit",
+      "actor": null,
+      "actors": [],
+      "plot": "Two cosmonauts, two friends, try to do their best in their everyday training life to make their common dream a reality. But this story is not only about the dream.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzBjZDljZGQtYWY5Ny00MGY0LWJiM2ItZjY5NGE3NGQwZmZiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3965660",
+      "imdbID": "tt3965660",
+      "imdbRating": 7.6,
+      "imdbVotes": 2105,
+      "runtime": "16 min",
+      "rated": null,
+      "country": "Russia",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 22 wins & 11 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Trumbo",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Jay Roach",
+      "actor": "Bryan Cranston",
+      "actors": [
+        "Bryan Cranston",
+        "Diane Lane",
+        "Helen Mirren"
+      ],
+      "plot": "In 1947, Dalton Trumbo was Hollywood's top screenwriter, until he and other artists were jailed and blacklisted for their political beliefs.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjM1MDc2OTQ3NV5BMl5BanBnXkFtZTgwNzQ0NjQ1NjE@._V1_SX300.jpg",
+      "posterId": "tt3203606",
+      "imdbID": "tt3203606",
+      "imdbRating": 7.4,
+      "imdbVotes": 86358,
+      "runtime": "124 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 8 wins & 45 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Theeb",
+      "year": "2014",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Naji Abu Nowar",
+      "actor": "Jacir Eid Al-Hwietat",
+      "actors": [
+        "Jacir Eid Al-Hwietat",
+        "Hussein Salameh Al-Sweilhiyeen",
+        "Hassan Mutlag Al-Maraiyeh"
+      ],
+      "plot": "In the Ottoman province of Hijaz during World War I, a young Bedouin boy experiences a greatly hastened coming-of-age as he embarks on a perilous desert journey to guide a British officer to his secret destination.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmFkYjIxMWQtNDM0Ni00MWQ2LTkzZGMtNjk4ODlkY2Q4OWQyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3170902",
+      "imdbID": "tt3170902",
+      "imdbRating": 7.2,
+      "imdbVotes": 11706,
+      "runtime": "100 min",
+      "rated": "Not Rated",
+      "country": "Jordan, United Kingdom, Qatar, United Arab Emirates",
+      "language": "Arabic, English, Turkish",
+      "awards": "Nominated for 1 Oscar. 10 wins & 17 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Look of Silence",
+      "year": "2014",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "History"
+      ],
+      "director": "Joshua Oppenheimer",
+      "actor": "Adi Rukun",
+      "actors": [
+        "Adi Rukun",
+        "M.Y. Basrun",
+        "Volker Hanisch"
+      ],
+      "plot": "A family that survived the genocide in Indonesia confronts the men who killed one of their brothers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTMwMjI4MjQ3MF5BMl5BanBnXkFtZTgwMjkwOTM2NTE@._V1_SX300.jpg",
+      "posterId": "tt3521134",
+      "imdbID": "tt3521134",
+      "imdbRating": 8.2,
+      "imdbVotes": 14716,
+      "runtime": "103 min",
+      "rated": "PG-13",
+      "country": "Denmark, Indonesia, Finland, Norway, United Kingdom, Israel, France, United States, Germany, Netherlands",
+      "language": "Indonesian",
+      "awards": "Nominated for 1 Oscar. 48 wins & 45 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Hunting Ground",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Kirby Dick",
+      "actor": "Andrea Pino",
+      "actors": [
+        "Andrea Pino",
+        "Annie Clark",
+        "Claire Potter"
+      ],
+      "plot": "An exposé of rape crimes on U.S. college campuses, their institutional cover-ups, and the devastating toll they take on students and their families.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjc4Mjk3ODgxMl5BMl5BanBnXkFtZTgwMjc3OTQ1NDE@._V1_SX300.jpg",
+      "posterId": "tt4185572",
+      "imdbID": "tt4185572",
+      "imdbRating": 7.4,
+      "imdbVotes": 6519,
+      "runtime": "103 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 8 wins & 23 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Straight Outta Compton",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "F. Gary Gray",
+      "actor": "O'Shea Jackson Jr.",
+      "actors": [
+        "O'Shea Jackson Jr.",
+        "Corey Hawkins",
+        "Jason Mitchell"
+      ],
+      "plot": "The rap group NWA emerges from the mean streets of Compton in the mid-1980s and revolutionizes hip-hop culture with their music and tales about life in the hood.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTA5MzkyMzIxNjJeQTJeQWpwZ15BbWU4MDU0MDk0OTUx._V1_SX300.jpg",
+      "posterId": "tt1398426",
+      "imdbID": "tt1398426",
+      "imdbRating": 7.8,
+      "imdbVotes": 232617,
+      "runtime": "147 min",
+      "rated": "R",
+      "country": "United States, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 28 wins & 40 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Shok",
+      "year": "2015",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "History"
+      ],
+      "director": "Jamie Donoughue",
+      "actor": "Lum Veseli",
+      "actors": [
+        "Lum Veseli",
+        "Andi Bajgora",
+        "Melihate Qena"
+      ],
+      "plot": "The friendship of two boys is tested to its limits as they battle for survival during the Kosovo war.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUwMjU5NDQyOV5BMl5BanBnXkFtZTgwNjIzNjg5NDE@._V1_SX300.jpg",
+      "posterId": "tt4273570",
+      "imdbID": "tt4273570",
+      "imdbRating": 7.9,
+      "imdbVotes": 2848,
+      "runtime": "21 min",
+      "rated": null,
+      "country": "United Kingdom, Kosovo",
+      "language": "Albanian, Serbian",
+      "awards": "Nominated for 1 Oscar. 18 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Shaun the Sheep Movie",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Mark Burton, Richard Starzak",
+      "actor": "Justin Fletcher",
+      "actors": [
+        "Justin Fletcher",
+        "John Sparkes",
+        "Omid Djalili"
+      ],
+      "plot": "When Shaun decides to take the day off and have some fun, he gets a little more action than he bargained for. A mix up with the Farmer, a caravan and a very steep hill lead them all to the Big City and it's up to Shaun and the flo...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTc1ODY5MTQ1Nl5BMl5BanBnXkFtZTgwMDM5ODI1NjE@._V1_SX300.jpg",
+      "posterId": "tt2872750",
+      "imdbID": "tt2872750",
+      "imdbRating": 7.3,
+      "imdbVotes": 46480,
+      "runtime": "85 min",
+      "rated": "PG",
+      "country": "United Kingdom, France",
+      "language": "None, English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 49 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sanjay's Super Team",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Action"
+      ],
+      "director": "Sanjay Patel",
+      "actor": "Brent Schraff",
+      "actors": [
+        "Brent Schraff",
+        "Sunny Singh Attar",
+        "Arun Rao"
+      ],
+      "plot": "Sanjay loves cartoons and comics, while his father tries to draw him into his Hindu traditions. Reluctance turns into awe-inspiring adventure as the boy embarks on an amazing journey, returning with a new perspective they can both...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzYwZGU5ZTUtOWJlZS00ODU4LWJkOGQtOGE0MTFhYzA2NWUwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4661600",
+      "imdbID": "tt4661600",
+      "imdbRating": 6.8,
+      "imdbVotes": 5813,
+      "runtime": "7 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Racing Extinction",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Adventure",
+        "News"
+      ],
+      "director": "Louie Psihoyos",
+      "actor": "Elon Musk",
+      "actors": [
+        "Elon Musk",
+        "Joel Sartore",
+        "Louie Psihoyos"
+      ],
+      "plot": "Follows undercover activists trying to stave off a man-made mass extinction.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQyNTk0ODU5Ml5BMl5BanBnXkFtZTgwMTc2NzA0NDE@._V1_SX300.jpg",
+      "posterId": "tt1618448",
+      "imdbID": "tt1618448",
+      "imdbRating": 8.2,
+      "imdbVotes": 8430,
+      "runtime": "90 min",
+      "rated": "Not Rated",
+      "country": "United States, China, Hong Kong, Indonesia, Mexico, United Kingdom, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Prologue",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short"
+      ],
+      "director": "Richard Williams",
+      "actor": null,
+      "actors": [],
+      "plot": "Taking place 2,400 years in the past, Prologue depicts a brutal battle between two teams of Spartan and Athenian warriors.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDM2YTFjOTMtOWU5MC00MDMyLTk1MjAtYTJlOGM1MWFkNzNlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4955294",
+      "imdbID": "tt4955294",
+      "imdbRating": 6.5,
+      "imdbVotes": 1296,
+      "runtime": "6 min",
+      "rated": "TV-MA",
+      "country": "United Kingdom",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mustang",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Deniz Gamze Ergüven",
+      "actor": "Günes Sensoy",
+      "actors": [
+        "Günes Sensoy",
+        "Doga Zeynep Doguslu",
+        "Tugba Sunguroglu"
+      ],
+      "plot": "When five orphan girls are seen innocently playing with boys on a beach, their scandalized conservative guardians confine them while forced marriages are arranged.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkwODUzODA0OV5BMl5BanBnXkFtZTgwMTA3ODkxNzE@._V1_SX300.jpg",
+      "posterId": "tt3966404",
+      "imdbID": "tt3966404",
+      "imdbRating": 7.6,
+      "imdbVotes": 42339,
+      "runtime": "97 min",
+      "rated": "PG-13",
+      "country": "France, Germany, Turkey, Qatar",
+      "language": "Turkish",
+      "awards": "Nominated for 1 Oscar. 46 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Joy",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "David O. Russell",
+      "actor": "Jennifer Lawrence",
+      "actors": [
+        "Jennifer Lawrence",
+        "Robert De Niro",
+        "Bradley Cooper"
+      ],
+      "plot": "Joy is the story of the title character, who rose to become founder and matriarch of a powerful family business dynasty.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmEyMWJiNzMtZjU3Mi00YzBjLTk3ZDgtMDZkYWVjNmZjMjQ3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2446980",
+      "imdbID": "tt2446980",
+      "imdbRating": 6.6,
+      "imdbVotes": 149748,
+      "runtime": "124 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Spanish, French",
+      "awards": "Nominated for 1 Oscar. 8 wins & 23 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Everything Will Be Okay",
+      "year": "2015",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Patrick Vollrath",
+      "actor": "Simon Schwarz",
+      "actors": [
+        "Simon Schwarz",
+        "Julia Pointner",
+        "Marion Rottenhofer"
+      ],
+      "plot": "A divorced father picks up his eight-year-old daughter Lea. It seems pretty much like every second weekend, but after a while Lea can't help feeling that something isn't right. So begins a fateful journey.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0MzkxMDEzNV5BMl5BanBnXkFtZTgwNTE5MDkxNjE@._V1_SX300.jpg",
+      "posterId": "tt4324518",
+      "imdbID": "tt4324518",
+      "imdbRating": 7.4,
+      "imdbVotes": 1440,
+      "runtime": "30 min",
+      "rated": null,
+      "country": "Germany, Austria",
+      "language": "German",
+      "awards": "Nominated for 1 Oscar. 26 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Embrace of the Serpent",
+      "year": "2015",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Ciro Guerra",
+      "actor": "Nilbio Torres",
+      "actors": [
+        "Nilbio Torres",
+        "Jan Bijvoet",
+        "Antonio Bolívar"
+      ],
+      "plot": "The story of the relationship between Karamakate, an Amazonian shaman and last survivor of his people, and two scientists who work together over the course of forty years to search the Amazon for a sacred healing plant.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIwNjA0NzM3Ml5BMl5BanBnXkFtZTgwNjU4NTQ0NzE@._V1_SX300.jpg",
+      "posterId": "tt4285496",
+      "imdbID": "tt4285496",
+      "imdbRating": 7.8,
+      "imdbVotes": 25201,
+      "runtime": "125 min",
+      "rated": "Not Rated",
+      "country": "Colombia, Mexico, Venezuela, Argentina, Spain, Netherlands",
+      "language": "Spanish, Portuguese, Aboriginal, German, Catalan, Latin, English",
+      "awards": "Nominated for 1 Oscar. 46 wins & 32 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Creed",
+      "year": "2015",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "Sport"
+      ],
+      "director": "Ryan Coogler",
+      "actor": "Michael B. Jordan",
+      "actors": [
+        "Michael B. Jordan",
+        "Sylvester Stallone",
+        "Tessa Thompson"
+      ],
+      "plot": "The former World Heavyweight Champion Rocky Balboa serves as a trainer and mentor to Adonis Johnson, the son of his late friend and former rival Apollo Creed.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWM3NjY2ZDctMGZiYy00OGFlLThkMTktOTY2MDM2YjE2OTliXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3076658",
+      "imdbID": "tt3076658",
+      "imdbRating": 7.6,
+      "imdbVotes": 330457,
+      "runtime": "133 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 45 wins & 66 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Cinderella",
+      "year": "2015",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Family"
+      ],
+      "director": "Kenneth Branagh",
+      "actor": "Lily James",
+      "actors": [
+        "Lily James",
+        "Cate Blanchett",
+        "Richard Madden"
+      ],
+      "plot": "When her father unexpectedly dies, young Ella finds herself at the mercy of her cruel stepmother and her scheming stepsisters. Never one to give up hope, Ella's fortunes begin to change after meeting a dashing stranger.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjMxODYyODEzN15BMl5BanBnXkFtZTgwMDk4OTU0MzE@._V1_SX300.jpg",
+      "posterId": "tt1661199",
+      "imdbID": "tt1661199",
+      "imdbRating": 6.9,
+      "imdbVotes": 204139,
+      "runtime": "105 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States, Denmark, Canada, Italy",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 10 wins & 40 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Cartel Land",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Matthew Heineman",
+      "actor": "Tim Foley",
+      "actors": [
+        "Tim Foley",
+        "José Manuel 'El Doctor' Mireles",
+        "Paco Valencia"
+      ],
+      "plot": "Filmmaker Matthew Heineman examines the state of the ongoing drug problem along the U.S.-Mexican border.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE1MzI2MzcxOV5BMl5BanBnXkFtZTgwNTE2Mjk4NTE@._V1_SX300.jpg",
+      "posterId": "tt4126304",
+      "imdbID": "tt4126304",
+      "imdbRating": 7.3,
+      "imdbVotes": 19142,
+      "runtime": "100 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "Spanish, English",
+      "awards": "Nominated for 1 Oscar. 19 wins & 38 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Boy and the World",
+      "year": "2013",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Family"
+      ],
+      "director": "Alê Abreu",
+      "actor": "Vinicius Garcia",
+      "actors": [
+        "Vinicius Garcia",
+        "Marco Aurélio Campos",
+        "Lu Horta"
+      ],
+      "plot": "A little boy goes on an adventurous quest in search of his father.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY4MTAwODg1NF5BMl5BanBnXkFtZTgwMTUyMDQyNzE@._V1_SX300.jpg",
+      "posterId": "tt3183630",
+      "imdbID": "tt3183630",
+      "imdbRating": 7.5,
+      "imdbVotes": 8057,
+      "runtime": "80 min",
+      "rated": "PG",
+      "country": "Brazil",
+      "language": "Portuguese",
+      "awards": "Nominated for 1 Oscar. 16 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ave Maria",
+      "year": "2015",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy"
+      ],
+      "director": "Basil Khalil",
+      "actor": "Maria Zreik",
+      "actors": [
+        "Maria Zreik",
+        "Huda Al Imam",
+        "Shady Srour"
+      ],
+      "plot": "The silent routine of 5 Nuns living in the West Bank wilderness is disturbed when an Israeli settler family breaks down right outside the convent just as the Sabbath comes into effect.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWRmOTc0YzAtOTYwZi00ODA0LTgwMTItNTgzNmE2ZGIxMTIzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt4419794",
+      "imdbID": "tt4419794",
+      "imdbRating": 6.5,
+      "imdbVotes": 1435,
+      "runtime": "15 min",
+      "rated": null,
+      "country": "Occupied Palestinian Territory, France, Germany",
+      "language": "Arabic, English, Hebrew",
+      "awards": "Nominated for 1 Oscar. 13 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Anomalisa",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Duke Johnson, Charlie Kaufman",
+      "actor": "David Thewlis",
+      "actors": [
+        "David Thewlis",
+        "Jennifer Jason Leigh",
+        "Tom Noonan"
+      ],
+      "plot": "A man crippled by the mundanity of his life experiences something out of the ordinary.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkyMzI2MzQ1N15BMl5BanBnXkFtZTgwNDg0MzQxNzE@._V1_SX300.jpg",
+      "posterId": "tt2401878",
+      "imdbID": "tt2401878",
+      "imdbRating": 7.2,
+      "imdbVotes": 78512,
+      "runtime": "90 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English, Italian, Japanese",
+      "awards": "Nominated for 1 Oscar. 24 wins & 79 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A War",
+      "year": "2015",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Tobias Lindholm",
+      "actor": "Pilou Asbæk",
+      "actors": [
+        "Pilou Asbæk",
+        "Tuva Novotny",
+        "Søren Malling"
+      ],
+      "plot": "During contact with the Taliban in Afghanistan a Danish commander makes a decision which saves many of his men's lives but inadvertently takes the lives of some Afghani civilians. Now he is facing criminal charges.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA1ODY3NjQzNV5BMl5BanBnXkFtZTgwNjEzNTUxNzE@._V1_SX300.jpg",
+      "posterId": "tt3830162",
+      "imdbID": "tt3830162",
+      "imdbRating": 7,
+      "imdbVotes": 11613,
+      "runtime": "115 min",
+      "rated": "R",
+      "country": "Denmark, France",
+      "language": "Danish, Arabic, English",
+      "awards": "Nominated for 1 Oscar. 8 wins & 26 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "45 Years",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Andrew Haigh",
+      "actor": "Charlotte Rampling",
+      "actors": [
+        "Charlotte Rampling",
+        "Tom Courtenay",
+        "Geraldine James"
+      ],
+      "plot": "A married couple preparing to celebrate their wedding anniversary receives shattering news that promises to forever change the course of their lives.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTgxMTQ4NzMyN15BMl5BanBnXkFtZTgwODA0MTgyNzE@._V1_SX300.jpg",
+      "posterId": "tt3544082",
+      "imdbID": "tt3544082",
+      "imdbRating": 7.1,
+      "imdbVotes": 36550,
+      "runtime": "95 min",
+      "rated": "R",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 21 wins & 62 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Steve Jobs",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Danny Boyle",
+      "actor": "Michael Fassbender",
+      "actors": [
+        "Michael Fassbender",
+        "Kate Winslet",
+        "Seth Rogen"
+      ],
+      "plot": "Steve Jobs takes us behind the scenes of the digital revolution, to paint a portrait of the man at its epicenter. The story unfolds backstage at three iconic product launches, ending in 1998 with the unveiling of the iMac.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE0NTA2MTEwOV5BMl5BanBnXkFtZTgwNzg4NzU2NjE@._V1_SX300.jpg",
+      "posterId": "tt2080374",
+      "imdbID": "tt2080374",
+      "imdbRating": 7.2,
+      "imdbVotes": 186294,
+      "runtime": "122 min",
+      "rated": "R",
+      "country": "United Kingdom, Japan, United States",
+      "language": "English, Ukrainian",
+      "awards": "Nominated for 2 Oscars. 28 wins & 117 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sicario",
+      "year": "2015",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Denis Villeneuve",
+      "actor": "Emily Blunt",
+      "actors": [
+        "Emily Blunt",
+        "Josh Brolin",
+        "Benicio Del Toro"
+      ],
+      "plot": "An idealistic FBI agent is enlisted by a government task force to aid in the escalating war against drugs at the border area between the U.S. and Mexico.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA5NjM3NTk1M15BMl5BanBnXkFtZTgwMzg1MzU2NjE@._V1_SX300.jpg",
+      "posterId": "tt3397884",
+      "imdbID": "tt3397884",
+      "imdbRating": 7.7,
+      "imdbVotes": 527661,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "United States, Mexico, Hong Kong",
+      "language": "English, Spanish, Ukrainian",
+      "awards": "Nominated for 3 Oscars. 15 wins & 157 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Brooklyn",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "John Crowley",
+      "actor": "Saoirse Ronan",
+      "actors": [
+        "Saoirse Ronan",
+        "Emory Cohen",
+        "Domhnall Gleeson"
+      ],
+      "plot": "An Irish immigrant lands in 1950s Brooklyn, where she quickly falls into a romance with a local. When her past catches up with her, however, she must choose between two countries and the lives that exist within.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzE4MDk5NzEyOV5BMl5BanBnXkFtZTgwNDM4NDA3NjE@._V1_SX300.jpg",
+      "posterId": "tt2381111",
+      "imdbID": "tt2381111",
+      "imdbRating": 7.5,
+      "imdbVotes": 157845,
+      "runtime": "117 min",
+      "rated": "PG-13",
+      "country": "Ireland, United Kingdom, Canada, United States",
+      "language": "English, Latin, Irish Gaelic",
+      "awards": "Nominated for 3 Oscars. 38 wins & 161 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Star Wars: Episode VII - The Force Awakens",
+      "year": "2015",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "J.J. Abrams",
+      "actor": "Daisy Ridley",
+      "actors": [
+        "Daisy Ridley",
+        "John Boyega",
+        "Oscar Isaac"
+      ],
+      "plot": "As a new threat to the galaxy rises, Rey, a desert scavenger, and Finn, an ex-stormtrooper, must join Han Solo and Chewbacca to search for the one hope of restoring peace.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTAzODEzNDAzMl5BMl5BanBnXkFtZTgwMDU1MTgzNzE@._V1_SX300.jpg",
+      "posterId": "tt2488496",
+      "imdbID": "tt2488496",
+      "imdbRating": 7.7,
+      "imdbVotes": 1018738,
+      "runtime": "138 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 5 Oscars. 64 wins & 140 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Carol",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Todd Haynes",
+      "actor": "Cate Blanchett",
+      "actors": [
+        "Cate Blanchett",
+        "Rooney Mara",
+        "Sarah Paulson"
+      ],
+      "plot": "An aspiring photographer develops an intimate relationship with an older woman in 1950s New York.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTczNTQ4OTEyNV5BMl5BanBnXkFtZTgwNDgyMDI3NjE@._V1_SX300.jpg",
+      "posterId": "tt2402927",
+      "imdbID": "tt2402927",
+      "imdbRating": 7.3,
+      "imdbVotes": 152897,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "United Kingdom, France, Australia, United States",
+      "language": "English",
+      "awards": "Nominated for 6 Oscars. 76 wins & 255 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Martian",
+      "year": "2015",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Sci-Fi"
+      ],
+      "director": "Ridley Scott",
+      "actor": "Matt Damon",
+      "actors": [
+        "Matt Damon",
+        "Jessica Chastain",
+        "Kristen Wiig"
+      ],
+      "plot": "An astronaut becomes stranded on Mars after his team assumes him dead, and must rely on his ingenuity to find a way to signal to Earth that he is alive and can survive until a potential rescue.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc2MTQ3MDA1Nl5BMl5BanBnXkFtZTgwODA3OTI4NjE@._V1_SX300.jpg",
+      "posterId": "tt3659388",
+      "imdbID": "tt3659388",
+      "imdbRating": 8,
+      "imdbVotes": 999128,
+      "runtime": "144 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom, Hungary, Jordan",
+      "language": "English, Mandarin",
+      "awards": "Nominated for 7 Oscars. 40 wins & 199 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Stutterer",
+      "year": "2015",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Benjamin Cleary",
+      "actor": "Matthew Needham",
+      "actors": [
+        "Matthew Needham",
+        "Chloe Pirrie",
+        "Eric Richard"
+      ],
+      "plot": "A man whose lush inner thoughts are rendered mute by a crippling stutter feels isolated from the world despite a flourishing online relationship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUwNTA2NzUxNl5BMl5BanBnXkFtZTgwNzIzNjczNzE@._V1_SX300.jpg",
+      "posterId": "tt4817576",
+      "imdbID": "tt4817576",
+      "imdbRating": 7.7,
+      "imdbVotes": 3349,
+      "runtime": "12 min",
+      "rated": "PG",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 8 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Spectre",
+      "year": "2015",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Thriller"
+      ],
+      "director": "Sam Mendes",
+      "actor": "Daniel Craig",
+      "actors": [
+        "Daniel Craig",
+        "Christoph Waltz",
+        "Léa Seydoux"
+      ],
+      "plot": "A cryptic message from James Bond's past sends him on a trail to uncover the existence of a sinister organisation named SPECTRE. With a new threat dawning, Bond learns the terrible truth about the author of all his pain in his mos...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzA5MzFiNDAtYTI0NC00MDE5LTljYTctYTNkODk1OTZlODI5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2379713",
+      "imdbID": "tt2379713",
+      "imdbRating": 6.8,
+      "imdbVotes": 493010,
+      "runtime": "148 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States, Morocco, Italy, Austria, Canada, Mexico",
+      "language": "English, German, Italian, Spanish, French, Ukrainian",
+      "awards": "Won 1 Oscar. 8 wins & 37 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Son of Saul",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "War"
+      ],
+      "director": "László Nemes",
+      "actor": "Géza Röhrig",
+      "actors": [
+        "Géza Röhrig",
+        "Levente Molnár",
+        "Urs Rechn"
+      ],
+      "plot": "A Jewish-Hungarian concentration camp prisoner sets out to give a child he mistook for his son a proper burial.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTMwNTI0MDktNGJiYS00ZWQ0LTgyZDgtMzU2MjkzZTkxNDBhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3808342",
+      "imdbID": "tt3808342",
+      "imdbRating": 7.4,
+      "imdbVotes": 52784,
+      "runtime": "107 min",
+      "rated": "R",
+      "country": "Hungary, France",
+      "language": "Hungarian, Yiddish, German, Russian, Polish, French, Greek, Slovak, Hebrew",
+      "awards": "Won 1 Oscar. 65 wins & 61 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bear Story",
+      "year": "2014",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Adventure"
+      ],
+      "director": "Gabriel Osorio Vargas",
+      "actor": null,
+      "actors": [],
+      "plot": "An old, lonesome bear tells the story of his life through a mechanical diorama.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUxMDMyMTA0OV5BMl5BanBnXkFtZTgwNjU5MjE1NjE@._V1_SX300.jpg",
+      "posterId": "tt3829254",
+      "imdbID": "tt3829254",
+      "imdbRating": 7.7,
+      "imdbVotes": 3713,
+      "runtime": "11 min",
+      "rated": "G",
+      "country": "Chile",
+      "language": "None",
+      "awards": "Won 1 Oscar. 7 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Amy",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Music"
+      ],
+      "director": "Asif Kapadia",
+      "actor": "Amy Winehouse",
+      "actors": [
+        "Amy Winehouse",
+        "Mitch Winehouse",
+        "Mark Ronson"
+      ],
+      "plot": "Archival footage and personal testimonials present an intimate portrait of the life and career of British singer/songwriter Amy Winehouse.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1MzE4MTE3OF5BMl5BanBnXkFtZTgwOTcyNDM3NTE@._V1_SX300.jpg",
+      "posterId": "tt2870648",
+      "imdbID": "tt2870648",
+      "imdbRating": 7.8,
+      "imdbVotes": 56532,
+      "runtime": "128 min",
+      "rated": "R",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 51 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Girl in the River: The Price of Forgiveness",
+      "year": "2015",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "Drama"
+      ],
+      "director": "Sharmeen Obaid-Chinoy",
+      "actor": "Asad Jamal",
+      "actors": [
+        "Asad Jamal",
+        "Saba"
+      ],
+      "plot": "A woman in Pakistan sentenced to death for falling in love becomes a rare survivor of the country's harsh judicial system.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWFlYzc3MmEtNzc0Ni00ZjE3LThiZDUtMzlmMjgwZDZkNjcxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt5144072",
+      "imdbID": "tt5144072",
+      "imdbRating": 7.8,
+      "imdbVotes": 1916,
+      "runtime": "40 min",
+      "rated": "Not Rated",
+      "country": "United States, Pakistan",
+      "language": "Punjabi",
+      "awards": "Won 1 Oscar. 3 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Inside Out",
+      "year": "2015",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Pete Docter, Ronnie Del Carmen",
+      "actor": "Amy Poehler",
+      "actors": [
+        "Amy Poehler",
+        "Bill Hader",
+        "Lewis Black"
+      ],
+      "plot": "After young Riley is uprooted from her Midwest life and moved to San Francisco, her emotions, Joy, Fear, Anger, Disgust, and Sadness, conflict on how best to navigate a new city, house, and school.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTgxMDQwMDk0OF5BMl5BanBnXkFtZTgwNjU5OTg2NDE@._V1_SX300.jpg",
+      "posterId": "tt2096673",
+      "imdbID": "tt2096673",
+      "imdbRating": 8.1,
+      "imdbVotes": 905131,
+      "runtime": "95 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Portuguese, Latvian",
+      "awards": "Won 1 Oscar. 99 wins & 118 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ex Machina",
+      "year": "2014",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Sci-Fi",
+        "Thriller"
+      ],
+      "director": "Alex Garland",
+      "actor": "Alicia Vikander",
+      "actors": [
+        "Alicia Vikander",
+        "Domhnall Gleeson",
+        "Oscar Isaac"
+      ],
+      "plot": "A young programmer is selected to participate in a ground-breaking experiment in synthetic intelligence by evaluating the human qualities of a highly advanced humanoid A.I.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUxNzc0OTIxMV5BMl5BanBnXkFtZTgwNDI3NzU2NDE@._V1_SX300.jpg",
+      "posterId": "tt0470752",
+      "imdbID": "tt0470752",
+      "imdbRating": 7.7,
+      "imdbVotes": 633967,
+      "runtime": "108 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 74 wins & 162 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Hateful Eight",
+      "year": "2015",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "Quentin Tarantino",
+      "actor": "Samuel L. Jackson",
+      "actors": [
+        "Samuel L. Jackson",
+        "Kurt Russell",
+        "Jennifer Jason Leigh"
+      ],
+      "plot": "In the dead of a Wyoming winter, a bounty hunter and his prisoner find shelter in a cabin currently inhabited by a collection of nefarious characters.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA1MTc1NTg5NV5BMl5BanBnXkFtZTgwOTM2MDEzNzE@._V1_SX300.jpg",
+      "posterId": "tt3460252",
+      "imdbID": "tt3460252",
+      "imdbRating": 7.8,
+      "imdbVotes": 718072,
+      "runtime": "168 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish, French, Persian",
+      "awards": "Won 1 Oscar. 46 wins & 116 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Danish Girl",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Tom Hooper",
+      "actor": "Eddie Redmayne",
+      "actors": [
+        "Eddie Redmayne",
+        "Alicia Vikander",
+        "Amber Heard"
+      ],
+      "plot": "A love story loosely inspired by the lives of Danish artists Lili Elbe and Gerda Wegener. Lili and Gerda's marriage and work evolve as they navigate Lili's groundbreaking journey as a transgender pioneer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0NjA4NjE2Nl5BMl5BanBnXkFtZTgwNzIxNTY2NjE@._V1_SX300.jpg",
+      "posterId": "tt0810819",
+      "imdbID": "tt0810819",
+      "imdbRating": 7.1,
+      "imdbVotes": 204119,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United Kingdom, United States, Germany, Denmark, Belgium, Japan",
+      "language": "English, French, German, Ukrainian",
+      "awards": "Won 1 Oscar. 32 wins & 82 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Room",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Lenny Abrahamson",
+      "actor": "Brie Larson",
+      "actors": [
+        "Brie Larson",
+        "Jacob Tremblay",
+        "Sean Bridgers"
+      ],
+      "plot": "A little boy is held captive in a room with his mother since his birth, so he has never known the world outside.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE4NzgzNzEwMl5BMl5BanBnXkFtZTgwMTMzMDE0NjE@._V1_SX300.jpg",
+      "posterId": "tt3170832",
+      "imdbID": "tt3170832",
+      "imdbRating": 8.1,
+      "imdbVotes": 477769,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "Ireland, Canada, United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 108 wins & 143 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Big Short",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Adam McKay",
+      "actor": "Christian Bale",
+      "actors": [
+        "Christian Bale",
+        "Steve Carell",
+        "Ryan Gosling"
+      ],
+      "plot": "In 2006-2007 a group of investors bet against the United States mortgage market. In their research, they discover how flawed and corrupt the market is.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDZkNDQ3YjktYjBlZC00YTY1LTgxOGYtY2RhMWFhZmNkZGY3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1596363",
+      "imdbID": "tt1596363",
+      "imdbRating": 7.8,
+      "imdbVotes": 532875,
+      "runtime": "130 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 37 wins & 81 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bridge of Spies",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History",
+        "Thriller"
+      ],
+      "director": "Steven Spielberg",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Mark Rylance",
+        "Alan Alda"
+      ],
+      "plot": "During the Cold War, an American lawyer is recruited to defend an arrested Soviet spy in court, and then help the CIA facilitate an exchange of the spy for the Soviet captured American U2 spy plane pilot, Francis Gary Powers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIxOTI0MjU5NV5BMl5BanBnXkFtZTgwNzM4OTk4NTE@._V1_SX300.jpg",
+      "posterId": "tt3682448",
+      "imdbID": "tt3682448",
+      "imdbRating": 7.6,
+      "imdbVotes": 343045,
+      "runtime": "142 min",
+      "rated": "PG-13",
+      "country": "United States, India, Germany",
+      "language": "English, German, Russian",
+      "awards": "Won 1 Oscar. 30 wins & 105 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Revenant",
+      "year": "2015",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Western"
+      ],
+      "director": "Alejandro G. Iñárritu",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Tom Hardy",
+        "Will Poulter"
+      ],
+      "plot": "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTgwNmQzZDctMjNmOS00OTExLTkwM2UtNzJmOTJhODFjOTdlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1663202",
+      "imdbID": "tt1663202",
+      "imdbRating": 8,
+      "imdbVotes": 941249,
+      "runtime": "156 min",
+      "rated": "R",
+      "country": "United States, Hong Kong, Taiwan, Argentina",
+      "language": "English, Pawnee, French",
+      "awards": "Won 3 Oscars. 94 wins & 193 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mad Max: Fury Road",
+      "year": "2015",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "George Miller",
+      "actor": "Tom Hardy",
+      "actors": [
+        "Tom Hardy",
+        "Charlize Theron",
+        "Nicholas Hoult"
+      ],
+      "plot": "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners, a psychotic worshipper and a drifter named Max.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDRkODJhOTgtOTc1OC00NTgzLTk4NjItNDgxZDY4YjlmNDY2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1392190",
+      "imdbID": "tt1392190",
+      "imdbRating": 8.1,
+      "imdbVotes": 1198396,
+      "runtime": "120 min",
+      "rated": "R",
+      "country": "Australia, United States",
+      "language": "English, Russian",
+      "awards": "Won 6 Oscars. 245 wins & 234 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Spotlight",
+      "year": "2015",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Tom McCarthy",
+      "actor": "Mark Ruffalo",
+      "actors": [
+        "Mark Ruffalo",
+        "Michael Keaton",
+        "Rachel McAdams"
+      ],
+      "plot": "The true story of how the Boston Globe uncovered the massive scandal of child molestation and cover-up within the local Catholic Archdiocese, shaking the entire Catholic Church to its core.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIyOTM5OTIzNV5BMl5BanBnXkFtZTgwMDkzODE2NjE@._V1_SX300.jpg",
+      "posterId": "tt1895587",
+      "imdbID": "tt1895587",
+      "imdbRating": 8.1,
+      "imdbVotes": 529406,
+      "runtime": "129 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 124 wins & 145 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
       ],
       "ph": false,
       "source": "auto_candidates",
