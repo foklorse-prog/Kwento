@@ -4866,13 +4866,26 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       return true;
     });
   };
-  const buildFreshPool=(loc=null)=>sanitizePool(buildCatPool(
-    cat,data.logs,data.feedback,loc,data.libraryMovies||[],data.tasteSeed||[],data.discoverSkips||{},
-    {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
-    data.likedSuggestions||{},
-    watchlistKeys,
-    data.discoverSkipLastAt||{}
-  ));
+  const buildFreshPool=(loc=null)=>{
+    const buildWithMovies=(movies)=>sanitizePool(buildCatPool(
+      cat,data.logs,data.feedback,loc,movies||[],data.tasteSeed||[],data.discoverSkips||{},
+      {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
+      data.likedSuggestions||{},
+      watchlistKeys,
+      data.discoverSkipLastAt||{}
+    ));
+    let built=buildWithMovies(data.libraryMovies||[]);
+    if(cat==="movies"&&(!built||!built.length)){
+      try{
+        const raw=localStorage.getItem("kwento_shared_library_cache");
+        const cached=raw?JSON.parse(raw):[];
+        if(Array.isArray(cached)&&cached.length){
+          built=buildWithMovies(cached);
+        }
+      }catch(_){}
+    }
+    return built;
+  };
   const buildPremiumFallbackPool=()=>{
     if(cat!=="movies"||!data.betaMode) return [];
     const items=[...(data.libraryMovies||[])].filter(isActualMovieOrSeries);
@@ -5016,6 +5029,20 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       discoverDate:today,
     });
   },[cat,data.libraryMovies]);
+  useEffect(()=>{
+    if(cat!=="movies") return;
+    if(movieLockedByLimit) return;
+    if(displayItem) return;
+    const rebuilt=buildFreshPool();
+    if(!rebuilt.length) return;
+    setPool(rebuilt);
+    setPoolIdx(0);
+    onChange("__batch__",{
+      discoverQueues:{...(data.discoverQueues||{}),[cat]:rebuilt},
+      discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+      discoverDate:today,
+    });
+  },[cat,displayItem,movieLockedByLimit,data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems,data.libraryMovies]);
 
   // Background OMDB fetch for movie suggestions missing plot/poster
   const fetchingRef=useRef(null);
@@ -5195,24 +5222,64 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     // Liking also consumes one daily discover slot and advances to next movie.
     advanceSuggestion({recordSkip:false});
   };
-  const handleWatchlist=()=>{
+  const handleWatchlist=async ()=>{
     if(cat!=="movies"||!currentItem) return;
     const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
     if(!key) return;
     markInteracted(key);
     const existing=_normalizeWatchlistItems(data);
+    const fromLib=(data.libraryMovies||[]).find(m=>{
+      const mk=(m.imdbID||m.title||"").toLowerCase();
+      return mk&&mk===key;
+    })||null;
+    let fromCache=null;
+    if(!fromLib){
+      try{
+        const raw=localStorage.getItem("kwento_shared_library_cache");
+        const cached=raw?JSON.parse(raw):[];
+        if(Array.isArray(cached)){
+          fromCache=cached.find(m=>((m.imdbID||m.title||"").toLowerCase()===key))||null;
+        }
+      }catch(_){}
+    }
+    let src={...(fromCache||{}),...(fromLib||{}),...(currentItem||{})};
+    const posterIdGuess=src.posterId||src.imdbID||currentItem.posterId||currentItem.imdbID||`t_${_h((src.title||currentItem.title||""))}`;
+    if(!src.poster && posterIdGuess){
+      try{
+        const p=await idbGet("poster_"+posterIdGuess);
+        if(p) src={...src,poster:p};
+      }catch(_){}
+    }
+    if((!src.poster||!src.plot||!src.director||!src.actors||!src.imdbRating) && (src.title||currentItem.title)){
+      const meta=await fetchMovieMeta(src.title||currentItem.title,src.omdbType||null);
+      if(meta){
+        src={...src,...meta,posterId:posterIdGuess||meta.imdbID||`t_${_h((meta.title||src.title||currentItem.title||""))}`};
+      }
+    }
     const has=existing.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
     const next=has
       ?existing.filter(w=>((w.imdbID||w.title||"").toLowerCase()!==key))
       :[...existing,{
-        title:currentItem.title,
-        year:currentItem.year||null,
-        imdbID:currentItem.imdbID||null,
-        poster:currentItem.poster||null,
-        posterId:currentItem.posterId||currentItem.imdbID||`t_${_h(currentItem.title||"")}`,
-        genre:currentItem.genre||null,
-        director:currentItem.director||null,
-        tags:currentItem.tags||[]
+        title:src.title||currentItem.title,
+        year:src.year||currentItem.year||null,
+        imdbID:src.imdbID||currentItem.imdbID||null,
+        poster:src.poster||null,
+        posterId:src.posterId||src.imdbID||posterIdGuess||`t_${_h((src.title||currentItem.title||""))}`,
+        genre:src.genre||currentItem.genre||null,
+        director:src.director||currentItem.director||null,
+        genres:src.genres||[],
+        actor:src.actor||null,
+        actors:src.actors||[],
+        plot:src.plot||null,
+        imdbRating:src.imdbRating??null,
+        imdbVotes:src.imdbVotes??null,
+        runtime:src.runtime||null,
+        rated:src.rated||null,
+        country:src.country||null,
+        language:src.language||null,
+        awards:src.awards||null,
+        omdbType:src.omdbType||null,
+        tags:src.tags||currentItem.tags||[]
       }];
     const nextSkips={...(data.discoverSkips||{})};
     if(!has){
@@ -5228,9 +5295,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     });
     if(!has){
       setReminderMovie({
-        title:currentItem.title,
-        imdbID:currentItem.imdbID||null,
-        poster:currentItem.poster||null,
+        title:src.title||currentItem.title,
+        imdbID:src.imdbID||currentItem.imdbID||null,
+        poster:src.poster||currentItem.poster||null,
       });
     }
   };
@@ -8760,9 +8827,15 @@ function App(){
       // from being silently discarded when hydration completes.
       const all=await idbGetAll();
       const av=all["avatar"];
+      const hydratedLib=(d.libraryMovies||[]).map(m=>{
+        if(m.poster) return m;
+        if(!m.posterId) return m;
+        const p=all["poster_"+m.posterId];
+        return p?{...m,poster:p}:m;
+      });
       setData(prev=>({
         ...prev,
-        libraryMovies:d.libraryMovies??prev.libraryMovies,
+        libraryMovies:hydratedLib,
         omdbLastUpdated:d.omdbLastUpdated??prev.omdbLastUpdated,
         omdbCleanedAt:d.omdbCleanedAt??prev.omdbCleanedAt,
         customPhoto:av?av.data:prev.customPhoto,
@@ -8834,6 +8907,33 @@ function App(){
       setData(d=>({...d,offlinePosterCacheAt:new Date().toISOString()}));
     })();
   },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.discoverQueues]);
+  useEffect(()=>{
+    if(!photosReady) return;
+    (async()=>{
+      const items=_normalizeWatchlistItems(data);
+      if(!items.length) return;
+      const libByKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+      let changed=false;
+      const next=[];
+      for(const w of items){
+        const key=(w.imdbID||w.title||"").toLowerCase();
+        const lib=libByKey.get(key)||null;
+        let poster=w.poster||lib?.poster||null;
+        const posterId=w.posterId||lib?.posterId||w.imdbID||lib?.imdbID||`t_${_h((w.title||lib?.title||""))}`;
+        if(!poster && posterId){
+          try{
+            poster=await idbGet("poster_"+posterId);
+          }catch(_){}
+        }
+        const merged={...lib,...w,poster:poster||null,posterId};
+        if((merged.poster||"")!==(w.poster||"")||(merged.genre||"")!==(w.genre||"")||(merged.director||"")!==(w.director||"")) changed=true;
+        next.push(merged);
+      }
+      if(changed){
+        setData(d=>({...d,watchlist:next}));
+      }
+    })();
+  },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.libraryMovies]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
 
   // ── OMDB metadata hydration only (no discovery search) ────────────────────
@@ -8857,15 +8957,45 @@ function App(){
         const logs=[...(data.logs||[])];
         const updatedLogs=[...logs];
         let logsChanged=false;
+        const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+        const libByTitleYear=new Map();
+        (updatedLib||[]).forEach(m=>{
+          const tk=normTitle(m.title);
+          const yk=(m.year||"").toString().slice(0,4);
+          if(!tk) return;
+          const key=yk?`${tk}|${yk}`:tk;
+          if(!libByTitleYear.has(key)) libByTitleYear.set(key,m);
+          if(!libByTitleYear.has(tk)) libByTitleYear.set(tk,m);
+        });
         const missingLogs=logs
           .map((l,i)=>({l,i}))
           .filter(({l})=>
             l.category==="movies" &&
             !l.fromHealthKit &&
-            (!l.year || !l.genre || !l.director || !l.actor || !l.poster)
+            (!l.imdbID || !l.year || !l.genre || !l.director || !l.actor || !l.poster)
           )
           .slice(0,30);
         for(const {l,i} of missingLogs){
+          const tk=normTitle(l.title);
+          const yk=(l.year||"").toString().slice(0,4);
+          const key=yk?`${tk}|${yk}`:tk;
+          const fromLib=(libByTitleYear.get(key)||libByTitleYear.get(tk)||null);
+          if(fromLib){
+            updatedLogs[i]={
+              ...l,
+              imdbID:l.imdbID||fromLib.imdbID||null,
+              year:l.year||fromLib.year||null,
+              genre:l.genre||fromLib.genre||null,
+              genres:(l.genres&&l.genres.length)?l.genres:(fromLib.genres||[]),
+              director:l.director||fromLib.director||null,
+              actor:l.actor||fromLib.actor||null,
+              actors:(l.actors&&l.actors.length)?l.actors:(fromLib.actors||[]),
+              poster:l.poster||fromLib.poster||null,
+              posterId:l.posterId||fromLib.posterId||fromLib.imdbID||`t_${_h(fromLib.title||l.title||"")}`,
+            };
+            logsChanged=true;
+            if(updatedLogs[i].imdbID && updatedLogs[i].poster && updatedLogs[i].director && updatedLogs[i].genre) continue;
+          }
           const meta=await fetchMovieMeta(l.title,"movie");
           if(!meta) continue;
           updatedLogs[i]={...l,...meta};
