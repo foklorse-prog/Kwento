@@ -8470,10 +8470,35 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     setTimeout(()=>setRedeemMsg(""),3000);
   };
 
-  const handleSuggestion=()=>{
-    if(!suggText.trim())return;
-    if(isOffensive(suggText)){setMsg(t.offensive_blocked);setSuggText("");setTimeout(()=>setMsg(""),3000);return;}
-    setMsg(lang==="fil"?"Salamat sa iyong mungkahi! 🙏":"Thanks for the suggestion! 🙏");setSuggText("");setTimeout(()=>setMsg(""),3000);
+  const FEEDBACK_WEBAPP_URL="https://script.google.com/macros/s/AKfycbx-beQQasotN9xVQIHoEdiBrKFDGKoIP5b31lJJ3FWJmL_Kgkncm-ZzBtDJdSQ3Zohg/exec";
+  const handleSuggestion=async()=>{
+    const text=(suggText||"").trim();
+    if(!text) return;
+    if(isOffensive(text)){
+      setMsg(t.offensive_blocked);
+      setSuggText("");
+      setTimeout(()=>setMsg(""),3000);
+      return;
+    }
+    try{
+      await fetch(FEEDBACK_WEBAPP_URL,{
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          message:text,
+          source:"kwento_settings",
+          language:lang,
+          theme:data.theme||"",
+          createdAt:new Date().toISOString(),
+        }),
+      });
+      setMsg(lang==="fil"?"Salamat! Naipadala na ang mungkahi mo.":"Thanks! Your feedback was sent.");
+      setSuggText("");
+    }catch(e){
+      setMsg(lang==="fil"?"Hindi naipadala. Subukan ulit.":"Could not send right now. Please try again.");
+    }
+    setTimeout(()=>setMsg(""),3000);
   };
 
   return(
