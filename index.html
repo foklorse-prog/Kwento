@@ -1675,9 +1675,11 @@ function saveData(d){
 
 // ── Save photos to IndexedDB ──────────────────────────────────────────────────
 async function savePhotos(d){
-  // Avatar
+  // Avatar — only write if we actually have photo data.
+  // We never delete here because d.customPhoto may be null simply because
+  // hydration hasn't run yet, not because the user removed their photo.
+  // Deletion is handled explicitly in the UI when the user removes their photo.
   if(d.customPhoto) await idbSet("avatar",{data:d.customPhoto,pos:d.photoPos||{x:50,y:50,scale:1}});
-  else await idbDel("avatar");
   // Entry photos
   if(d.logs){
     for(const l of d.logs){
@@ -7169,7 +7171,13 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
   };
   const donePicker=()=>{
     const patch={avatar:pendingAvatar,customPhoto:pendingPhoto||null};
-    if(!pendingPhoto) patch.photoPos={x:50,y:50,scale:1};
+    if(!pendingPhoto){
+      patch.photoPos={x:50,y:50,scale:1};
+      // User explicitly removed their photo — delete from IDB now.
+      // This is the only legitimate time to delete the avatar from IDB.
+      // savePhotos never deletes, so we handle it explicitly here.
+      idbDel("avatar").catch(()=>{});
+    }
     if(pendingPhoto&&window._pdx!==undefined) patch._dx=!!window._pdx;
     onChange("__batch__",patch);
     setPickerOpen(false);
