@@ -8717,9 +8717,26 @@ function App(){
       }
       // One-time migration: move any photos still in localStorage → IDB
       await migratePhotosToIDB(d);
-      // Hydrate IDB photos into state
-      const hydrated=await hydratePhotos(d);
-      setData(prev=>({...prev,...hydrated}));
+      // Hydrate IDB photos into state.
+      // We merge carefully here: photos go onto whichever logs are currently
+      // in state (d.logs may have grown if the user logged something during
+      // the startup async window), rather than replacing logs wholesale with
+      // the hydrated snapshot. This prevents entries logged during startup
+      // from being silently discarded when hydration completes.
+      const all=await idbGetAll();
+      const av=all["avatar"];
+      setData(prev=>({
+        ...prev,
+        libraryMovies:d.libraryMovies??prev.libraryMovies,
+        omdbLastUpdated:d.omdbLastUpdated??prev.omdbLastUpdated,
+        omdbCleanedAt:d.omdbCleanedAt??prev.omdbCleanedAt,
+        customPhoto:av?av.data:prev.customPhoto,
+        photoPos:av?av.pos:prev.photoPos,
+        logs:prev.logs.map(l=>{
+          const photos=all["entry_"+l.id];
+          return photos?{...l,actPhotos:photos}:l;
+        }),
+      }));
       setPhotosReady(true);
     })();
   },[]);
@@ -8853,7 +8870,6 @@ function App(){
   const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage||showWatchedPage;
 
   useEffect(()=>{
-    if(!photosReady) return; // don't save until hydration is done
     saveData(data);
     savePhotos(data);
   },[data]);
