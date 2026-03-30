@@ -4764,7 +4764,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   return scored;
 }
 
-function curateSharedLibrary(sharedItems, logs, feedback, limit=1200){
+function curateSharedLibrary(sharedItems, logs, feedback){
   const tc = buildTagScore(logs.filter(l=>!l.fromHealthKit), feedback);
   const scored=(sharedItems||[]).map(i=>{
     let score=Math.random()*2;
@@ -4774,7 +4774,7 @@ function curateSharedLibrary(sharedItems, logs, feedback, limit=1200){
     if(i.ph) score+=1.5;
     return {...i,_shared:true,score};
   }).sort((a,b)=>b.score-a.score||Math.random()-0.5);
-  return scored.slice(0,limit).map(({score,...rest})=>rest);
+  return scored.map(({score,...rest})=>rest);
 }
 function buildRelevantLocalLibrary(curated, logs, existing){
   const loggedTitles=new Set((logs||[]).filter(l=>l.category==="movies").map(l=>(l.title||"").toLowerCase()));
@@ -4954,7 +4954,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   },[]);
   const hasSavedOnMount=useRef(!!(data.discoverQueues?.[cat]?.length));
   const suppressAutoRebuildUntilRef=useRef(0);
-  const movieLibSigRef=useRef("");
+  const movieLibSigRef=useRef(
+    (data.libraryMovies||[])
+      .map(m=>((m.imdbID||m.title||"").toLowerCase()))
+      .filter(Boolean)
+      .sort()
+      .join("|")
+  );
   useEffect(()=>{
     if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
@@ -4991,11 +4997,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   },[cat,pool]);
   useEffect(()=>{
     if(cat!=="movies") return;
+    const saved=data.discoverDate===today?(data.discoverQueues?.[cat]||[]):[];
     const sig=(data.libraryMovies||[])
       .map(m=>((m.imdbID||m.title||"").toLowerCase()))
       .filter(Boolean)
       .sort()
       .join("|");
+    if(saved.length){ movieLibSigRef.current=sig; return; }
     if(sig===movieLibSigRef.current) return;
     movieLibSigRef.current=sig;
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
@@ -8793,7 +8801,7 @@ function App(){
       const sharedItems=json?((json.items||json.library||json)||[]):fromCache();
       if(!sharedItems||!sharedItems.length) return;
       try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
-      const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,1200);
+      const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback);
       const token=_getGhToken();
       const existing=data.libraryMovies||[];
       if(token && !data.sharedSyncDone && existing.length){
