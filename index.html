@@ -4875,13 +4875,15 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       return true;
     });
   };
-  const buildFreshPool=(loc=null)=>{
+  const buildFreshPool=(loc=null,overrides={})=>{
+    const mergedDiscoverSkips={...(data.discoverSkips||{}),...(overrides.discoverSkips||{})};
+    const mergedSkipLastAt={...(data.discoverSkipLastAt||{}),...(overrides.skipLastAt||{})};
     const buildWithMovies=(movies)=>sanitizePool(buildCatPool(
-      cat,data.logs,data.feedback,loc,movies||[],data.tasteSeed||[],data.discoverSkips||{},
+      cat,data.logs,data.feedback,loc,movies||[],data.tasteSeed||[],mergedDiscoverSkips,
       {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
       data.likedSuggestions||{},
       watchlistKeys,
-      data.discoverSkipLastAt||{}
+      mergedSkipLastAt
     ));
     let built=buildWithMovies(data.libraryMovies||[]);
     if(cat==="movies"&&(!built||!built.length)){
@@ -5108,8 +5110,21 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const {recordSkip=false}=opts;
     if(!canGenerate) return false;
     suppressAutoRebuildUntilRef.current=Date.now()+800;
+    let optimisticSkips=null;
+    if(recordSkip&&cat==="movies"&&currentItem){
+      const ds={...(data.discoverSkips||{})};
+      const dl={...(data.discoverSkipLastAt||{})};
+      const k1=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+      const k2=normTitle(currentItem.title||"");
+      const keys=[...new Set([k1,k2].filter(Boolean))];
+      keys.forEach(k=>{
+        ds[k]=(ds[k]||0)+1;
+        dl[k]=new Date().toISOString();
+      });
+      optimisticSkips={discoverSkips:ds,skipLastAt:dl};
+    }
     if(!currentItem){
-      let rebuilt=buildFreshPool();
+      let rebuilt=buildFreshPool(null,optimisticSkips||{});
       if((!rebuilt||!rebuilt.length) && data.betaMode){
         rebuilt=buildPremiumFallbackPool();
       }
@@ -5125,7 +5140,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextPool=[...pool];
     const removeIdx=Math.min(poolIdx,Math.max(nextPool.length-1,0));
     if(nextPool.length) nextPool.splice(removeIdx,1);
-    let finalPool=nextPool.length?nextPool:buildFreshPool();
+    let finalPool=nextPool.length?nextPool:buildFreshPool(null,optimisticSkips||{});
     if((!finalPool||!finalPool.length) && data.betaMode){
       finalPool=buildPremiumFallbackPool();
     }
