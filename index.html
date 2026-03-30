@@ -1035,13 +1035,9 @@ function buildSuggestionQueue(logs, feedback, locationData=null, libraryMovies=[
   // Variety boosts — silently diversify if dominant pattern detected
   const varietyBoosts = getFoodVarietyBoosts(logs);
   cats.forEach(cat => {
-    let items = (LIBRARY[cat]||[]);
-    if(cat==="movies" && libraryMovies && libraryMovies.length){
-      const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
-      const dynTitles=new Set(dyn.map(m=>m.title.toLowerCase()));
-      const filtered=items.filter(i=>!dynTitles.has(i.title.toLowerCase()));
-      items=[...dyn,...filtered];
-    }
+    const items = cat==="movies"
+      ? ((libraryMovies||[]).map(m=>({...m,ph:!!m.ph})))
+      : (LIBRARY[cat]||[]);
     catPools[cat] = items.map(i => {
       // Base score: Filipino bias + randomness. Feedback intentionally not used.
       let score = (i.ph?8:0) + Math.random()*4;
@@ -2739,12 +2735,13 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
-      const pool=cat?(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})):
-        Object.entries(LIBRARY).flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
-      // Merge OMDB-fetched movies into the movie search pool
+      const pool=cat
+        ? ((cat==="movies")?[]:(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})))
+        : Object.entries(LIBRARY)
+            .filter(([cid])=>cid!=="movies")
+            .flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
+      // Movie search pool comes from shared/local movie library only.
   const dynMovies=(data.libraryMovies||[]).map(m=>({...m,_cat:"movies"}));
-  const libTitles=new Set((LIBRARY.movies||[]).map(m=>m.title.toLowerCase()));
-  const freshDyn=dynMovies.filter(m=>!libTitles.has(m.title.toLowerCase()));
   // Search fallback should also see shared JSON cache, even if item was not curated into local library.
   let sharedDyn=[];
   try{
@@ -2755,7 +2752,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
     }
   }catch(_){}
   const dedupeTitle=new Set();
-  const mergedMovies=[...freshDyn,...sharedDyn].filter(m=>{
+  const mergedMovies=[...dynMovies,...sharedDyn].filter(m=>{
     const k=(m.title||"").toLowerCase();
     if(!k||dedupeTitle.has(k)) return false;
     dedupeTitle.add(k);
@@ -4562,12 +4559,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       }))),
   ];
   const tc = buildTagScore(signalLogs, feedback);
-  let items = LIBRARY[cat]||[];
-  if(cat==="movies" && libraryMovies && libraryMovies.length){
-    const dyn=libraryMovies.map(m=>({...m,ph:!!m.ph}));
-    const dynTitles=new Set(dyn.map(m=>m.title.toLowerCase()));
-    items=[...dyn,...items.filter(i=>!dynTitles.has(i.title.toLowerCase()))];
-  }
+  let items = cat==="movies"
+    ? ((libraryMovies||[]).map(m=>({...m,ph:!!m.ph})))
+    : (LIBRARY[cat]||[]);
   if(cat==="movies"){
     items=items
       .filter(isActualMovieOrSeries)
@@ -4881,7 +4875,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   ));
   const buildPremiumFallbackPool=()=>{
     if(cat!=="movies"||!data.betaMode) return [];
-    const items=[...(data.libraryMovies||[]),...(LIBRARY.movies||[])].filter(isActualMovieOrSeries);
+    const items=[...(data.libraryMovies||[])].filter(isActualMovieOrSeries);
     const seen=new Set();
     const uniq=items.filter(i=>{
       const key=(i.imdbID||normTitle(i.title)||"").toLowerCase();
@@ -4959,17 +4953,22 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
   },[]);
   const hasSavedOnMount=useRef(!!(data.discoverQueues?.[cat]?.length));
+  const suppressAutoRebuildUntilRef=useRef(0);
+  const movieLibSigRef=useRef("");
   useEffect(()=>{
     if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
+    if(Date.now()<suppressAutoRebuildUntilRef.current) return;
     setPool(buildFreshPool());
-  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
+  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt]);
   useEffect(()=>{
+    if(Date.now()<suppressAutoRebuildUntilRef.current) return;
     const next=sanitizePool(pool);
     if(next.length===pool.length) return;
     setPool(next);
     setPoolIdx(i=>Math.min(i,Math.max(next.length-1,0)));
   },[data.logs,data.likedSuggestions,data.watchlist,data.watchlistMovies,data.watchlistItems]);
   useEffect(()=>{
+    if(Date.now()<suppressAutoRebuildUntilRef.current) return;
     if(!currentItem) return;
     const next=sanitizePool(pool);
     if(next.length===pool.length) return;
@@ -4990,6 +4989,25 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       discoverIndexes:{...(data.discoverIndexes||{}),[cat]:(data.discoverIndexes?.[cat]||poolIdx)}
     });
   },[cat,pool]);
+  useEffect(()=>{
+    if(cat!=="movies") return;
+    const sig=(data.libraryMovies||[])
+      .map(m=>((m.imdbID||m.title||"").toLowerCase()))
+      .filter(Boolean)
+      .sort()
+      .join("|");
+    if(sig===movieLibSigRef.current) return;
+    movieLibSigRef.current=sig;
+    if(Date.now()<suppressAutoRebuildUntilRef.current) return;
+    const rebuilt=buildFreshPool();
+    setPool(rebuilt);
+    setPoolIdx(0);
+    onChange("__batch__",{
+      discoverQueues:{...(data.discoverQueues||{}),[cat]:rebuilt},
+      discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+      discoverDate:today,
+    });
+  },[cat,data.libraryMovies]);
 
   // Background OMDB fetch for movie suggestions missing plot/poster
   const fetchingRef=useRef(null);
@@ -5047,6 +5065,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const advanceSuggestion=(opts={})=>{
     const {recordSkip=false}=opts;
     if(!canGenerate) return false;
+    suppressAutoRebuildUntilRef.current=Date.now()+800;
     if(!currentItem){
       let rebuilt=buildFreshPool();
       if((!rebuilt||!rebuilt.length) && data.betaMode){
@@ -8752,43 +8771,47 @@ function App(){
   // ── Shared global library (GitHub JSON) ────────────────────────────────────
   useEffect(()=>{
     (async()=>{
-      try{
-        const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
-        if(!res.ok) return;
-        const json=await res.json();
-        const sharedItems=(json.items||json.library||json)||[];
-        try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
-        const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,1200);
-        const token=_getGhToken();
-        const existing=data.libraryMovies||[];
-        if(token && !data.sharedSyncDone && existing.length){
-          for(const m of existing){
-            await queueSharedCandidateWithMeta(m,"local_migration");
+      const fromCache=()=>{
+        try{
+          const raw=localStorage.getItem("kwento_shared_library_cache");
+          if(!raw) return null;
+          const parsed=JSON.parse(raw)||[];
+          return Array.isArray(parsed)?parsed:[];
+        }catch(_){ return null; }
+      };
+      let json=null;
+      for(let i=0;i<3;i++){
+        try{
+          const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
+          if(res.ok){
+            json=await res.json();
+            break;
           }
-          const r=await flushSharedQueue();
-          if(r.ok){
-            setData(d=>({...d,sharedSyncDone:true}));
-          }
-        }
-        const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
-        setData(d=>({
-          ...d,
-          libraryMovies:relevant,
-          sharedLastSyncAt:json.updatedAt||new Date().toISOString()
-        }));
-      }catch(_){}
-    })();
-  },[]);
-  useEffect(()=>{
-    // Fallback: if shared fetch fails, prune using cached shared library
-    try{
-      const raw=localStorage.getItem("kwento_shared_library_cache");
-      if(!raw) return;
-      const sharedItems=JSON.parse(raw)||[];
+        }catch(_){}
+        await new Promise(r=>setTimeout(r,350*(i+1)));
+      }
+      const sharedItems=json?((json.items||json.library||json)||[]):fromCache();
+      if(!sharedItems||!sharedItems.length) return;
+      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
       const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback,1200);
-      const relevant=buildRelevantLocalLibrary(curated,data.logs,data.libraryMovies||[]);
-      setData(d=>({...d,libraryMovies:relevant}));
-    }catch(_){}
+      const token=_getGhToken();
+      const existing=data.libraryMovies||[];
+      if(token && !data.sharedSyncDone && existing.length){
+        for(const m of existing){
+          await queueSharedCandidateWithMeta(m,"local_migration");
+        }
+        const r=await flushSharedQueue();
+        if(r.ok){
+          setData(d=>({...d,sharedSyncDone:true}));
+        }
+      }
+      const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
+      setData(d=>({
+        ...d,
+        libraryMovies:relevant,
+        sharedLastSyncAt:(json&&json.updatedAt)?json.updatedAt:new Date().toISOString()
+      }));
+    })();
   },[]);
   useEffect(()=>{
     if(!photosReady) return;
@@ -9387,5 +9410,3 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
-
-
