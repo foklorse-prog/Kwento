@@ -4618,19 +4618,24 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   const scored = items
     .filter(i=>{
       const itemKey=(i.imdbID||i.title||"").toLowerCase();
+      const titleKey=normTitle(i.title);
       if(disliked.has(i.title)) return false;
       if(itemKey&&loggedImdbKeys.has(itemKey)) return false;
-      if(loggedTitleKeys.has(normTitle(i.title))) return false;
+      if(loggedTitleKeys.has(titleKey)) return false;
       if(itemKey&&likedSet.has(itemKey)) return false;
-      if(likedSet.has(normTitle(i.title))) return false;
+      if(likedSet.has(titleKey)) return false;
       if(itemKey&&watchSet.has(itemKey)) return false;
-      if(watchSet.has(normTitle(i.title))) return false;
-      if(cat==="movies"&&itemKey&&(discoverSkips[itemKey]||0)>0){
-        const count=discoverSkips[itemKey]||0;
-        const lastAt=skipLastAt[itemKey]?new Date(skipLastAt[itemKey]).getTime():0;
+      if(watchSet.has(titleKey)) return false;
+      if(cat==="movies"){
+        const count=Math.max(discoverSkips[itemKey]||0,discoverSkips[titleKey]||0);
+        if(count>0){
+        const lastA=skipLastAt[itemKey]?new Date(skipLastAt[itemKey]).getTime():0;
+        const lastB=skipLastAt[titleKey]?new Date(skipLastAt[titleKey]).getTime():0;
+        const lastAt=Math.max(lastA,lastB);
         const ageDays=lastAt?((Date.now()-lastAt)/86400000):9999;
         const cooldown=count>=3?120:(count===2?45:14);
         if(ageDays<cooldown) return false;
+        }
       }
       // Quality filter for OMDB-enriched movies only
       // Library movies pass through — they're hand-picked
@@ -4645,7 +4650,11 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
     .map(i=>{
       let score=Math.random()*3;
       const itemKey=(i.imdbID||i.title||"").toLowerCase();
-      const skipPenalty=(cat==="movies"&&discoverSkips&&itemKey)?Math.min(12,(discoverSkips[itemKey]||0)*3):0;
+      const titleKey=normTitle(i.title);
+      const skipCount=(cat==="movies"&&discoverSkips)
+        ?Math.max(discoverSkips[itemKey]||0,discoverSkips[titleKey]||0)
+        :0;
+      const skipPenalty=Math.min(12,skipCount*3);
       const yearMap=skipSignals.year||{};
       const genreMap=skipSignals.genre||{};
       const directorMap=skipSignals.director||{};
@@ -5079,8 +5088,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
           category:"movies",
         };
         onChange("libraryMovies",[...existing,newEntry]);
-        await queueSharedCandidateWithMeta(newEntry,"discover");
-        flushSharedQueue();
       }
       setPool(prev=>prev.map(m=>m.title===currentItem.title?{...m,...meta}:m));
     })();
@@ -5130,10 +5137,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
         if(!key) return {};
         if(interactedMap[key]) return {};
+        const titleKey=normTitle(currentItem.title||"");
+        const keys=[...new Set([key,titleKey].filter(Boolean))];
         const ds={...(data.discoverSkips||{})};
         const dl={...(data.discoverSkipLastAt||{})};
-        ds[key]=(ds[key]||0)+1;
-        dl[key]=new Date().toISOString();
+        keys.forEach(k=>{
+          ds[k]=(ds[k]||0)+1;
+          dl[k]=new Date().toISOString();
+        });
         const y={...(data.discoverSkipYears||{})};
         const g={...(data.discoverSkipGenres||{})};
         const d={...(data.discoverSkipDirectors||{})};
@@ -5197,10 +5208,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextSkips={...(data.discoverSkips||{})};
     if(nextLiked[key]){
       delete nextLiked[key];
+      delete nextLiked[normTitle(currentItem.title||"")];
       nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===key)&&s.signal==="like"));
     } else {
       nextLiked[key]=true;
+      const titleKey=normTitle(currentItem.title||"");
       delete nextSkips[key];
+      if(titleKey) delete nextSkips[titleKey];
       if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===key&&s.signal==="like"))){
         nextSeed.push({
           title:currentItem.title,
@@ -5283,7 +5297,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       }];
     const nextSkips={...(data.discoverSkips||{})};
     if(!has){
+      const titleKey=normTitle(currentItem.title||"");
       delete nextSkips[key];
+      if(titleKey) delete nextSkips[titleKey];
     }
     const nextReminders=has
       ?(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key))
@@ -8875,17 +8891,7 @@ function App(){
       if(!sharedItems||!sharedItems.length) return;
       try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
       const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback);
-      const token=_getGhToken();
       const existing=data.libraryMovies||[];
-      if(token && !data.sharedSyncDone && existing.length){
-        for(const m of existing){
-          await queueSharedCandidateWithMeta(m,"local_migration");
-        }
-        const r=await flushSharedQueue();
-        if(r.ok){
-          setData(d=>({...d,sharedSyncDone:true}));
-        }
-      }
       const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
       setData(d=>({
         ...d,
