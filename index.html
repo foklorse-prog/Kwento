@@ -7765,9 +7765,28 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             }
           }
 
-          // Week pulse vs average
+          // Activity pulse vs average (week or month, depending on key)
           let weekPulse=null, weekPulseEmoji=null;
-          if(avgPerWeek>0 && manualWeekCounts[weekKey]!==undefined && Object.keys(manualWeekCounts).sort().indexOf(weekKey)>0){
+          const isMonthlyBucket=String(weekKey||"").startsWith("month_");
+          if(isMonthlyBucket){
+            const targetMonth=String(weekKey||"").replace(/^month_/,"");
+            const manualMonthCounts={};
+            manualLogs.forEach(l=>{
+              const d=entryDateForWeek(l);
+              if(!d||isNaN(d)) return;
+              const mk=phDateKey(d).slice(0,7); // YYYY-MM in PH-local date
+              manualMonthCounts[mk]=(manualMonthCounts[mk]||0)+1;
+            });
+            const monthKeys=Object.keys(manualMonthCounts).sort();
+            const avgPerMonth=monthKeys.length
+              ?monthKeys.reduce((s,k)=>s+manualMonthCounts[k],0)/monthKeys.length
+              :0;
+            if(avgPerMonth>0 && manualMonthCounts[targetMonth]!==undefined && monthKeys.indexOf(targetMonth)>0){
+              const pulseRatio=weekManualLogs.length/avgPerMonth;
+              weekPulse=pulseRatio>=1.3?"busier than usual":pulseRatio<=0.7?"quieter than usual":"about your pace";
+              weekPulseEmoji=pulseRatio>=1.3?"🔥":pulseRatio<=0.7?"🌙":"〰️";
+            }
+          } else if(avgPerWeek>0 && manualWeekCounts[weekKey]!==undefined && Object.keys(manualWeekCounts).sort().indexOf(weekKey)>0){
             const pulseRatio=thisWeekCount/avgPerWeek;
             weekPulse=pulseRatio>=1.3?"busier than usual":pulseRatio<=0.7?"quieter than usual":"about your pace";
             weekPulseEmoji=pulseRatio>=1.3?"🔥":pulseRatio<=0.7?"🌙":"〰️";
