@@ -8817,13 +8817,21 @@ function App(){
         }
 
         if(!libChanged && !logsChanged) return;
-        setData(d=>({
-          ...d,
-          libraryMovies:updatedLib,
-          logs:updatedLogs.map((l,i)=>({...l,actPhotos:d.logs[i]?.actPhotos??l.actPhotos})),
-          omdbLastUpdated:new Date().toISOString(),
-          omdbLibrary:undefined,
-        }));
+        setData(d=>{
+          // Build a map of id → actPhotos from the current live state BEFORE
+          // applying the OMDB update. This is critical because quick-log (and any
+          // other new entry) prepends to d.logs, shifting every index by 1.
+          // Matching by index would attach the wrong photos to the wrong entries.
+          // Matching by id is always safe regardless of array order.
+          const photoById=new Map(d.logs.map(l=>[l.id, l.actPhotos]));
+          return {
+            ...d,
+            libraryMovies:updatedLib,
+            logs:updatedLogs.map(l=>({...l,actPhotos:photoById.get(l.id)??l.actPhotos})),
+            omdbLastUpdated:new Date().toISOString(),
+            omdbLibrary:undefined,
+          };
+        });
       }catch(_){}
     })();
   },[]); // runs once per app mount
@@ -8994,12 +9002,22 @@ function App(){
         localStorage.setItem("kwento_restore_tab", tab);
         (async()=>{
           try{
-            const fresh=localStorage.getItem("kwento_v5");
-            if(fresh){
-              const parsed=JSON.parse(fresh);
-              const hydrated=await hydratePhotos(parsed);
-              setData(d=>({...d,...hydrated}));
-            }
+            // Re-hydrate IDB photos back onto the CURRENT live logs.
+            // We deliberately do NOT read from localStorage here because
+            // localStorage may be stale — e.g. a quick log entry was just added
+            // to React state but saveData hasn't finished writing yet.
+            // Replacing d.logs with the localStorage version would lose that entry
+            // and also cause photos to shift to wrong entries.
+            const all=await idbGetAll();
+            setData(d=>({
+              ...d,
+              customPhoto:all["avatar"]?.data??d.customPhoto,
+              photoPos:all["avatar"]?.pos??d.photoPos,
+              logs:d.logs.map(l=>{
+                const photos=all["entry_"+l.id];
+                return photos?{...l,actPhotos:photos}:l;
+              }),
+            }));
           }catch(e){}
         })();
         if(navigator.serviceWorker && navigator.serviceWorker.controller){
