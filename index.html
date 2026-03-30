@@ -4618,8 +4618,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
 
   const scored = items
     .filter(i=>{
-      const itemKey=(i.imdbID||i.title||"").toLowerCase();
       const titleKey=normTitle(i.title);
+      const yearKey=(i.year||"").toString().slice(0,4);
+      const itemKey=(i.imdbID||"").toLowerCase()||(titleKey?(yearKey?`${titleKey}|${yearKey}`:titleKey):"");
       if(disliked.has(i.title)) return false;
       if(itemKey&&loggedImdbKeys.has(itemKey)) return false;
       if(loggedTitleKeys.has(titleKey)) return false;
@@ -4654,8 +4655,9 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
     })
     .map(i=>{
       let score=Math.random()*3;
-      const itemKey=(i.imdbID||i.title||"").toLowerCase();
       const titleKey=normTitle(i.title);
+      const yearKey=(i.year||"").toString().slice(0,4);
+      const itemKey=(i.imdbID||"").toLowerCase()||(titleKey?(yearKey?`${titleKey}|${yearKey}`:titleKey):"");
       const skipCount=(cat==="movies"&&discoverSkips)
         ?Math.max(discoverSkips[itemKey]||0,discoverSkips[titleKey]||0)
         :0;
@@ -4852,7 +4854,15 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const FREE_LIMIT=DISCOVER_FREE_LIMIT;
   const watchlistAll=_normalizeWatchlistItems(data);
   const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
-  const watchlistKeys=watchlistAll.flatMap(w=>[(w.imdbID||"").toLowerCase(),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
+  const movieKey=item=>{
+    if(!item) return "";
+    const imdb=(item.imdbID||"").toLowerCase();
+    if(imdb) return imdb;
+    const t=normTitle(item.title||"");
+    const y=(item.year||"").toString().slice(0,4);
+    return t?(y?`${t}|${y}`:t):"";
+  };
+  const watchlistKeys=watchlistAll.flatMap(w=>[movieKey(w),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
   const loggedTitleKeys=new Set((data.logs||[]).filter(l=>l.category===cat).map(l=>normTitle(l.title)).filter(Boolean));
   const loggedImdbKeys=new Set((data.logs||[]).filter(l=>l.category===cat&&l.imdbID).map(l=>(l.imdbID||"").toLowerCase()));
   const likedKeysSet=new Set(
@@ -4865,7 +4875,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const sanitizePool=(arr)=>{
     const seen=new Set();
     return (arr||[]).filter(it=>{
-      const key=(it.imdbID||it.title||"").toLowerCase();
+      const key=movieKey(it);
       const titleKey=normTitle(it.title);
       const yearKey=(it.year||"").toString().slice(0,4);
       const dedupeKey=(cat==="movies"&&titleKey)?`${titleKey}|${yearKey}`:(key||titleKey);
@@ -4974,7 +4984,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
   const displayItem=movieLockedByLimit?null:currentItem;
   const description=displayItem?generateDescription(displayItem,data.logs,data.feedback,poolIdx):"";
-  const likedKey=(displayItem?.imdbID||displayItem?.title||"").toLowerCase();
+  const likedKey=movieKey(displayItem);
   const likedMap=data.likedSuggestions||{};
   const isLiked=!!likedMap[likedKey];
   const interactedMap=data.discoverInteractions||{};
@@ -5000,6 +5010,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     onChange("__batch__",{discoverCounts:{...tc,[cat]:1},discoverDate:today});
   },[]);
   const hasSavedOnMount=useRef(!!(data.discoverQueues?.[cat]?.length));
+  const [actionBusy,setActionBusy]=useState(false);
+  const runAction=async(fn)=>{
+    if(actionBusy) return;
+    setActionBusy(true);
+    try{ await fn(); } finally{
+      setTimeout(()=>setActionBusy(false),120);
+    }
+  };
   const suppressAutoRebuildUntilRef=useRef(0);
   const movieLibSigRef=useRef(
     (data.libraryMovies||[])
@@ -5012,7 +5030,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
     setPool(buildFreshPool());
-  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt]);
+  },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt,data.discoverSkipUntil]);
   useEffect(()=>{
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
     const next=sanitizePool(pool);
@@ -5237,9 +5255,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     });
     return true;
   };
-  const handleGenerate=()=>{
+  const handleGenerate=()=>runAction(async()=>{
     advanceSuggestion({recordSkip:true});
-  };
+  });
   const markInteracted=(key)=>{
     if(!key) return;
     if(interactedMap[key]) return;
@@ -5247,7 +5265,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   };
   const handleLike=()=>{
     if(cat!=="movies"||!currentItem) return;
-    const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+    const key=movieKey(currentItem);
     if(!key) return;
     markInteracted(key);
     const nextLiked={...(data.likedSuggestions||{})};
@@ -5289,7 +5307,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   };
   const handleWatchlist=async ()=>{
     if(cat!=="movies"||!currentItem) return;
-    const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+    const key=movieKey(currentItem);
     if(!key) return;
     markInteracted(key);
     const existing=_normalizeWatchlistItems(data);
@@ -5373,12 +5391,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     }
   };
   const ActionBtn=({onClick,active,children,title})=>(
-    <button onClick={onClick} title={title}
+    <button onClick={onClick} title={title} disabled={actionBusy}
       style={{
         flex:1,padding:"10px 8px",borderRadius:11,cursor:"pointer",
         background:active?`${catInfo.color}22`:"transparent",
         border:`1px solid ${active?catInfo.color:th.border}`,
-        display:"flex",alignItems:"center",justifyContent:"center"
+        display:"flex",alignItems:"center",justifyContent:"center",
+        opacity:actionBusy?0.68:1
       }}>
       {children}
     </button>
@@ -5513,20 +5532,22 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
           {displayItem&&cat==="movies"&&(
             <div style={{display:"flex",gap:8,marginTop:2}}>
               <ActionBtn onClick={()=>{
-                const key=(displayItem.imdbID||displayItem.title||"").toLowerCase();
-                markInteracted(key);
-                onOpenMovieLog&&onOpenMovieLog(displayItem);
+                runAction(async()=>{
+                  const key=movieKey(displayItem);
+                  markInteracted(key);
+                  onOpenMovieLog&&onOpenMovieLog(displayItem);
+                });
               }} active={isLogged} title="Log">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill={isLogged?catInfo.color:"none"} stroke={isLogged?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
                 </svg>
               </ActionBtn>
-              <ActionBtn onClick={handleLike} active={isLiked} title="Like">
+              <ActionBtn onClick={()=>runAction(handleLike)} active={isLiked} title="Like">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill={isLiked?catInfo.color:"none"} stroke={isLiked?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
                 </svg>
               </ActionBtn>
-              <ActionBtn onClick={handleWatchlist} active={isWatchlisted} title="Watchlist">
+              <ActionBtn onClick={()=>runAction(handleWatchlist)} active={isWatchlisted} title="Watchlist">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted?catInfo.color:"none"} stroke={isWatchlisted?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/>
                 </svg>
@@ -8248,9 +8269,11 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
       if(!res.ok) throw new Error("Fetch failed");
       const json=await res.json();
-      const items=(json.items||json.library||json)||[];
+      const items=((json.items||json.library||json)||[]).filter(isActualMovieOrSeries);
       setSharedTotal(Array.isArray(items)?items.length:0);
+      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){}
       onChange("__batch__",{
+        libraryMovies:items,
         sharedLastSyncAt:json.updatedAt||new Date().toISOString(),
         sharedSyncDone:true
       });
@@ -8922,38 +8945,69 @@ function App(){
 
   // ── Shared global library (GitHub JSON) ────────────────────────────────────
   useEffect(()=>{
-    (async()=>{
-      const fromCache=()=>{
-        try{
-          const raw=localStorage.getItem("kwento_shared_library_cache");
-          if(!raw) return null;
-          const parsed=JSON.parse(raw)||[];
-          return Array.isArray(parsed)?parsed:[];
-        }catch(_){ return null; }
-      };
+    let alive=true;
+    let requestSeq=0;
+    let appliedSeq=0;
+    const fromCache=()=>{
+      try{
+        const raw=localStorage.getItem("kwento_shared_library_cache");
+        if(!raw) return null;
+        const parsed=JSON.parse(raw)||[];
+        return Array.isArray(parsed)?parsed.filter(isActualMovieOrSeries):[];
+      }catch(_){ return null; }
+    };
+    const applyShared=(items,updatedAt)=>setData(d=>({
+      ...d,
+      libraryMovies:items||[],
+      sharedLastSyncAt:updatedAt||new Date().toISOString()
+    }));
+    const loadShared=async(allowCache=true)=>{
+      const seq=++requestSeq;
       let json=null;
-      for(let i=0;i<3;i++){
-        try{
-          const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
-          if(res.ok){
-            json=await res.json();
-            break;
-          }
-        }catch(_){}
-        await new Promise(r=>setTimeout(r,350*(i+1)));
+      if(typeof navigator==="undefined" || navigator.onLine!==false){
+        for(let i=0;i<3;i++){
+          try{
+            const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
+            if(res.ok){
+              json=await res.json();
+              break;
+            }
+          }catch(_){}
+          await new Promise(r=>setTimeout(r,350*(i+1)));
+        }
       }
-      const sharedItems=json?((json.items||json.library||json)||[]):fromCache();
-      if(!sharedItems||!sharedItems.length) return;
-      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(sharedItems)); }catch(_){}
-      const curated=curateSharedLibrary(sharedItems,data.logs,data.feedback);
-      const existing=data.libraryMovies||[];
-      const relevant=buildRelevantLocalLibrary(curated,data.logs,existing);
-      setData(d=>({
-        ...d,
-        libraryMovies:relevant,
-        sharedLastSyncAt:(json&&json.updatedAt)?json.updatedAt:new Date().toISOString()
-      }));
-    })();
+      if(json){
+        const items=((json.items||json.library||json)||[]).filter(isActualMovieOrSeries);
+        try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){}
+        if(alive && seq>=appliedSeq){
+          appliedSeq=seq;
+          applyShared(items,json.updatedAt||new Date().toISOString());
+        }
+        return true;
+      }
+      if(allowCache){
+        const cached=fromCache();
+        if(cached&&alive && seq>=appliedSeq){
+          appliedSeq=seq;
+          applyShared(cached,new Date().toISOString());
+          return true;
+        }
+      }
+      return false;
+    };
+    loadShared(true);
+    const onOnline=()=>{ loadShared(false); };
+    window.addEventListener("online",onOnline);
+    const timer=setInterval(()=>{
+      if(typeof navigator==="undefined" || navigator.onLine!==false){
+        loadShared(false);
+      }
+    },120000);
+    return ()=>{
+      alive=false;
+      window.removeEventListener("online",onOnline);
+      clearInterval(timer);
+    };
   },[]);
   useEffect(()=>{
     if(!photosReady) return;
