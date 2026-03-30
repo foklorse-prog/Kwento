@@ -8314,6 +8314,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [confirmReset,setConfirmReset]=useState(false);
   const [suggText,setSuggText]=useState("");
   const [msg,setMsg]=useState("");
+  const [suggSending,setSuggSending]=useState(false);
   const [importMsg,setImportMsg]=useState("");
   const [lbMsg,setLbMsg]=useState("");
   const [importLoading,setImportLoading]=useState(false);
@@ -8472,6 +8473,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
 
   const FEEDBACK_WEBAPP_URL="https://script.google.com/macros/s/AKfycbx-beQQasotN9xVQIHoEdiBrKFDGKoIP5b31lJJ3FWJmL_Kgkncm-ZzBtDJdSQ3Zohg/exec";
   const handleSuggestion=async()=>{
+    if(suggSending) return;
     const text=(suggText||"").trim();
     if(!text) return;
     if(isOffensive(text)){
@@ -8481,6 +8483,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       return;
     }
     try{
+      setSuggSending(true);
+      setMsg(lang==="fil"?"Ipinapadala...":"Sending...");
       await fetch(FEEDBACK_WEBAPP_URL,{
         method:"POST",
         mode:"no-cors",
@@ -8497,6 +8501,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       setSuggText("");
     }catch(e){
       setMsg(lang==="fil"?"Hindi naipadala. Subukan ulit.":"Could not send right now. Please try again.");
+    }finally{
+      setSuggSending(false);
     }
     setTimeout(()=>setMsg(""),3000);
   };
@@ -8636,8 +8642,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
         <div style={{fontSize:22,marginBottom:6}}>💬</div>
         <h3 style={{fontWeight:700,color:th.text,marginBottom:5}}>{t.suggest_feature}</h3>
-        <textarea value={suggText} onChange={e=>setSuggText(e.target.value)} placeholder={lang==="fil"?"I-type ang iyong mungkahi...":"Type your suggestion..."} style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"10px 12px",fontSize:13,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:10,marginTop:8}}/>
-        <button onClick={handleSuggestion} style={{padding:"10px 20px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:14}}>{t.send}</button>
+        <textarea value={suggText} disabled={suggSending} onChange={e=>setSuggText(e.target.value)} placeholder={lang==="fil"?"I-type ang iyong mungkahi...":"Type your suggestion..."} style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"10px 12px",fontSize:13,color:th.text,minHeight:68,resize:"none",lineHeight:1.5,marginBottom:10,marginTop:8,opacity:suggSending?0.7:1}}/>
+        <button onClick={handleSuggestion} disabled={suggSending} style={{padding:"10px 20px",borderRadius:10,background:th.accent,color:"#fff",fontWeight:600,fontSize:14,opacity:suggSending?0.7:1,cursor:suggSending?"default":"pointer"}}>{suggSending?(lang==="fil"?"Ipinapadala...":"Sending..."):t.send}</button>
         {msg&&<div style={{marginTop:10,fontSize:13,color:msg.includes("🌌")?"#ef4444":th.accent,fontWeight:500}}>{msg}</div>}
       </div>
 
