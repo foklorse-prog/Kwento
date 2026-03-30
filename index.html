@@ -3673,7 +3673,31 @@ function HomePage({data,onOpenLog,onRelog}){
                     <div style={{fontSize:11,color:th.sub,marginTop:2,opacity:0.75}}>{genre?`${genre} · `:""}{count}×</div>
                   </div>
                   <button
-                    onClick={()=>onRelog({...log,id:Date.now(),date:new Date().toISOString(),customDate:null,note:""})}
+                    onClick={()=>onRelog({
+                      // Only carry identifying metadata — never content or photos.
+                      // Spreading the full log causes old note/review/reflection to
+                      // bleed into the new entry (via handleLog's pickText), and
+                      // copying photo/photoPos makes two entries share the same IDB
+                      // photo blob which breaks profile photo positioning for both.
+                      id:Date.now(),
+                      date:new Date().toISOString(),
+                      customDate:null,
+                      category:log.category,
+                      title:log.title,
+                      genre:log.genre,
+                      genres:log.genres,
+                      year:log.year,
+                      imdbID:log.imdbID,
+                      poster:log.poster,
+                      rating:log.rating,
+                      emoji:log.emoji,
+                      tags:log.tags,
+                      note:"",
+                      review:"",
+                      reflection:"",
+                      photo:null,
+                      photoPos:null,
+                    })}
                     style={{width:30,height:30,borderRadius:"50%",fontSize:18,fontWeight:400,
                       background:"transparent",color:th.accent,flexShrink:0,
                       border:`1.5px solid ${th.accent}55`,cursor:"pointer",
@@ -3755,6 +3779,12 @@ function getBestLibrarySuggestion(log, dismissedSugg) {
   if(dismissed.never) return null;
   const skipped = new Set(dismissed.skipped || []);
   const lib = LIBRARY[log.category] || [];
+  // If the title already exactly matches a library entry, there's nothing to suggest —
+  // the entry is already correctly identified, so showing "did you mean X?" for X
+  // would be redundant and confusing.
+  const normalise = s => (s||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const normLog = normalise(log.title);
+  if(lib.some(item => normalise(item.title) === normLog)) return null;
   let best = null, bestScore = 0.45;
   lib.forEach(item => {
     if(skipped.has(item.title)) return;
