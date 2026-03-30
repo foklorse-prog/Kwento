@@ -5339,9 +5339,15 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         src={...src,...meta,posterId:posterIdGuess||meta.imdbID||`t_${_h((meta.title||src.title||currentItem.title||""))}`};
       }
     }
-    const has=existing.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
+    const has=existing.some(w=>{
+      const wk=movieKey(w);
+      return (wk&&wk===key) || ((w.imdbID||w.title||"").toLowerCase()===key);
+    });
     const next=has
-      ?existing.filter(w=>((w.imdbID||w.title||"").toLowerCase()!==key))
+      ?existing.filter(w=>{
+        const wk=movieKey(w);
+        return !(((wk&&wk===key) || ((w.imdbID||w.title||"").toLowerCase()===key)));
+      })
       :[...existing,{
         title:src.title||currentItem.title,
         year:src.year||currentItem.year||null,
@@ -6076,8 +6082,25 @@ function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
 
 function LikedPage({data,onClose}){
   const th=THEMES[data.theme];
-  const likedKeys=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>k.toLowerCase()));
-  const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+  const movieKey=item=>{
+    if(!item) return "";
+    const imdb=(item.imdbID||"").toLowerCase();
+    if(imdb) return imdb;
+    const t=normTitle(item.title||"");
+    const y=(item.year||"").toString().slice(0,4);
+    return t?(y?`${t}|${y}`:t):"";
+  };
+  const likedKeys=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>(k||"").toLowerCase()));
+  const byKey=new Map();
+  (data.libraryMovies||[]).forEach(m=>{
+    const k1=(m.imdbID||"").toLowerCase();
+    const k2=(m.title||"").toLowerCase();
+    const k3=normTitle(m.title||"");
+    const y=(m.year||"").toString().slice(0,4);
+    const k4=k3?(y?`${k3}|${y}`:k3):"";
+    [k1,k2,k3,k4,movieKey(m)].filter(Boolean).forEach(k=>{ if(!byKey.has(k)) byKey.set(k,m); });
+  });
   const items=Array.from(likedKeys).map(k=>byKey.get(k)||{title:k}).filter(Boolean);
   const [selected,setSelected]=useState(null);
   const [showAll,setShowAll]=useState(false);
@@ -7583,6 +7606,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
         const manualLogs=allLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
         const cumulativeDaysActive=weekKey=>{
           const end=new Date(weekKey+"T00:00:00");
+          // Monthly pseudo-keys (e.g. "month_2026-03") are not valid dates.
+          // Fall back to counting distinct active days within that synthetic bucket.
+          if(isNaN(end)){
+            const days=new Set();
+            (weekMap[weekKey]||[]).forEach(l=>{
+              const d=entryDateForWeek(l);
+              if(!d||isNaN(d)||l.fromHealthKit||l.fromLetterboxd) return;
+              days.add(phDateKey(d));
+            });
+            return days.size;
+          }
           end.setDate(end.getDate()+6);
           const endKey=phDateKey(end);
           const days=new Set();
@@ -9126,9 +9160,22 @@ function App(){
           // Matching by index would attach the wrong photos to the wrong entries.
           // Matching by id is always safe regardless of array order.
           const photoById=new Map(d.logs.map(l=>[l.id, l.actPhotos]));
+          const mergedLibrary=(()=>{
+            if(!libChanged) return d.libraryMovies;
+            const byKey=new Map();
+            (updatedLib||[]).forEach(m=>{
+              const k=((m.imdbID||m.title||"")+"").toLowerCase();
+              if(k) byKey.set(k,m);
+            });
+            return (d.libraryMovies||[]).map(m=>{
+              const k=((m.imdbID||m.title||"")+"").toLowerCase();
+              const h=k?byKey.get(k):null;
+              return h?{...m,...h}:m;
+            });
+          })();
           return {
             ...d,
-            libraryMovies:updatedLib,
+            libraryMovies:mergedLibrary,
             logs:d.logs.map(l=>{
               const h=updatedLogsById.get(l.id);
               if(!h) return l;
