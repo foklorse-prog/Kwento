@@ -8840,6 +8840,7 @@ function App(){
           updatedLogs[i]={...l,...meta};
           logsChanged=true;
         }
+        const updatedLogsById=new Map(updatedLogs.map(l=>[l.id,l]));
 
         if(!libChanged && !logsChanged) return;
         setData(d=>{
@@ -8852,7 +8853,11 @@ function App(){
           return {
             ...d,
             libraryMovies:updatedLib,
-            logs:updatedLogs.map(l=>({...l,actPhotos:photoById.get(l.id)??l.actPhotos})),
+            logs:d.logs.map(l=>{
+              const h=updatedLogsById.get(l.id);
+              if(!h) return l;
+              return {...l,...h,actPhotos:photoById.get(l.id)??l.actPhotos};
+            }),
             omdbLastUpdated:new Date().toISOString(),
             omdbLibrary:undefined,
           };
@@ -9382,6 +9387,5 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
-
 
 
