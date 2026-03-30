@@ -1792,6 +1792,7 @@ function defaultData(){
     discoverSkipDirectors:{},
     discoverSkipTags:{},
     discoverSkipLastAt:{},
+    discoverSkipUntil:{},
     watchlistRollCount:0,
     watchlistRollDate:null,
     betaRedeemLocked:false,
@@ -4534,7 +4535,7 @@ const DISCOVER_FREE_LIMIT = 10;
 const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
-function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}) {
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}, skipUntil={}) {
   const signalLogs = [
     ...(logs||[])
       .filter(l=>!l.fromHealthKit)
@@ -4627,6 +4628,10 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       if(itemKey&&watchSet.has(itemKey)) return false;
       if(watchSet.has(titleKey)) return false;
       if(cat==="movies"){
+        const untilA=skipUntil[itemKey]?new Date(skipUntil[itemKey]).getTime():0;
+        const untilB=skipUntil[titleKey]?new Date(skipUntil[titleKey]).getTime():0;
+        const until=Math.max(untilA,untilB);
+        if(until && until>Date.now()) return false;
         const count=Math.max(discoverSkips[itemKey]||0,discoverSkips[titleKey]||0);
         if(count>0){
         const lastA=skipLastAt[itemKey]?new Date(skipLastAt[itemKey]).getTime():0;
@@ -4862,9 +4867,25 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     return (arr||[]).filter(it=>{
       const key=(it.imdbID||it.title||"").toLowerCase();
       const titleKey=normTitle(it.title);
-      const dedupeKey=key||titleKey;
+      const yearKey=(it.year||"").toString().slice(0,4);
+      const dedupeKey=(cat==="movies"&&titleKey)?`${titleKey}|${yearKey}`:(key||titleKey);
       if(!dedupeKey) return false;
       if(seen.has(dedupeKey)) return false;
+      if(cat==="movies"){
+        const untilA=(data.discoverSkipUntil||{})[key]?new Date((data.discoverSkipUntil||{})[key]).getTime():0;
+        const untilB=(data.discoverSkipUntil||{})[titleKey]?new Date((data.discoverSkipUntil||{})[titleKey]).getTime():0;
+        const until=Math.max(untilA,untilB);
+        if(until&&until>Date.now()) return false;
+        const skipCount=Math.max((data.discoverSkips||{})[key]||0,(data.discoverSkips||{})[titleKey]||0);
+        if(skipCount>0){
+          const lastA=(data.discoverSkipLastAt||{})[key]?new Date((data.discoverSkipLastAt||{})[key]).getTime():0;
+          const lastB=(data.discoverSkipLastAt||{})[titleKey]?new Date((data.discoverSkipLastAt||{})[titleKey]).getTime():0;
+          const lastAt=Math.max(lastA,lastB);
+          const ageDays=lastAt?((Date.now()-lastAt)/86400000):9999;
+          const cooldown=skipCount>=3?120:(skipCount===2?45:14);
+          if(ageDays<cooldown) return false;
+        }
+      }
       if(key&&likedKeysSet.has(key)) return false;
       if(titleKey&&likedKeysSet.has(titleKey)) return false;
       if(key&&watchKeysSet.has(key)) return false;
@@ -4878,12 +4899,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const buildFreshPool=(loc=null,overrides={})=>{
     const mergedDiscoverSkips={...(data.discoverSkips||{}),...(overrides.discoverSkips||{})};
     const mergedSkipLastAt={...(data.discoverSkipLastAt||{}),...(overrides.skipLastAt||{})};
+    const mergedSkipUntil={...(data.discoverSkipUntil||{}),...(overrides.skipUntil||{})};
     const buildWithMovies=(movies)=>sanitizePool(buildCatPool(
       cat,data.logs,data.feedback,loc,movies||[],data.tasteSeed||[],mergedDiscoverSkips,
       {year:data.discoverSkipYears||{},genre:data.discoverSkipGenres||{},director:data.discoverSkipDirectors||{},tag:data.discoverSkipTags||{}},
       data.likedSuggestions||{},
       watchlistKeys,
-      mergedSkipLastAt
+      mergedSkipLastAt,
+      mergedSkipUntil
     ));
     let built=buildWithMovies(data.libraryMovies||[]);
     if(cat==="movies"&&(!built||!built.length)){
@@ -5114,14 +5137,19 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(recordSkip&&cat==="movies"&&currentItem){
       const ds={...(data.discoverSkips||{})};
       const dl={...(data.discoverSkipLastAt||{})};
+      const du={...(data.discoverSkipUntil||{})};
       const k1=(currentItem.imdbID||currentItem.title||"").toLowerCase();
       const k2=normTitle(currentItem.title||"");
       const keys=[...new Set([k1,k2].filter(Boolean))];
+      const nextCount=Math.max(...keys.map(k=>(ds[k]||0)))+1;
+      const cooldownDays=nextCount>=3?120:(nextCount===2?45:14);
+      const untilIso=new Date(Date.now()+cooldownDays*86400000).toISOString();
       keys.forEach(k=>{
         ds[k]=(ds[k]||0)+1;
         dl[k]=new Date().toISOString();
+        du[k]=untilIso;
       });
-      optimisticSkips={discoverSkips:ds,skipLastAt:dl};
+      optimisticSkips={discoverSkips:ds,skipLastAt:dl,skipUntil:du};
     }
     if(!currentItem){
       let rebuilt=buildFreshPool(null,optimisticSkips||{});
@@ -5156,9 +5184,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         const keys=[...new Set([key,titleKey].filter(Boolean))];
         const ds={...(data.discoverSkips||{})};
         const dl={...(data.discoverSkipLastAt||{})};
+        const du={...(data.discoverSkipUntil||{})};
         keys.forEach(k=>{
           ds[k]=(ds[k]||0)+1;
           dl[k]=new Date().toISOString();
+          const cooldownDays=ds[k]>=3?120:(ds[k]===2?45:14);
+          du[k]=new Date(Date.now()+cooldownDays*86400000).toISOString();
         });
         const y={...(data.discoverSkipYears||{})};
         const g={...(data.discoverSkipGenres||{})};
@@ -5185,6 +5216,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         return {
           discoverSkips:ds,
           discoverSkipLastAt:dl,
+          discoverSkipUntil:du,
           discoverSkipYears:y,
           discoverSkipGenres:g,
           discoverSkipDirectors:d,
@@ -5221,6 +5253,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextLiked={...(data.likedSuggestions||{})};
     let nextSeed=[...(data.tasteSeed||[])];
     const nextSkips={...(data.discoverSkips||{})};
+    const nextSkipUntil={...(data.discoverSkipUntil||{})};
     if(nextLiked[key]){
       delete nextLiked[key];
       delete nextLiked[normTitle(currentItem.title||"")];
@@ -5230,6 +5263,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       const titleKey=normTitle(currentItem.title||"");
       delete nextSkips[key];
       if(titleKey) delete nextSkips[titleKey];
+      delete nextSkipUntil[key];
+      if(titleKey) delete nextSkipUntil[titleKey];
       if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===key&&s.signal==="like"))){
         nextSeed.push({
           title:currentItem.title,
@@ -5247,6 +5282,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       likedSuggestions:nextLiked,
       tasteSeed:nextSeed,
       discoverSkips:nextSkips,
+      discoverSkipUntil:nextSkipUntil,
     });
     // Liking also consumes one daily discover slot and advances to next movie.
     advanceSuggestion({recordSkip:false});
@@ -5311,10 +5347,13 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         tags:src.tags||currentItem.tags||[]
       }];
     const nextSkips={...(data.discoverSkips||{})};
+    const nextSkipUntil={...(data.discoverSkipUntil||{})};
     if(!has){
       const titleKey=normTitle(currentItem.title||"");
       delete nextSkips[key];
       if(titleKey) delete nextSkips[titleKey];
+      delete nextSkipUntil[key];
+      if(titleKey) delete nextSkipUntil[titleKey];
     }
     const nextReminders=has
       ?(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key))
@@ -5323,6 +5362,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       watchlist:next,
       watchlistReminders:nextReminders,
       discoverSkips:nextSkips,
+      discoverSkipUntil:nextSkipUntil,
     });
     if(!has){
       setReminderMovie({
