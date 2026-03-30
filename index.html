@@ -7813,8 +7813,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           }).filter(Boolean);
 
           // Stat cards in priority order — matches your registry 1,2,4,5,7,8,10,11,12,13
+          const vibeLabel=String(weekKey||"").startsWith("month_")?"This Month's Vibe":"This Week's Vibe";
           const statRegistry=[
-            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:"This Week's Vibe",value:weekBreakdownValue,min:1}]:[]),
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:vibeLabel,value:weekBreakdownValue,min:1}]:[]),
             ...(weekPulse?[{iconId:wkId("week_pulse"),_baseId:"week_pulse",emoji:weekPulseEmoji,label:"",value:weekPulse,min:1}]:[]),
             ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌅",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
             ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
@@ -7998,7 +7999,20 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const photo=entry?.actPhotos?.[0];
             if(!photo) return null;
             const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-            return {iconId:`profile_photo_${id}`,_baseId:"photo",label:entry.title||"",value:"📷",_photo:true,_photoSrc:photo,_entryId:id,_photoPos:pos,min:1};
+            const weeklyPhotoId=`profile_photo_${id}`;
+            const weeklySpan=(data.statCardSizes||{})[weeklyPhotoId]||{colSpan:2,rowSpan:2};
+            return {
+              iconId:`profile_photo_${id}_month_${monthKey}`,
+              _baseId:"photo",
+              label:entry.title||"",
+              value:"📷",
+              _photo:true,
+              _photoSrc:photo,
+              _entryId:id,
+              _photoPos:pos,
+              min:1,
+              defaultSpan:{colSpan:weeklySpan.colSpan||2,rowSpan:weeklySpan.rowSpan||2}
+            };
           }).filter(Boolean);
 
           // Re-use buildWeekCards logic but with monthLogs — create a fake weekKey for the month
@@ -8008,9 +8022,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           const result=buildWeekCards(fakeKey,prevPalette);
           delete weekMap[fakeKey];
 
-          // Replace photo cards with monthly ones (first pinned per week)
+          // Replace photo cards with monthly ones (first pinned per week),
+          // and place one photo after every 2 stat cards.
           const nonPhotoCards=result.cards.filter(c=>!c._photo);
-          const cards=[...monthPhotoCards,...nonPhotoCards];
+          const cards=[];
+          let statIdx=0;
+          let photoIdx=0;
+          while(statIdx<nonPhotoCards.length || photoIdx<monthPhotoCards.length){
+            if(statIdx<nonPhotoCards.length) cards.push(nonPhotoCards[statIdx++]);
+            if(statIdx<nonPhotoCards.length) cards.push(nonPhotoCards[statIdx++]);
+            if(photoIdx<monthPhotoCards.length) cards.push(monthPhotoCards[photoIdx++]);
+          }
           return {cards,slots:result.slots,weekDominant:result.weekDominant};
         };
 
