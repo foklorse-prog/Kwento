@@ -8902,7 +8902,11 @@ function App(){
       return {...log,genre:match.genre,tags:match.tags,enriched:true};
     });
     const changed=enriched.some((l,i)=>l!==data.logs[i]);
-    if(changed)setData(d=>({...d,logs:enriched}));
+    if(changed){
+      // Build enrichment as a map by id so we never drop entries added after this effect started
+      const enrichMap=new Map(enriched.map(l=>[l.id,l]));
+      setData(d=>({...d,logs:d.logs.map(l=>enrichMap.get(l.id)||l)}));
+    }
   },[data.libraryMovies]);
   useEffect(()=>{
     const tick=()=>{
