@@ -8064,7 +8064,67 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             if(statIdx<nonPhotoCards.length) cards.push(nonPhotoCards[statIdx++]);
             if(photoIdx<monthPhotoCards.length) cards.push(monthPhotoCards[photoIdx++]);
           }
-          return {cards,slots:result.slots,weekDominant:result.weekDominant};
+          // Re-apply palette + photo-background roles on the FINAL monthly card order.
+          // (Weekly logic already does this; monthly needs it after custom interleave.)
+          const monthPhotoColors=monthPhotoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
+          const monthDominant=monthPhotoColors.length
+            ?_rgbToHex((()=>{
+              const sum=monthPhotoColors.reduce((acc,hex)=>{
+                const r=_hexToRgb(hex);
+                return {r:acc.r+r.r,g:acc.g+r.g,b:acc.b+r.b};
+              },{r:0,g:0,b:0});
+              return {r:sum.r/monthPhotoColors.length,g:sum.g/monthPhotoColors.length,b:sum.b/monthPhotoColors.length};
+            })())
+            :prevPalette;
+          const harmonyMode=(data.weekHarmony||{})[`month_${monthKey}`]||"analog";
+          const photoIndices=cards.map((c,i)=>c._photo?i:null).filter(i=>i!==null);
+          const nearestPhotoSrc=idx=>{
+            if(!photoIndices.length) return null;
+            let best=photoIndices[0], bestD=Math.abs(idx-best);
+            photoIndices.forEach(pi=>{const d=Math.abs(idx-pi); if(d<bestD){bestD=d;best=pi;}});
+            return cards[best]?cards[best]._photoSrc:null;
+          };
+          const topKeys=new Set(["week_breakdown","week_pulse"]);
+          const resolvedSizes=data.statCardSizes||{};
+          const firstPhotoIdx=cards.findIndex(c=>c._photo&&c._photoSrc);
+          const firstPhotoSrc=firstPhotoIdx!==-1?cards[firstPhotoIdx]._photoSrc:null;
+          let photoBgIdx=-1;
+          if(firstPhotoIdx!==-1 && firstPhotoSrc){
+            let bestDist=Infinity;
+            cards.forEach((nc,ni)=>{
+              if(nc._photo) return;
+              const span=resolvedSizes[nc.iconId]||nc.defaultSpan||{colSpan:1,rowSpan:1};
+              const dist=Math.abs(ni-firstPhotoIdx);
+              // Prefer a tall side-card like weekly; fallback to nearest non-photo if absent.
+              if(span.colSpan===1 && span.rowSpan===2){
+                if(dist<bestDist){bestDist=dist; photoBgIdx=ni;}
+              }
+            });
+            if(photoBgIdx===-1){
+              cards.forEach((nc,ni)=>{
+                if(nc._photo) return;
+                const dist=Math.abs(ni-firstPhotoIdx);
+                if(dist<bestDist){bestDist=dist; photoBgIdx=ni;}
+              });
+            }
+          }
+          cards.forEach((c,i)=>{
+            if(c._photo) return;
+            const dom=getCachedDominant(nearestPhotoSrc(i))||monthDominant||th.accent;
+            const base=_harmonizePhotoFirst(dom, th.accent, harmonyMode);
+            const bgRgb=_hexToRgb(base);
+            const bg2=_rgbToHex(_mixRgb(bgRgb,_hexToRgb("#000000"),0.12));
+            const text=_pickReadableText(bgRgb, th);
+            const palette={bg:base,bg2,text,accent:text,label:text};
+            c._palette=palette;
+            if(i===photoBgIdx){
+              c._slotRole="photo_bg";
+              c._bgImage=firstPhotoSrc;
+            } else {
+              c._slotRole=topKeys.has(c._baseId)?"top":"normal";
+            }
+          });
+          return {cards,slots:result.slots,weekDominant:monthDominant||result.weekDominant};
         };
 
         const monthFmtLabel=monthKey=>{
