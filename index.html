@@ -1796,6 +1796,9 @@ function defaultData(){
     watchlistRollCount:0,
     watchlistRollDate:null,
     betaRedeemLocked:false,
+    appActiveMs:0,
+    firstUseAt:null,
+    profileMonthView:{},
   };
 }
 
@@ -7344,7 +7347,216 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
   );
 }
 
-function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpenWatchlist,onOpenLiked,onOpenWatched}){
+function StatsNerdsPage({data,onClose}){
+  const th=THEMES[data.theme];
+  const isManualLog=l=>{
+    if(!l) return false;
+    if(l.source==="manual" || l.source==="discover") return true;
+    const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
+    return !hasImportFlag;
+  };
+  const logs=(data.logs||[]).filter(l=>!l.fromHealthKit);
+  const movieLogs=logs.filter(l=>l.category==="movies");
+  const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
+  const phDateFmt=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit"});
+  const phWeekdayFmt=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Manila",weekday:"long"});
+  const phHourFmt=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Manila",hour:"numeric",hour12:true});
+  const phDayKey=d=>phDateFmt.format(d);
+  const wordCount=s=>(String(s||"").trim().match(/\S+/g)||[]).length;
+  const formatPct=(n,d)=>d>0?`${Math.round((n/d)*100)}%`:null;
+  const fmtDuration=ms=>{
+    const total=Math.max(0,Math.round((ms||0)/1000));
+    const h=Math.floor(total/3600), m=Math.floor((total%3600)/60), s=total%60;
+    if(h>0) return `${h}h ${m}m`;
+    if(m>0) return `${m}m ${s}s`;
+    return `${s}s`;
+  };
+  const dayCounts={};
+  const hourCounts={};
+  const categoryCounts={};
+  const titleCounts={};
+  const countryCounts={};
+  const distinctDays=new Set();
+  let words=0;
+  let pictures=0;
+  let longestEntryWords=0;
+  let longestEntryTitle="";
+  let filipinoCount=0, foreignCount=0;
+  let discoverLogs=0;
+  const seenMovieTitles=new Set();
+  let newMovieCount=0, repeatMovieCount=0;
+  logs.forEach(l=>{
+    const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
+    if(!d||isNaN(d)) return;
+    const day=phWeekdayFmt.format(d);
+    dayCounts[day]=(dayCounts[day]||0)+1;
+    const hour=phHourFmt.format(d);
+    hourCounts[hour]=(hourCounts[hour]||0)+1;
+    categoryCounts[l.category||"other"]=(categoryCounts[l.category||"other"]||0)+1;
+    const title=(l.title||"").trim();
+    if(title) titleCounts[title]=(titleCounts[title]||0)+1;
+    distinctDays.add(phDayKey(d));
+    const wc=wordCount((l.note||"")+" "+(l.review||""));
+    words+=wc;
+    if(wc>longestEntryWords){
+      longestEntryWords=wc;
+      longestEntryTitle=title||"Untitled";
+    }
+    pictures+=(Array.isArray(l.actPhotos)?l.actPhotos.length:0);
+    if((l.source||"")==="discover") discoverLogs++;
+    if(l.category==="movies"){
+      const key=((l.imdbID||l.title||"").toLowerCase());
+      const meta=byKey.get(key)||l;
+      const phMeta=(meta.ph===true) || /\bphilippines\b/i.test(meta.country||"") || /\bfilipino\b/i.test((meta.language||"")+" "+((meta.tags||[]).join(" ")));
+      if(phMeta) filipinoCount++; else foreignCount++;
+      const country=(meta.country||"").split(",").map(s=>s.trim()).filter(Boolean)[0];
+      if(country) countryCounts[country]=(countryCounts[country]||0)+1;
+      const mtitle=(l.title||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+      if(mtitle){
+        if(seenMovieTitles.has(mtitle)) repeatMovieCount++;
+        else { seenMovieTitles.add(mtitle); newMovieCount++; }
+      }
+    }
+  });
+  const avgMovieRating=(()=>{
+    const rated=movieLogs.map(l=>Math.max(0,Math.min(5,Number(l.rating)))).filter(v=>isFinite(v)&&v>0);
+    if(!rated.length) return null;
+    const avg=rated.reduce((a,b)=>a+b,0)/rated.length;
+    const one=avg.toFixed(1);
+    return one.endsWith(".0") ? String(Math.round(avg)) : one;
+  })();
+  const mostActiveDay=Object.entries(dayCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+  const avgLogsPerDay=distinctDays.size? (logs.length/distinctDays.size).toFixed(2):null;
+  const longestStreak=(()=>{
+    const days=Array.from(distinctDays).sort();
+    if(!days.length) return 0;
+    let best=1, cur=1;
+    for(let i=1;i<days.length;i++){
+      const prev=new Date(days[i-1]+"T00:00:00+08:00");
+      const now=new Date(days[i]+"T00:00:00+08:00");
+      const delta=Math.round((now-prev)/86400000);
+      if(delta===1){ cur++; best=Math.max(best,cur); } else cur=1;
+    }
+    return best;
+  })();
+  const currentStreak=(()=>{
+    const days=Array.from(distinctDays).sort();
+    if(!days.length) return 0;
+    let cur=1;
+    for(let i=days.length-1;i>0;i--){
+      const prev=new Date(days[i-1]+"T00:00:00+08:00");
+      const now=new Date(days[i]+"T00:00:00+08:00");
+      const delta=Math.round((now-prev)/86400000);
+      if(delta===1) cur++; else break;
+    }
+    return cur;
+  })();
+  const culturalMix=Object.entries(countryCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} ${Math.round((v/Math.max(1,movieLogs.length))*100)}%`).join(" • ");
+  const dataSizeBytes=(()=>{
+    try{return new Blob([JSON.stringify(data)]).size;}catch(_){return 0;}
+  })();
+  const firstUse=(()=>{
+    const earliestManual=(data.logs||[])
+      .filter(isManualLog)
+      .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
+      .filter(Boolean)
+      .sort()[0]||null;
+    if(data.firstUseAt && earliestManual){
+      return new Date(data.firstUseAt)<=new Date(earliestManual)?data.firstUseAt:earliestManual;
+    }
+    return data.firstUseAt||earliestManual||null;
+  })();
+  const comfortPickMovie=(()=>{
+    const movieTitleCounts={};
+    movieLogs.forEach(l=>{
+      const t=(l.title||"").trim();
+      if(!t) return;
+      movieTitleCounts[t]=(movieTitleCounts[t]||0)+1;
+    });
+    return Object.entries(movieTitleCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+  })();
+  const mostLoggedHour=Object.entries(hourCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+  const categoryBalance=Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>`${(CAT_MAP[k]?.labelEn||k)} ${Math.round((v/Math.max(1,logs.length))*100)}%`).join(" • ");
+  const rewatchRate=formatPct(repeatMovieCount,Math.max(1,newMovieCount+repeatMovieCount));
+  const newVsRepeat=(newMovieCount+repeatMovieCount)>0?`${newMovieCount}:${repeatMovieCount}`:null;
+  const discoverRate=formatPct(discoverLogs,Math.max(1,movieLogs.length));
+  const rows=[
+    {label:"Average movie rating",value:avgMovieRating?`${avgMovieRating}/5`:null},
+    {label:"Most active day",value:mostActiveDay},
+    {label:"Filipino content",value:formatPct(filipinoCount,Math.max(1,filipinoCount+foreignCount))},
+    {label:"Foreign content",value:formatPct(foreignCount,Math.max(1,filipinoCount+foreignCount))},
+    {label:"Average logs per day",value:avgLogsPerDay},
+    {label:"Comfort pick",value:comfortPickMovie},
+    {label:"Discover rate",value:discoverRate},
+    {label:"Longest streak",value:longestStreak?`${longestStreak} days`:null},
+    {label:"Current streak",value:currentStreak?`${currentStreak} days`:null},
+    {label:"Cultural mix",value:culturalMix||null},
+    {label:"Words written",value:words?words.toLocaleString():null},
+    {label:"Pictures",value:pictures?pictures.toLocaleString():null},
+    {label:"Total logs",value:logs.length?logs.length.toLocaleString():null},
+    {label:"Longest entry",value:longestEntryWords?`${longestEntryWords} words • ${longestEntryTitle}`:null},
+    {label:"Total time spent in app",value:(data.appActiveMs||0)>0?fmtDuration(data.appActiveMs):null},
+    {label:"Data size",value:dataSizeBytes?`${(dataSizeBytes/1024).toFixed(1)} KB`:null},
+    {label:"First use of app",value:firstUse?new Date(firstUse).toLocaleDateString():null},
+    {label:"Most logged hour",value:mostLoggedHour},
+    {label:"Category balance %",value:categoryBalance||null},
+    {label:"Rewatch rate",value:rewatchRate},
+    {label:"New vs repeat titles ratio",value:newVsRepeat},
+  ].filter(r=>r.value && String(r.value)!=="0" && String(r.value)!=="0.00");
+  const heroKeys=["Total logs","Current streak","Average logs per day"];
+  const heroRows=heroKeys.map(k=>rows.find(r=>r.label===k)).filter(Boolean);
+  const sectioned=[
+    {title:"Usage", keys:["First use of app","Total logs","Average logs per day","Words written","Pictures","Longest entry","Data size","Total time spent in app"]},
+    {title:"Pattern", keys:["Most active day","Most logged hour","Category balance %","Current streak","Longest streak"]},
+    {title:"Movies", keys:["Average movie rating","Comfort pick","Discover rate","Rewatch rate","New vs repeat titles ratio","Filipino content","Foreign content","Cultural mix"]},
+  ].map(sec=>({
+    ...sec,
+    rows:rows.filter(r=>sec.keys.includes(r.label))
+  })).filter(sec=>sec.rows.length>0)
+    .map(sec=>({
+      ...sec,
+      rows:sec.rows.filter(r=>!heroKeys.includes(r.label))
+    }))
+    .filter(sec=>sec.rows.length>0);
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
+      <div style={{maxWidth:520,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Stats For Nerds</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
+        </div>
+        {heroRows.length>0&&(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,marginBottom:24}}>
+            {heroRows.map((r,i)=>(
+              <div key={r.label+i} style={{padding:"13px 11px",borderRadius:12,background:`linear-gradient(160deg,${th.card} 0%, ${th.bg} 100%)`,border:`1px solid ${th.border}`}}>
+                <div style={{fontSize:11,color:th.sub,lineHeight:1.3,marginBottom:8,minHeight:28}}>{r.label}</div>
+                <div style={{fontFamily:"var(--font-mono)",fontSize:20,fontWeight:700,color:th.text,lineHeight:1.1}}>{r.value}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{display:"grid",gap:24}}>
+          {sectioned.map((sec,si)=>(
+            <div key={sec.title+si}>
+              <div style={{fontSize:12,color:th.text,textTransform:"uppercase",letterSpacing:1.2,fontWeight:700,marginBottom:10,opacity:0.9}}>{sec.title}</div>
+              <div>
+                {sec.rows.map((r,i)=>(
+                  <div key={r.label+i} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,padding:"11px 0",borderBottom:i===sec.rows.length-1?"none":`1px solid ${th.border}`}}>
+                    <div style={{fontSize:13,color:th.sub,lineHeight:1.35,maxWidth:"64%"}}>{r.label}</div>
+                    <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:700,color:th.text,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          {!sectioned.length&&<div style={{fontSize:13,color:th.sub}}>No stats yet.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpenStats,onOpenWatchlist,onOpenLiked,onOpenWatched}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
   const lang=data.language;
@@ -7539,7 +7751,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           ?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>
           :"🌟"}</p>
         <div style={{display:"flex",justifyContent:"center",gap:26,marginTop:14,marginBottom:2}}>
-          <button onClick={()=>{}} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+          <button onClick={onOpenStats} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg>
           </button>
           <button onClick={onOpenLiked} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
@@ -7649,8 +7861,6 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           ?manualWeekKeys.reduce((s,k)=>s+manualWeekCounts[k],0)/manualWeekKeys.length
           :0;
 
-        const swipedRightSet=new Set(Object.entries(data.feedback||{}).filter(([,v])=>v==="right").map(([k])=>k));
-
         const WeekStar=()=>(
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2l2.9 6.3L22 9.3l-5 4.9 1.2 6.9L12 17.8 5.8 21l1.2-6.9L2 9.3l7.1-1L12 2z"/>
@@ -7664,7 +7874,25 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           const weekSteps=stepsLogs.reduce((s,l)=>s+(l.stepCount||0),0);
           const thisWeekCount=weekLogs.length;
           const daysActiveCount=cumulativeDaysActive(weekKey);
-          const weekLikedCount=weekManualLogs.filter(l=>swipedRightSet.has(l.title)).length;
+          const likesSignals=(data.tasteSeed||[]).filter(s=>s&&s.signal==="like"&&s.savedAt&&!isNaN(new Date(s.savedAt)));
+          let weekLikedCount=0;
+          if(String(weekKey||"").startsWith("month_")){
+            const targetMonth=String(weekKey).replace(/^month_/,"");
+            weekLikedCount=likesSignals.filter(s=>phDateKey(new Date(s.savedAt)).slice(0,7)===targetMonth).length;
+          } else {
+            weekLikedCount=likesSignals.filter(s=>phWeekStartKey(new Date(s.savedAt))===weekKey).length;
+          }
+          // Backward-compat fallback for older likes that may not have savedAt in tasteSeed.
+          if(weekLikedCount===0){
+            const likedMap=data.likedSuggestions||{};
+            const set=new Set();
+            weekManualLogs.forEach(l=>{
+              const key=(l.imdbID||l.title||"").toLowerCase();
+              const titleKey=(l.title||"").toLowerCase();
+              if((key&&likedMap[key])||(titleKey&&likedMap[titleKey])) set.add(key||titleKey);
+            });
+            weekLikedCount=set.size;
+          }
 
           // Top category
           const catCount={};
@@ -9391,13 +9619,52 @@ function App(){
   const [showWatchlistPage,setShowWatchlistPage]=useState(false);
   const [showLikedPage,setShowLikedPage]=useState(false);
   const [showWatchedPage,setShowWatchedPage]=useState(false);
+  const [showStatsNerdsPage,setShowStatsNerdsPage]=useState(false);
 
-  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage||showWatchedPage;
+  const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage||showWatchedPage||showStatsNerdsPage;
 
   useEffect(()=>{
     saveData(data);
     savePhotos(data);
   },[data]);
+  // Best-effort app time tracking
+  useEffect(()=>{
+    const startedAt=Date.now();
+    const isManualLog=l=>{
+      if(!l) return false;
+      if(l.source==="manual" || l.source==="discover") return true;
+      const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
+      return !hasImportFlag;
+    };
+    setData(prev=>{
+      if(prev.firstUseAt) return prev;
+      const earliestManual=(prev.logs||[])
+        .filter(isManualLog)
+        .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
+        .filter(Boolean)
+        .sort()[0];
+      const next={...prev,firstUseAt:earliestManual||new Date(startedAt).toISOString()};
+      saveData(next);
+      return next;
+    });
+    const addMs=ms=>{
+      if(!ms||ms<1000) return;
+      setData(prev=>{
+        const next={...prev,appActiveMs:(prev.appActiveMs||0)+ms,firstUseAt:prev.firstUseAt||new Date(startedAt).toISOString()};
+        saveData(next);
+        return next;
+      });
+    };
+    const onVis=()=>{ if(document.visibilityState==="hidden") addMs(Date.now()-startedAt); };
+    const onUnload=()=>addMs(Date.now()-startedAt);
+    document.addEventListener("visibilitychange",onVis);
+    window.addEventListener("beforeunload",onUnload);
+    return ()=>{
+      document.removeEventListener("visibilitychange",onVis);
+      window.removeEventListener("beforeunload",onUnload);
+      addMs(Date.now()-startedAt);
+    };
+  },[]);
   // Autosave every 5 minutes as safety net
   useEffect(()=>{
     const id=setInterval(()=>{saveData(data);savePhotos(data);},5*60*1000);
@@ -9606,6 +9873,7 @@ function App(){
         ...e,
         id:e.id||Date.now()+idx,
         category:cat,
+        source:e.source||(logFromDiscover?"discover":"manual"),
         note:cat==="movies"?movieText:noteText,
         review:cat==="movies"?movieText:(e.review||""),
       };
@@ -9791,7 +10059,7 @@ function App(){
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
               {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
-              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)} onOpenWatched={()=>setShowWatchedPage(true)}/>}
+              {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenStats={()=>setShowStatsNerdsPage(true)} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)} onOpenWatched={()=>setShowWatchedPage(true)}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
               <TabBar tab={tab} setTab={switchTab} data={data} flash={timelineUnread} animKey={badgeAnimKey}/>
@@ -9884,7 +10152,8 @@ function App(){
               {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
               {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
-              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
+              {showStatsNerdsPage&&<StatsNerdsPage data={data} onClose={()=>setShowStatsNerdsPage(false)}/>}
+              <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||showStatsNerdsPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
           )}
         </div>
