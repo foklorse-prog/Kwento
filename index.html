@@ -7349,13 +7349,16 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
 
 function StatsNerdsPage({data,onClose}){
   const th=THEMES[data.theme];
+  const APP_MADE_KEY="2026-03-05";
+  const appMadeAt=new Date(`${APP_MADE_KEY}T00:00:00+08:00`);
   const isManualLog=l=>{
     if(!l) return false;
     if(l.source==="manual" || l.source==="discover") return true;
     const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
     return !hasImportFlag;
   };
-  const logs=(data.logs||[]).filter(l=>!l.fromHealthKit);
+  const allLogs=(data.logs||[]);
+  const logs=allLogs.filter(l=>!l.fromHealthKit);
   const movieLogs=logs.filter(l=>l.category==="movies");
   const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
   const phDateFmt=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit"});
@@ -7365,11 +7368,10 @@ function StatsNerdsPage({data,onClose}){
   const wordCount=s=>(String(s||"").trim().match(/\S+/g)||[]).length;
   const formatPct=(n,d)=>d>0?`${Math.round((n/d)*100)}%`:null;
   const fmtDuration=ms=>{
-    const total=Math.max(0,Math.round((ms||0)/1000));
-    const h=Math.floor(total/3600), m=Math.floor((total%3600)/60), s=total%60;
+    const totalMin=Math.max(0,Math.floor((ms||0)/60000));
+    const h=Math.floor(totalMin/60), m=totalMin%60;
     if(h>0) return `${h}h ${m}m`;
-    if(m>0) return `${m}m ${s}s`;
-    return `${s}s`;
+    return `${m}m`;
   };
   const dayCounts={};
   const hourCounts={};
@@ -7377,6 +7379,8 @@ function StatsNerdsPage({data,onClose}){
   const titleCounts={};
   const countryCounts={};
   const distinctDays=new Set();
+  const activeDaysAll=new Set();
+  const timelinePhotoEntryIds=new Set();
   let words=0;
   let pictures=0;
   let longestEntryWords=0;
@@ -7396,13 +7400,19 @@ function StatsNerdsPage({data,onClose}){
     const title=(l.title||"").trim();
     if(title) titleCounts[title]=(titleCounts[title]||0)+1;
     distinctDays.add(phDayKey(d));
-    const wc=wordCount((l.note||"")+" "+(l.review||""));
+    const textForWords=l.category==="movies"
+      ?(l.note||l.review||"")
+      :`${l.note||""} ${l.review||""}`;
+    const wc=wordCount(textForWords);
     words+=wc;
     if(wc>longestEntryWords){
       longestEntryWords=wc;
       longestEntryTitle=title||"Untitled";
     }
-    pictures+=(Array.isArray(l.actPhotos)?l.actPhotos.length:0);
+    const hasImportFlag=Object.keys(l||{}).some(k=>k.startsWith("from")&&l[k]===true);
+    if(l.category==="activities" && !hasImportFlag && Array.isArray(l.actPhotos)&&l.actPhotos.length>0){
+      timelinePhotoEntryIds.add(l.id);
+    }
     if((l.source||"")==="discover") discoverLogs++;
     if(l.category==="movies"){
       const key=((l.imdbID||l.title||"").toLowerCase());
@@ -7418,6 +7428,15 @@ function StatsNerdsPage({data,onClose}){
       }
     }
   });
+  allLogs.forEach(l=>{
+    const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
+    if(!d||isNaN(d)) return;
+    if(d<appMadeAt) return; // streak anchor: app-made date
+    activeDaysAll.add(phDayKey(d));
+  });
+  // Pictures = number of logged entries that have at least one attached photo.
+  // Using a photo as profile/stat background does not add extra count.
+  pictures=timelinePhotoEntryIds.size;
   const avgMovieRating=(()=>{
     const rated=movieLogs.map(l=>Math.max(0,Math.min(5,Number(l.rating)))).filter(v=>isFinite(v)&&v>0);
     if(!rated.length) return null;
@@ -7428,7 +7447,7 @@ function StatsNerdsPage({data,onClose}){
   const mostActiveDay=Object.entries(dayCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
   const avgLogsPerDay=distinctDays.size? (logs.length/distinctDays.size).toFixed(2):null;
   const longestStreak=(()=>{
-    const days=Array.from(distinctDays).sort();
+    const days=Array.from(activeDaysAll).sort();
     if(!days.length) return 0;
     let best=1, cur=1;
     for(let i=1;i<days.length;i++){
@@ -7440,14 +7459,15 @@ function StatsNerdsPage({data,onClose}){
     return best;
   })();
   const currentStreak=(()=>{
-    const days=Array.from(distinctDays).sort();
-    if(!days.length) return 0;
-    let cur=1;
-    for(let i=days.length-1;i>0;i--){
-      const prev=new Date(days[i-1]+"T00:00:00+08:00");
-      const now=new Date(days[i]+"T00:00:00+08:00");
-      const delta=Math.round((now-prev)/86400000);
-      if(delta===1) cur++; else break;
+    const daySet=new Set(Array.from(activeDaysAll));
+    let cur=0;
+    let d=new Date();
+    d.setHours(12,0,0,0);
+    while(true){
+      const k=phDayKey(d);
+      if(!daySet.has(k)) break;
+      cur++;
+      d.setDate(d.getDate()-1);
     }
     return cur;
   })();
@@ -7461,10 +7481,7 @@ function StatsNerdsPage({data,onClose}){
       .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
       .filter(Boolean)
       .sort()[0]||null;
-    if(data.firstUseAt && earliestManual){
-      return new Date(data.firstUseAt)<=new Date(earliestManual)?data.firstUseAt:earliestManual;
-    }
-    return data.firstUseAt||earliestManual||null;
+    return earliestManual||data.firstUseAt||null;
   })();
   const comfortPickMovie=(()=>{
     const movieTitleCounts={};
@@ -7479,7 +7496,8 @@ function StatsNerdsPage({data,onClose}){
   const categoryBalance=Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>`${(CAT_MAP[k]?.labelEn||k)} ${Math.round((v/Math.max(1,logs.length))*100)}%`).join(" • ");
   const rewatchRate=formatPct(repeatMovieCount,Math.max(1,newMovieCount+repeatMovieCount));
   const newVsRepeat=(newMovieCount+repeatMovieCount)>0?`${newMovieCount}:${repeatMovieCount}`:null;
-  const discoverRate=formatPct(discoverLogs,Math.max(1,movieLogs.length));
+  const discoverRateRaw=movieLogs.length?Math.round((discoverLogs/movieLogs.length)*100):0;
+  const discoverRate=discoverRateRaw>0?`${discoverRateRaw}%`:null;
   const rows=[
     {label:"Average movie rating",value:avgMovieRating?`${avgMovieRating}/5`:null},
     {label:"Most active day",value:mostActiveDay},
@@ -7493,7 +7511,7 @@ function StatsNerdsPage({data,onClose}){
     {label:"Cultural mix",value:culturalMix||null},
     {label:"Words written",value:words?words.toLocaleString():null},
     {label:"Pictures",value:pictures?pictures.toLocaleString():null},
-    {label:"Total logs",value:logs.length?logs.length.toLocaleString():null},
+    {label:"Total logs",value:allLogs.length?allLogs.length.toLocaleString():null},
     {label:"Longest entry",value:longestEntryWords?`${longestEntryWords} words • ${longestEntryTitle}`:null},
     {label:"Total time spent in app",value:(data.appActiveMs||0)>0?fmtDuration(data.appActiveMs):null},
     {label:"Data size",value:dataSizeBytes?`${(dataSizeBytes/1024).toFixed(1)} KB`:null},
@@ -7503,8 +7521,12 @@ function StatsNerdsPage({data,onClose}){
     {label:"Rewatch rate",value:rewatchRate},
     {label:"New vs repeat titles ratio",value:newVsRepeat},
   ].filter(r=>r.value && String(r.value)!=="0" && String(r.value)!=="0.00");
-  const heroKeys=["Total logs","Current streak","Average logs per day"];
-  const heroRows=heroKeys.map(k=>rows.find(r=>r.label===k)).filter(Boolean);
+  const heroRows=[
+    {label:"Total logs",value:allLogs.length.toLocaleString()},
+    {label:"Current streak",value:`${currentStreak} days`},
+    {label:"Average logs per day",value:avgLogsPerDay||"0"}
+  ];
+  const heroLabelSet=new Set(heroRows.map(h=>h.label));
   const sectioned=[
     {title:"Usage", keys:["First use of app","Total logs","Average logs per day","Words written","Pictures","Longest entry","Data size","Total time spent in app"]},
     {title:"Pattern", keys:["Most active day","Most logged hour","Category balance %","Current streak","Longest streak"]},
@@ -7515,7 +7537,7 @@ function StatsNerdsPage({data,onClose}){
   })).filter(sec=>sec.rows.length>0)
     .map(sec=>({
       ...sec,
-      rows:sec.rows.filter(r=>!heroKeys.includes(r.label))
+      rows:sec.rows.filter(r=>!heroLabelSet.has(r.label))
     }))
     .filter(sec=>sec.rows.length>0);
   return(
@@ -7530,7 +7552,7 @@ function StatsNerdsPage({data,onClose}){
             {heroRows.map((r,i)=>(
               <div key={r.label+i} style={{padding:"13px 11px",borderRadius:12,background:`linear-gradient(160deg,${th.card} 0%, ${th.bg} 100%)`,border:`1px solid ${th.border}`}}>
                 <div style={{fontSize:11,color:th.sub,lineHeight:1.3,marginBottom:8,minHeight:28}}>{r.label}</div>
-                <div style={{fontFamily:"var(--font-mono)",fontSize:20,fontWeight:700,color:th.text,lineHeight:1.1}}>{r.value}</div>
+                <div style={{fontFamily:"var(--font-mono)",fontSize:19,fontWeight:650,color:th.text,opacity:0.88,lineHeight:1.1}}>{r.value}</div>
               </div>
             ))}
           </div>
@@ -7543,7 +7565,7 @@ function StatsNerdsPage({data,onClose}){
                 {sec.rows.map((r,i)=>(
                   <div key={r.label+i} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,padding:"11px 0",borderBottom:i===sec.rows.length-1?"none":`1px solid ${th.border}`}}>
                     <div style={{fontSize:13,color:th.sub,lineHeight:1.35,maxWidth:"64%"}}>{r.label}</div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:700,color:th.text,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
+                    <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:650,color:th.text,opacity:0.88,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
                   </div>
                 ))}
               </div>
@@ -9630,6 +9652,7 @@ function App(){
   // Best-effort app time tracking
   useEffect(()=>{
     const startedAt=Date.now();
+    let lastTick=Date.now();
     const isManualLog=l=>{
       if(!l) return false;
       if(l.source==="manual" || l.source==="discover") return true;
@@ -9655,14 +9678,40 @@ function App(){
         return next;
       });
     };
-    const onVis=()=>{ if(document.visibilityState==="hidden") addMs(Date.now()-startedAt); };
-    const onUnload=()=>addMs(Date.now()-startedAt);
+    const flushWholeMinutes=()=>{
+      if(document.visibilityState==="hidden") return;
+      const now=Date.now();
+      const diff=now-lastTick;
+      const wholeMinutes=Math.floor(diff/60000);
+      if(wholeMinutes<=0) return;
+      const add=wholeMinutes*60000;
+      addMs(add);
+      lastTick+=add;
+    };
+    const onVis=()=>{
+      if(document.visibilityState==="hidden"){
+        const now=Date.now();
+        addMs(now-lastTick);
+        lastTick=now;
+      } else {
+        lastTick=Date.now();
+      }
+    };
+    const onUnload=()=>{
+      const now=Date.now();
+      addMs(now-lastTick);
+      lastTick=now;
+    };
+    const minTimer=setInterval(flushWholeMinutes,15000);
     document.addEventListener("visibilitychange",onVis);
     window.addEventListener("beforeunload",onUnload);
     return ()=>{
+      clearInterval(minTimer);
       document.removeEventListener("visibilitychange",onVis);
       window.removeEventListener("beforeunload",onUnload);
-      addMs(Date.now()-startedAt);
+      const now=Date.now();
+      addMs(now-lastTick);
+      lastTick=now;
     };
   },[]);
   // Autosave every 5 minutes as safety net
