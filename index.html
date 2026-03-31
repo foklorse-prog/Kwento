@@ -7434,7 +7434,6 @@ function StatsNerdsPage({data,onClose}){
   allLogs.forEach(l=>{
     const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
     if(!d||isNaN(d)) return;
-    if(d<appMadeAt) return; // streak anchor: app-made date
     activeDaysAll.add(phDayKey(d));
   });
   // Pictures = number of logged entries that have at least one attached photo.
