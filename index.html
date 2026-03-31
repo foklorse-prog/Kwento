@@ -7349,12 +7349,14 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
 
 function StatsNerdsPage({data,onClose}){
   const th=THEMES[data.theme];
+  const APP_MADE_AT=new Date("2026-03-05T00:00:00+08:00");
   const isManualLog=l=>{
     if(!l) return false;
     if(l.source==="manual" || l.source==="discover") return true;
     const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
     return !hasImportFlag;
   };
+  const isManualForFirstUse=l=>!!l && (l.source==="manual" || l.source==="discover");
   const allLogs=(data.logs||[]);
   const logs=allLogs.filter(l=>!l.fromHealthKit);
   const movieLogs=logs.filter(l=>l.category==="movies");
@@ -7479,12 +7481,12 @@ function StatsNerdsPage({data,onClose}){
   })();
   const firstUse=(()=>{
     const earliestManual=(data.logs||[])
-      .filter(isManualLog)
+      .filter(isManualForFirstUse)
       .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
-      .filter(dt=>{ const d=new Date(dt); return !isNaN(d); })
+      .filter(dt=>{ const d=new Date(dt); return !isNaN(d) && d>=APP_MADE_AT; })
       .filter(Boolean)
       .sort()[0]||null;
-    const existing=(data.firstUseAt&&isFinite(new Date(data.firstUseAt).getTime()))?data.firstUseAt:null;
+    const existing=(data.firstUseAt&&isFinite(new Date(data.firstUseAt).getTime())&&new Date(data.firstUseAt)>=APP_MADE_AT)?data.firstUseAt:null;
     if(existing&&earliestManual){
       return new Date(existing)<=new Date(earliestManual)?existing:earliestManual;
     }
@@ -8313,14 +8315,22 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           // Replace photo cards with monthly ones (first pinned per week),
           // and place one photo after every 2 stat cards.
           const nonPhotoCards=result.cards.filter(c=>!c._photo);
-          const cards=[];
+          const cardsRaw=[];
           let statIdx=0;
           let photoIdx=0;
           while(statIdx<nonPhotoCards.length || photoIdx<monthPhotoCards.length){
-            if(statIdx<nonPhotoCards.length) cards.push(nonPhotoCards[statIdx++]);
-            if(statIdx<nonPhotoCards.length) cards.push(nonPhotoCards[statIdx++]);
-            if(photoIdx<monthPhotoCards.length) cards.push(monthPhotoCards[photoIdx++]);
+            if(statIdx<nonPhotoCards.length) cardsRaw.push(nonPhotoCards[statIdx++]);
+            if(statIdx<nonPhotoCards.length) cardsRaw.push(nonPhotoCards[statIdx++]);
+            if(photoIdx<monthPhotoCards.length) cardsRaw.push(monthPhotoCards[photoIdx++]);
           }
+          // Apply saved drag order first (same behavior as weekly), then compute palettes/bg roles.
+          const savedOrder=(data.statCardOrder||[]);
+          const cards = savedOrder.length
+            ?[
+              ...savedOrder.map(id=>cardsRaw.find(c=>c.iconId===id)).filter(Boolean),
+              ...cardsRaw.filter(c=>!savedOrder.includes(c.iconId)),
+            ]
+            :cardsRaw;
           // Re-apply palette + photo-background roles on the FINAL monthly card order.
           // (Weekly logic already does this; monthly needs it after custom interleave.)
           const monthPhotoColors=monthPhotoCards.map(p=>getCachedDominant(p._photoSrc)).filter(Boolean);
@@ -9659,22 +9669,20 @@ function App(){
   // Best-effort app time tracking
   useEffect(()=>{
     const startedAt=Date.now();
+    const APP_MADE_AT=new Date("2026-03-05T00:00:00+08:00");
     let lastTick=Date.now();
     const isManualLog=l=>{
-      if(!l) return false;
-      if(l.source==="manual" || l.source==="discover") return true;
-      const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
-      return !hasImportFlag;
+      return !!l && (l.source==="manual" || l.source==="discover");
     };
     setData(prev=>{
       const earliestManual=(prev.logs||[])
         .filter(isManualLog)
         .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
-        .filter(dt=>{ const d=new Date(dt); return !isNaN(d); })
+        .filter(dt=>{ const d=new Date(dt); return !isNaN(d) && d>=APP_MADE_AT; })
         .filter(Boolean)
         .sort()[0];
       const existing=prev.firstUseAt?new Date(prev.firstUseAt):null;
-      const safeExisting=(existing&&!isNaN(existing))?existing.toISOString():null;
+      const safeExisting=(existing&&!isNaN(existing)&&existing>=APP_MADE_AT)?existing.toISOString():null;
       const nextFirstUse=(safeExisting&&earliestManual)
         ?(new Date(safeExisting)<=new Date(earliestManual)?safeExisting:earliestManual)
         :(safeExisting||earliestManual||new Date(startedAt).toISOString());
