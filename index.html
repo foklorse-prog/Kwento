@@ -7356,7 +7356,6 @@ function StatsNerdsPage({data,onClose}){
     const hasImportFlag=Object.keys(l).some(k=>k.startsWith("from") && l[k]===true);
     return !hasImportFlag;
   };
-  const isManualForFirstUse=l=>!!l && (l.source==="manual" || l.source==="discover");
   const allLogs=(data.logs||[]);
   const logs=allLogs.filter(l=>!l.fromHealthKit);
   const movieLogs=logs.filter(l=>l.category==="movies");
@@ -7436,6 +7435,7 @@ function StatsNerdsPage({data,onClose}){
   allLogs.forEach(l=>{
     const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
     if(!d||isNaN(d)) return;
+    if(d<APP_MADE_AT) return;
     activeDaysAll.add(phDayKey(d));
   });
   // Pictures = number of logged entries that have at least one attached photo.
@@ -7480,17 +7480,18 @@ function StatsNerdsPage({data,onClose}){
     try{return new Blob([JSON.stringify(data)]).size;}catch(_){return 0;}
   })();
   const firstUse=(()=>{
-    const earliestManual=(data.logs||[])
-      .filter(isManualForFirstUse)
-      .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
-      .filter(dt=>{ const d=new Date(dt); return !isNaN(d) && d>=APP_MADE_AT; })
-      .filter(Boolean)
-      .sort()[0]||null;
-    const existing=(data.firstUseAt&&isFinite(new Date(data.firstUseAt).getTime())&&new Date(data.firstUseAt)>=APP_MADE_AT)?data.firstUseAt:null;
-    if(existing&&earliestManual){
-      return new Date(existing)<=new Date(earliestManual)?existing:earliestManual;
-    }
-    return existing||earliestManual||null;
+    const allDates=(data.logs||[])
+      .map(l=>new Date(l.customDate?`${l.customDate}T12:00:00`:l.date))
+      .filter(d=>d && !isNaN(d));
+    const madeDayKey=phDayKey(APP_MADE_AT);
+    const hasLogOnMadeDate=allDates.some(d=>phDayKey(d)===madeDayKey);
+    if(hasLogOnMadeDate) return APP_MADE_AT.toISOString();
+    const afterMade=allDates
+      .filter(d=>d>APP_MADE_AT)
+      .sort((a,b)=>a-b)[0];
+    if(afterMade) return afterMade.toISOString();
+    const firstLoaded=(data.firstUseAt&&isFinite(new Date(data.firstUseAt).getTime()))?data.firstUseAt:null;
+    return firstLoaded||null;
   })();
   const comfortPickMovie=(()=>{
     const movieTitleCounts={};
@@ -7561,7 +7562,7 @@ function StatsNerdsPage({data,onClose}){
             {heroRows.map((r,i)=>(
               <div key={r.label+i} style={{padding:"13px 11px",borderRadius:12,background:`linear-gradient(160deg,${th.card} 0%, ${th.bg} 100%)`,border:`1px solid ${th.border}`}}>
                 <div style={{fontSize:11,color:th.sub,lineHeight:1.3,marginBottom:8,minHeight:28}}>{r.label}</div>
-                <div style={{fontFamily:"var(--font-mono)",fontSize:19,fontWeight:650,color:th.text,opacity:0.88,lineHeight:1.1}}>{r.value}</div>
+                <div style={{fontFamily:"var(--font-mono)",fontSize:19,fontWeight:650,color:th.sub,lineHeight:1.1}}>{r.value}</div>
               </div>
             ))}
           </div>
@@ -7574,7 +7575,7 @@ function StatsNerdsPage({data,onClose}){
                 {sec.rows.map((r,i)=>(
                   <div key={r.label+i} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,padding:"11px 0"}}>
                     <div style={{fontSize:13,color:th.sub,lineHeight:1.35,maxWidth:"64%"}}>{r.label}</div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:650,color:th.text,opacity:0.88,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
+                    <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:650,color:th.sub,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
                   </div>
                 ))}
               </div>
@@ -9669,25 +9670,10 @@ function App(){
   // Best-effort app time tracking
   useEffect(()=>{
     const startedAt=Date.now();
-    const APP_MADE_AT=new Date("2026-03-05T00:00:00+08:00");
     let lastTick=Date.now();
-    const isManualLog=l=>{
-      return !!l && (l.source==="manual" || l.source==="discover");
-    };
     setData(prev=>{
-      const earliestManual=(prev.logs||[])
-        .filter(isManualLog)
-        .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
-        .filter(dt=>{ const d=new Date(dt); return !isNaN(d) && d>=APP_MADE_AT; })
-        .filter(Boolean)
-        .sort()[0];
-      const existing=prev.firstUseAt?new Date(prev.firstUseAt):null;
-      const safeExisting=(existing&&!isNaN(existing)&&existing>=APP_MADE_AT)?existing.toISOString():null;
-      const nextFirstUse=(safeExisting&&earliestManual)
-        ?(new Date(safeExisting)<=new Date(earliestManual)?safeExisting:earliestManual)
-        :(safeExisting||earliestManual||new Date(startedAt).toISOString());
-      if(prev.firstUseAt===nextFirstUse) return prev;
-      const next={...prev,firstUseAt:nextFirstUse};
+      if(prev.firstUseAt) return prev;
+      const next={...prev,firstUseAt:new Date(startedAt).toISOString()};
       saveData(next);
       return next;
     });
