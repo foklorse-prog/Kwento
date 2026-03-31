@@ -7349,8 +7349,6 @@ function ProfilePhotoCropper({photo, pos, setPos, frameW, frameH, accent}){
 
 function StatsNerdsPage({data,onClose}){
   const th=THEMES[data.theme];
-  const APP_MADE_KEY="2026-03-05";
-  const appMadeAt=new Date(`${APP_MADE_KEY}T00:00:00+08:00`);
   const isManualLog=l=>{
     if(!l) return false;
     if(l.source==="manual" || l.source==="discover") return true;
@@ -7372,6 +7370,11 @@ function StatsNerdsPage({data,onClose}){
     const h=Math.floor(totalMin/60), m=totalMin%60;
     if(h>0) return `${h}h ${m}m`;
     return `${m}m`;
+  };
+  const fmtDataSize=bytes=>{
+    const b=Math.max(0,Number(bytes)||0);
+    if(b>=1024*1024) return `${(b/(1024*1024)).toFixed(1)} MB`;
+    return `${(b/1024).toFixed(1)} KB`;
   };
   const dayCounts={};
   const hourCounts={};
@@ -7479,9 +7482,14 @@ function StatsNerdsPage({data,onClose}){
     const earliestManual=(data.logs||[])
       .filter(isManualLog)
       .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
+      .filter(dt=>{ const d=new Date(dt); return !isNaN(d); })
       .filter(Boolean)
       .sort()[0]||null;
-    return earliestManual||data.firstUseAt||null;
+    const existing=(data.firstUseAt&&isFinite(new Date(data.firstUseAt).getTime()))?data.firstUseAt:null;
+    if(existing&&earliestManual){
+      return new Date(existing)<=new Date(earliestManual)?existing:earliestManual;
+    }
+    return existing||earliestManual||null;
   })();
   const comfortPickMovie=(()=>{
     const movieTitleCounts={};
@@ -7514,7 +7522,7 @@ function StatsNerdsPage({data,onClose}){
     {label:"Total logs",value:allLogs.length?allLogs.length.toLocaleString():null},
     {label:"Longest entry",value:longestEntryWords?`${longestEntryWords} words • ${longestEntryTitle}`:null},
     {label:"Total time spent in app",value:(data.appActiveMs||0)>0?fmtDuration(data.appActiveMs):null},
-    {label:"Data size",value:dataSizeBytes?`${(dataSizeBytes/1024).toFixed(1)} KB`:null},
+    {label:"Data size",value:dataSizeBytes?fmtDataSize(dataSizeBytes):null},
     {label:"First use of app",value:firstUse?new Date(firstUse).toLocaleDateString():null},
     {label:"Most logged hour",value:mostLoggedHour},
     {label:"Category balance %",value:categoryBalance||null},
@@ -7563,7 +7571,7 @@ function StatsNerdsPage({data,onClose}){
               <div style={{fontSize:12,color:th.text,textTransform:"uppercase",letterSpacing:1.2,fontWeight:700,marginBottom:10,opacity:0.9}}>{sec.title}</div>
               <div>
                 {sec.rows.map((r,i)=>(
-                  <div key={r.label+i} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,padding:"11px 0",borderBottom:i===sec.rows.length-1?"none":`1px solid ${th.border}`}}>
+                  <div key={r.label+i} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,padding:"11px 0"}}>
                     <div style={{fontSize:13,color:th.sub,lineHeight:1.35,maxWidth:"64%"}}>{r.label}</div>
                     <div style={{fontFamily:"var(--font-mono)",fontSize:14,fontWeight:650,color:th.text,opacity:0.88,textAlign:"right",lineHeight:1.25,maxWidth:"36%"}}>{r.value}</div>
                   </div>
@@ -9660,13 +9668,19 @@ function App(){
       return !hasImportFlag;
     };
     setData(prev=>{
-      if(prev.firstUseAt) return prev;
       const earliestManual=(prev.logs||[])
         .filter(isManualLog)
         .map(l=>l.customDate?`${l.customDate}T12:00:00`:l.date)
+        .filter(dt=>{ const d=new Date(dt); return !isNaN(d); })
         .filter(Boolean)
         .sort()[0];
-      const next={...prev,firstUseAt:earliestManual||new Date(startedAt).toISOString()};
+      const existing=prev.firstUseAt?new Date(prev.firstUseAt):null;
+      const safeExisting=(existing&&!isNaN(existing))?existing.toISOString():null;
+      const nextFirstUse=(safeExisting&&earliestManual)
+        ?(new Date(safeExisting)<=new Date(earliestManual)?safeExisting:earliestManual)
+        :(safeExisting||earliestManual||new Date(startedAt).toISOString());
+      if(prev.firstUseAt===nextFirstUse) return prev;
+      const next={...prev,firstUseAt:nextFirstUse};
       saveData(next);
       return next;
     });
