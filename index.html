@@ -7354,8 +7354,19 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
   const [showStatsShare,setShowStatsShare]=useState(false);
   const [weekOpen,setWeekOpen]=useState({});
   const [weekDetailsOpen,setWeekDetailsOpen]=useState({});
-  const [monthView,setMonthView]=useState({}); // monthKey -> true if in monthly view
-  const monthStarTap=React.useRef({}); // monthKey -> last tap timestamp
+  const [monthOpen,setMonthOpen]=useState({});
+  const [monthDetailsOpen,setMonthDetailsOpen]=useState({});
+  const [monthView,setMonthView]=useState(()=>data.profileMonthView||{}); // monthKey -> true if in monthly view
+  useEffect(()=>{
+    setMonthView(data.profileMonthView||{});
+  },[JSON.stringify(data.profileMonthView||{})]);
+  const updateMonthView=updater=>{
+    setMonthView(prev=>{
+      const next=typeof updater==="function"?updater(prev):updater;
+      onChange("profileMonthView",next);
+      return next;
+    });
+  };
   const [cropPos,setCropPos]=useState(data.photoPos||{x:50,y:50,scale:1});
   const [cropPhotoId,setCropPhotoId]=useState(null); // id of profile photo being repositioned
   const [photoCropPos,setPhotoCropPos]=useState({x:50,y:50,scale:1});
@@ -8003,6 +8014,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           // Collect all logs across all weeks in this month
           const monthLogs=weeks.flatMap(wk=>weekMap[wk]||[]);
           // Collect photo cards — first pinned from each week only
+          let monthPhotoIdx=0;
           const monthPhotoCards=weeks.map(wk=>{
             const pinnedIds=(data.profilePhotoIds||[]);
             const weekPinned=pinnedIds.filter(id=>{
@@ -8018,8 +8030,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const photo=entry?.actPhotos?.[0];
             if(!photo) return null;
             const pos=(data.profilePhotoPosMap||{})[id]||{x:50,y:50,scale:1};
-            const weeklyPhotoId=`profile_photo_${id}`;
-            const weeklySpan=(data.statCardSizes||{})[weeklyPhotoId]||{colSpan:2,rowSpan:2};
+            const sizeByPosition=(monthPhotoIdx%2===0)?{colSpan:2,rowSpan:2}:{colSpan:1,rowSpan:1};
+            monthPhotoIdx++;
             return {
               iconId:`profile_photo_${id}_month_${monthKey}`,
               _baseId:"photo",
@@ -8030,7 +8042,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
               _entryId:id,
               _photoPos:pos,
               min:1,
-              defaultSpan:{colSpan:weeklySpan.colSpan||2,rowSpan:weeklySpan.rowSpan||2}
+              defaultSpan:sizeByPosition
             };
           }).filter(Boolean);
 
@@ -8078,28 +8090,71 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
                   const {cards,slots,weekDominant}=buildMonthCards(monthKey,lastPalette);
                   if(weekDominant) lastPalette=weekDominant;
                   if(!cards.length) return null;
-                  const isOpen=true;
+                  const monthHarmonyKey=`month_${monthKey}`;
+                  const showMonthDetails=monthDetailsOpen[monthKey]===true;
+                  const isOpen=monthOpen[monthKey]!==false;
                   return(
                     <div key={monthKey} style={{marginBottom:16}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                         <button
                           onClick={()=>{
-                            const now=Date.now();
-                            const last=monthStarTap.current[monthKey]||0;
-                            if(now-last<400){
-                              monthStarTap.current[monthKey]=0;
-                              setMonthView(prev=>({...prev,[monthKey]:false}));
-                            } else {
-                              monthStarTap.current[monthKey]=now;
-                            }
+                            setMonthDetailsOpen(prev=>({...prev,[monthKey]:!prev[monthKey]}));
                           }}
                           style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:0.9}}
                         >
                           <WeekStar/>
                         </button>
-                        <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{monthFmtLabel(monthKey)}</span>
+                        {showMonthDetails&&(
+                          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                            <button
+                              onClick={()=>updateMonthView(prev=>({...prev,[monthKey]:false}))}
+                              style={{fontSize:11,color:th.sub,letterSpacing:0.3,background:"transparent",border:"none",padding:0,cursor:"pointer",textDecoration:"underline"}}
+                            >
+                              {monthFmtLabel(monthKey)}
+                            </button>
+                            <select
+                              value={(data.weekHarmony||{})[monthHarmonyKey]||"analog"}
+                              onChange={e=>onChange("weekHarmony",{...(data.weekHarmony||{}),[monthHarmonyKey]:e.target.value})}
+                              style={{
+                                fontSize:11,
+                                color:th.sub,
+                                background:th.card,
+                                border:`1px solid ${th.border}`,
+                                borderRadius:8,
+                                padding:"3px 8px",
+                                cursor:"pointer",
+                                outline:"none",
+                                appearance:"none",
+                                WebkitAppearance:"none",
+                                paddingRight:20,
+                                backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`,
+                                backgroundRepeat:"no-repeat",
+                                backgroundPosition:"right 6px center",
+                              }}
+                            >
+                              <option value="analog">Analog</option>
+                              <option value="comp">Complement</option>
+                              <option value="split1">Split-Comp</option>
+                              <option value="triad">Triad</option>
+                              <option value="mono">Mono</option>
+                              <option value="auto">Auto</option>
+                            </select>
+                            <button
+                              onClick={()=>setMonthOpen(prev=>({...prev,[monthKey]:!isOpen}))}
+                              style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",cursor:"pointer"}}
+                            >
+                              {isOpen?"Hide":"Show"}
+                            </button>
+                            <button
+                              disabled
+                              style={{fontSize:11,color:th.sub,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"3px 8px",opacity:0.5,cursor:"default"}}
+                            >
+                              Share
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      {photosReady&&<StatGrid
+                      {isOpen&&photosReady&&<StatGrid
                         cards={cards} data={data} onChange={onChange}
                         th={th} isHapon={isHapon} isMN={data.theme==="manila_nights"}
                         onStickerOpen={onStickerOpen}
@@ -8125,15 +8180,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <button
                       onClick={()=>{
-                        const now=Date.now();
-                        const last=monthStarTap.current[monthKey]||0;
-                        if(now-last<400&&eligible){
-                          monthStarTap.current[monthKey]=0;
-                          setMonthView(prev=>({...prev,[monthKey]:true}));
-                        } else {
-                          monthStarTap.current[monthKey]=now;
-                          setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}));
-                        }
+                        setWeekDetailsOpen(prev=>({...prev,[weekKey]:!prev[weekKey]}));
                       }}
                       style={{background:"transparent",border:"none",padding:0,cursor:"pointer",display:"inline-flex",alignItems:"center",opacity:eligible&&isFirstWeekOfMonth?1:0.7}}
                       aria-label="Toggle week details"
@@ -8142,7 +8189,12 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
                     </button>
                     {showDetails&&(
                       <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                        <span style={{fontSize:11,color:th.sub,letterSpacing:0.3}}>{formatWeekRange(weekKey)}</span>
+                        <button
+                          onClick={()=>{ if(eligible) updateMonthView(prev=>({...prev,[monthKey]:true})); }}
+                          style={{fontSize:11,color:th.sub,letterSpacing:0.3,background:"transparent",border:"none",padding:0,cursor:eligible?"pointer":"default",textDecoration:eligible?"underline":"none",opacity:eligible?1:0.75}}
+                        >
+                          {formatWeekRange(weekKey)}
+                        </button>
                         {/* Harmony mode compact dropdown — sits right next to the date range */}
                         <select
                           value={(data.weekHarmony||{})[weekKey]||"analog"}
@@ -8970,7 +9022,12 @@ function App(){
           const html=await res.text();
           const m=html.match(/omdbLibrary:\s*(\[[\s\S]*?\])\s*,\s*omdbCursor:/);
           if(m&&m[1]){
-            const srcList=eval(m[1])||[];
+            let srcList=[];
+            try{
+              srcList=JSON.parse(m[1]);
+            }catch(_){
+              srcList=[];
+            }
             if(srcList.length){
               const existing=new Set((d.libraryMovies||[]).map(x=>x.title.toLowerCase()));
               const posterMap={};
