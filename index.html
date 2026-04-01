@@ -7394,7 +7394,7 @@ function StatsNerdsPage({data,onClose}){
   const seenMovieTitles=new Set();
   let newMovieCount=0, repeatMovieCount=0;
   logs.forEach(l=>{
-    const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
+    const d=l.customDate?new Date(l.customDate+"T12:00:00"):(l.date?new Date(l.date):null);
     if(!d||isNaN(d)) return;
     const day=phWeekdayFmt.format(d);
     dayCounts[day]=(dayCounts[day]||0)+1;
@@ -7433,7 +7433,7 @@ function StatsNerdsPage({data,onClose}){
     }
   });
   allLogs.forEach(l=>{
-    const d=l.customDate?new Date(l.customDate+"T12:00:00"):new Date(l.date||Date.now());
+    const d=l.customDate?new Date(l.customDate+"T12:00:00"):(l.date?new Date(l.date):null);
     if(!d||isNaN(d)) return;
     if(d<APP_MADE_AT) return;
     activeDaysAll.add(phDayKey(d));
@@ -7816,11 +7816,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
       <div ref={statsAnchorRef}/>
       {(()=>{
         const PH_TZ="Asia/Manila";
-        const phDateFmt=new Intl.DateTimeFormat("en-CA",{timeZone:PH_TZ,year:"numeric",month:"2-digit",day:"2-digit"});
+        const phDateFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,year:"numeric",month:"2-digit",day:"2-digit"});
         const phWeekdayFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,weekday:"short"});
         const phHourFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,hour:"2-digit",hour12:false});
         const weekdayIdx={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
-        const phDateKey=d=>phDateFmt.format(d);
+        const phDateKey=d=>{
+          const parts=phDateFmt.formatToParts(d);
+          const y=parts.find(p=>p.type==="year")?.value;
+          const m=parts.find(p=>p.type==="month")?.value;
+          const day=parts.find(p=>p.type==="day")?.value;
+          return `${y}-${m}-${day}`;
+        };
         const phWeekStartKey=d=>{
           const key=phDateKey(d);
           const wd=weekdayIdx[phWeekdayFmt.format(d)]??0;
@@ -7830,7 +7836,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
         };
         const phHour=d=>parseInt(phHourFmt.format(d),10);
 
-        const allLogs=data.logs.filter(l=>l.date);
+        const allLogs=data.logs.filter(l=>l.date||l.customDate);
         if(!allLogs.length){
           return(
             <div style={{marginBottom:16}}>
@@ -7859,6 +7865,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           .sort((a,b)=>new Date(`${b}T00:00:00+08:00`)-new Date(`${a}T00:00:00+08:00`));
 
         const manualLogs=allLogs.filter(l=>!l.fromHealthKit&&!l.fromLetterboxd);
+        const activeLogs=allLogs; // unified source for days-active/streak-style counting
         const cumulativeDaysActive=weekKey=>{
           const end=new Date(weekKey+"T00:00:00");
           // Monthly pseudo-keys (e.g. "month_2026-03") are not valid dates.
@@ -7867,15 +7874,17 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             const days=new Set();
             (weekMap[weekKey]||[]).forEach(l=>{
               const d=entryDateForWeek(l);
-              if(!d||isNaN(d)||l.fromHealthKit||l.fromLetterboxd) return;
-              days.add(phDateKey(d));
+              if(!d||isNaN(d)) return;
+              const k=phDateKey(d);
+              if(k<TIMELINE_START_KEY) return;
+              days.add(k);
             });
             return days.size;
           }
           end.setDate(end.getDate()+6);
           const endKey=phDateKey(end);
           const days=new Set();
-          manualLogs.forEach(l=>{
+          activeLogs.forEach(l=>{
             const d=entryDateForWeek(l);
             if(!d||isNaN(d)) return;
             const k=phDateKey(d);
@@ -7885,7 +7894,9 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
         };
         const manualWeekCounts={};
         manualLogs.forEach(l=>{
-          const wk=phWeekStartKey(new Date(l.date));
+          const d=entryDateForWeek(l);
+          if(!d||isNaN(d)) return;
+          const wk=phWeekStartKey(d);
           manualWeekCounts[wk]=(manualWeekCounts[wk]||0)+1;
         });
         const manualWeekKeys=Object.keys(manualWeekCounts);
