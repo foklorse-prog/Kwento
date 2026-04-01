@@ -7105,10 +7105,14 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                   fontSize:20, // slightly reduced again
                   color:"rgba(255,255,255,0.96)",
                   fontWeight:600,
-                  lineHeight:1.1,
+                  lineHeight:1.08,
+                  minHeight:Math.round(20*1.08*2),
+                  display:"-webkit-box",
+                  WebkitLineClamp:2,
+                  WebkitBoxOrient:"vertical",
                   overflow:"hidden",
                   textOverflow:"ellipsis",
-                  whiteSpace:"nowrap",
+                  whiteSpace:"normal",
                   textShadow:"0 1px 2px rgba(0,0,0,0.65)"
                 }}>
                   {card.label}
@@ -7122,11 +7126,10 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                     fontWeight:400,
                     lineHeight:1.2,
                     overflow:"hidden",
-                    textOverflow:"ellipsis",
                     whiteSpace:"nowrap",
                     textShadow:"0 1px 2px rgba(0,0,0,0.62)"
                   }}>
-                    {truncateWholeWord(card._photoNote,colSpan===2?52:22)}
+                    {truncateWholeWord(card._photoNote,colSpan===2?34:16)}
                   </div>
                 )}
               </div>}
