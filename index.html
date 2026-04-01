@@ -6597,7 +6597,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
         :parts;
     const availH=breakdownMode==="wide"?cH*0.34:cH*0.64;
     const lineGap=1.24;
-    let fSize=15; // slightly reduced from 12pt equivalent
+    let fSize=14; // slightly reduced again
     ctx.font=`600 ${fSize}px 'Space Mono', monospace`;
     const longest=lines.reduce((a,b)=>ctx.measureText(a).width>ctx.measureText(b).width?a:b);
     while((ctx.measureText(longest).width>cW*0.9 || (fSize*lineGap*lines.length)>availH) && fSize>8){
@@ -6613,7 +6613,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
       ctx.shadowBlur=0; ctx.fillText(line,cx,y);
     });
   } else if(isNum){
-    let fSize=15; // slightly reduced from 12pt equivalent
+    let fSize=14; // slightly reduced again
     ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`;
     while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){
       fSize--;
@@ -6622,7 +6622,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ctx.shadowBlur=10; ctx.fillText(String(value),cx,valueY);
     ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
   } else {
-    let fSize=15; // slightly reduced from 12pt equivalent
+    let fSize=14; // slightly reduced again
     ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`;
     while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){
       fSize--;
@@ -6634,8 +6634,8 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 
   // ── Label — only for cards that have a separate label
   if(!noLabel){
-    const labelFontSize=10; // slightly reduced from 8pt equivalent
-    ctx.font=`italic 600 ${labelFontSize}px 'DM Sans', sans-serif`;
+    const labelFontSize=9; // slightly reduced again
+    ctx.font=`italic 400 ${labelFontSize}px 'DM Sans', sans-serif`;
     ctx.fillStyle=(palette&&palette.label)||"rgba(136,120,170,0.75)";
     ctx.shadowBlur=0;
     ctx.fillText(label.toUpperCase(),cx,labelY);
@@ -6974,9 +6974,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const BASE_H=95;
         const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
         const area=colSpan*rowSpan;
-        const emojiSz="15px";
-        const valSz="15px"; // slightly reduced
-        const lblSz="10px"; // slightly reduced
+        const emojiSz="14px";
+        const valSz="14px"; // slightly reduced again
+        const lblSz="9.33px"; // slightly reduced again
         const pad=area>=4
           ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
           :area>=2
@@ -7042,6 +7042,23 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         let accentColor=th.accent;
         let labelColor=th.sub;
         let borderColor=th.border;
+        const firstStatCard=orderedCards.find(c=>!c._photo);
+        const isFirstStatCard=!!firstStatCard && firstStatCard.iconId===card.iconId;
+        const isLeadTopBottom=(isFirstStatCard&&(String(card.iconId).includes("week_breakdown")||String(card.iconId).includes("most_logged")));
+        const truncateWholeWord=(text,maxChars)=>{
+          const raw=String(text||"").trim().replace(/\s+/g," ");
+          if(!raw) return "";
+          if(raw.length<=maxChars) return raw;
+          const words=raw.split(" ");
+          let out="";
+          for(let i=0;i<words.length;i++){
+            const next=out?`${out} ${words[i]}`:words[i];
+            if(next.length>maxChars) break;
+            out=next;
+          }
+          if(!out) return raw.slice(0,Math.max(1,maxChars-1))+"…";
+          return out+"…";
+        };
         if(card._photo) return(
           <div key={card.iconId} data-cardid={card.iconId}
             ref={el=>{ if(el) cardRefs.current[card.iconId]=el; }}
@@ -7080,12 +7097,12 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 top:((1-(card._photoPos.scale||1))*(card._photoPos.y||50)/100*100)+"%",
                 pointerEvents:"none",
               }}/>
-              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px 12px",
+              {!(colSpan===1&&rowSpan===1)&&<div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px 12px",
                 background:"linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.62) 38%, rgba(0,0,0,0.22) 72%, rgba(0,0,0,0) 100%)",
                 userSelect:"none",WebkitUserSelect:"none"}}>
                 <div style={{
                   fontFamily:"var(--font-display)",
-                  fontSize:22, // slightly reduced from 18pt equivalent
+                  fontSize:20, // slightly reduced again
                   color:"rgba(255,255,255,0.96)",
                   fontWeight:600,
                   lineHeight:1.1,
@@ -7109,10 +7126,10 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                     whiteSpace:"nowrap",
                     textShadow:"0 1px 2px rgba(0,0,0,0.62)"
                   }}>
-                    {card._photoNote}
+                    {truncateWholeWord(card._photoNote,colSpan===2?52:22)}
                   </div>
                 )}
-              </div>
+              </div>}
             </div>
           </div>
         );
@@ -7237,7 +7254,8 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 fontSize:valSz,fontWeight:800,color:valColor,
                 lineHeight:isVibe?1.22:1.05,whiteSpace:vibeWhiteSpace,
                 maxWidth:"100%",textAlign:"center",
-                fontFamily:valueFont,position:"relative",zIndex:1
+                fontFamily:valueFont,position:"relative",zIndex:1,
+                order:isLeadTopBottom?2:0,
               }}>
                 {card.iconId==="steps"
                   ?card.value.toLocaleString()
@@ -7249,6 +7267,11 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
                 fontFamily:"var(--font-body)",textTransform:"uppercase",
                 fontStyle:"italic",
+                fontWeight:400,
+                order:isLeadTopBottom?1:0,
+                alignSelf:"center",
+                textAlign:"center",
+                width:"auto",
               }}>{card.label}</div>
               {showEqualizer&&(
                 <svg width="120" height="28" viewBox="0 0 291 65" style={{position:"relative",zIndex:1,display:"block"}} fill={valColor}>
