@@ -6597,7 +6597,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
         :parts;
     const availH=breakdownMode==="wide"?cH*0.34:cH*0.64;
     const lineGap=1.24;
-    let fSize=16; // 12pt
+    let fSize=15; // slightly reduced from 12pt equivalent
     ctx.font=`600 ${fSize}px 'Space Mono', monospace`;
     const longest=lines.reduce((a,b)=>ctx.measureText(a).width>ctx.measureText(b).width?a:b);
     while((ctx.measureText(longest).width>cW*0.9 || (fSize*lineGap*lines.length)>availH) && fSize>8){
@@ -6613,7 +6613,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
       ctx.shadowBlur=0; ctx.fillText(line,cx,y);
     });
   } else if(isNum){
-    let fSize=16; // 12pt
+    let fSize=15; // slightly reduced from 12pt equivalent
     ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`;
     while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){
       fSize--;
@@ -6622,7 +6622,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ctx.shadowBlur=10; ctx.fillText(String(value),cx,valueY);
     ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
   } else {
-    let fSize=16; // 12pt
+    let fSize=15; // slightly reduced from 12pt equivalent
     ctx.font=`700 ${fSize}px 'Playfair Display', Georgia, serif`;
     while(ctx.measureText(String(value)).width>cW*0.88&&fSize>8){
       fSize--;
@@ -6634,7 +6634,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 
   // ── Label — only for cards that have a separate label
   if(!noLabel){
-    const labelFontSize=10.67; // 8pt
+    const labelFontSize=10; // slightly reduced from 8pt equivalent
     ctx.font=`italic 600 ${labelFontSize}px 'DM Sans', sans-serif`;
     ctx.fillStyle=(palette&&palette.label)||"rgba(136,120,170,0.75)";
     ctx.shadowBlur=0;
@@ -6974,9 +6974,9 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
         const BASE_H=95;
         const cardH=rowSpan===2?BASE_H*2+10:BASE_H;
         const area=colSpan*rowSpan;
-        const emojiSz="16px";
-        const valSz="16px"; // 12pt
-        const lblSz="10.67px"; // 8pt
+        const emojiSz="15px";
+        const valSz="15px"; // slightly reduced
+        const lblSz="10px"; // slightly reduced
         const pad=area>=4
           ?"clamp(10px,2.1vw,14px) clamp(9px,1.8vw,12px)"
           :area>=2
@@ -7085,7 +7085,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                 userSelect:"none",WebkitUserSelect:"none"}}>
                 <div style={{
                   fontFamily:"var(--font-display)",
-                  fontSize:24, // 18pt
+                  fontSize:22, // slightly reduced from 18pt equivalent
                   color:"rgba(255,255,255,0.96)",
                   fontWeight:600,
                   lineHeight:1.1,
@@ -7100,7 +7100,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
                   <div style={{
                     marginTop:4,
                     fontFamily:"var(--font-ui)",
-                    fontSize:16, // 16px
+                    fontSize:13.33, // 10pt
                     color:"rgba(255,255,255,0.92)",
                     fontWeight:400,
                     lineHeight:1.2,
