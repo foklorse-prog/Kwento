@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-01T20:06:39.352Z",
+  "updatedAt": "2026-04-02T05:50:16.556Z",
   "items": [
     {
       "title": "Mid90s",
@@ -20708,6 +20708,2143 @@
         "emotional",
         "crime",
         "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Omar",
+      "year": "2013",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Hany Abu-Assad",
+      "actor": "Adam Bakri",
+      "actors": [
+        "Adam Bakri",
+        "Leem Lubany",
+        "Eyad Hourani"
+      ],
+      "plot": "A young Palestinian freedom fighter agrees to work as an informant after he's tricked into an admission of guilt by association in the wake of an Israeli soldier's killing.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIxMjY1NTQ5Ml5BMl5BanBnXkFtZTgwMjMwMTAyMTE@._V1_SX300.jpg",
+      "posterId": "tt2852406",
+      "imdbID": "tt2852406",
+      "imdbRating": 7.5,
+      "imdbVotes": 15858,
+      "runtime": "98 min",
+      "rated": "Not Rated",
+      "country": "Occupied Palestinian Territory",
+      "language": "Arabic, Hebrew",
+      "awards": "Nominated for 1 Oscar. 13 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mandela: Long Walk to Freedom",
+      "year": "2013",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Justin Chadwick",
+      "actor": "Idris Elba",
+      "actors": [
+        "Idris Elba",
+        "Naomie Harris",
+        "Terry Pheto"
+      ],
+      "plot": "A chronicle of Nelson Mandela's life journey from his childhood in a rural village through to his inauguration as the first democratically elected president of South Africa.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg1NTQ1NDczNV5BMl5BanBnXkFtZTcwNDQyMDU1OQ@@._V1_SX300.jpg",
+      "posterId": "tt2304771",
+      "imdbID": "tt2304771",
+      "imdbRating": 7.1,
+      "imdbVotes": 29817,
+      "runtime": "141 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, France, South Africa",
+      "language": "English, Afrikaans, Xhosa",
+      "awards": "Nominated for 1 Oscar. 13 wins & 36 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Jackass Presents: Bad Grandpa",
+      "year": "2013",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": "Jeff Tremaine",
+      "actor": "Johnny Knoxville",
+      "actors": [
+        "Johnny Knoxville",
+        "Jackson Nicoll",
+        "Gregorio"
+      ],
+      "plot": "86-year-old Irving Zisman takes a trip from Nebraska to North Carolina to take his 8 year-old grandson, Billy, back to his real father.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGViOTJlMDktYzFkMy00NWU0LTg4M2EtNWMyNDUyMjQ5YmQxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt3063516",
+      "imdbID": "tt3063516",
+      "imdbRating": 6.5,
+      "imdbVotes": 100383,
+      "runtime": "92 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 1 win & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Iron Man 3",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Shane Black",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Guy Pearce",
+        "Gwyneth Paltrow"
+      ],
+      "plot": "When Tony Stark's world is torn apart by a formidable terrorist called the Mandarin, he starts an odyssey of rebuilding and retribution.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIzMzAzMjQyM15BMl5BanBnXkFtZTcwNzM2NjcyOQ@@._V1_SX300.jpg",
+      "posterId": "tt1300854",
+      "imdbID": "tt1300854",
+      "imdbRating": 7.1,
+      "imdbVotes": 957295,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 20 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Get a Horse!",
+      "year": "2013",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Lauren MacMullan",
+      "actor": "Walt Disney",
+      "actors": [
+        "Walt Disney",
+        "Marcellite Garner",
+        "Russi Taylor"
+      ],
+      "plot": "Mickey, Minnie, Horace Horsecollar, and Clarabelle Cow go on a musical wagon ride until Peg-Leg Pete tries to run them off the road.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQxNDIzMDI3NF5BMl5BanBnXkFtZTcwODE4OTA3OQ@@._V1_SX300.jpg",
+      "posterId": "tt2980764",
+      "imdbID": "tt2980764",
+      "imdbRating": 7.5,
+      "imdbVotes": 5798,
+      "runtime": "6 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ernest & Celestine",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Stéphane Aubier, Vincent Patar, Benjamin Renner",
+      "actor": "Lambert Wilson",
+      "actors": [
+        "Lambert Wilson",
+        "Pauline Brunner",
+        "Anne-Marie Loop"
+      ],
+      "plot": "The story of an unlikely friendship between a bear, Ernest, and a young mouse named Celestine.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA3NzA5ODY4M15BMl5BanBnXkFtZTgwMzU5ODMwMTE@._V1_SX300.jpg",
+      "posterId": "tt1816518",
+      "imdbID": "tt1816518",
+      "imdbRating": 7.8,
+      "imdbVotes": 23596,
+      "runtime": "80 min",
+      "rated": "PG",
+      "country": "France, Belgium, Luxembourg, United States",
+      "language": "French, English",
+      "awards": "Nominated for 1 Oscar. 15 wins & 15 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Dirty Wars",
+      "year": "2013",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Crime",
+        "History"
+      ],
+      "director": "Rick Rowley",
+      "actor": "Jeremy Scahill",
+      "actors": [
+        "Jeremy Scahill",
+        "Nasser Al Aulaqi",
+        "Saleha Al Aulaqi"
+      ],
+      "plot": "Investigative journalist Jeremy Scahill is pulled into an unexpected journey as he chases down the hidden truth behind America's expanding covert wars.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUyOTYwNDUyMV5BMl5BanBnXkFtZTcwNzQwOTU1OQ@@._V1_SX300.jpg",
+      "posterId": "tt2532528",
+      "imdbID": "tt2532528",
+      "imdbRating": 7.4,
+      "imdbVotes": 9431,
+      "runtime": "87 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English, Pashtu, Somali, Dari, Arabic",
+      "awards": "Nominated for 1 Oscar. 10 wins & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Cutie and the Boxer",
+      "year": "2013",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography"
+      ],
+      "director": "Zach Heinzerling",
+      "actor": "Ushio Shinohara",
+      "actors": [
+        "Ushio Shinohara",
+        "Noriko Shinohara",
+        "Alex Shinohara"
+      ],
+      "plot": "This candid New York love story explores the chaotic 40-year marriage of famed boxing painter Ushio Shinohara and his wife, Noriko. Anxious to shed her role as her overbearing husband's assistant, Noriko finds an identity of her own.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjEyNzgyMjUzNl5BMl5BanBnXkFtZTcwODk3NjQyOQ@@._V1_SX300.jpg",
+      "posterId": "tt2355540",
+      "imdbID": "tt2355540",
+      "imdbRating": 7.2,
+      "imdbVotes": 4757,
+      "runtime": "82 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Japanese",
+      "awards": "Nominated for 1 Oscar. 8 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Before Midnight",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Richard Linklater",
+      "actor": "Ethan Hawke",
+      "actors": [
+        "Ethan Hawke",
+        "Julie Delpy",
+        "Seamus Davey-Fitzpatrick"
+      ],
+      "plot": "We meet Jesse and Celine nine years on in Greece. Almost two decades have passed since their first meeting on that train bound for Vienna.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA5NzgxODE2NF5BMl5BanBnXkFtZTcwNTI1NTI0OQ@@._V1_SX300.jpg",
+      "posterId": "tt2209418",
+      "imdbID": "tt2209418",
+      "imdbRating": 7.9,
+      "imdbVotes": 183223,
+      "runtime": "109 min",
+      "rated": "R",
+      "country": "United States, Greece",
+      "language": "English, Greek, French",
+      "awards": "Nominated for 1 Oscar. 20 wins & 64 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "All Is Lost",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "J.C. Chandor",
+      "actor": "Robert Redford",
+      "actors": [
+        "Robert Redford"
+      ],
+      "plot": "After a collision with a shipping container at sea, a resourceful sailor finds himself, despite all efforts to the contrary, staring his mortality in the face.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI0MzIyMjU1N15BMl5BanBnXkFtZTgwOTk1MjQxMDE@._V1_SX300.jpg",
+      "posterId": "tt2017038",
+      "imdbID": "tt2017038",
+      "imdbRating": 6.9,
+      "imdbVotes": 87409,
+      "runtime": "106 min",
+      "rated": "PG-13",
+      "country": "United States, Canada, Mexico",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 48 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lone Ranger",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Gore Verbinski",
+      "actor": "Johnny Depp",
+      "actors": [
+        "Johnny Depp",
+        "Armie Hammer",
+        "William Fichtner"
+      ],
+      "plot": "Native American warrior Tonto recounts the untold tales that transformed John Reid, a man of the law, into a legend of justice.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjQ1YWE5NzktOWYyYS00MTBmLWE1NDUtMTU5Mzc2YWQyNzhjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1210819",
+      "imdbID": "tt1210819",
+      "imdbRating": 6.4,
+      "imdbVotes": 252056,
+      "runtime": "150 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, North American Indian",
+      "awards": "Nominated for 2 Oscars. 6 wins & 23 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Grandmaster",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Wong Kar-Wai",
+      "actor": "Tony Leung Chiu-wai",
+      "actors": [
+        "Tony Leung Chiu-wai",
+        "Ziyi Zhang",
+        "Jin Zhang"
+      ],
+      "plot": "The story of martial-arts master Ip Man, the man who trained Bruce Lee.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjYzYTcxMjYtZWNlYy00Y2UwLTg5MDYtZDZmNTExYmVjZjc4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1462900",
+      "imdbID": "tt1462900",
+      "imdbRating": 6.6,
+      "imdbVotes": 38340,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "Hong Kong, China",
+      "language": "Mandarin, Cantonese, Japanese",
+      "awards": "Nominated for 2 Oscars. 68 wins & 72 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Lone Survivor",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Peter Berg",
+      "actor": "Mark Wahlberg",
+      "actors": [
+        "Mark Wahlberg",
+        "Taylor Kitsch",
+        "Emile Hirsch"
+      ],
+      "plot": "Marcus Luttrell and his team set out on a mission to capture or kill notorious Taliban leader Ahmad Shah, in late June 2005. Marcus and his team are left to fight for their lives in one of the most valiant efforts of modern warfare.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0NTgwOTk5Ml5BMl5BanBnXkFtZTcwMjE3NDc5OQ@@._V1_SX300.jpg",
+      "posterId": "tt1091191",
+      "imdbID": "tt1091191",
+      "imdbRating": 7.5,
+      "imdbVotes": 322301,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English, Pashtu, Arabic",
+      "awards": "Nominated for 2 Oscars. 6 wins & 16 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Inside Llewyn Davis",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "director": "Ethan Coen, Joel Coen",
+      "actor": "Oscar Isaac",
+      "actors": [
+        "Oscar Isaac",
+        "Carey Mulligan",
+        "John Goodman"
+      ],
+      "plot": "A week in the life of a young singer as he navigates the Greenwich Village folk scene of 1961.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAxNjcyNDQxM15BMl5BanBnXkFtZTgwNzU2NDA0MDE@._V1_SX300.jpg",
+      "posterId": "tt2042568",
+      "imdbID": "tt2042568",
+      "imdbRating": 7.4,
+      "imdbVotes": 170704,
+      "runtime": "104 min",
+      "rated": "R",
+      "country": "United States, United Kingdom, France",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 47 wins & 174 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Despicable Me 2",
+      "year": "2013",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Pierre Coffin, Chris Renaud",
+      "actor": "Steve Carell",
+      "actors": [
+        "Steve Carell",
+        "Kristen Wiig",
+        "Benjamin Bratt"
+      ],
+      "plot": "When a new criminal comes to town, the Anti-Villain League decides to hire Gru in order to fight him off. While Gru initially refuses, he eventually agrees after his aide goes back to his evil ways.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQxNzY1MjI5NF5BMl5BanBnXkFtZTcwNTI0MDY1OQ@@._V1_SX300.jpg",
+      "posterId": "tt1690953",
+      "imdbID": "tt1690953",
+      "imdbRating": 7.3,
+      "imdbVotes": 456712,
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "United States, France, Japan",
+      "language": "English, Ukrainian",
+      "awards": "Nominated for 2 Oscars. 12 wins & 66 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "August: Osage County",
+      "year": "2013",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "John Wells",
+      "actor": "Meryl Streep",
+      "actors": [
+        "Meryl Streep",
+        "Dermot Mulroney",
+        "Julia Roberts"
+      ],
+      "plot": "A look at the lives of the strong-willed women of the Weston family, whose paths have diverged until a family crisis brings them back to the Oklahoma house they grew up in, and to the dysfunctional woman who raised them.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzQ5ODE4NTcxNV5BMl5BanBnXkFtZTgwNjkyNDQ0MDE@._V1_SX300.jpg",
+      "posterId": "tt1322269",
+      "imdbID": "tt1322269",
+      "imdbRating": 7.2,
+      "imdbVotes": 97779,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 16 wins & 67 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Hobbit: The Desolation of Smaug",
+      "year": "2013",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Fantasy"
+      ],
+      "director": "Peter Jackson",
+      "actor": "Ian McKellen",
+      "actors": [
+        "Ian McKellen",
+        "Martin Freeman",
+        "Richard Armitage"
+      ],
+      "plot": "The dwarves, along with Bilbo Baggins and Gandalf the Grey, continue their quest to reclaim the Lonely Mountain, their homeland, from the dragon Smaug.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzU0NDY0NDEzNV5BMl5BanBnXkFtZTgwOTIxNDU1MDE@._V1_SX300.jpg",
+      "posterId": "tt1170358",
+      "imdbID": "tt1170358",
+      "imdbRating": 7.8,
+      "imdbVotes": 749778,
+      "runtime": "161 min",
+      "rated": "PG-13",
+      "country": "New Zealand, United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 19 wins & 90 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Philomena",
+      "year": "2013",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Stephen Frears",
+      "actor": "Judi Dench",
+      "actors": [
+        "Judi Dench",
+        "Steve Coogan",
+        "Sophie Kennedy Clark"
+      ],
+      "plot": "A world-weary political journalist picks up the story of a woman's search for her son, who was taken away from her decades ago after she became pregnant and was forced to live in a convent.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA5ODgyNzcxMV5BMl5BanBnXkFtZTgwMzkzOTYzMDE@._V1_SX300.jpg",
+      "posterId": "tt2431286",
+      "imdbID": "tt2431286",
+      "imdbRating": 7.6,
+      "imdbVotes": 106399,
+      "runtime": "98 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, France, United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 33 wins & 86 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Wolf of Wall Street",
+      "year": "2013",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Martin Scorsese",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Jonah Hill",
+        "Margot Robbie"
+      ],
+      "plot": "Based on the true story of Jordan Belfort, from his rise to a wealthy stock-broker living the high life to his fall involving crime, corruption and the federal government.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIxMjgxNTk0MF5BMl5BanBnXkFtZTgwNjIyOTg2MDE@._V1_SX300.jpg",
+      "posterId": "tt0993846",
+      "imdbID": "tt0993846",
+      "imdbRating": 8.2,
+      "imdbVotes": 1759293,
+      "runtime": "180 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 5 Oscars. 38 wins & 180 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Nebraska",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Alexander Payne",
+      "actor": "Bruce Dern",
+      "actors": [
+        "Bruce Dern",
+        "Will Forte",
+        "June Squibb"
+      ],
+      "plot": "An aging, booze-addled father makes the trip from Montana to Nebraska with his estranged son in order to claim a million-dollar Mega Sweepstakes Marketing prize.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTgyNzRhMTQtZWUxZi00YzFmLTlhYTItNzY5ZDY2ZjdlYjM1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1821549",
+      "imdbID": "tt1821549",
+      "imdbRating": 7.7,
+      "imdbVotes": 126898,
+      "runtime": "115 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 6 Oscars. 29 wins & 170 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Captain Phillips",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Crime"
+      ],
+      "director": "Paul Greengrass",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Barkhad Abdi",
+        "Barkhad Abdirahman"
+      ],
+      "plot": "The true story of Captain Richard Phillips and the 2009 hijacking by Somali pirates of the U.S.-flagged MV Maersk Alabama, the first American cargo ship to be hijacked in two hundred years.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWYyNjI3ZjEtNGE5ZS00MDgxLWIzNGEtZTgzNDVlZjZjYWU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1535109",
+      "imdbID": "tt1535109",
+      "imdbRating": 7.8,
+      "imdbVotes": 516908,
+      "runtime": "134 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom, Malta",
+      "language": "English, Somali",
+      "awards": "Nominated for 6 Oscars. 17 wins & 155 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "American Hustle",
+      "year": "2013",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "David O. Russell",
+      "actor": "Christian Bale",
+      "actors": [
+        "Christian Bale",
+        "Amy Adams",
+        "Bradley Cooper"
+      ],
+      "plot": "A con man, Irving Rosenfeld, along with his seductive partner Sydney Prosser, is forced to work for a wild F.B.I. Agent, Richie DiMaso, who pushes them into a world of Jersey powerbrokers and the Mafia.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGQ2NzEwZGEtYjk1MC00NWFmLTgyYTgtZmRhMTRmOTBlN2U5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1800241",
+      "imdbID": "tt1800241",
+      "imdbRating": 7.2,
+      "imdbVotes": 515479,
+      "runtime": "138 min",
+      "rated": "R",
+      "country": "United States, China",
+      "language": "English, Arabic",
+      "awards": "Nominated for 10 Oscars. 70 wins & 228 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lady in Number 6: Music Saved My Life",
+      "year": "2013",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short",
+        "Biography"
+      ],
+      "director": "Malcolm Clarke",
+      "actor": "Aliza Sommer-Herz",
+      "actors": [
+        "Aliza Sommer-Herz",
+        "Zdenka Fantlova",
+        "Anita Lasker-Wallfisch"
+      ],
+      "plot": "Aliza Sommer-Herz, aged 109 and the world's oldest Holocaust survivor, tells the story of how music saved her life: both during her time at Theresienstadt concentration camp and in the years afterwards.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAzNDg3ODM1OV5BMl5BanBnXkFtZTgwNTQ1MzA1MDE@._V1_SX300.jpg",
+      "posterId": "tt2924484",
+      "imdbID": "tt2924484",
+      "imdbRating": 8,
+      "imdbVotes": 1012,
+      "runtime": "39 min",
+      "rated": null,
+      "country": "Canada, United States, United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 4 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Great Beauty",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Paolo Sorrentino",
+      "actor": "Toni Servillo",
+      "actors": [
+        "Toni Servillo",
+        "Carlo Verdone",
+        "Sabrina Ferilli"
+      ],
+      "plot": "Jep Gambardella has seduced his way through the lavish nightlife of Rome for decades, but after his 65th birthday and a shock from the past, Jep looks past the nightclubs and parties to find a timeless landscape of absurd, exquisi...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ0ODg1OTQ2Nl5BMl5BanBnXkFtZTgwNTc2MDY1MDE@._V1_SX300.jpg",
+      "posterId": "tt2358891",
+      "imdbID": "tt2358891",
+      "imdbRating": 7.7,
+      "imdbVotes": 104171,
+      "runtime": "141 min",
+      "rated": "Not Rated",
+      "country": "Italy, France",
+      "language": "Italian, Japanese, Spanish, Chinese, French, Latin, German, English",
+      "awards": "Won 1 Oscar. 60 wins & 78 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mr. Hublot",
+      "year": "2013",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Laurent Witz, Alexandre Espigares",
+      "actor": null,
+      "actors": [],
+      "plot": "Mr Hublot is a withdrawn, idiosyncratic character with OCD, scared of change and the outside world. Robot Pet's arrival turns his life upside down: he has to share his home with this very invasive companion.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYyOTQyNTYwOF5BMl5BanBnXkFtZTgwNDE0OTU2MDE@._V1_SX300.jpg",
+      "posterId": "tt3043542",
+      "imdbID": "tt3043542",
+      "imdbRating": 7.2,
+      "imdbVotes": 5320,
+      "runtime": "11 min",
+      "rated": null,
+      "country": "Luxembourg, France",
+      "language": "English",
+      "awards": "Won 1 Oscar. 6 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Helium",
+      "year": "2013",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "Family"
+      ],
+      "director": "Anders Walter",
+      "actor": "Casper Crump",
+      "actors": [
+        "Casper Crump",
+        "Pelle Falk Krusbæk",
+        "Marijana Jankovic"
+      ],
+      "plot": "A young boy, Alfred, is dying, but through the stories about HELIUM - a magical fantasy world - told by the hospital's eccentric janitor Enzo, Alfred regains the joy and happiness of his life, and finds a safe haven away from dail...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0NDI1MTQ1Ml5BMl5BanBnXkFtZTgwNjk5NjE1MjE@._V1_SX300.jpg",
+      "posterId": "tt3346410",
+      "imdbID": "tt3346410",
+      "imdbRating": 7.2,
+      "imdbVotes": 2530,
+      "runtime": "22 min",
+      "rated": "Not Rated",
+      "country": "Denmark, United States",
+      "language": "Danish",
+      "awards": "Won 1 Oscar. 7 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "20 Feet from Stardom",
+      "year": "2013",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "History"
+      ],
+      "director": "Morgan Neville",
+      "actor": "Lou Adler",
+      "actors": [
+        "Lou Adler",
+        "Stephanie 'Stevvi' Alexander",
+        "Patti Austin"
+      ],
+      "plot": "Backup singers live in a world that lies just beyond the spotlight. Their voices bring harmony to the biggest bands in popular music, but we've had no idea who these singers are or what lives they lead, until now.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQxNDY2NjMwNF5BMl5BanBnXkFtZTcwNzExMDg0OQ@@._V1_SX300.jpg",
+      "posterId": "tt2396566",
+      "imdbID": "tt2396566",
+      "imdbRating": 7.4,
+      "imdbVotes": 14336,
+      "runtime": "91 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Won 1 Oscar. 22 wins & 27 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Blue Jasmine",
+      "year": "2013",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Woody Allen",
+      "actor": "Cate Blanchett",
+      "actors": [
+        "Cate Blanchett",
+        "Joy Carlin",
+        "Richard Conti"
+      ],
+      "plot": "A New York socialite, deeply troubled and in denial, arrives in San Francisco to impose upon her sister. She looks like a million dollars but isn't bringing money, peace or love.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc0ODk5MzEyMV5BMl5BanBnXkFtZTcwMzI0MDY1OQ@@._V1_SX300.jpg",
+      "posterId": "tt2334873",
+      "imdbID": "tt2334873",
+      "imdbRating": 7.3,
+      "imdbVotes": 218419,
+      "runtime": "98 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 56 wins & 83 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Her",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "Sci-Fi"
+      ],
+      "director": "Spike Jonze",
+      "actor": "Joaquin Phoenix",
+      "actors": [
+        "Joaquin Phoenix",
+        "Amy Adams",
+        "Scarlett Johansson"
+      ],
+      "plot": "In the near future, a lonely writer develops an unlikely relationship with an operating system designed to meet his every need.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA1Nzk0OTM2OF5BMl5BanBnXkFtZTgwNjU2NjEwMDE@._V1_SX300.jpg",
+      "posterId": "tt1798709",
+      "imdbID": "tt1798709",
+      "imdbRating": 8,
+      "imdbVotes": 722410,
+      "runtime": "126 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 83 wins & 187 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Great Gatsby",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Baz Luhrmann",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Carey Mulligan",
+        "Joel Edgerton"
+      ],
+      "plot": "A writer and wall street trader, Nick Carraway, finds himself drawn to the past and lifestyle of his mysterious millionaire neighbor, Jay Gatsby, amid the riotous parties of the Jazz Age.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkxNTk1ODcxNl5BMl5BanBnXkFtZTcwMDI1OTMzOQ@@._V1_SX300.jpg",
+      "posterId": "tt1343092",
+      "imdbID": "tt1343092",
+      "imdbRating": 7.2,
+      "imdbVotes": 639016,
+      "runtime": "143 min",
+      "rated": "PG-13",
+      "country": "Australia, United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 51 wins & 86 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Frozen",
+      "year": "2013",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Chris Buck, Jennifer Lee",
+      "actor": "Kristen Bell",
+      "actors": [
+        "Kristen Bell",
+        "Idina Menzel",
+        "Jonathan Groff"
+      ],
+      "plot": "Fearless optimist Anna teams up with rugged mountain man Kristoff and his loyal reindeer Sven in an epic journey to find Anna's sister Elsa, whose icy powers have trapped the kingdom of Arendelle in eternal winter.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg",
+      "posterId": "tt2294629",
+      "imdbID": "tt2294629",
+      "imdbRating": 7.4,
+      "imdbVotes": 708011,
+      "runtime": "102 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 83 wins & 60 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Dallas Buyers Club",
+      "year": "2013",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Jean-Marc Vallée",
+      "actor": "Matthew McConaughey",
+      "actors": [
+        "Matthew McConaughey",
+        "Jennifer Garner",
+        "Jared Leto"
+      ],
+      "plot": "In 1985 Dallas, electrician and hustler Ron Woodroof works around the system to help AIDS patients get the medication they need after he is diagnosed with the disease.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYwMTA4MzgyNF5BMl5BanBnXkFtZTgwMjEyMjE0MDE@._V1_SX300.jpg",
+      "posterId": "tt0790636",
+      "imdbID": "tt0790636",
+      "imdbRating": 7.9,
+      "imdbVotes": 545550,
+      "runtime": "117 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Japanese",
+      "awards": "Won 3 Oscars. 85 wins & 88 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Gravity",
+      "year": "2013",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Sci-Fi",
+        "Thriller"
+      ],
+      "director": "Alfonso Cuarón",
+      "actor": "Sandra Bullock",
+      "actors": [
+        "Sandra Bullock",
+        "George Clooney",
+        "Ed Harris"
+      ],
+      "plot": "Dr Ryan Stone, an engineer on her first space mission, and Matt Kowalski, an astronaut on his final expedition, have to survive in space after they are hit by debris while spacewalking.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjE5MzYwMzYxMF5BMl5BanBnXkFtZTcwOTk4MTk0OQ@@._V1_SX300.jpg",
+      "posterId": "tt1454468",
+      "imdbID": "tt1454468",
+      "imdbRating": 7.7,
+      "imdbVotes": 895643,
+      "runtime": "91 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, Greenlandic",
+      "awards": "Won 7 Oscars. 240 wins & 188 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "12 Years a Slave",
+      "year": "2013",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Steve McQueen",
+      "actor": "Chiwetel Ejiofor",
+      "actors": [
+        "Chiwetel Ejiofor",
+        "Michael Kenneth Williams",
+        "Michael Fassbender"
+      ],
+      "plot": "In the antebellum United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjExMTEzODkyN15BMl5BanBnXkFtZTcwNTU4NTc4OQ@@._V1_SX300.jpg",
+      "posterId": "tt2024544",
+      "imdbID": "tt2024544",
+      "imdbRating": 8.1,
+      "imdbVotes": 782160,
+      "runtime": "134 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Won 3 Oscars. 244 wins & 338 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Wreck-It Ralph",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Rich Moore",
+      "actor": "John C. Reilly",
+      "actors": [
+        "John C. Reilly",
+        "Jack McBrayer",
+        "Jane Lynch"
+      ],
+      "plot": "Ralph is tired of playing the role of a bad guy and embarks on a journey to become a video game hero. But he accidentally lets loose a deadly enemy that threatens the entire arcade.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzMxNTExOTkyMF5BMl5BanBnXkFtZTcwMzEyNDc0OA@@._V1_SX300.jpg",
+      "posterId": "tt1772341",
+      "imdbID": "tt1772341",
+      "imdbRating": 7.7,
+      "imdbVotes": 494419,
+      "runtime": "101 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 33 wins & 42 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Pirates! Band of Misfits",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Peter Lord, Jeff Newitt",
+      "actor": "Hugh Grant",
+      "actors": [
+        "Hugh Grant",
+        "Salma Hayek",
+        "Jeremy Piven"
+      ],
+      "plot": "Pirate Captain sets out on a mission to defeat his rivals Black Bellamy and Cutlass Liz for the Pirate of the year Award. The quest takes Captain and his crew from the shores of Blood Island to the foggy streets of Victorian London.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjAyNDc5ZTYtZGQyZi00NGFkLWI0Y2MtNTU5YTgxNGVjY2Y1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1430626",
+      "imdbID": "tt1430626",
+      "imdbRating": 6.7,
+      "imdbVotes": 54044,
+      "runtime": "88 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 20 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Longest Daycare",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "David Silverman",
+      "actor": null,
+      "actors": [],
+      "plot": "Maggie Simpson spends the day in the Ayn Rand School for Tots.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmI4NzAwYTEtNGU3My00ZDk1LWE4NTktMGE0MDA2NmU0MmRiXkEyXkFqcGdeQXVyMjUxMTY3ODM@._V1_SX300.jpg",
+      "posterId": "tt2175842",
+      "imdbID": "tt2175842",
+      "imdbRating": 7.2,
+      "imdbVotes": 6026,
+      "runtime": "5 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Invisible War",
+      "year": "2012",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Crime"
+      ],
+      "director": "Kirby Dick",
+      "actor": "Amy Ziering",
+      "actors": [
+        "Amy Ziering",
+        "Kirby Dick",
+        "Kori Cioca"
+      ],
+      "plot": "An investigative documentary about the epidemic of rape of soldiers within the US military.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkyNjUzOTg4MV5BMl5BanBnXkFtZTcwOTIyMzc4Nw@@._V1_SX300.jpg",
+      "posterId": "tt2120152",
+      "imdbID": "tt2120152",
+      "imdbRating": 7.6,
+      "imdbVotes": 7398,
+      "runtime": "93 min",
+      "rated": "Not Rated",
+      "country": "United States, France",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 11 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Impossible",
+      "year": "2012",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History",
+        "Thriller"
+      ],
+      "director": "J.A. Bayona",
+      "actor": "Naomi Watts",
+      "actors": [
+        "Naomi Watts",
+        "Ewan McGregor",
+        "Tom Holland"
+      ],
+      "plot": "The story of a tourist family in Thailand caught in the destruction and chaotic aftermath of the 2004 Indian Ocean tsunami.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjM1ZTJkMjctY2M0ZC00ZTkyLTliYTktNzYxYWIzYTAyOTRjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1649419",
+      "imdbID": "tt1649419",
+      "imdbRating": 7.5,
+      "imdbVotes": 261851,
+      "runtime": "114 min",
+      "rated": "PG-13",
+      "country": "Spain, Thailand, United States",
+      "language": "English, Thai, German, Swedish, Spanish",
+      "awards": "Nominated for 1 Oscar. 28 wins & 70 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Gatekeepers",
+      "year": "2012",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History",
+        "War"
+      ],
+      "director": "Dror Moreh",
+      "actor": "Ami Ayalon",
+      "actors": [
+        "Ami Ayalon",
+        "Avraham Shalom",
+        "Avi Dichter"
+      ],
+      "plot": "A documentary featuring interviews with all surviving former heads of Shin Bet, the Israeli security agency whose activities and membership are closely held state secrets.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYyMDg3NjYyMl5BMl5BanBnXkFtZTcwOTcyNDY4OA@@._V1_SX300.jpg",
+      "posterId": "tt2309788",
+      "imdbID": "tt2309788",
+      "imdbRating": 7.6,
+      "imdbVotes": 5965,
+      "runtime": "101 min",
+      "rated": "PG-13",
+      "country": "Israel, France, Belgium, Canada",
+      "language": "Hebrew, English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Avengers",
+      "year": "2012",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Sci-Fi"
+      ],
+      "director": "Joss Whedon",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Chris Evans",
+        "Scarlett Johansson"
+      ],
+      "plot": "Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGE0YTVjNzUtNzJjOS00NGNlLTgxMzctZTY4YTE1Y2Y1ZTU4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0848228",
+      "imdbID": "tt0848228",
+      "imdbRating": 8,
+      "imdbVotes": 1547278,
+      "runtime": "143 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Russian",
+      "awards": "Nominated for 1 Oscar. 40 wins & 81 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ted",
+      "year": "2012",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": "Seth MacFarlane",
+      "actor": "Mark Wahlberg",
+      "actors": [
+        "Mark Wahlberg",
+        "Mila Kunis",
+        "Seth MacFarlane"
+      ],
+      "plot": "John Bennett, a man whose childhood wish of bringing his teddy bear to life came true, now must decide between keeping the relationship with the bear, Ted or his girlfriend, Lori.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1OTU0ODcxMV5BMl5BanBnXkFtZTcwOTMxNTUwOA@@._V1_SX300.jpg",
+      "posterId": "tt1637725",
+      "imdbID": "tt1637725",
+      "imdbRating": 6.9,
+      "imdbVotes": 704925,
+      "runtime": "106 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Japanese, Ukrainian",
+      "awards": "Nominated for 1 Oscar. 13 wins & 28 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Redemption",
+      "year": "2013",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Steven Knight",
+      "actor": "Jason Statham",
+      "actors": [
+        "Jason Statham",
+        "Agata Buzek",
+        "Vicky McClure"
+      ],
+      "plot": "A damaged ex-special forces soldier navigating London's criminal underworld seizes an opportunity to assume another man's identity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BM2FlNzI3ODctMGM1NC00NzJlLWJkNmYtNWQ3OGEwZDI5ZDFmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1893256",
+      "imdbID": "tt1893256",
+      "imdbRating": 6.2,
+      "imdbVotes": 81481,
+      "runtime": "100 min",
+      "rated": "R",
+      "country": "United States, United Kingdom",
+      "language": "English, Polish, Cantonese, Italian",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Prometheus",
+      "year": "2012",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Ridley Scott",
+      "actor": "Noomi Rapace",
+      "actors": [
+        "Noomi Rapace",
+        "Logan Marshall-Green",
+        "Michael Fassbender"
+      ],
+      "plot": "Following clues to the origin of mankind, a team finds a structure on a distant moon, but they soon realize they are not alone.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY3NzIyNTA2NV5BMl5BanBnXkFtZTcwNzE2NjI4Nw@@._V1_SX300.jpg",
+      "posterId": "tt1446714",
+      "imdbID": "tt1446714",
+      "imdbRating": 7,
+      "imdbVotes": 691831,
+      "runtime": "124 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English, Gaelic",
+      "awards": "Nominated for 1 Oscar. 6 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "ParaNorman",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Chris Butler, Sam Fell",
+      "actor": "Kodi Smit-McPhee",
+      "actors": [
+        "Kodi Smit-McPhee",
+        "Anna Kendrick",
+        "Christopher Mintz-Plasse"
+      ],
+      "plot": "A misunderstood boy takes on ghosts, zombies and grown-ups to save his town from a centuries-old curse.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTI0MjA3M2ItY2QzMS00MzZiLWE5YTAtM2ZlODk1MjBhNjA0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1623288",
+      "imdbID": "tt1623288",
+      "imdbRating": 7,
+      "imdbVotes": 116416,
+      "runtime": "92 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 19 wins & 46 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "No",
+      "year": "2012",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History"
+      ],
+      "director": "Pablo Larraín",
+      "actor": "Gael García Bernal",
+      "actors": [
+        "Gael García Bernal",
+        "Alfredo Castro",
+        "Antonia Zegers"
+      ],
+      "plot": "An advertising executive comes up with a campaign to defeat Augusto Pinochet in Chile's 1988 referendum.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM3ODAzNjcwMV5BMl5BanBnXkFtZTcwMTUzMjc4OA@@._V1_SX300.jpg",
+      "posterId": "tt2059255",
+      "imdbID": "tt2059255",
+      "imdbRating": 7.4,
+      "imdbVotes": 26710,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "Chile, France, Mexico, United States",
+      "language": "Spanish",
+      "awards": "Nominated for 1 Oscar. 15 wins & 28 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Moonrise Kingdom",
+      "year": "2012",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Wes Anderson",
+      "actor": "Jared Gilman",
+      "actors": [
+        "Jared Gilman",
+        "Kara Hayward",
+        "Bruce Willis"
+      ],
+      "plot": "Two 12-year-olds, who live on an island, fall in love with each other and elope into the wilderness. While people set out on a search mission, a violent storm approaching them catches their attention.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTEwMTc3NDkzOTJeQTJeQWpwZ15BbWU3MDI4NTAwNzc@._V1_SX300.jpg",
+      "posterId": "tt1748122",
+      "imdbID": "tt1748122",
+      "imdbRating": 7.8,
+      "imdbVotes": 381453,
+      "runtime": "94 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 36 wins & 121 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Kon-Tiki",
+      "year": "2012",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Biography",
+        "Drama"
+      ],
+      "director": "Joachim Rønning, Espen Sandberg",
+      "actor": "Pål Sverre Hagen",
+      "actors": [
+        "Pål Sverre Hagen",
+        "Anders Baasmo",
+        "Gustaf Skarsgård"
+      ],
+      "plot": "In 1947, with five loyal friends in tow, explorer Thor Heyerdahl sails a fragile balsa wood raft along an ancient path some 4,300 miles across the Pacific.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjMxOTU2NzQxMF5BMl5BanBnXkFtZTcwODIwODY0OA@@._V1_SX300.jpg",
+      "posterId": "tt1613750",
+      "imdbID": "tt1613750",
+      "imdbRating": 7.1,
+      "imdbVotes": 54278,
+      "runtime": "118 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Norway, Denmark, Germany, Sweden",
+      "language": "Norwegian, English, French, Swedish, Spanish, German, Danish",
+      "awards": "Nominated for 1 Oscar. 12 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "How to Survive a Plague",
+      "year": "2012",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History",
+        "News"
+      ],
+      "director": "David France",
+      "actor": "Peter Staley",
+      "actors": [
+        "Peter Staley",
+        "Larry Kramer",
+        "Iris Long"
+      ],
+      "plot": "The story of two coalitions -- ACT UP and TAG (Treatment Action Group) -- whose activism and innovation turned AIDS from a death sentence into a manageable condition.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg2NTEyNTE3NF5BMl5BanBnXkFtZTcwNjY3NzM0OA@@._V1_SX300.jpg",
+      "posterId": "tt2124803",
+      "imdbID": "tt2124803",
+      "imdbRating": 7.6,
+      "imdbVotes": 4402,
+      "runtime": "110 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 13 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hitchcock",
+      "year": "2012",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Sacha Gervasi",
+      "actor": "Anthony Hopkins",
+      "actors": [
+        "Anthony Hopkins",
+        "Helen Mirren",
+        "Scarlett Johansson"
+      ],
+      "plot": "The relationship between Alfred Hitchcock and his wife Alma Reville during the filming of Psycho (1960) in 1959 is explored.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODAwNDI5NjIwN15BMl5BanBnXkFtZTcwNjc4ODc2OA@@._V1_SX300.jpg",
+      "posterId": "tt0975645",
+      "imdbID": "tt0975645",
+      "imdbRating": 6.8,
+      "imdbVotes": 83156,
+      "runtime": "98 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 6 wins & 30 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fresh Guacamole",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short"
+      ],
+      "director": "PES",
+      "actor": null,
+      "actors": [],
+      "plot": "Transforming familiar objects into fresh guacamole.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTZmYTViMzMtNThhOC00NTU0LWEzOTItODU5ZWRhOTRiYjM3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2309977",
+      "imdbID": "tt2309977",
+      "imdbRating": 7.4,
+      "imdbVotes": 4371,
+      "runtime": "2 min",
+      "rated": "Unrated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Frankenweenie",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Tim Burton",
+      "actor": "Winona Ryder",
+      "actors": [
+        "Winona Ryder",
+        "Catherine O'Hara",
+        "Martin Short"
+      ],
+      "plot": "When a boy's beloved dog passes away suddenly, he attempts to bring the animal back to life through a powerful science experiment.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjNjOThlZTctMjNmNy00YjdmLTgwOTYtMzg1N2VmNmMyOTBlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1142977",
+      "imdbID": "tt1142977",
+      "imdbRating": 6.9,
+      "imdbVotes": 125518,
+      "runtime": "87 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 12 wins & 50 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Death of a Shadow",
+      "year": "2012",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama",
+        "Fantasy"
+      ],
+      "director": "Tom Van Avermaet",
+      "actor": "Matthias Schoenaerts",
+      "actors": [
+        "Matthias Schoenaerts",
+        "Laura Verlinden",
+        "Peter Van den Eede"
+      ],
+      "plot": "The shadow of a deceased World War I soldier is captured by a collector, who offers him the chance to live again if he captures the shadows of 10,000 people, leading to a quest driven by love and jealousy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc5NDM3MjkzOV5BMl5BanBnXkFtZTcwODI3Mjg5OA@@._V1_SX300.jpg",
+      "posterId": "tt2312702",
+      "imdbID": "tt2312702",
+      "imdbRating": 7.2,
+      "imdbVotes": 2318,
+      "runtime": "20 min",
+      "rated": null,
+      "country": "Belgium, France",
+      "language": "Flemish, French, German",
+      "awards": "Nominated for 1 Oscar. 18 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Chasing Ice",
+      "year": "2012",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography"
+      ],
+      "director": "Jeff Orlowski-Yang",
+      "actor": "James Balog",
+      "actors": [
+        "James Balog",
+        "Svavar Jónatansson",
+        "Louie Psihoyos"
+      ],
+      "plot": "Follow National Geographic photographer James Balog across the Arctic as he deploys time-lapse cameras designed for one purpose: to capture a multi-year record of the world's changing glaciers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM1NDc0MzAxNF5BMl5BanBnXkFtZTcwMjY1NzE3OA@@._V1_SX300.jpg",
+      "posterId": "tt1579361",
+      "imdbID": "tt1579361",
+      "imdbRating": 7.7,
+      "imdbVotes": 8916,
+      "runtime": "75 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 9 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Adam and Dog",
+      "year": "2012",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Minkyu Lee",
+      "actor": "Alexander Jasho",
+      "actors": [
+        "Alexander Jasho"
+      ],
+      "plot": "Adam, and a dog, in the Garden of Eden.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzc1NzcyNzY4Nl5BMl5BanBnXkFtZTcwNTEwMDIwOQ@@._V1_SX300.jpg",
+      "posterId": "tt2162565",
+      "imdbID": "tt2162565",
+      "imdbRating": 6.9,
+      "imdbVotes": 2333,
+      "runtime": "16 min",
+      "rated": "TV-PG",
+      "country": "United States",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Royal Affair",
+      "year": "2012",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Nikolaj Arcel",
+      "actor": "Alicia Vikander",
+      "actors": [
+        "Alicia Vikander",
+        "Mads Mikkelsen",
+        "Mikkel Boe Følsgaard"
+      ],
+      "plot": "A young queen, who is married to an insane king, falls secretly in love with her physician - and together they start a revolution that changes a nation forever.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg3MDE4MTQ4NF5BMl5BanBnXkFtZTcwNDgwNDYyOA@@._V1_SX300.jpg",
+      "posterId": "tt1276419",
+      "imdbID": "tt1276419",
+      "imdbRating": 7.5,
+      "imdbVotes": 53006,
+      "runtime": "137 min",
+      "rated": "R",
+      "country": "Denmark, Sweden, Czech Republic, Germany",
+      "language": "Danish, English, German, French",
+      "awards": "Nominated for 1 Oscar. 21 wins & 42 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "5 Broken Cameras",
+      "year": "2011",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "War"
+      ],
+      "director": "Emad Burnat, Guy Davidi",
+      "actor": "Emad Burnat",
+      "actors": [
+        "Emad Burnat",
+        "Soraya Burnat",
+        "Mohammed Burnat"
+      ],
+      "plot": "A documentary on a Palestinian farmer's chronicle of his nonviolent resistance to the actions of the Israeli army.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1OTgzNjM1OV5BMl5BanBnXkFtZTcwMzE3Mjk4OA@@._V1_SX300.jpg",
+      "posterId": "tt2125423",
+      "imdbID": "tt2125423",
+      "imdbRating": 7.9,
+      "imdbVotes": 6831,
+      "runtime": "94 min",
+      "rated": "Not Rated",
+      "country": "Occupied Palestinian Territory, Israel, France, Netherlands",
+      "language": "Hebrew, Arabic",
+      "awards": "Nominated for 1 Oscar. 18 wins & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Snow White and the Huntsman",
+      "year": "2012",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Rupert Sanders",
+      "actor": "Kristen Stewart",
+      "actors": [
+        "Kristen Stewart",
+        "Chris Hemsworth",
+        "Charlize Theron"
+      ],
+      "plot": "In a twist to the fairy tale, the Huntsman ordered to take Snow White into the woods to be killed winds up becoming her protector and mentor in a quest to vanquish the Evil Queen.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2JjYWUyZjUtMDg3OS00MGIyLTgyN2QtYjIyY2VlYzViYThlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1735898",
+      "imdbID": "tt1735898",
+      "imdbRating": 6.1,
+      "imdbVotes": 312075,
+      "runtime": "127 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Japan, United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 13 wins & 33 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Flight",
+      "year": "2012",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Robert Zemeckis",
+      "actor": "Denzel Washington",
+      "actors": [
+        "Denzel Washington",
+        "Kelly Reilly",
+        "Don Cheadle"
+      ],
+      "plot": "Troubling questions arise after airline pilot Whip Whitaker makes a miracle landing after a mid-air catastrophe.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUxMjI1OTMxNl5BMl5BanBnXkFtZTcwNjc3NTY1OA@@._V1_SX300.jpg",
+      "posterId": "tt1907668",
+      "imdbID": "tt1907668",
+      "imdbRating": 7.3,
+      "imdbVotes": 394854,
+      "runtime": "138 min",
+      "rated": "R",
+      "country": "United States, United Arab Emirates",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 15 wins & 45 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Master",
+      "year": "2012",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Paul Thomas Anderson",
+      "actor": "Joaquin Phoenix",
+      "actors": [
+        "Joaquin Phoenix",
+        "Philip Seymour Hoffman",
+        "Amy Adams"
+      ],
+      "plot": "A Naval veteran arrives home from war unsettled and uncertain of his future - until he is tantalized by a cult and its charismatic leader.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ2NjQ5MzMwMF5BMl5BanBnXkFtZTcwMjczNTAzOA@@._V1_SX300.jpg",
+      "posterId": "tt1560747",
+      "imdbID": "tt1560747",
+      "imdbRating": 7.1,
+      "imdbVotes": 197015,
+      "runtime": "138 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Filipino",
+      "awards": "Nominated for 3 Oscars. 75 wins & 187 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
       ],
       "ph": false,
       "source": "auto_candidates",
