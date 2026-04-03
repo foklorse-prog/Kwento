@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-03T08:36:00.908Z",
+  "updatedAt": "2026-04-03T14:23:29.678Z",
   "items": [
     {
       "title": "Mid90s",
@@ -25085,6 +25085,3386 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Artist",
+      "year": "2011",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Michel Hazanavicius",
+      "actor": "Jean Dujardin",
+      "actors": [
+        "Jean Dujardin",
+        "Bérénice Bejo",
+        "John Goodman"
+      ],
+      "plot": "When George, a silent movie superstar, meets Peppy Miller, a dancer, sparks fly between the two. However, after the introduction of talking pictures, their fortunes change, affecting their dynamic.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjEwOGZmM2QtNjY4Mi00NjI0LTkyZjItZDEzZGI1YTEzMDg1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1655442",
+      "imdbID": "tt1655442",
+      "imdbRating": 7.8,
+      "imdbVotes": 254736,
+      "runtime": "100 min",
+      "rated": "PG-13",
+      "country": "France, Belgium, United States",
+      "language": "English, French",
+      "awards": "Won 5 Oscars. 162 wins & 204 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Waste Land",
+      "year": "2010",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Lucy Walker, Karen Harley, João Jardim",
+      "actor": "Vik Muniz",
+      "actors": [
+        "Vik Muniz"
+      ],
+      "plot": "On the outskirts of Rio de Janeiro is Jardim Gramacho, the world's largest landfill, where men and women sift through garbage for a living. Artist Vik Muniz produces portraits of the workers and learns about their lives.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM2ODkxMTY1NF5BMl5BanBnXkFtZTcwNTAxMzc5Mw@@._V1_SX300.jpg",
+      "posterId": "tt1268204",
+      "imdbID": "tt1268204",
+      "imdbRating": 7.8,
+      "imdbVotes": 9405,
+      "runtime": "99 min",
+      "rated": "Not Rated",
+      "country": "Brazil, United Kingdom",
+      "language": "Portuguese, English",
+      "awards": "Nominated for 1 Oscar. 29 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Unstoppable",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Thriller"
+      ],
+      "director": "Tony Scott",
+      "actor": "Denzel Washington",
+      "actors": [
+        "Denzel Washington",
+        "Chris Pine",
+        "Rosario Dawson"
+      ],
+      "plot": "With an unmanned, half-mile-long freight train barreling toward a city, a veteran engineer and a young conductor race against the clock to prevent a catastrophe.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI4NDQwMDM0N15BMl5BanBnXkFtZTcwMzY1ODMwNA@@._V1_SX300.jpg",
+      "posterId": "tt0477080",
+      "imdbID": "tt0477080",
+      "imdbRating": 6.8,
+      "imdbVotes": 218128,
+      "runtime": "98 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tron: Legacy",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Joseph Kosinski",
+      "actor": "Jeff Bridges",
+      "actors": [
+        "Jeff Bridges",
+        "Garrett Hedlund",
+        "Olivia Wilde"
+      ],
+      "plot": "The son of a computer programmer goes looking for his father and ends up inside the digital world that his father designed. He meets his father's corrupted creation and a unique ally who was born inside the digital world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTk4NTk4MTk1OF5BMl5BanBnXkFtZTcwNTE2MDIwNA@@._V1_SX300.jpg",
+      "posterId": "tt1104001",
+      "imdbID": "tt1104001",
+      "imdbRating": 6.8,
+      "imdbVotes": 385484,
+      "runtime": "125 min",
+      "rated": "PG",
+      "country": "United States, India, United Kingdom, Mexico, Japan, Canada",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 10 wins & 52 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Way Back",
+      "year": "2010",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "History"
+      ],
+      "director": "Peter Weir",
+      "actor": "Jim Sturgess",
+      "actors": [
+        "Jim Sturgess",
+        "Ed Harris",
+        "Colin Farrell"
+      ],
+      "plot": "Siberian gulag escapees travel four thousand miles by foot to freedom in India.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg5MTc5MTM3Ml5BMl5BanBnXkFtZTcwMDI2NzgwNA@@._V1_SX300.jpg",
+      "posterId": "tt1023114",
+      "imdbID": "tt1023114",
+      "imdbRating": 7.3,
+      "imdbVotes": 124595,
+      "runtime": "133 min",
+      "rated": "PG-13",
+      "country": "United States, Poland, United Arab Emirates, India",
+      "language": "English, Russian, Polish, Tibetan, Mongolian",
+      "awards": "Nominated for 1 Oscar. 4 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Town",
+      "year": "2010",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Ben Affleck",
+      "actor": "Ben Affleck",
+      "actors": [
+        "Ben Affleck",
+        "Rebecca Hall",
+        "Jon Hamm"
+      ],
+      "plot": "A proficient group of thieves rob a bank and hold the manager hostage. Things begin to get complicated when one of the crew members falls in love with her.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTcyNzcxODg3Nl5BMl5BanBnXkFtZTcwMTUyNjQ3Mw@@._V1_SX300.jpg",
+      "posterId": "tt0840361",
+      "imdbID": "tt0840361",
+      "imdbRating": 7.5,
+      "imdbVotes": 444731,
+      "runtime": "125 min",
+      "rated": "R",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 9 wins & 46 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Illusionist",
+      "year": "2006",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Fantasy",
+        "Mystery"
+      ],
+      "director": "Neil Burger",
+      "actor": "Edward Norton",
+      "actors": [
+        "Edward Norton",
+        "Jessica Biel",
+        "Paul Giamatti"
+      ],
+      "plot": "In turn-of-the-century Vienna, a magician uses his abilities to secure the love of a woman far above his social standing.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzNmYmI4YWMtMGFkOS00ODVkLTg3MTEtOTExNDg3ZjQ0MGM3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0443543",
+      "imdbID": "tt0443543",
+      "imdbRating": 7.5,
+      "imdbVotes": 402986,
+      "runtime": "110 min",
+      "rated": "PG-13",
+      "country": "United States, Czech Republic",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 11 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Gruffalo",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Family",
+        "Fantasy"
+      ],
+      "director": "Max Lang, Jakob Schuh",
+      "actor": "Helena Bonham Carter",
+      "actors": [
+        "Helena Bonham Carter",
+        "Rob Brydon",
+        "Robbie Coltrane"
+      ],
+      "plot": "A cunning mouse goes for a walk in the forest, and outwits a succession of predators.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGRjYmRmYTktZjhkNS00ZmQzLWE2MzQtYmNjODVjMDc5MzEwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1461418",
+      "imdbID": "tt1461418",
+      "imdbRating": 7.5,
+      "imdbVotes": 8184,
+      "runtime": "27 min",
+      "rated": "Approved",
+      "country": "United Kingdom, Germany",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Confession",
+      "year": "2011",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": null,
+      "actor": "John Hurt",
+      "actors": [
+        "John Hurt",
+        "Kiefer Sutherland",
+        "Max Casella"
+      ],
+      "plot": "A tale of unique redemption, and an exploration of good and evil featuring a hitman and a Priest.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1MTc1NTAzOF5BMl5BanBnXkFtZTcwNjM0NjE2NA@@._V1_SX300.jpg",
+      "posterId": "tt1809362",
+      "imdbID": "tt1809362",
+      "imdbRating": 7.6,
+      "imdbVotes": 5686,
+      "runtime": "1 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "1 win",
+      "omdbType": "series",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tangled",
+      "year": "2010",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Nathan Greno, Byron Howard",
+      "actor": "Mandy Moore",
+      "actors": [
+        "Mandy Moore",
+        "Zachary Levi",
+        "Donna Murphy"
+      ],
+      "plot": "The magically long-haired Rapunzel has spent her entire life in a tower, but now that a runaway thief has stumbled upon her, she is about to discover the world for the first time, and who she really is.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTAxNDYxMjg0MjNeQTJeQWpwZ15BbWU3MDcyNTk2OTM@._V1_SX300.jpg",
+      "posterId": "tt0398286",
+      "imdbID": "tt0398286",
+      "imdbRating": 7.7,
+      "imdbVotes": 540207,
+      "runtime": "100 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English, German",
+      "awards": "Nominated for 1 Oscar. 10 wins & 42 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Salt",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Thriller"
+      ],
+      "director": "Phillip Noyce",
+      "actor": "Angelina Jolie",
+      "actors": [
+        "Angelina Jolie",
+        "Liev Schreiber",
+        "Chiwetel Ejiofor"
+      ],
+      "plot": "A CIA agent goes on the run after a defector accuses her of being a Russian spy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIyODA2NDg4NV5BMl5BanBnXkFtZTcwMjg4NDAwMw@@._V1_SX300.jpg",
+      "posterId": "tt0944835",
+      "imdbID": "tt0944835",
+      "imdbRating": 6.5,
+      "imdbVotes": 341745,
+      "runtime": "100 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Russian, Korean",
+      "awards": "Nominated for 1 Oscar. 4 wins & 16 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Restrepo",
+      "year": "2010",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "History"
+      ],
+      "director": "Tim Hetherington, Sebastian Junger",
+      "actor": "The Men of Battle Company 2nd of the 503rd Infantry Regiment 173rd Airborne Brigade Combat Team",
+      "actors": [
+        "The Men of Battle Company 2nd of the 503rd Infantry Regiment 173rd Airborne Brigade Combat Team",
+        "Juan 'Doc Restrepo",
+        "Dan Kearney"
+      ],
+      "plot": "A year with one platoon in the deadliest valley in Afghanistan.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIwNDAxMTY4Ml5BMl5BanBnXkFtZTcwMTUyMTQ1Mw@@._V1_SX300.jpg",
+      "posterId": "tt1559549",
+      "imdbID": "tt1559549",
+      "imdbRating": 7.4,
+      "imdbVotes": 24632,
+      "runtime": "93 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 10 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Rabbit Hole",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "John Cameron Mitchell",
+      "actor": "Nicole Kidman",
+      "actors": [
+        "Nicole Kidman",
+        "Aaron Eckhart",
+        "Dianne Wiest"
+      ],
+      "plot": "Life for a happy couple is turned upside down after their young son dies in an accident.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjEzOTU0NjMxNF5BMl5BanBnXkFtZTcwNzc5MDUxNA@@._V1_SX300.jpg",
+      "posterId": "tt0935075",
+      "imdbID": "tt0935075",
+      "imdbRating": 7,
+      "imdbVotes": 51735,
+      "runtime": "91 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 42 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Outside the Law",
+      "year": "2010",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "War"
+      ],
+      "director": "Rachid Bouchareb",
+      "actor": "Jamel Debbouze",
+      "actors": [
+        "Jamel Debbouze",
+        "Roschdy Zem",
+        "Sami Bouajila"
+      ],
+      "plot": "A drama about the Algerian struggle for independence from France after WWII.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg5NzY0MTkwOV5BMl5BanBnXkFtZTcwNjU4NzcwNA@@._V1_SX300.jpg",
+      "posterId": "tt1229381",
+      "imdbID": "tt1229381",
+      "imdbRating": 6.6,
+      "imdbVotes": 4164,
+      "runtime": "138 min",
+      "rated": "R",
+      "country": "France, Algeria, Belgium, Tunisia, Italy",
+      "language": "French, Arabic, English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Iron Man 2",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Sci-Fi"
+      ],
+      "director": "Jon Favreau",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Mickey Rourke",
+        "Gwyneth Paltrow"
+      ],
+      "plot": "With the world now aware of his identity as Iron Man, Tony Stark must contend with both his declining health and a vengeful mad man with ties to his father's legacy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWYyOGQzOGYtMGQ1My00ZWYxLTgzZjktZWYzN2IwYjkxYzM0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1228705",
+      "imdbID": "tt1228705",
+      "imdbRating": 6.9,
+      "imdbVotes": 930932,
+      "runtime": "124 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, French, Russian",
+      "awards": "Nominated for 1 Oscar. 7 wins & 45 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Incendies",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "War"
+      ],
+      "director": "Denis Villeneuve",
+      "actor": "Lubna Azabal",
+      "actors": [
+        "Lubna Azabal",
+        "Mélissa Désormeaux-Poulin",
+        "Maxim Gaudette"
+      ],
+      "plot": "Twins journey to the Middle East to discover their family history and fulfill their mother's last wishes.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWFmMjdmNjctNzhhOC00ZmMzLTkwOGItMmVmZDU4MjE2MTYwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1255953",
+      "imdbID": "tt1255953",
+      "imdbRating": 8.3,
+      "imdbVotes": 243446,
+      "runtime": "131 min",
+      "rated": "R",
+      "country": "Canada, France",
+      "language": "French, Arabic, English",
+      "awards": "Nominated for 1 Oscar. 41 wins & 20 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "I Am Love",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Luca Guadagnino",
+      "actor": "Tilda Swinton",
+      "actors": [
+        "Tilda Swinton",
+        "Flavio Parenti",
+        "Edoardo Gabbriellini"
+      ],
+      "plot": "Emma left Russia to live with her husband in Italy. Now a member of a powerful industrial family, she is the respected mother of three, but feels unfulfilled. One day, Antonio, a talented chef and her son's friend, makes her sense...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAwNjY5OTUxM15BMl5BanBnXkFtZTcwNjE3MTQxMw@@._V1_SX300.jpg",
+      "posterId": "tt1226236",
+      "imdbID": "tt1226236",
+      "imdbRating": 7,
+      "imdbVotes": 25046,
+      "runtime": "120 min",
+      "rated": "R",
+      "country": "Italy",
+      "language": "Italian, Russian, English",
+      "awards": "Nominated for 1 Oscar. 16 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hereafter",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Fantasy",
+        "Romance"
+      ],
+      "director": "Clint Eastwood",
+      "actor": "Matt Damon",
+      "actors": [
+        "Matt Damon",
+        "Cécile de France",
+        "Bryce Dallas Howard"
+      ],
+      "plot": "An American factory worker, a French journalist and a London school boy set out on a spiritual journey after death touches their lives in different ways.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE2MzU3Nzk4M15BMl5BanBnXkFtZTcwODcxNTI5Mw@@._V1_SX300.jpg",
+      "posterId": "tt1212419",
+      "imdbID": "tt1212419",
+      "imdbRating": 6.5,
+      "imdbVotes": 98150,
+      "runtime": "129 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, French, German",
+      "awards": "Nominated for 1 Oscar. 4 wins & 15 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "GasLand",
+      "year": "2010",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Josh Fox",
+      "actor": "Josh Fox",
+      "actors": [
+        "Josh Fox",
+        "Dick Cheney",
+        "Pete Seeger"
+      ],
+      "plot": "An exploration of the fracking petroleum extraction industry and the serious environmental consequences involved.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDA5NDc4NTUzMl5BMl5BanBnXkFtZTcwMjcxNDg1Mw@@._V1_SX300.jpg",
+      "posterId": "tt1558250",
+      "imdbID": "tt1558250",
+      "imdbRating": 7.6,
+      "imdbVotes": 11148,
+      "runtime": "107 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English, German",
+      "awards": "Nominated for 1 Oscar. 9 wins & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Exit Through the Gift Shop",
+      "year": "2010",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Banksy",
+      "actor": "Banksy",
+      "actors": [
+        "Banksy",
+        "Mr. Brainwash",
+        "Space Invader"
+      ],
+      "plot": "Following the style of some of the world's most prolific street artists, an amateur filmmaker makes a foray into the art world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE2NTg1NDM4Ml5BMl5BanBnXkFtZTcwMzMxOTkyMw@@._V1_SX300.jpg",
+      "posterId": "tt1587707",
+      "imdbID": "tt1587707",
+      "imdbRating": 7.9,
+      "imdbVotes": 70648,
+      "runtime": "87 min",
+      "rated": "R",
+      "country": "United Kingdom, France",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 24 wins & 31 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Dogtooth",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Yorgos Lanthimos",
+      "actor": "Christos Stergioglou",
+      "actors": [
+        "Christos Stergioglou",
+        "Michele Valley",
+        "Angeliki Papoulia"
+      ],
+      "plot": "A controlling, manipulative father locks his three adult offspring in a state of perpetual childhood by keeping them prisoner within the sprawling family compound.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIyOTkyMDE5N15BMl5BanBnXkFtZTcwNjIwNzQwMw@@._V1_SX300.jpg",
+      "posterId": "tt1379182",
+      "imdbID": "tt1379182",
+      "imdbRating": 7.1,
+      "imdbVotes": 121983,
+      "runtime": "97 min",
+      "rated": "Not Rated",
+      "country": "Greece",
+      "language": "Greek",
+      "awards": "Nominated for 1 Oscar. 21 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Day & Night",
+      "year": "2010",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Teddy Newton",
+      "actor": "Muneer Lyati",
+      "actors": [
+        "Muneer Lyati",
+        "Wayne Dyer",
+        "Ivo Josipovic"
+      ],
+      "plot": "Day encounters Night, a stranger of distinctly darker moods. But their suspicions soon turn to curiosity, and they are delighted to find the joys of their budding friendship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTYyMTk1MjE3NF5BMl5BanBnXkFtZTgwMjkxMDgwMjE@._V1_SX300.jpg",
+      "posterId": "tt1620446",
+      "imdbID": "tt1620446",
+      "imdbRating": 8,
+      "imdbVotes": 20852,
+      "runtime": "6 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Country Strong",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "director": "Shana Feste",
+      "actor": "Garrett Hedlund",
+      "actors": [
+        "Garrett Hedlund",
+        "Gwyneth Paltrow",
+        "Leighton Meester"
+      ],
+      "plot": "A rising country-music songwriter works with a fallen star to work their way to fame, causing romantic complications along the way.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGY1MzE2NDItNDQwMi00YmYwLWFlYTEtMjNkOTBjN2ZlZjI3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1555064",
+      "imdbID": "tt1555064",
+      "imdbRating": 6.3,
+      "imdbVotes": 19317,
+      "runtime": "117 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Blue Valentine",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Derek Cianfrance",
+      "actor": "Ryan Gosling",
+      "actors": [
+        "Ryan Gosling",
+        "Michelle Williams",
+        "John Doman"
+      ],
+      "plot": "A couple cannot halt the downward spiral of their marriage.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTQ2MzA1Ml5BMl5BanBnXkFtZTcwODE3NTgwNA@@._V1_SX300.jpg",
+      "posterId": "tt1120985",
+      "imdbID": "tt1120985",
+      "imdbRating": 7.3,
+      "imdbVotes": 223210,
+      "runtime": "112 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 9 wins & 56 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Barney's Version",
+      "year": "2010",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Richard J. Lewis",
+      "actor": "Paul Giamatti",
+      "actors": [
+        "Paul Giamatti",
+        "Rosamund Pike",
+        "Jake Hoffman"
+      ],
+      "plot": "The picaresque and touching story of the politically incorrect, fully lived life of the impulsive, irascible and fearlessly blunt Barney Panofsky.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM4MTUwNDg0OF5BMl5BanBnXkFtZTcwMjUyODYxNA@@._V1_SX300.jpg",
+      "posterId": "tt1423894",
+      "imdbID": "tt1423894",
+      "imdbRating": 7.3,
+      "imdbVotes": 26784,
+      "runtime": "134 min",
+      "rated": "R",
+      "country": "Italy, Canada",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 18 wins & 19 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Another Year",
+      "year": "2010",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Mike Leigh",
+      "actor": "Jim Broadbent",
+      "actors": [
+        "Jim Broadbent",
+        "Ruth Sheen",
+        "Lesley Manville"
+      ],
+      "plot": "A look at four seasons in the lives of a happily married couple and their relationships with their family and friends.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODM3OWMyNTktMTFiMy00MDM4LTk1ZDctYTc2Y2U3ZjRkYjIwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1431181",
+      "imdbID": "tt1431181",
+      "imdbRating": 7.4,
+      "imdbVotes": 31731,
+      "runtime": "129 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 23 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Animal Kingdom",
+      "year": "2010",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "David Michôd",
+      "actor": "James Frecheville",
+      "actors": [
+        "James Frecheville",
+        "Guy Pearce",
+        "Joel Edgerton"
+      ],
+      "plot": "A seventeen-year-old navigates his survival amongst an explosive criminal family and the detective who thinks he can save him.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ2NjcwNjE4NV5BMl5BanBnXkFtZTcwNDU2NDg1Mw@@._V1_SX300.jpg",
+      "posterId": "tt1313092",
+      "imdbID": "tt1313092",
+      "imdbRating": 7.2,
+      "imdbVotes": 63105,
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "Australia",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 39 wins & 60 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "How to Train Your Dragon",
+      "year": "2010",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Dean DeBlois, Chris Sanders",
+      "actor": "Jay Baruchel",
+      "actors": [
+        "Jay Baruchel",
+        "Gerard Butler",
+        "Christopher Mintz-Plasse"
+      ],
+      "plot": "A hapless young Viking who aspires to hunt dragons becomes the unlikely friend of a young dragon himself, and learns there may be more to the creatures than he assumed.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA5NDQyMjc2NF5BMl5BanBnXkFtZTcwMjg5ODcyMw@@._V1_SX300.jpg",
+      "posterId": "tt0892769",
+      "imdbID": "tt0892769",
+      "imdbRating": 8.1,
+      "imdbVotes": 882954,
+      "runtime": "98 min",
+      "rated": "PG",
+      "country": "United Kingdom, France, United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 25 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Harry Potter and the Deathly Hallows: Part 1",
+      "year": "2010",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Family",
+        "Fantasy"
+      ],
+      "director": "David Yates",
+      "actor": "Daniel Radcliffe",
+      "actors": [
+        "Daniel Radcliffe",
+        "Emma Watson",
+        "Rupert Grint"
+      ],
+      "plot": "Harry Potter is tasked with the dangerous and seemingly impossible task of locating and destroying Voldemort's remaining Horcruxes. Harry must rely on Ron and Hermione more than ever, but dark forces threaten to tear them apart.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ2OTE1Mjk0N15BMl5BanBnXkFtZTcwODE3MDAwNA@@._V1_SX300.jpg",
+      "posterId": "tt0926084",
+      "imdbID": "tt0926084",
+      "imdbRating": 7.7,
+      "imdbVotes": 659115,
+      "runtime": "146 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, Latin",
+      "awards": "Nominated for 2 Oscars. 15 wins & 55 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Biutiful",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Alejandro G. Iñárritu",
+      "actor": "Javier Bardem",
+      "actors": [
+        "Javier Bardem",
+        "Maricel Álvarez",
+        "Hanaa Bouchaib"
+      ],
+      "plot": "A man dying of cancer tries his best to leave the world on his own terms.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzI4OTQ0MDQyNl5BMl5BanBnXkFtZTcwODY5MjQwNA@@._V1_SX300.jpg",
+      "posterId": "tt1164999",
+      "imdbID": "tt1164999",
+      "imdbRating": 7.4,
+      "imdbVotes": 97232,
+      "runtime": "148 min",
+      "rated": "R",
+      "country": "Mexico, Spain",
+      "language": "Spanish, Chinese, Wolof",
+      "awards": "Nominated for 2 Oscars. 21 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Winter's Bone",
+      "year": "2010",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "Debra Granik",
+      "actor": "Jennifer Lawrence",
+      "actors": [
+        "Jennifer Lawrence",
+        "John Hawkes",
+        "Garret Dillahunt"
+      ],
+      "plot": "An unflinching Ozark Mountain girl hacks through dangerous social terrain as she hunts down her drug-dealing father while trying to keep her family intact.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA0OTM3MDMxNF5BMl5BanBnXkFtZTcwMDY1MjI0Mw@@._V1_SX300.jpg",
+      "posterId": "tt1399683",
+      "imdbID": "tt1399683",
+      "imdbRating": 7.1,
+      "imdbVotes": 155028,
+      "runtime": "100 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 65 wins & 131 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Kids Are All Right",
+      "year": "2010",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Lisa Cholodenko",
+      "actor": "Annette Bening",
+      "actors": [
+        "Annette Bening",
+        "Julianne Moore",
+        "Mark Ruffalo"
+      ],
+      "plot": "Two children conceived by artificial insemination bring their biological father into their non-traditional family life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE4NTMwNDg5MF5BMl5BanBnXkFtZTcwNDY2ODE0Mw@@._V1_SX300.jpg",
+      "posterId": "tt0842926",
+      "imdbID": "tt0842926",
+      "imdbRating": 7,
+      "imdbVotes": 137167,
+      "runtime": "106 min",
+      "rated": "R",
+      "country": "United States, France",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 29 wins & 133 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "127 Hours",
+      "year": "2010",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Danny Boyle",
+      "actor": "James Franco",
+      "actors": [
+        "James Franco",
+        "Amber Tamblyn",
+        "Kate Mara"
+      ],
+      "plot": "A mountain climber becomes trapped under a boulder while canyoneering alone near Moab, Utah and resorts to desperate measures in order to survive.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc2NjMzOTE3Ml5BMl5BanBnXkFtZTcwMDE0OTc5Mw@@._V1_SX300.jpg",
+      "posterId": "tt1542344",
+      "imdbID": "tt1542344",
+      "imdbRating": 7.5,
+      "imdbVotes": 422701,
+      "runtime": "94 min",
+      "rated": "R",
+      "country": "United Kingdom, United States, France",
+      "language": "English, Italian",
+      "awards": "Nominated for 6 Oscars. 23 wins & 150 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "True Grit",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Western"
+      ],
+      "director": "Ethan Coen, Joel Coen",
+      "actor": "Jeff Bridges",
+      "actors": [
+        "Jeff Bridges",
+        "Matt Damon",
+        "Hailee Steinfeld"
+      ],
+      "plot": "A stubborn teenager enlists the help of a tough U.S. Marshal to track down her father's murderer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU5MjU3MTI4OF5BMl5BanBnXkFtZTcwMTQxOTAxNA@@._V1_SX300.jpg",
+      "posterId": "tt1403865",
+      "imdbID": "tt1403865",
+      "imdbRating": 7.6,
+      "imdbVotes": 370062,
+      "runtime": "110 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 10 Oscars. 38 wins & 170 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lost Thing",
+      "year": "2010",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Andrew Ruhemann, Shaun Tan",
+      "actor": "Tim Minchin",
+      "actors": [
+        "Tim Minchin"
+      ],
+      "plot": "A boy finds a strange creature on a beach, and decides to find a home for it in a world where everyone believes there are far more important things to pay attention to.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTkzNTVkYWMtNzhlYi00YzUxLWFkYmItMTgyZmFjY2E3ZTU0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1669698",
+      "imdbID": "tt1669698",
+      "imdbRating": 7.3,
+      "imdbVotes": 3754,
+      "runtime": "15 min",
+      "rated": "Not Rated",
+      "country": "Australia, United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 9 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Inside Job",
+      "year": "2010",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Crime"
+      ],
+      "director": "Charles Ferguson",
+      "actor": "Matt Damon",
+      "actors": [
+        "Matt Damon",
+        "Gylfi Zoega",
+        "Andri Snær Magnason"
+      ],
+      "plot": "Takes a closer look at what brought about the 2008 financial meltdown.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ3MjkyODA2Nl5BMl5BanBnXkFtZTcwNzQxMTU4Mw@@._V1_SX300.jpg",
+      "posterId": "tt1645089",
+      "imdbID": "tt1645089",
+      "imdbRating": 8.2,
+      "imdbVotes": 82332,
+      "runtime": "109 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 8 wins & 27 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "In a Better World",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Susanne Bier",
+      "actor": "Mikael Persbrandt",
+      "actors": [
+        "Mikael Persbrandt",
+        "Trine Dyrholm",
+        "Markus Rygaard"
+      ],
+      "plot": "The lives of two Danish families cross each other, and an extraordinary but risky friendship comes into bud. But loneliness, frailty and sorrow lie in wait.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTMxMTc1Mjk0N15BMl5BanBnXkFtZTcwMjUwMzU0NA@@._V1_SX300.jpg",
+      "posterId": "tt1340107",
+      "imdbID": "tt1340107",
+      "imdbRating": 7.6,
+      "imdbVotes": 42646,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "Denmark, Sweden, Belgium, Germany",
+      "language": "Danish, Swedish, English, Arabic",
+      "awards": "Won 1 Oscar. 14 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "God of Love",
+      "year": "2010",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Fantasy"
+      ],
+      "director": "Luke Matheny",
+      "actor": "Luke Matheny",
+      "actors": [
+        "Luke Matheny",
+        "Marian Brock",
+        "Christopher Hirsh"
+      ],
+      "plot": "A lovestruck, lounge-singing darts champion finds his prayers answered--literally--when he mysteriously receives a box of love-inducing darts.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTcyODM0MjM0OF5BMl5BanBnXkFtZTcwMzU0MDE0NA@@._V1_SX300.jpg",
+      "posterId": "tt1631323",
+      "imdbID": "tt1631323",
+      "imdbRating": 7.6,
+      "imdbVotes": 1949,
+      "runtime": "18 min",
+      "rated": null,
+      "country": "United States",
+      "language": null,
+      "awards": "Won 1 Oscar. 6 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Black Swan",
+      "year": "2010",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Darren Aronofsky",
+      "actor": "Natalie Portman",
+      "actors": [
+        "Natalie Portman",
+        "Mila Kunis",
+        "Vincent Cassel"
+      ],
+      "plot": "Nina is a talented but unstable ballerina on the verge of stardom. Pushed to the breaking point by her artistic director and a seductive rival, Nina's grip on reality slips, plunging her into a waking nightmare.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzY2NzI4OTE5MF5BMl5BanBnXkFtZTcwMjMyNDY4Mw@@._V1_SX300.jpg",
+      "posterId": "tt0947798",
+      "imdbID": "tt0947798",
+      "imdbRating": 8,
+      "imdbVotes": 882921,
+      "runtime": "108 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, French, Italian",
+      "awards": "Won 1 Oscar. 98 wins & 279 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Alice in Wonderland",
+      "year": "2010",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Family",
+        "Fantasy"
+      ],
+      "director": "Tim Burton",
+      "actor": "Mia Wasikowska",
+      "actors": [
+        "Mia Wasikowska",
+        "Johnny Depp",
+        "Helena Bonham Carter"
+      ],
+      "plot": "Nineteen-year-old Alice returns to the magical world from her childhood adventure, where she reunites with her old friends and learns of her true destiny: to end the Red Queen's reign of terror.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjgxMTQ3NjMtOTI1Yy00Yzg4LWJlNWQtMjFkNjVlYjU0OWIyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1014759",
+      "imdbID": "tt1014759",
+      "imdbRating": 6.4,
+      "imdbVotes": 464214,
+      "runtime": "108 min",
+      "rated": "PG",
+      "country": "United States, Italy, Canada, Japan, United Kingdom",
+      "language": "English",
+      "awards": "Won 2 Oscars. 35 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Toy Story 3",
+      "year": "2010",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Lee Unkrich",
+      "actor": "Tom Hanks",
+      "actors": [
+        "Tom Hanks",
+        "Tim Allen",
+        "Joan Cusack"
+      ],
+      "plot": "The toys are mistakenly delivered to a day-care center instead of the attic right before Andy leaves for college, and it's up to Woody to convince the other toys that they weren't abandoned and to return home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTgxOTY4Mjc0MF5BMl5BanBnXkFtZTcwNTA4MDQyMw@@._V1_SX300.jpg",
+      "posterId": "tt0435761",
+      "imdbID": "tt0435761",
+      "imdbRating": 8.3,
+      "imdbVotes": 961588,
+      "runtime": "103 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Won 2 Oscars. 63 wins & 96 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Fighter",
+      "year": "2010",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Drama"
+      ],
+      "director": "David O. Russell",
+      "actor": "Mark Wahlberg",
+      "actors": [
+        "Mark Wahlberg",
+        "Christian Bale",
+        "Amy Adams"
+      ],
+      "plot": "Based on the story of Micky Ward, a fledgling boxer who tries to escape the shadow of his more famous but troubled older boxing brother and get his own shot at greatness.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM0ODk3MjM1MV5BMl5BanBnXkFtZTcwNzc1MDIwNA@@._V1_SX300.jpg",
+      "posterId": "tt0964517",
+      "imdbID": "tt0964517",
+      "imdbRating": 7.8,
+      "imdbVotes": 405736,
+      "runtime": "116 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 74 wins & 123 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Social Network",
+      "year": "2010",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "David Fincher",
+      "actor": "Jesse Eisenberg",
+      "actors": [
+        "Jesse Eisenberg",
+        "Andrew Garfield",
+        "Justin Timberlake"
+      ],
+      "plot": "As Harvard student Mark Zuckerberg creates the social networking site that would become known as Facebook, he is sued by the twins who claimed he stole their idea and by the co-founder who was later squeezed out of the business.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjlkNTE5ZTUtNGEwNy00MGVhLThmZjMtZjU1NDE5Zjk1NDZkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1285016",
+      "imdbID": "tt1285016",
+      "imdbRating": 7.8,
+      "imdbVotes": 812001,
+      "runtime": "120 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Won 3 Oscars. 174 wins & 188 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Wings",
+      "year": "1927",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "War"
+      ],
+      "director": "William A. Wellman, Harry d'Abbadie d'Arrast",
+      "actor": "Clara Bow",
+      "actors": [
+        "Clara Bow",
+        "Charles 'Buddy' Rogers",
+        "Richard Arlen"
+      ],
+      "plot": "Two young men, one rich, one middle class, who are in love with the same woman, become fighter pilots in World War I.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjNiNjhkMjEtMDhjNy00MDRhLWEwOTctYzZlN2ZjYjZlYTM4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0018578",
+      "imdbID": "tt0018578",
+      "imdbRating": 7.5,
+      "imdbVotes": 15487,
+      "runtime": "144 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 9 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Last Command",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "War"
+      ],
+      "director": "Josef von Sternberg",
+      "actor": "Emil Jannings",
+      "actors": [
+        "Emil Jannings",
+        "Evelyn Brent",
+        "William Powell"
+      ],
+      "plot": "A former Imperial Russian general and cousin of the Czar ends up in Hollywood as an extra in a movie directed by a former revolutionary.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDg3Y2NkNWMtMWQ4ZS00NmVmLWFkNjMtZGUzMjUwZmM2ZTU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0019071",
+      "imdbID": "tt0019071",
+      "imdbRating": 7.9,
+      "imdbVotes": 4676,
+      "runtime": "88 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "None, English",
+      "awards": "Won 1 Oscar. 4 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Street Angel",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Frank Borzage",
+      "actor": "Janet Gaynor",
+      "actors": [
+        "Janet Gaynor",
+        "Charles Farrell",
+        "Natalie Kingston"
+      ],
+      "plot": "A woman on the run from the law finds her past catching up to her just as she is on the verge of true happiness.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGQwOWUwMjAtNzZiNy00YWJiLTk5NjctMWE2ZGM3NzMwNTUwXkEyXkFqcGdeQXVyMzg1ODEwNQ@@._V1_SX300.jpg",
+      "posterId": "tt0019429",
+      "imdbID": "tt0019429",
+      "imdbRating": 7.3,
+      "imdbVotes": 2619,
+      "runtime": "102 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "None, English",
+      "awards": "Won 1 Oscar. 4 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tempest",
+      "year": "2025",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "Thriller"
+      ],
+      "director": null,
+      "actor": "Jun Ji-hyun",
+      "actors": [
+        "Jun Ji-hyun",
+        "Gang Dong-won",
+        "Lee Mi-sook"
+      ],
+      "plot": "Munju, an ex-ambassador, and Sanho, a secret agent, investigate an attack that could destabilize the Korean peninsula, unraveling a dangerous conspiracy that jeopardizes regional peace and security.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGFmYTNkNmUtZmQzMi00ZjkxLWI0NDgtY2ZmZDJiMmEyMDc1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt27368147",
+      "imdbID": "tt27368147",
+      "imdbRating": 6.8,
+      "imdbVotes": 10314,
+      "runtime": null,
+      "rated": null,
+      "country": "South Korea, United States, Korea",
+      "language": "Korean",
+      "awards": null,
+      "omdbType": "series",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Two Arabian Knights",
+      "year": "1927",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Romance"
+      ],
+      "director": "Lewis Milestone",
+      "actor": "William Boyd",
+      "actors": [
+        "William Boyd",
+        "Mary Astor",
+        "Louis Wolheim"
+      ],
+      "plot": "Two American soldiers are captured by the Germans on the Western Front during World War One and escape a POW camp only to stumble into further life-threatening adventures when they come across an Arabian king's daughter while on t...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWJhOWEyYWQtYTQzZS00ODI5LWI5NTMtN2M2NmJiOTk1MTgwXkEyXkFqcGdeQXVyNDkwMzY5NjQ@._V1_SX300.jpg",
+      "posterId": "tt0018515",
+      "imdbID": "tt0018515",
+      "imdbRating": 6.7,
+      "imdbVotes": 1097,
+      "runtime": "92 min",
+      "rated": "TV-G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Underworld",
+      "year": "2003",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Fantasy",
+        "Thriller"
+      ],
+      "director": "Len Wiseman",
+      "actor": "Kate Beckinsale",
+      "actors": [
+        "Kate Beckinsale",
+        "Scott Speedman",
+        "Shane Brolly"
+      ],
+      "plot": "Selene, a vampire warrior, is entrenched in a conflict between vampires and werewolves, while falling in love with Michael, a human who is sought by werewolves for unknown reasons.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWIwZjFkYjktZTI3My00YzhkLWI5NmUtZDYyMTg5ZWVmODZkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0320691",
+      "imdbID": "tt0320691",
+      "imdbRating": 7,
+      "imdbVotes": 299220,
+      "runtime": "121 min",
+      "rated": "R",
+      "country": "United States, United Kingdom, Germany, Hungary",
+      "language": "English",
+      "awards": "1 win & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sadie Thompson",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Raoul Walsh",
+      "actor": "Lionel Barrymore",
+      "actors": [
+        "Lionel Barrymore",
+        "Blanche Friderici",
+        "Charles Lane"
+      ],
+      "plot": "A prostitute seeking a fresh start becomes the obsession of a religious extremist.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTkyOTQ1NzU1Nl5BMl5BanBnXkFtZTgwODY1MTczMTE@._V1_SX300.jpg",
+      "posterId": "tt0019344",
+      "imdbID": "tt0019344",
+      "imdbRating": 7.2,
+      "imdbVotes": 2859,
+      "runtime": "97 min",
+      "rated": "Unrated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 3 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Crowd",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "King Vidor",
+      "actor": "Eleanor Boardman",
+      "actors": [
+        "Eleanor Boardman",
+        "James Murray",
+        "Bert Roach"
+      ],
+      "plot": "The life of a man and woman together in a large, impersonal metropolis through their hopes, struggles, and downfalls.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmRkNjk1ZDgtOTk2Ny00ZjU5LTg4NWQtYzNmNzFkMzA4MWMxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0018806",
+      "imdbID": "tt0018806",
+      "imdbRating": 8.1,
+      "imdbVotes": 9436,
+      "runtime": "98 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "None",
+      "awards": "Nominated for 2 Oscars. 4 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Chang: A Drama of the Wilderness",
+      "year": "1927",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Merian C. Cooper, Ernest B. Schoedsack",
+      "actor": "Kru",
+      "actors": [
+        "Kru",
+        "Chantui",
+        "Nah"
+      ],
+      "plot": "A snapshot of life in the jungles of Northern Siam.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmVkNGE4MmUtN2ZlOC00Y2M3LWI4MDUtY2VkZDhiYWZlNTg3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0017743",
+      "imdbID": "tt0017743",
+      "imdbRating": 6.9,
+      "imdbVotes": 1152,
+      "runtime": "69 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English, German",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Speedy",
+      "year": "1928",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Family"
+      ],
+      "director": "Ted Wilde",
+      "actor": "Harold Lloyd",
+      "actors": [
+        "Harold Lloyd",
+        "Ann Christy",
+        "Bert Woodruff"
+      ],
+      "plot": "Harold \"Speedy\" Swift, a fan of Babe Ruth and the New York Yankees, saves from extinction the city's last horse-drawn trolley, operated by his girlfriend's grandfather.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg0ODM0NzEwN15BMl5BanBnXkFtZTgwMzgzODYwMjE@._V1_SX300.jpg",
+      "posterId": "tt0019412",
+      "imdbID": "tt0019412",
+      "imdbRating": 7.6,
+      "imdbVotes": 4381,
+      "runtime": "85 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "None, English",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Jazz Singer",
+      "year": "1927",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Musical"
+      ],
+      "director": "Alan Crosland",
+      "actor": "Al Jolson",
+      "actors": [
+        "Al Jolson",
+        "May McAvoy",
+        "Warner Oland"
+      ],
+      "plot": "The son of a Jewish Cantor must defy the traditions of his religious father in order to pursue his dream of becoming a jazz singer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTMxODVjM2MtYjFlYS00Y2Y1LTg1NTEtNjcwZTBhNTE3MTJmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0018037",
+      "imdbID": "tt0018037",
+      "imdbRating": 6.4,
+      "imdbVotes": 11586,
+      "runtime": "88 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Noose",
+      "year": "1958",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Wojciech Has",
+      "actor": "Gustaw Holoubek",
+      "actors": [
+        "Gustaw Holoubek",
+        "Aleksandra Slaska",
+        "Teresa Szmigielówna"
+      ],
+      "plot": "One day in the life of an alcohol addict. With the help of his girlfriend Krysia, Kuba attempts to regain control of his life. But when she's at work, Kuba is home alone, and it becomes hard not to resist the temptation.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTAyODczYzctNmQzZS00YmUyLWEzZjEtZWQxNTJiYTM3NjNlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0052063",
+      "imdbID": "tt0052063",
+      "imdbRating": 7.6,
+      "imdbVotes": 1274,
+      "runtime": "96 min",
+      "rated": null,
+      "country": "Poland",
+      "language": "Polish",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Racket",
+      "year": "1951",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Film-Noir"
+      ],
+      "director": "John Cromwell, Mel Ferrer, Tay Garnett",
+      "actor": "Robert Mitchum",
+      "actors": [
+        "Robert Mitchum",
+        "Lizabeth Scott",
+        "Robert Ryan"
+      ],
+      "plot": "In New York, two honest cops try to hinder a crime syndicate from moving into the precinct and also to prevent the mob's plan of electing a corrupt prosecutor to a judgeship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWMzNmZhYzYtMjliOS00OGUzLWIxZWUtNDJlZTEyOWQwNmI0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0043955",
+      "imdbID": "tt0043955",
+      "imdbRating": 6.7,
+      "imdbVotes": 3414,
+      "runtime": "88 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Circus",
+      "year": "1928",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Family",
+        "Romance"
+      ],
+      "director": "Charles Chaplin",
+      "actor": "Charles Chaplin",
+      "actors": [
+        "Charles Chaplin",
+        "Merna Kennedy",
+        "Al Ernest Garcia"
+      ],
+      "plot": "The Tramp finds work and the girl of his dreams at a circus.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjNhZWY4YjgtOTI2Zi00NWZlLWIyNDItNGY0MzhhNmUxNTkyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0018773",
+      "imdbID": "tt0018773",
+      "imdbRating": 8.1,
+      "imdbVotes": 38179,
+      "runtime": "72 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "None, English",
+      "awards": "3 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Patriot",
+      "year": "2000",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "War"
+      ],
+      "director": "Roland Emmerich",
+      "actor": "Mel Gibson",
+      "actors": [
+        "Mel Gibson",
+        "Heath Ledger",
+        "Joely Richardson"
+      ],
+      "plot": "Peaceful farmer Benjamin Martin is driven to lead the Colonial Militia during the American Revolution when a sadistic British officer murders his son.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYThjZWExNTItYmE5Yi00ZDE3LTk1ZDktMGJiMWUyYTc2YmFkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0187393",
+      "imdbID": "tt0187393",
+      "imdbRating": 7.2,
+      "imdbVotes": 305970,
+      "runtime": "165 min",
+      "rated": "R",
+      "country": "Germany, United States",
+      "language": "English, French",
+      "awards": "Nominated for 3 Oscars. 9 wins & 23 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Madame X",
+      "year": "1966",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "David Lowell Rich",
+      "actor": "Lana Turner",
+      "actors": [
+        "Lana Turner",
+        "John Forsythe",
+        "Ricardo Montalban"
+      ],
+      "plot": "When her lover is killed, the wife of a wealthy man is convinced to fake her own death, which leads her into greater depths of depravity until fate reunites her with her long-lost son, who is unaware of her real identity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTYxMjk1ZDQtOGEwMC00NTJjLTk5YTEtZjRmODhkOTljZTU5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0060645",
+      "imdbID": "tt0060645",
+      "imdbRating": 6.9,
+      "imdbVotes": 2623,
+      "runtime": "100 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Spanish, German",
+      "awards": "1 win & 1 nomination",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Our Dancing Daughters",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Harry Beaumont",
+      "actor": "Joan Crawford",
+      "actors": [
+        "Joan Crawford",
+        "Johnny Mack Brown",
+        "Nils Asther"
+      ],
+      "plot": "A flapper who's secretly a good girl and a gold digging floozy masquerading as an ingénue both vie for the hand of a millionaire.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjIyNTJlNmItODhjOC00OGZkLTgwMDYtMmIyMmYyOTBiZDMwXkEyXkFqcGdeQXVyNjc0MzMzNjA@._V1_SX300.jpg",
+      "posterId": "tt0019237",
+      "imdbID": "tt0019237",
+      "imdbRating": 6.7,
+      "imdbVotes": 2016,
+      "runtime": "85 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 2 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Woman of Affairs",
+      "year": "1928",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Clarence Brown",
+      "actor": "Greta Garbo",
+      "actors": [
+        "Greta Garbo",
+        "John Gilbert",
+        "Lewis Stone"
+      ],
+      "plot": "When two childhood sweethearts are kept from marrying, misery ensues.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQzMzUyNjc0OF5BMl5BanBnXkFtZTgwNTk5MjgzMjE@._V1_SX300.jpg",
+      "posterId": "tt0019591",
+      "imdbID": "tt0019591",
+      "imdbRating": 7.1,
+      "imdbVotes": 1733,
+      "runtime": "98 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Drag Me to Hell",
+      "year": "2009",
+      "genre": "Horror",
+      "genres": [
+        "Horror"
+      ],
+      "director": "Sam Raimi",
+      "actor": "Alison Lohman",
+      "actors": [
+        "Alison Lohman",
+        "Justin Long",
+        "Ruth Livier"
+      ],
+      "plot": "An ambitious loan officer must find a way to shatter a curse that threatens her soul with damnation.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQwNTMyNjc5Ml5BMl5BanBnXkFtZTcwOTI2MTQ0Mg@@._V1_SX300.jpg",
+      "posterId": "tt1127180",
+      "imdbID": "tt1127180",
+      "imdbRating": 6.6,
+      "imdbVotes": 229962,
+      "runtime": "99 min",
+      "rated": "PG-13",
+      "country": "United States, India",
+      "language": "English, Spanish, Hungarian, Czech",
+      "awards": "7 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dark"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Awakening",
+      "year": "2011",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Horror",
+        "Mystery"
+      ],
+      "director": "Nick Murphy",
+      "actor": "Rebecca Hall",
+      "actors": [
+        "Rebecca Hall",
+        "Dominic West",
+        "Imelda Staunton"
+      ],
+      "plot": "In 1921, England is overwhelmed by the loss and grief of World War I. Hoax exposer Florence Cathcart visits a boarding school to explain sightings of a child ghost. Everything she believes unravels as the 'missing' begin to show t...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzk0ODc1NDMxOV5BMl5BanBnXkFtZTcwNTAzMzgwOA@@._V1_SX300.jpg",
+      "posterId": "tt1687901",
+      "imdbID": "tt1687901",
+      "imdbRating": 6.5,
+      "imdbVotes": 71604,
+      "runtime": "102 min",
+      "rated": "R",
+      "country": "United Kingdom",
+      "language": "English, French, Latin",
+      "awards": "4 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "dark",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Last of Mrs. Cheyney",
+      "year": "1937",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Richard Boleslawski, Dorothy Arzner, George Fitzmaurice",
+      "actor": "Robert Montgomery",
+      "actors": [
+        "Robert Montgomery",
+        "Joan Crawford",
+        "William Powell"
+      ],
+      "plot": "Two English aristocrats pursue a rich American widow who may not be quite the person she claims to be.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmJkYzQyNjAtMmM1Mi00ZjBmLWI5MDEtNzEzZDZiMjI2ZmJlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029120",
+      "imdbID": "tt0029120",
+      "imdbRating": 6.4,
+      "imdbVotes": 1735,
+      "runtime": "98 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Letter",
+      "year": "1940",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Film-Noir"
+      ],
+      "director": "William Wyler",
+      "actor": "Bette Davis",
+      "actors": [
+        "Bette Davis",
+        "Herbert Marshall",
+        "James Stephenson"
+      ],
+      "plot": "The wife of a rubber plantation administrator shoots a man to death and claims it was self-defense, but a letter written in her own hand may prove her undoing.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjU4ODQyNGQtZDdiMS00M2M0LTkxYjEtOTliZGI2YmI0ZDJhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032701",
+      "imdbID": "tt0032701",
+      "imdbRating": 7.5,
+      "imdbVotes": 14903,
+      "runtime": "95 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 7 Oscars. 1 win & 9 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Thunderbolt",
+      "year": "1995",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Thriller"
+      ],
+      "director": "Gordon Chan",
+      "actor": "Jackie Chan",
+      "actors": [
+        "Jackie Chan",
+        "Anita Yuen",
+        "Michael Wong"
+      ],
+      "plot": "In order to release his kidnapped sister, sports car mechanic Chan Foh To (Jackie Chan) has to beat a supercriminal street racer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDQxN2IwNmYtYmFhMS00MWVlLWFjMWItMzE4ZjQxNjM3YjI3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0114126",
+      "imdbID": "tt0114126",
+      "imdbRating": 6.3,
+      "imdbVotes": 10715,
+      "runtime": "110 min",
+      "rated": "R",
+      "country": "Hong Kong",
+      "language": "Cantonese, English, Japanese",
+      "awards": "1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Big House",
+      "year": "1930",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "director": "George W. Hill, Ward Wing",
+      "actor": "Chester Morris",
+      "actors": [
+        "Chester Morris",
+        "Wallace Beery",
+        "Lewis Stone"
+      ],
+      "plot": "A convict falls in love with his new cellmate's sister, only to become embroiled in a planned break-out which is certain to have lethal consequences.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTIwNDJjMzQtNWIyOS00MWI5LWEzYTgtYjA1Y2FhY2Q5Zjg3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0020686",
+      "imdbID": "tt0020686",
+      "imdbRating": 7.1,
+      "imdbVotes": 2676,
+      "runtime": "87 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Russian",
+      "awards": "Won 2 Oscars. 2 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Divorcee",
+      "year": "1930",
+      "genre": "Romance",
+      "genres": [
+        "Romance",
+        "Drama"
+      ],
+      "director": "Robert Z. Leonard",
+      "actor": "Norma Shearer",
+      "actors": [
+        "Norma Shearer",
+        "Robert Montgomery",
+        "Chester Morris"
+      ],
+      "plot": "When a woman discovers that her husband has been unfaithful to her, she decides to respond to his infidelities in kind.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzgyODFiMDUtNjMxMS00OWU0LWJiODgtY2JmZmJjNGYzMDQxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0020827",
+      "imdbID": "tt0020827",
+      "imdbRating": 6.7,
+      "imdbVotes": 3768,
+      "runtime": "84 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Won 1 Oscar. 1 win & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Disraeli",
+      "year": "1929",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Alfred E. Green",
+      "actor": "George Arliss",
+      "actors": [
+        "George Arliss",
+        "Doris Lloyd",
+        "David Torrence"
+      ],
+      "plot": "Prime Minister of Great Britain Benjamin Disraeli outwits the subterfuge of the Russians and chicanery at home in order to secure the purchase of the Suez Canal.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTRmNTcwMGQtMDc2ZC00ZTlhLTgzMjgtZjY4ZTkyZmNkNDM4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0019823",
+      "imdbID": "tt0019823",
+      "imdbRating": 6.1,
+      "imdbVotes": 1411,
+      "runtime": "90 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 4 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "King of Jazz",
+      "year": "1930",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical"
+      ],
+      "director": "John Murray Anderson, Walter Lantz",
+      "actor": "Paul Whiteman",
+      "actors": [
+        "Paul Whiteman",
+        "John Boles",
+        "Laura La Plante"
+      ],
+      "plot": "A rotund bandleader leads a series of theatrical sketches, dance numbers, special effects, and animated segments.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOThmNTVhMmEtNDU5YS00YzNkLTg3NWMtNmY2YzRkNTZlZmE4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021025",
+      "imdbID": "tt0021025",
+      "imdbRating": 6.7,
+      "imdbVotes": 1675,
+      "runtime": "99 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Spanish, German, Russian, French, Italian",
+      "awards": "Won 1 Oscar. 2 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Love Parade",
+      "year": "1929",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical",
+        "Romance"
+      ],
+      "director": "Ernst Lubitsch",
+      "actor": "Maurice Chevalier",
+      "actors": [
+        "Maurice Chevalier",
+        "Jeanette MacDonald",
+        "Lupino Lane"
+      ],
+      "plot": "The queen of mythical Sylvania marries a courtier, who finds his new life unsatisfying.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDkyNDZjYTktOGNlMC00YzNmLWJjN2UtM2VjMjBhMDQzMDBjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0020112",
+      "imdbID": "tt0020112",
+      "imdbRating": 7,
+      "imdbVotes": 2668,
+      "runtime": "107 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 6 Oscars. 1 win & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Anna Christie",
+      "year": "1930",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Clarence Brown",
+      "actor": "Greta Garbo",
+      "actors": [
+        "Greta Garbo",
+        "Charles Bickford",
+        "George F. Marion"
+      ],
+      "plot": "A young woman reunites with her estranged father and falls in love with a sailor, but struggles to tell them about her dark past.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUyNDA5MTY0M15BMl5BanBnXkFtZTgwMzA1NDIwMjE@._V1_SX300.jpg",
+      "posterId": "tt0020641",
+      "imdbID": "tt0020641",
+      "imdbRating": 6.6,
+      "imdbVotes": 3556,
+      "runtime": "89 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 1 win & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bulldog Drummond",
+      "year": "1929",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Mystery"
+      ],
+      "director": "F. Richard Jones",
+      "actor": "Ronald Colman",
+      "actors": [
+        "Ronald Colman",
+        "Claud Allister",
+        "Lawrence Grant"
+      ],
+      "plot": "A bored WWI veteran helps out a young woman whose uncle is being held hostage by embezzlers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjNjY2Q0NGEtYzdkNy00MGJiLTk2YmMtZTAyNGU5YTM3ODUzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0019735",
+      "imdbID": "tt0019735",
+      "imdbRating": 6.3,
+      "imdbVotes": 1369,
+      "runtime": "90 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 5 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hallelujah",
+      "year": "1929",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Musical"
+      ],
+      "director": "King Vidor",
+      "actor": "Daniel L. Haynes",
+      "actors": [
+        "Daniel L. Haynes",
+        "Nina Mae McKinney",
+        "William Fountaine"
+      ],
+      "plot": "A sharecropper decides to become a preacher after falling for a vamp from the city.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzgzMTNkY2MtZTdkOS00OGZlLTk4ZjgtNmUzYWNhYWJmZGZlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0019959",
+      "imdbID": "tt0019959",
+      "imdbRating": 6.7,
+      "imdbVotes": 2083,
+      "runtime": "109 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hell's Angels",
+      "year": "1930",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "War"
+      ],
+      "director": "Howard Hughes, Edmund Goulding, James Whale",
+      "actor": "Ben Lyon",
+      "actors": [
+        "Ben Lyon",
+        "James Hall",
+        "Jean Harlow"
+      ],
+      "plot": "Brothers Monte and Ray leave Oxford to join the Royal Flying Corps. Ray loves Helen; Helen enjoys an affair with Monte; before they leave on their mission over Germany they find her in still another man's arms.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzMwODM4MzE2MF5BMl5BanBnXkFtZTgwNTc0NTgyMjE@._V1_SX300.jpg",
+      "posterId": "tt0020960",
+      "imdbID": "tt0020960",
+      "imdbRating": 7.3,
+      "imdbVotes": 6324,
+      "runtime": "127 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English, German, French",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Raffles",
+      "year": "1939",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Sam Wood, William Wyler",
+      "actor": "David Niven",
+      "actors": [
+        "David Niven",
+        "Olivia de Havilland",
+        "May Whitty"
+      ],
+      "plot": "Man about town and first class cricketer A.J. Raffles keeps himself solvent with daring robberies. Meeting Gwen from his schooldays and falling in love all over again, he spends the weekend with her parents, Lord and Lady Melrose....",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGJhM2YyY2ItMjRiMi00YmNjLWE5MzMtNmY1MjdkYjUwYTE0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032963",
+      "imdbID": "tt0032963",
+      "imdbRating": 6.4,
+      "imdbVotes": 1256,
+      "runtime": "72 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Trespasser",
+      "year": "2001",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller"
+      ],
+      "director": "Beto Brant",
+      "actor": "Marco Ricca",
+      "actors": [
+        "Marco Ricca",
+        "Alexandre Borges",
+        "Paulo Miklos"
+      ],
+      "plot": "Two businessmen hire a hitman to kill their third partner and are then blackmailed by the hitman as he takes over their company.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjI0ODQwMDQtZmNlNy00ZGEyLWI3MzktOTljNjI4NDAzZWJjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0303408",
+      "imdbID": "tt0303408",
+      "imdbRating": 7,
+      "imdbVotes": 1904,
+      "runtime": "97 min",
+      "rated": null,
+      "country": "Brazil",
+      "language": "Portuguese",
+      "awards": "29 wins & 21 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Skippy",
+      "year": "1968",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Family"
+      ],
+      "director": null,
+      "actor": "Ed Devereaux",
+      "actors": [
+        "Ed Devereaux",
+        "Tony Bonner",
+        "Ken James"
+      ],
+      "plot": "Sonny and his kangaroo Skippy live in Waratah National Park in New South Wales. Matt Hammond, Sonny's father is the park ranger. Skippy saves the day in many adventures.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNThjYjA4YWItNDRmZi00N2YyLWI2NTAtZTQyZjM1Yjc0NTQwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0060025",
+      "imdbID": "tt0060025",
+      "imdbRating": 6.3,
+      "imdbVotes": 1184,
+      "runtime": "25 min",
+      "rated": null,
+      "country": "Australia",
+      "language": "English",
+      "awards": "1 win",
+      "omdbType": "series",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Free Soul",
+      "year": "1931",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Clarence Brown",
+      "actor": "Norma Shearer",
+      "actors": [
+        "Norma Shearer",
+        "Leslie Howard",
+        "Lionel Barrymore"
+      ],
+      "plot": "An alcoholic lawyer who successfully defended a notorious gambler on a murder charge objects when his free-spirited daughter becomes romantically involved with him.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzNkNTg3NDItMjA3OS00YjA0LWIzMTgtOWI2ZmQzYzJkOWY4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021885",
+      "imdbID": "tt0021885",
+      "imdbRating": 6.6,
+      "imdbVotes": 2978,
+      "runtime": "93 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Min and Bill",
+      "year": "1930",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "George W. Hill",
+      "actor": "Marie Dressler",
+      "actors": [
+        "Marie Dressler",
+        "Wallace Beery",
+        "Dorothy Jordan"
+      ],
+      "plot": "Min, the owner of a dockside hotel, is forced to make difficult decisions about the future of Nancy, the young woman she took in as an infant.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTZkODg1OGMtZmRiMC00ZjU0LWE3YzctOGE5ZDZjZTBlMTMwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021148",
+      "imdbID": "tt0021148",
+      "imdbRating": 6.7,
+      "imdbVotes": 1937,
+      "runtime": "69 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tabu: A Story of the South Seas",
+      "year": "1931",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Romance"
+      ],
+      "director": "F.W. Murnau",
+      "actor": "Anne Chevalier",
+      "actors": [
+        "Anne Chevalier",
+        "Matahi",
+        "Hitu"
+      ],
+      "plot": "On the South Pacific island of Bora Bora, a young couple's love is threatened when the tribal chief declares the girl a sacred virgin.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTI2ZWQzNjAtYjJhZi00MDFmLTliOWItZjRmNTI2Y2U2ZTM2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0022458",
+      "imdbID": "tt0022458",
+      "imdbRating": 7.4,
+      "imdbVotes": 6708,
+      "runtime": "86 min",
+      "rated": "TV-PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 4 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Dawn Patrol",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "War"
+      ],
+      "director": "Edmund Goulding",
+      "actor": "Errol Flynn",
+      "actors": [
+        "Errol Flynn",
+        "Basil Rathbone",
+        "David Niven"
+      ],
+      "plot": "British flying aces in World War I contend with the harsh realities of war.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTFkN2RmYWEtOGJmZC00YTQyLTllYTgtYjE1MzE5OTljNGM2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030044",
+      "imdbID": "tt0030044",
+      "imdbRating": 7.5,
+      "imdbVotes": 3479,
+      "runtime": "103 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, German",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Morocco",
+      "year": "1930",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Josef von Sternberg",
+      "actor": "Gary Cooper",
+      "actors": [
+        "Gary Cooper",
+        "Marlene Dietrich",
+        "Adolphe Menjou"
+      ],
+      "plot": "A cabaret singer and a Legionnaire fall in love, but their relationship is complicated by the results of his womanizing and the appearance of a rich man who wants her for himself.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmU0ZjVjNzgtYjE3NC00ZjgwLWFhNzQtNzA4NDI5ZGVhNmYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021156",
+      "imdbID": "tt0021156",
+      "imdbRating": 7,
+      "imdbVotes": 7738,
+      "runtime": "92 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French, Spanish, Arabic, Italian",
+      "awards": "Nominated for 4 Oscars. 3 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Front Page",
+      "year": "1974",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Billy Wilder",
+      "actor": "Jack Lemmon",
+      "actors": [
+        "Jack Lemmon",
+        "Walter Matthau",
+        "Susan Sarandon"
+      ],
+      "plot": "A ruthless editor tries to get his top reporter to cover one more crime story before retirement.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTAyNjQzZGUtNjRiZi00ZDA2LTgwMWQtZGU1YTc5MmY4MDNhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0071524",
+      "imdbID": "tt0071524",
+      "imdbRating": 7.3,
+      "imdbVotes": 16075,
+      "runtime": "105 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "3 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Holiday",
+      "year": "2014",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Thriller"
+      ],
+      "director": "A.R. Murugadoss",
+      "actor": "Akshay Kumar",
+      "actors": [
+        "Akshay Kumar",
+        "Sonakshi Sinha",
+        "Freddy Daruwala"
+      ],
+      "plot": "A military officer attempts to hunt down a terrorist, destroy a terrorist gang and deactivate the sleeper cells under its command.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTUzZDBiOWEtMGM3MC00OWFiLWFiNDgtYjIxYWZjZWQ0Mjg5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt2556308",
+      "imdbID": "tt2556308",
+      "imdbRating": 7.2,
+      "imdbVotes": 30846,
+      "runtime": "160 min",
+      "rated": "Not Rated",
+      "country": "India",
+      "language": "Hindi",
+      "awards": "5 wins & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Svengali",
+      "year": "1931",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Horror",
+        "Romance"
+      ],
+      "director": "Archie Mayo",
+      "actor": "John Barrymore",
+      "actors": [
+        "John Barrymore",
+        "Marian Marsh",
+        "Donald Crisp"
+      ],
+      "plot": "Through hypnotism and telepathic mind control, a sinister music maestro controls the singing voice, but not the heart, of the woman he loves.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2VjYzEzYTMtZWZkNC00YzgzLWEwMDEtZmU0ODk1NjU4YjViXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0022454",
+      "imdbID": "tt0022454",
+      "imdbRating": 6.8,
+      "imdbVotes": 2606,
+      "runtime": "81 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French, Italian, German",
+      "awards": "Nominated for 2 Oscars. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "dark"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Little Caesar",
+      "year": "1931",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Mervyn LeRoy",
+      "actor": "Edward G. Robinson",
+      "actors": [
+        "Edward G. Robinson",
+        "Douglas Fairbanks Jr.",
+        "Glenda Farrell"
+      ],
+      "plot": "A small-time criminal moves to a big city to seek bigger fortune.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGE3YTI5MzUtZDVhZS00Y2NkLTgwNjYtNjg1YzE3MGE5NDhmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021079",
+      "imdbID": "tt0021079",
+      "imdbRating": 7.2,
+      "imdbVotes": 14828,
+      "runtime": "79 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Smart Money",
+      "year": "1931",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Alfred E. Green",
+      "actor": "Edward G. Robinson",
+      "actors": [
+        "Edward G. Robinson",
+        "James Cagney",
+        "Evalyn Knapp"
+      ],
+      "plot": "A Greek barber has uncommon skills in playing poker and soon rises in the seedy world of illegal gambling, but pretty blondes remain his Achilles' heel.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg3MjE5ODA2M15BMl5BanBnXkFtZTgwODU2ODgwMzE@._V1_SX300.jpg",
+      "posterId": "tt0022403",
+      "imdbID": "tt0022403",
+      "imdbRating": 6.8,
+      "imdbVotes": 2419,
+      "runtime": "81 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Criminal Code",
+      "year": "1931",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Howard Hawks",
+      "actor": "Walter Huston",
+      "actors": [
+        "Walter Huston",
+        "Phillips Holmes",
+        "Constance Cummings"
+      ],
+      "plot": "After a failed attempt at running for governor, D.A. Mark Brady is appointed warden of the state prison where many of the criminals he prosecuted are incarcerated.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODQ1NTM4NGUtZTJmNy00MzVjLWJjYTgtYjc3Y2FlZDA5NGUxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0021770",
+      "imdbID": "tt0021770",
+      "imdbRating": 6.9,
+      "imdbVotes": 1535,
+      "runtime": "97 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Doorway to Hell",
+      "year": "1930",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Archie Mayo",
+      "actor": "Lew Ayres",
+      "actors": [
+        "Lew Ayres",
+        "James Cagney",
+        "Dorothy Mathews"
+      ],
+      "plot": "Despite his efforts to go straight, a young gangster keeps falling back into crime.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODVhODRjMTEtNWEwYy00ZWVjLTkzYTItZmI1NmM4MDZmYTc2XkEyXkFqcGdeQXVyMTk2MzI2Ng@@._V1_SX300.jpg",
+      "posterId": "tt0020836",
+      "imdbID": "tt0020836",
+      "imdbRating": 6.5,
+      "imdbVotes": 1335,
+      "runtime": "78 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Public Enemy",
+      "year": "1931",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "William A. Wellman",
+      "actor": "James Cagney",
+      "actors": [
+        "James Cagney",
+        "Jean Harlow",
+        "Edward Woods"
+      ],
+      "plot": "An Irish-American street punk tries to make it big in the world of organized crime.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYThlZDRjZjYtN2FmZS00NTQxLThlY2QtY2I0MGM5OWY1OWYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0022286",
+      "imdbID": "tt0022286",
+      "imdbRating": 7.6,
+      "imdbVotes": 23502,
+      "runtime": "83 min",
+      "rated": "Passed",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Trader Horn",
+      "year": "1931",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "W.S. Van Dyke",
+      "actor": "Harry Carey",
+      "actors": [
+        "Harry Carey",
+        "Edwina Booth",
+        "Duncan Renaldo"
+      ],
+      "plot": "Two white traders in the darkest Africa of the 1870s find a missionary's daughter, who was captured as a child by a savage tribe and now worshiped as a goddess.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTM5MGRhZDYtN2M0ZC00NTMzLWFkNjEtOGNhYzVhODQ0Y2QyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0022495",
+      "imdbID": "tt0022495",
+      "imdbRating": 6.1,
+      "imdbVotes": 1327,
+      "runtime": "122 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Swahili",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Whoopee!",
+      "year": "1930",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical",
+        "Romance"
+      ],
+      "director": "Thornton Freeland",
+      "actor": "Eddie Cantor",
+      "actors": [
+        "Eddie Cantor",
+        "Ethel Shutta",
+        "Paul Gregory"
+      ],
+      "plot": "Western sheriff Bob Wells is preparing to marry Sally Morgan; she loves part-Indian Wanenis, whose race is an obstacle. Sally flees the wedding with hypochondriac Henry Williams, who thinks he's just giving her a ride; but she lef...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDIxZGU2MjItNDIyOC00ZGM1LTk2ODgtNDhiNWE0OWQxMGIyXkEyXkFqcGdeQXVyMTY5Nzc4MDY@._V1_SX300.jpg",
+      "posterId": "tt0021549",
+      "imdbID": "tt0021549",
+      "imdbRating": 6.4,
+      "imdbVotes": 1213,
+      "runtime": "93 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
       ],
       "ph": false,
       "source": "auto_candidates",
