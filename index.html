@@ -2636,6 +2636,79 @@ async function spotifyApiRequest(method,path,body=null){
   try{ data=await res.json(); }catch(_){}
   return {ok:res.ok,status:res.status,data};
 }
+let _spotifySdkPromise=null;
+let _spotifyPlayer=null;
+let _spotifyPlayerDeviceId=null;
+let _spotifyPlayerReady=false;
+function _loadSpotifySdk(){
+  if(_spotifySdkPromise) return _spotifySdkPromise;
+  _spotifySdkPromise=new Promise((resolve,reject)=>{
+    try{
+      if(window.Spotify&&window.Spotify.Player){ resolve(window.Spotify); return; }
+      const existing=document.querySelector('script[data-spotify-sdk="1"]');
+      if(!existing){
+        const s=document.createElement("script");
+        s.src="https://sdk.scdn.co/spotify-player.js";
+        s.async=true;
+        s.dataset.spotifySdk="1";
+        document.head.appendChild(s);
+      }
+      const timeout=setTimeout(()=>reject(new Error("Spotify SDK load timeout")),10000);
+      window.onSpotifyWebPlaybackSDKReady=()=>{
+        clearTimeout(timeout);
+        resolve(window.Spotify);
+      };
+    }catch(err){ reject(err); }
+  });
+  return _spotifySdkPromise;
+}
+async function _ensureSpotifyWebPlayer(){
+  const Spotify=await _loadSpotifySdk();
+  if(_spotifyPlayer&&_spotifyPlayerReady&&_spotifyPlayerDeviceId){
+    return {ok:true,deviceId:_spotifyPlayerDeviceId};
+  }
+  if(!_spotifyPlayer){
+    _spotifyPlayer=new Spotify.Player({
+      name:"Kwento Web Player",
+      getOAuthToken:async cb=>{
+        const token=await _getSpotifyAccessToken();
+        cb(token||"");
+      },
+      volume:0.85
+    });
+    _spotifyPlayer.addListener("ready",({device_id})=>{
+      _spotifyPlayerDeviceId=device_id;
+      _spotifyPlayerReady=true;
+    });
+    _spotifyPlayer.addListener("not_ready",()=>{
+      _spotifyPlayerReady=false;
+    });
+    _spotifyPlayer.addListener("authentication_error",()=>{});
+    _spotifyPlayer.addListener("account_error",()=>{});
+    _spotifyPlayer.addListener("initialization_error",()=>{});
+    const connected=await _spotifyPlayer.connect();
+    if(!connected) return {ok:false,err:"Spotify player connection failed"};
+  }
+  const started=Date.now();
+  while(!_spotifyPlayerReady&&Date.now()-started<5000){
+    await new Promise(r=>setTimeout(r,120));
+  }
+  if(!_spotifyPlayerReady||!_spotifyPlayerDeviceId){
+    return {ok:false,err:"Spotify player not ready"};
+  }
+  return {ok:true,deviceId:_spotifyPlayerDeviceId};
+}
+async function playTrackViaSpotifyWeb(trackUri){
+  if(!trackUri) return {ok:false,err:"No track URI"};
+  const ensured=await _ensureSpotifyWebPlayer();
+  if(!ensured.ok) return ensured;
+  const deviceId=ensured.deviceId;
+  const transfer=await spotifyApiRequest("PUT","me/player",{device_ids:[deviceId],play:false});
+  if(!transfer.ok&&transfer.status!==204) return {ok:false,status:transfer.status,err:"Playback device transfer failed"};
+  const play=await spotifyApiRequest("PUT",`me/player/play?device_id=${encodeURIComponent(deviceId)}`,{uris:[trackUri]});
+  if(!play.ok&&play.status!==204) return {ok:false,status:play.status,err:"Play request failed"};
+  return {ok:true};
+}
 function _spotifyTagNorm(s){
   return (s||"")
     .toLowerCase()
@@ -6066,14 +6139,35 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const openUrl=(displayItem.spotifyUrl||"").trim() || (displayItem.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
     try{
       if(webPlaybackUri){
-        const slug=webPlaybackUri.startsWith("spotify:track:")?webPlaybackUri.split(":").pop():"";
-        if(slug){
-          window.open(`https://open.spotify.com/track/${slug}`,"_blank","noopener,noreferrer");
-          return;
-        }
+        playTrackViaSpotifyWeb(webPlaybackUri).then(r=>{
+          if(r?.ok){
+            setMusicPlayMsg("Playing now.");
+            setPreviewOn(false);
+            return;
+          }
+          if(previewUrl){
+            setPreviewOn(true);
+            setMusicPlayMsg("Preview mode.");
+            return;
+          }
+          if(openUrl){
+            window.open(openUrl,"_blank","noopener,noreferrer");
+          }
+        }).catch(()=>{
+          if(previewUrl){
+            setPreviewOn(true);
+            setMusicPlayMsg("Preview mode.");
+            return;
+          }
+          if(openUrl){
+            window.open(openUrl,"_blank","noopener,noreferrer");
+          }
+        });
+        return;
       }
       if(previewUrl){
-        window.open(previewUrl,"_blank","noopener,noreferrer");
+        setPreviewOn(true);
+        setMusicPlayMsg("Preview mode.");
         return;
       }
       if(openUrl){
@@ -6091,6 +6185,28 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     return "none";
   })();
   const musicPlayLabel=musicPlayMode==="play"?"Play":(musicPlayMode==="preview"?"Preview":(musicPlayMode==="open"?"Open in Spotify":"Unavailable"));
+  const [previewOn,setPreviewOn]=useState(false);
+  const [musicPlayMsg,setMusicPlayMsg]=useState("");
+  const previewRef=useRef(null);
+  useEffect(()=>{
+    setPreviewOn(false);
+    setMusicPlayMsg("");
+    if(previewRef.current){
+      try{
+        previewRef.current.pause();
+        previewRef.current.currentTime=0;
+      }catch(_){}
+    }
+  },[displayItem?.spotifyTrackId,displayItem?.spotifyUri,displayItem?.title]);
+  useEffect(()=>{
+    const el=previewRef.current;
+    if(!el) return;
+    if(previewOn){
+      el.play().catch(()=>{});
+    }else{
+      try{ el.pause(); }catch(_){}
+    }
+  },[previewOn,displayItem?.previewUrl]);
   const ActionBtn=({onClick,active,children,title})=>(
     <button onClick={onClick} title={title} disabled={actionBusy}
       style={{
@@ -6287,6 +6403,18 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
                 {musicPlayLabel}
               
               </button>
+              {displayItem?.previewUrl&&(
+                <div style={{marginBottom:8,display:previewOn?"block":"none"}}>
+                  <audio
+                    ref={previewRef}
+                    src={displayItem.previewUrl}
+                    controls
+                    style={{width:"100%"}}
+                    onEnded={()=>setPreviewOn(false)}
+                  />
+                </div>
+              )}
+              {musicPlayMsg&&<div style={{fontSize:11,color:th.sub,marginTop:-2,marginBottom:8,textAlign:"center"}}>{musicPlayMsg}</div>}
               <div style={{display:"flex",gap:8,marginTop:2}}>
                 <ActionBtn onClick={()=>runAction(handleMusicLog)} active={isLoggedMusic} title="Log">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill={isLoggedMusic?catInfo.color:"none"} stroke={isLoggedMusic?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -9877,6 +10005,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       "user-read-email",
       "user-top-read",
       "user-read-recently-played",
+      "user-read-playback-state",
+      "user-modify-playback-state",
+      "streaming",
       "playlist-modify-private",
       "playlist-modify-public",
     ];
