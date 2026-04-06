@@ -5394,6 +5394,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const watchlistKeys=watchlistAll.flatMap(w=>[movieKey(w),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
   const loggedTitleKeys=new Set((data.logs||[]).filter(l=>l.category===cat).map(l=>normTitle(l.title)).filter(Boolean));
   const loggedImdbKeys=new Set((data.logs||[]).filter(l=>l.category===cat&&l.imdbID).map(l=>(l.imdbID||"").toLowerCase()));
+  const loggedMusicTrackKeys=new Set((data.logs||[]).filter(l=>l.category==="music"&&l.spotifyTrackId).map(l=>(l.spotifyTrackId||"").toLowerCase()));
+  const loggedMusicUriKeys=new Set((data.logs||[]).filter(l=>l.category==="music"&&l.spotifyUri).map(l=>(l.spotifyUri||"").toLowerCase()));
+  const loggedMusicBaseTitleKeys=new Set((data.logs||[]).filter(l=>l.category==="music").map(l=>normTitle((l.title||"").split(" — ")[0]||l.title||"")).filter(Boolean));
   const likedKeysSet=new Set(
     Object.entries(data.likedSuggestions||{})
       .filter(([,v])=>!!v)
@@ -5429,6 +5432,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       if(titleKey&&watchKeysSet.has(titleKey)) return false;
       if(key&&loggedImdbKeys.has(key)) return false;
       if(titleKey&&loggedTitleKeys.has(titleKey)) return false;
+      if(cat==="music"){
+        const trackKey=(it.spotifyTrackId||"").toLowerCase();
+        const uriKey=(it.spotifyUri||"").toLowerCase();
+        const baseTitleKey=normTitle((it.title||"").split(" — ")[0]||it.title||"");
+        if(trackKey&&loggedMusicTrackKeys.has(trackKey)) return false;
+        if(uriKey&&loggedMusicUriKeys.has(uriKey)) return false;
+        if(baseTitleKey&&loggedMusicBaseTitleKeys.has(baseTitleKey)) return false;
+      }
       seen.add(dedupeKey);
       return true;
     });
@@ -6041,6 +6052,16 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       }
     }catch(_){}
   };
+  const musicPlayMode=(()=>{
+    const trackUri=(displayItem?.spotifyUri||"").trim();
+    const preview=(displayItem?.previewUrl||"").trim();
+    const spotifyWeb=(displayItem?.spotifyUrl||"").trim();
+    if(trackUri&&trackUri.startsWith("spotify:track:")) return "play";
+    if(preview) return "preview";
+    if(spotifyWeb) return "open";
+    return "none";
+  })();
+  const musicPlayLabel=musicPlayMode==="play"?"Play":(musicPlayMode==="preview"?"Preview":(musicPlayMode==="open"?"Open in Spotify":"Unavailable"));
   const ActionBtn=({onClick,active,children,title})=>(
     <button onClick={onClick} title={title} disabled={actionBusy}
       style={{
@@ -6228,9 +6249,14 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
               <button onClick={handleMusicPlay} style={{
                 width:"100%",padding:"9px",borderRadius:11,background:"transparent",
                 border:`1px solid ${th.border}`,fontSize:12,fontWeight:600,color:th.sub,
-                display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",marginBottom:10
-              }}>
-                ▶ Play
+                display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:musicPlayMode==="none"?"default":"pointer",marginBottom:10,
+                opacity:musicPlayMode==="none"?0.6:1
+              }} disabled={musicPlayMode==="none"}>
+                {musicPlayMode==="play"&&"▶ "}
+                {musicPlayMode==="preview"&&"▷ "}
+                {musicPlayMode==="open"&&"↗ "}
+                {musicPlayLabel}
+              
               </button>
               <div style={{display:"flex",gap:8,marginTop:2}}>
                 <ActionBtn onClick={()=>runAction(handleMusicLog)} active={isLoggedMusic} title="Log">
