@@ -6083,7 +6083,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const trackUri=((displayItem?.spotifyUri||"").trim()) || (displayItem?.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
     const preview=(displayItem?.previewUrl||"").trim();
     const spotifyWeb=((displayItem?.spotifyUrl||"").trim()) || (displayItem?.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
-    if(trackUri&&trackUri.startsWith("spotify:track:")) return "play";
+    if((trackUri&&trackUri.startsWith("spotify:track:")) || /open\.spotify\.com\/track\//i.test(spotifyWeb)) return "play";
     if(preview) return "preview";
     if(spotifyWeb) return "open";
     return "none";
