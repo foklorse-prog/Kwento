@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ================================================================
   KWENTO PATCH NOTES (dev only - update this every release)
 ================================================================
@@ -60,11 +60,11 @@ const { useState, useEffect, useRef, useMemo } = React;
 
 
 
-// ─── OFFENSIVE WORD FILTER ────────────────────────────────────────────────────
+// â”€â”€â”€ OFFENSIVE WORD FILTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const OFFENSIVE = ["fuck","shit","bitch","asshole","bastard","crap","puta","gago","bobo","putangina","tangina","leche","punyeta","tanga","ulol","pakyu","puke","dick","cock","pussy","cunt","whore","slut","nigger","faggot","retard","hate","kill","rape","murder","porn","nude","naked"];
 function isOffensive(t){ return OFFENSIVE.some(w=>t.toLowerCase().replace(/[^a-z0-9\s]/g,"").includes(w)); }
 
-// ─── COLOR HELPERS ───────────────────────────────────────────────────────────
+// â”€â”€â”€ COLOR HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const _clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 function _hexToRgb(hex){
   if(!hex||typeof hex!=="string") return {r:0,g:0,b:0};
@@ -171,54 +171,54 @@ function _harmonizePhotoFirst(dominantHex, themeHex, mode="analogous"){
   }
   return _rgbToHex(picked);
 }
-// ─── THEMES ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ THEMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const THEMES = {
   jeepney:{name:"Jeepney",emoji:"🚌",dark:true,bg:"#1a0a2e",card:"#2d1057",accent:"#ff6b35",accent2:"#ffd23f",text:"#fff8f0",sub:"#d4a0ff",border:"#5a2d82",grad:"linear-gradient(135deg,#1a0a2e 0%,#2d1057 50%,#3d0066 100%)"},
   tsinelas:{name:"Tsinelas",emoji:"🩴",dark:false,bg:"#f5f0e8",card:"#ffffff",accent:"#4a90a4",accent2:"#e8a44a",text:"#2c2c2c",sub:"#6b6b6b",border:"#ddd5c8",grad:"linear-gradient(135deg,#f5f0e8 0%,#ede4d3 100%)"},
   bahay_kubo:{name:"Bahay Kubo",emoji:"🏡",dark:true,bg:"#0a1f0f",card:"#132e18",accent:"#7ab86a",accent2:"#4e8a40",text:"#e8f5e0",sub:"#90b882",border:"#254d2c",grad:"#0a1f0f"},
   manila_nights:{name:"Manila Nights",emoji:"🌃",dark:true,bg:"#0a0614",card:"#130a22",accent:"#00cfff",accent2:"#ff3e9d",text:"#e0f4ff",sub:"#8878aa",border:"#221440",grad:"linear-gradient(135deg,#0a0614 0%,#130a22 50%,#0a0614 100%)"},
   fiesta:{name:"Fiesta",emoji:"🎊",dark:false,bg:"#fff8f0",card:"#ffffff",accent:"#e63946",accent2:"#f4a261",text:"#1d1d1d",sub:"#666666",border:"#ffd0b0",grad:"linear-gradient(135deg,#fff8f0 0%,#ffe4cc 100%)"},
-  hapon:{name:"Hapon",emoji:"🌅",dark:false,bg:"#fff0e8",card:"#ffffff",accent:"#e8502a",accent2:"#f4a0c0",text:"#2a1a10",sub:"#8a5a4a",border:"#f0c8b0",grad:"linear-gradient(180deg,#ffe4d0 0%,#ffb8a0 30%,#ff8fa0 60%,#c86080 100%)"},
+  hapon:{name:"Hapon",emoji:"🌆",dark:false,bg:"#fff0e8",card:"#ffffff",accent:"#e8502a",accent2:"#f4a0c0",text:"#2a1a10",sub:"#8a5a4a",border:"#f0c8b0",grad:"linear-gradient(180deg,#ffe4d0 0%,#ffb8a0 30%,#ff8fa0 60%,#c86080 100%)"},
   ulan:{name:"Ulan",emoji:"🌧️",dark:true,bg:"#0d1520",card:"#162030",accent:"#5ba8d4",accent2:"#8ecae6",text:"#ddeeff",sub:"#7aaabb",border:"#1e3448",grad:"linear-gradient(160deg,#0d1520 0%,#111c2c 40%,#0e1e30 100%)"},
   taho:{name:"Taho",emoji:"🧋",dark:false,bg:"#f5e6c8",card:"#fdf4e0",accent:"#8b3a0f",accent2:"#d4860a",text:"#1a0d04",sub:"#7a4f28",border:"#d4a96a",grad:"linear-gradient(160deg,#f5e6c8 0%,#edd9a8 50%,#e4c87e 100%)"},
 };
 
-// ─── CATEGORIES ───────────────────────────────────────────────────────────────
-// ── backup hash helper ────────────────────────────────────────────────────────
+// â”€â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ backup hash helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function _dataHash(d){
   // Hash logs length + last log id + entry count as a cheap change detector
   const l=d.logs||[];
   return l.length+"_"+(l[0]?.id||0)+"_"+(l[l.length-1]?.id||0);
 }
-// ── internal ──────────────────────────────────────────────────────────────
+// â”€â”€ internal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function _h(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return h>>>0;}
 const _kr=[1203243917]; // registered
 function _ck(fname){
   const b=fname.toLowerCase().replace(/\.[^.]+$/,"").slice(0,10);
   return _kr.indexOf(_h(b))!==-1;
 }
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CATEGORIES = [
-  {id:"movies",label:"Pelikula",labelEn:"Movies",emoji:"🎬",color:"#ff6b35"},
-  {id:"music",label:"Musika",labelEn:"Music",emoji:"🎵",color:"#a855f7"},
-  {id:"books",label:"Libro",labelEn:"Books",emoji:"📚",color:"#22c55e"},
-  {id:"food",label:"Pagkain",labelEn:"Food",emoji:"🍜",color:"#f59e0b"},
-  {id:"games",label:"Laro",labelEn:"Games",emoji:"🎮",color:"#3b82f6"},
-  {id:"activities",label:"Aktibidad",labelEn:"Activities",emoji:"✨",color:"#06b6d4"},
+  {id:"movies",label:"Pelikula",labelEn:"Movies",emoji:"\uD83C\uDFAC",color:"#ff6b35"},
+  {id:"music",label:"Musika",labelEn:"Music",emoji:"\uD83C\uDFB5",color:"#a855f7"},
+  {id:"books",label:"Libro",labelEn:"Books",emoji:"\uD83D\uDCDA",color:"#22c55e"},
+  {id:"food",label:"Pagkain",labelEn:"Food",emoji:"\uD83C\uDF5C",color:"#f59e0b"},
+  {id:"games",label:"Laro",labelEn:"Games",emoji:"\uD83C\uDFAE",color:"#3b82f6"},
+  {id:"activities",label:"Aktibidad",labelEn:"Activities",emoji:"\u2728",color:"#06b6d4"},
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
-// ─── AVATARS ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ AVATARS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const AVATARS = [
-  {id:"a1",emoji:"🌺"},{id:"a2",emoji:"🦋"},{id:"a3",emoji:"🌙"},
-  {id:"a4",emoji:"⭐"},{id:"a5",emoji:"🔥"},{id:"a6",emoji:"🌊"},
-  {id:"a7",emoji:"🌿"},{id:"a8",emoji:"🦅"},{id:"a9",emoji:"🎭"},
-  {id:"a10",emoji:"🍀"},{id:"a11",emoji:"🎸"},{id:"a12",emoji:"🦁"},
-  {id:"a13",emoji:"🌸"},{id:"a14",emoji:"🐉"},{id:"a15",emoji:"🎨"},
-  {id:"a16",emoji:"🌻"},{id:"a17",emoji:"🦊"},{id:"a18",emoji:"🐧"},
+  {id:"a1",emoji:"\uD83C\uDF3A"},{id:"a2",emoji:"\uD83E\uDD8B"},{id:"a3",emoji:"\uD83C\uDF19"},
+  {id:"a4",emoji:"\u2B50"},{id:"a5",emoji:"\uD83D\uDD25"},{id:"a6",emoji:"\uD83C\uDF0A"},
+  {id:"a7",emoji:"\uD83C\uDF3F"},{id:"a8",emoji:"\uD83E\uDD89"},{id:"a9",emoji:"\uD83C\uDFAD"},
+  {id:"a10",emoji:"\uD83C\uDF40"},{id:"a11",emoji:"\uD83C\uDFB8"},{id:"a12",emoji:"\uD83E\uDD81"},
+  {id:"a13",emoji:"\uD83C\uDF38"},{id:"a14",emoji:"\uD83D\uDC09"},{id:"a15",emoji:"\uD83C\uDFA8"},
+  {id:"a16",emoji:"\uD83C\uDF3B"},{id:"a17",emoji:"\uD83E\uDD8A"},{id:"a18",emoji:"\uD83D\uDC27"},
 ];
 
-// ─── MOOD MAPS ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ MOOD MAPS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOOD_TAGS = {
   happy:["upbeat","fun","social","light","feel-good"],
   sad:["emotional","reflective","slow","melancholic","intimate"],
@@ -244,7 +244,7 @@ const VIBE_TAG_ALLOWLIST = new Set(["acoustic","action","action adventure","acti
 const VIBE_TAG_DROPLIST = new Set(["active","addiction","adult","american","animated","anime","annatto","anthology","art","asian","asian-american","bacolod","baked","ballet","banana","banana-fritter","bangus","barcelona","barkada","batangas","battle-royale","beef","bicolano","biographical","birthday","bitter","boat","bone-marrow","braised","breakfast","british","bro","brown","brunch","budget","building","campy","caramelized","cebu","cebuano","celebratory","cheap","cheese","chewy","chicken","chinese","chinese-filipino","chocolate","choice-driven","christmas","coconut","coffee","cold","coming-of-age","competition","competitive","con-artist","corn","creamy","crime","crispy","crunchy","cured","curry","dance","date-night","death","deduction","dessert","drink","duck-egg","egg","enemies-to-lovers","erotic","expat","exploration","family","farming","fashion","fast-food","fermented","ferry","filipino","filipino-american","fish","food","fragrant","freedom","french","fried","fried-dough","fried-rice","fusion","gacha","garlic","garlic-rice","ginger","glass-noodles","global","gothic","green","grief","grilled","grinding","ground-pork","guitar","healthy","heritage","history","holiday","ilocano","iloilo","ilonggo","indian","indonesian","indulgent","italian","jackfruit","japanese","journey","korean","la","lgbtq+","live","long-distance","luca guadagnino","lunch","luzon","marriage","masochistic","meatloaf","merienda","middle-eastern","mild","milkfish","mixed","morning","multigenerational","music","must-play","mythology","nature","new york","night","noir","noodles","norwegian","octopus","offal","ofw","omelette","one-night","online","open-world","orange","origin-story","pampanga","party","patriotic","period","piano","pixel","pop-culture","popular","pork","porridge","portable","pregnancy","pulutan","purple","purple-yam","quail-egg","quick","r&b","rainy-day","raw","rice","rice-cake","rice-roll","road-trip","roasted","rock","roulade","salad","sam raimi","samgyup","sandra bullock","sandwich","sausage","savory","seafood","sequel","sesame","sharing","shaved-ice","shooter","short","shrimp","sick-day","silog","sinangag","sizzling","slasher","slow-cooked","snack","snacks","soft-tofu","soup","sour","southeast-asian","space","sports","spring-roll","spy","squad","steamed","stew","sticky","stir-fried","story","strategy","street-food","strong","stuffed","suburban","superhero","survival","synth-pop","tactical","tangy","tapa","team","teen","temptation","thai","thick","time-loop","time-travel","tofu","tom cruise","tomato","traditional","tropical","tv","umami","urban","useful","valentine's day","vampire","variety","vegetables","vietnamese","vinegar","visayan","volleyball","war","water","weekend","woody allen","wordless","wrap","wrapped","wwii","ya","yogurt","yorgos lanthimos"]);
 
 
-// ─── MOVIE YEARS LOOKUP ───────────────────────────────────────────────────────
+// â”€â”€â”€ MOVIE YEARS LOOKUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOVIE_YEARS = {
   // Filipino
   "Heneral Luna":2015,"Gomburza":2023,"Fan Girl":2020,"Ang Babae sa Septic Tank":2011,
@@ -316,17 +316,17 @@ const ITEM_MOOD = {
   "Family bonding":"nostalgic","Barkada overnight":"happy","Roadtrip":"excited",
 };
 
-// ─── ARCHETYPES ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ ARCHETYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ARCHETYPES = [
   {id:"soulful",name:"Soulful",nameFil:"Soulful",desc:"You gravitate toward things that hit. Slow, quiet, and heavy all find their way to you across everything you log.",descFil:"Hinahangad mo ang mga bagay na tumatalab. Mabagal, tahimik, at mabigat — lahat sila napupunta sa iyo.",tags:["emotional","slow","melancholic","intimate","reflective","nostalgic","quiet","beautiful"],emoji:"🌧️"},
-  {id:"maximalist",name:"Maximalist",nameFil:"Maximalist",desc:"Dark, hard, heavy. You don't do watered-down.",descFil:"Madilim, matigas, mabigat. Hindi ka nagko-kontento sa basta-basta.",tags:["intense","dark","thriller","bold","epic","action","disturbing","psychological","complex"],emoji:"🔥"},
+  {id:"maximalist",name:"Maximalist",nameFil:"Maximalist",desc:"Dark, hard, heavy. You don't do watered-down.",descFil:"Madilim, matigas, mabigat. Hindi ka nagko-kontento sa basta-basta.",tags:["intense","dark","thriller","bold","epic","action","disturbing","psychological","complex"],emoji:"\uD83D\uDD25"},
   {id:"creature_of_comfort",name:"Creature of Comfort",nameFil:"Creature of Comfort",desc:"You know what you like and you go back to it. Home is always the right answer.",descFil:"Alam mo ang gusto mo at bumabalik ka palagi. Ang tahanan ay palaging tamang sagot.",tags:["cozy","comfort","warm","heartwarming","feel-good","simple","everyday","family","sweet"],emoji:"☕"},
-  {id:"aesthete",name:"Aesthete",nameFil:"Aesthete",desc:"Not everything makes the cut. But when something does, it really does.",descFil:"Hindi lahat pumapasa. Pero kapag pumasa, talagang pumasa.",tags:["stylish","aesthetic","indie","arthouse","cinematic","atmospheric","literary","smart","unique","dreamy"],emoji:"✨"},
-  {id:"tatak_pinoy",name:"Tatak Pinoy",nameFil:"Tatak Pinoy",desc:"Filipino content is always in the mix — the music, the food, the films. It's not a preference, it's just who you are.",descFil:"Palaging may Filipino sa halo — musika, pagkain, pelikula. Hindi lang ito kagustuhan, ito ay ikaw.",tags:["Filipino","OPM","cultural","historical","patriotic","Visayan","Ilocano","Ilonggo","Cebuano","Bicolano"],emoji:"🌺"},
+  {id:"aesthete",name:"Aesthete",nameFil:"Aesthete",desc:"Not everything makes the cut. But when something does, it really does.",descFil:"Hindi lahat pumapasa. Pero kapag pumasa, talagang pumasa.",tags:["stylish","aesthetic","indie","arthouse","cinematic","atmospheric","literary","smart","unique","dreamy"],emoji:"\u2728"},
+  {id:"tatak_pinoy",name:"Tatak Pinoy",nameFil:"Tatak Pinoy",desc:"Filipino content is always in the mix — the music, the food, the films. It's not a preference, it's just who you are.",descFil:"Palaging may Filipino sa halo — musika, pagkain, pelikula. Hindi lang ito kagustuhan, ito ay ikaw.",tags:["Filipino","OPM","cultural","historical","patriotic","Visayan","Ilocano","Ilonggo","Cebuano","Bicolano"],emoji:"\uD83C\uDF3A"},
   {id:"cultural_nomad",name:"Cultural Nomad",nameFil:"Cultural Nomad",desc:"Korean one week, French the next. There's always something new worth trying.",descFil:"Korean ngayong linggo, French sa susunod. Palaging may bago na sulit subukan.",tags:["global","Japanese","Korean","French","Italian","British","Asian","Southeast-Asian","Vietnamese","Indian","discovery"],emoji:"🎲"},
 ];
 
-// ─── TRANSLATIONS ────────────────────────────────────────────────────────────
+// â”€â”€â”€ TRANSLATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const T = {
   en:{
     appName:"Kwento",tagline:"What's your story today?",
@@ -388,7 +388,7 @@ const T = {
   }
 };
 
-// ─── LIBRARY (abbreviated — same full set as v4) ───────────────────────────────
+// â”€â”€â”€ LIBRARY (abbreviated — same full set as v4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const LIBRARY = {
   movies:[
     {title:"Heneral Luna",tags:["historical","drama","Filipino","intense","patriotic","action","epic"],genre:"Historical Drama",ph:true},
@@ -606,7 +606,7 @@ const LIBRARY = {
     {title:"All the Light We Cannot See — Anthony Doerr",tags:["historical","WWII","emotional","beautiful","literary","epic","heartwarming"],genre:"Historical Fiction",ph:false},
   ],
   food:[
-    // ── Filipino Mains ────────────────────────────────────────────────────────
+    // â”€â”€ Filipino Mains â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Adobo",tags:["Filipino","savory","classic","comfort","family","everyday","iconic"],genre:"Main",ph:true},
     {title:"Sinigang na Baboy",tags:["Filipino","sour","comfort","warm","family","classic","soup"],genre:"Soup",ph:true},
     {title:"Sinigang na Hipon",tags:["Filipino","sour","seafood","light","fresh","family","soup"],genre:"Soup",ph:true},
@@ -660,7 +660,7 @@ const LIBRARY = {
     {title:"Fishball",tags:["Filipino","street-food","quick","snack","cheap","everyday","fun"],genre:"Street Food",ph:true},
     {title:"Kwek-kwek",tags:["Filipino","street-food","quail-egg","orange","fun","snack","bold"],genre:"Street Food",ph:true},
     {title:"Balut",tags:["Filipino","street-food","duck-egg","unique","bold","iconic","adventurous"],genre:"Street Food",ph:true},
-    // ── Filipino Desserts & Snacks ────────────────────────────────────────────
+    // â”€â”€ Filipino Desserts & Snacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Halo-Halo",tags:["Filipino","dessert","summer","fun","festive","refreshing","iconic"],genre:"Dessert",ph:true},
     {title:"Leche Flan",tags:["Filipino","dessert","classic","sweet","creamy","festive","nostalgic"],genre:"Dessert",ph:true},
     {title:"Bibingka",tags:["Filipino","dessert","Christmas","nostalgic","warm","traditional","seasonal"],genre:"Dessert",ph:true},
@@ -684,12 +684,12 @@ const LIBRARY = {
     {title:"Buko Pandan",tags:["Filipino","dessert","coconut","green","sweet","refreshing","festive"],genre:"Dessert",ph:true},
     {title:"Buko Salad",tags:["Filipino","dessert","coconut","festive","creamy","sweet","Christmas"],genre:"Dessert",ph:true},
     {title:"Binangkal",tags:["Filipino","Visayan","fried-dough","sesame","snack","merienda","simple"],genre:"Snack",ph:true},
-    // ── Drinks ───────────────────────────────────────────────────────────────
+    // â”€â”€ Drinks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Sago't Gulaman",tags:["Filipino","drink","sweet","refreshing","summer","classic","cold"],genre:"Drink",ph:true},
     {title:"Buko Juice",tags:["Filipino","drink","coconut","refreshing","natural","healthy","tropical"],genre:"Drink",ph:true},
     {title:"Milo",tags:["Filipino","drink","chocolate","breakfast","nostalgic","warm","classic"],genre:"Drink",ph:true},
     {title:"Kapeng Barako",tags:["Filipino","coffee","strong","Batangas","bold","classic","morning"],genre:"Drink",ph:true},
-    // ── Japanese ─────────────────────────────────────────────────────────────
+    // â”€â”€ Japanese â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Ramen",tags:["Japanese","warm","comfort","night","umami","cozy","noodles"],genre:"Noodles",ph:false},
     {title:"Tonkotsu Ramen",tags:["Japanese","rich","pork","umami","comfort","bold","hearty"],genre:"Noodles",ph:false},
     {title:"Sushi",tags:["Japanese","fresh","elegant","light","seafood","date-night","clean"],genre:"Sushi",ph:false},
@@ -701,7 +701,7 @@ const LIBRARY = {
     {title:"Takoyaki",tags:["Japanese","street-food","octopus","fun","snack","warm","social"],genre:"Street Food",ph:false},
     {title:"Matcha",tags:["Japanese","drink","bitter","earthy","trendy","calming","aesthetic"],genre:"Drink",ph:false},
     {title:"Mochi Ice Cream",tags:["Japanese","dessert","sweet","chewy","fun","cold","fusion"],genre:"Dessert",ph:false},
-    // ── Korean ───────────────────────────────────────────────────────────────
+    // â”€â”€ Korean â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Korean BBQ",tags:["Korean","social","fun","barkada","grilled","interactive","samgyup"],genre:"Grill",ph:false},
     {title:"Samgyeopsal",tags:["Korean","social","fun","barkada","grilled","pork","interactive"],genre:"Grill",ph:false},
     {title:"Tteokbokki",tags:["Korean","spicy","street-food","fun","chewy","bold","quick"],genre:"Street Food",ph:false},
@@ -712,7 +712,7 @@ const LIBRARY = {
     {title:"Kimbap",tags:["Korean","rice-roll","light","portable","snack","lunch","clean"],genre:"Snack",ph:false},
     {title:"Fried Chicken (Korean)",tags:["Korean","crispy","fried","bold","barkada","fun","indulgent"],genre:"Main",ph:false},
     {title:"Bingsu",tags:["Korean","dessert","shaved-ice","sweet","summer","refreshing","aesthetic"],genre:"Dessert",ph:false},
-    // ── Chinese / Chinese-Filipino ────────────────────────────────────────────
+    // â”€â”€ Chinese / Chinese-Filipino â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Dim Sum",tags:["Chinese","social","brunch","family","variety","weekend","classic"],genre:"Dim Sum",ph:false},
     {title:"Wanton Mami",tags:["Chinese-Filipino","noodles","soup","comfort","classic","warm","simple"],genre:"Noodles",ph:false},
     {title:"Lomi",tags:["Chinese-Filipino","noodles","thick","comfort","warm","Batangas","rich"],genre:"Noodles",ph:false},
@@ -720,26 +720,26 @@ const LIBRARY = {
     {title:"Mami",tags:["Chinese-Filipino","noodles","soup","light","comfort","classic","quick"],genre:"Noodles",ph:false},
     {title:"Peking Duck",tags:["Chinese","special","rich","crispy","festive","elegant","indulgent"],genre:"Main",ph:false},
     {title:"Sweet and Sour Pork",tags:["Chinese","sweet","tangy","pork","classic","family","fun"],genre:"Main",ph:false},
-    // ── Italian ───────────────────────────────────────────────────────────────
+    // â”€â”€ Italian â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Pasta Carbonara",tags:["Italian","rich","comfort","cozy","indulgent","date-night","classic"],genre:"Pasta",ph:false},
     {title:"Pizza Margherita",tags:["Italian","classic","simple","cheese","comfort","casual","sharing"],genre:"Pizza",ph:false},
     {title:"Pasta Aglio e Olio",tags:["Italian","simple","quick","garlic","light","comfort","elegant"],genre:"Pasta",ph:false},
     {title:"Risotto",tags:["Italian","rich","creamy","cozy","special","date-night","warm"],genre:"Main",ph:false},
     {title:"Lasagna",tags:["Italian","rich","comfort","baked","family","indulgent","hearty"],genre:"Pasta",ph:false},
     {title:"Tiramisu",tags:["Italian","dessert","coffee","creamy","elegant","sweet","indulgent"],genre:"Dessert",ph:false},
-    // ── Thai ─────────────────────────────────────────────────────────────────
+    // â”€â”€ Thai â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Pad Thai",tags:["Thai","noodles","tangy","fun","popular","quick","light"],genre:"Noodles",ph:false},
     {title:"Thai Green Curry",tags:["Thai","spicy","coconut","rich","bold","aromatic","warm"],genre:"Curry",ph:false},
     {title:"Tom Yum",tags:["Thai","spicy","sour","soup","fragrant","bold","light"],genre:"Soup",ph:false},
     {title:"Mango Sticky Rice",tags:["Thai","dessert","sweet","fruity","summer","tropical","simple"],genre:"Dessert",ph:false},
     {title:"Som Tum",tags:["Thai","salad","spicy","fresh","crunchy","light","tangy"],genre:"Salad",ph:false},
-    // ── American / Fast Food ─────────────────────────────────────────────────
+    // â”€â”€ American / Fast Food â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Jollibee Chickenjoy",tags:["Filipino-American","fast-food","crispy","chicken","comfort","iconic","nostalgic"],genre:"Fast Food",ph:true},
     {title:"Burger",tags:["American","fast-food","casual","fun","satisfying","quick","classic"],genre:"Fast Food",ph:false},
     {title:"Fried Chicken",tags:["American","fast-food","crispy","comfort","casual","fun","satisfying"],genre:"Fast Food",ph:false},
     {title:"Steak",tags:["American","special","beef","date-night","elegant","indulgent","rich"],genre:"Main",ph:false},
     {title:"Caesar Salad",tags:["American","salad","light","fresh","classic","healthy","simple"],genre:"Salad",ph:false},
-    // ── Other Asian ──────────────────────────────────────────────────────────
+    // â”€â”€ Other Asian â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     {title:"Pho",tags:["Vietnamese","noodles","light","fresh","fragrant","warm","comfort"],genre:"Noodles",ph:false},
     {title:"Banh Mi",tags:["Vietnamese","sandwich","crispy","light","fusion","quick","fresh"],genre:"Snack",ph:false},
     {title:"Nasi Goreng",tags:["Indonesian","fried-rice","savory","bold","comfort","Southeast-Asian","quick"],genre:"Rice",ph:false},
@@ -796,7 +796,11 @@ const LIBRARY = {
   ],
 };
 
-// ─── BARKADA POOL ─────────────────────────────────────────────────────────────
+// Music suggestions now come from Spotify + user taste signals.
+// Keep static music library disabled.
+LIBRARY.music = [];
+
+// â”€â”€â”€ BARKADA POOL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BARKADA_POOL = [
   {title:"Karaoke night out",tags:["social","barkada","music","fun","night","Filipino"],genre:"Social",category:"activities",ph:true},
   {title:"Late-night sisig + beer",tags:["barkada","food","night","fun","Filipino","pulutan"],genre:"Pulutan",category:"food",ph:true},
@@ -812,7 +816,7 @@ const BARKADA_POOL = [
   {title:"Samgyeopsal round",tags:["barkada","Korean","food","fun","social","grilled"],genre:"Grill",category:"food",ph:false},
 ];
 
-// ─── SUGGESTION DESCRIPTION GENERATOR ────────────────────────────────────────
+// â”€â”€â”€ SUGGESTION DESCRIPTION GENERATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Generates contextual descriptions grounded in the user's actual logged entries.
 // Cycles through 4 tones: funny → clever → poetic → serious
 
@@ -878,10 +882,63 @@ function generateDescription(item, logs, feedback, index) {
     inspired:"inspired",stressed:"stressed",bored:"bored"
   };
 
+  // --- MOVIES: concrete, varied reasons (not generic) ---
+  if(item.category==="movies"){
+    const movieLogs=logs.filter(l=>l.category==="movies");
+    const titleNorm=(item.title||"").toLowerCase();
+    const gNorm=(item.genre||"").toLowerCase();
+    const dNorm=(item.director||"").toLowerCase();
+    const itemYear=parseInt(item.year||MOVIE_YEARS[item.title]||"",10);
+    const facts=[];
+
+    if(topSharedTag && userTagCnt[topSharedTag]){
+      facts.push(`"${topSharedTag}" is one of your strongest tags`);
+    }
+    if(gNorm){
+      const genreHits=movieLogs.filter(l=>
+        (l.genre||"").toLowerCase()===gNorm ||
+        (l.genres||[]).map(x=>(x||"").toLowerCase()).includes(gNorm) ||
+        (l.tags||[]).map(x=>(x||"").toLowerCase()).includes(gNorm)
+      ).length;
+      if(genreHits>0) facts.push(`you've logged ${genreHits} ${gNorm} movie${genreHits===1?"":"s"}`);
+    }
+    if(dNorm){
+      const directorHits=movieLogs.filter(l=>(l.director||"").toLowerCase()===dNorm).length;
+      if(directorHits>0) facts.push(`${item.director} appears in your watch history`);
+    }
+    if(!isNaN(itemYear)){
+      const decade=`${Math.floor(itemYear/10)*10}s`;
+      const decadeHits=movieLogs.filter(l=>{
+        const y=parseInt(l.year||MOVIE_YEARS[l.title]||"",10);
+        return !isNaN(y) && (`${Math.floor(y/10)*10}s`===decade);
+      }).length;
+      if(decadeHits>0) facts.push(`you regularly pick films from the ${decade}`);
+    }
+    if(recentCatLog && (recentCatLog.title||"").toLowerCase()!==titleNorm){
+      facts.push(`it matches your recent pick "${recentCatLog.title}"`);
+    }
+
+    const hSeed=`${item.title||""}|${item.imdbID||""}|${index}|${topSharedTag||""}`;
+    let h=0; for(let i=0;i<hSeed.length;i++) h=((h*31)+hSeed.charCodeAt(i))>>>0;
+    const pick=(arr)=>arr[h%arr.length];
+    const f1=facts[0]||"it aligns with your movie taste profile";
+    const f2=facts[1]||null;
+
+    const templates=[
+      () => f2?`Recommended because ${f1}, and ${f2}.`:`Recommended because ${f1}.`,
+      () => f2?`This is a fit for your profile: ${f1}; ${f2}.`:`This is a fit for your profile: ${f1}.`,
+      () => f2?`Your logs point here — ${f1}, plus ${f2}.`:`Your logs point here — ${f1}.`,
+      () => f2?`This matched your pattern: ${f1}. It also helps that ${f2}.`:`This matched your pattern: ${f1}.`,
+    ];
+    return pick(templates)();
+  }
+
   // --- FUNNY ---
   if(tone === "funny") {
-    if(catCount >= 5 && isTopCat)
-      return `You have logged ${catCount} ${catLabel} entries. At this point you're basically a ${catLabel.toLowerCase()} critic. Might as well go deeper.`;
+    if(item.category === "movies" && topSharedTag)
+      return `This matches your overall movie taste, with extra weight on "${topSharedTag}" from your recent and monthly logs.`;
+    if(item.category === "movies" && recentCatLog)
+      return `Your movie profile points here (overall + monthly + recent), and "${recentCatLog.title}" gives it a small nudge.`;
     if(weekCatCount >= 3)
       return `${weekCatCount} ${catLabel.toLowerCase()} logs this week alone. We're not judging. We're enabling.`;
     if(item.category === "food" && recentLog)
@@ -890,6 +947,8 @@ function generateDescription(item, logs, feedback, index) {
       return `Your logs suggest stress. Your cure is probably this. Science agrees. Probably.`;
     if(item.category === "music" && weekCatCount === 0)
       return `You haven't logged any music this week. Your ears are staging a protest. This might help.`;
+    if(catCount >= 5 && isTopCat)
+      return `You have logged ${catCount} ${catLabel} entries. At this point you're basically a ${catLabel.toLowerCase()} critic. Might as well go deeper.`;
     if(recentCatLog)
       return `Last ${catLabel.toLowerCase()} you logged was "${recentCatLog.title}". This one lives in the same neighbourhood.`;
     return `We looked at your logs, squinted a little, and landed on this. You're welcome.`;
@@ -907,7 +966,7 @@ function generateDescription(item, logs, feedback, index) {
       return `${catLabel} is your most logged category at ${catCount} entries. Your taste here is specific. This fits the pattern.`;
     if(topSharedTag)
       return `"${topSharedTag}" keeps showing up in your logs. This suggestion shares that thread.`;
-    return `The overlap between your logged taste and this suggestion isn't random. Your profile pointed here.`;
+      return `This comes from your blended profile: overall taste first, then monthly trend, then recent nudges.`;
   }
 
   // --- POETIC ---
@@ -961,7 +1020,7 @@ function generateBarkadaDescription(item, index) {
   return lines[index % lines.length];
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildTagScore(logs, feedback) {
   const cnt={};
   const now=Date.now();
@@ -986,7 +1045,7 @@ function buildTagScore(logs, feedback) {
   return normalized;
 }
 
-// ─── FOOD VARIETY PATTERN DETECTION ──────────────────────────────────────────
+// â”€â”€â”€ FOOD VARIETY PATTERN DETECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Detects tag dominance in recent food logs and boosts underrepresented tags.
 // Never surfaces this to the user — purely internal scoring signal.
 // Threshold: 5+ food logs in last 30 days, one tag group >65% = variety boost.
@@ -1037,6 +1096,8 @@ function buildSuggestionQueue(logs, feedback, locationData=null, libraryMovies=[
   cats.forEach(cat => {
     const items = cat==="movies"
       ? ((libraryMovies||[]).map(m=>({...m,ph:!!m.ph})))
+      : (cat==="music")
+      ? []
       : (LIBRARY[cat]||[]);
     catPools[cat] = items.map(i => {
       // Base score: Filipino bias + randomness. Feedback intentionally not used.
@@ -1102,7 +1163,7 @@ function getWeekLogs(logs) {
   return logs.filter(l=>new Date(l.date).getTime()>cut);
 }
 
-// ─── FOOD GPS SUGGESTION SYSTEM ──────────────────────────────────────────────
+// â”€â”€â”€ FOOD GPS SUGGESTION SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // City-level food profiles — 149 Philippine cities + Siaton municipality
 // Updated periodically. Overpass API fills gaps for unmapped areas.
 // ph flag is metadata only — never shown in UI.
@@ -1403,7 +1464,7 @@ function todayKey() {
   return fmt.format(new Date());
 }
 
-// ─── TASTE PROFILE BUILDER ────────────────────────────────────────────────────
+// â”€â”€â”€ TASTE PROFILE BUILDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Liked = logged + swiped right (union, no duplicates)
 // Disliked = swiped left only (not logged)
 function buildTasteProfile(logs, feedback) {
@@ -1428,23 +1489,23 @@ function buildTasteProfile(logs, feedback) {
   logs.forEach(l => { if(l.genre) genreCnt[l.genre]=(genreCnt[l.genre]||0)+1; });
   const topGenres = Object.entries(genreCnt).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([g])=>g);
 
-  // ── LIKED = all logged titles + swipe-right titles, deduplicated ──
+  // â”€â”€ LIKED = all logged titles + swipe-right titles, deduplicated â”€â”€
   const loggedTitles = logs.map(l => l.title);
   const swipedRight = Object.entries(feedback).filter(([,v])=>v==="up").map(([k])=>k);
   const likedSet = new Set([...loggedTitles, ...swipedRight]);
   const liked = [...likedSet];
 
-  // ── DISLIKED = swiped left, but NOT in logged titles ──
+  // â”€â”€ DISLIKED = swiped left, but NOT in logged titles â”€â”€
   const swipedLeft = Object.entries(feedback).filter(([,v])=>v==="down").map(([k])=>k);
   const disliked = swipedLeft.filter(t => !likedSet.has(t));
 
-  // ── Per-category top items for stats display ──
+  // â”€â”€ Per-category top items for stats display â”€â”€
   const catItems = {};
   CATEGORIES.forEach(c => {
     catItems[c.id] = logs.filter(l=>l.category===c.id).slice(0,3).map(l=>l.title);
   });
 
-  // ── Top artist/creator hints (rough: extract "— Artist" from music titles) ──
+  // â”€â”€ Top artist/creator hints (rough: extract "— Artist" from music titles) â”€â”€
   const musicLogs = logs.filter(l=>l.category==="music");
   const artistCnt = {};
   musicLogs.forEach(l => {
@@ -1456,7 +1517,7 @@ function buildTasteProfile(logs, feedback) {
   });
   const topArtist = Object.entries(artistCnt).sort((a,b)=>b[1]-a[1])[0]?.[0];
 
-  // ── PH vs global ratio ──
+  // â”€â”€ PH vs global ratio â”€â”€
   let phCount = 0;
   logs.forEach(l => {
     const lib = LIBRARY[l.category]||[];
@@ -1464,12 +1525,12 @@ function buildTasteProfile(logs, feedback) {
   });
   const phRatio = logs.length ? Math.round((phCount/logs.length)*100) : 0;
 
-  // ── Week activity ──
+  // â”€â”€ Week activity â”€â”€
   const weekCut = Date.now()-7*24*60*60*1000;
   const weekLogs = logs.filter(l=>new Date(l.date).getTime()>weekCut);
   const daysActive = new Set(logs.filter(l=>!l.fromLetterboxd&&!l.fromHealthKit).map(l=>l.date?.split("T")[0])).size;
 
-  // ── NARRATIVE — mix of stats + poetic observation ──
+  // â”€â”€ NARRATIVE — mix of stats + poetic observation â”€â”€
   const moodDescriptions = {
     happy:"upbeat, joyful things",sad:"emotional, reflective experiences",
     excited:"high-energy and adventurous picks",relaxed:"calm, cozy content",
@@ -1509,12 +1570,12 @@ function buildTasteProfile(logs, feedback) {
   return { topCat, topTags, topMood, liked, disliked, catItems, topGenres, topArtist, phRatio, daysActive, weekLogs, statLine, narrative };
 }
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ STORAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SK = "kwento_v5";
 const IDB_NAME = "kwento_media";
 const IDB_STORE = "photos";
 
-// ── IndexedDB helpers ─────────────────────────────────────────────────────────
+// â”€â”€ IndexedDB helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function idbOpen(){
   return new Promise((res,rej)=>{
     const req=indexedDB.open(IDB_NAME,1);
@@ -1593,7 +1654,7 @@ async function idbSetAll(map){
   }catch{return false;}
 }
 
-// ── Load: text from localStorage, photos hydrated from IndexedDB async ────────
+// â”€â”€ Load: text from localStorage, photos hydrated from IndexedDB async â”€â”€â”€â”€â”€â”€â”€â”€
 function loadData(){
   try{
     const r=localStorage.getItem(SK);
@@ -1645,7 +1706,7 @@ function loadData(){
   }catch{return null;}
 }
 
-// ── Save: strip photos from data before writing to localStorage ───────────────
+// â”€â”€ Save: strip photos from data before writing to localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function saveData(d){
   try{
     // Photos live in IndexedDB — strip from localStorage copy
@@ -1669,7 +1730,7 @@ function saveData(d){
   }catch{}
 }
 
-// ── Save photos to IndexedDB ──────────────────────────────────────────────────
+// â”€â”€ Save photos to IndexedDB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function savePhotos(d){
   // Avatar — only write if we actually have photo data.
   // We never delete here because d.customPhoto may be null simply because
@@ -1694,7 +1755,7 @@ async function savePhotos(d){
   }
 }
 
-// ── Hydrate: merge IndexedDB photos back into data object ────────────────────
+// â”€â”€ Hydrate: merge IndexedDB photos back into data object â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function hydratePhotos(d){
   const all=await idbGetAll();
   const av=all["avatar"];
@@ -1719,7 +1780,7 @@ async function hydratePhotos(d){
   return hydrated;
 }
 
-// ── One-time migration: move photos from localStorage to IndexedDB ────────────
+// â”€â”€ One-time migration: move photos from localStorage to IndexedDB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function migratePhotosToIDB(d){
   let changed=false;
   // Avatar photo still in localStorage
@@ -1793,16 +1854,21 @@ function defaultData(){
     discoverSkipTags:{},
     discoverSkipLastAt:{},
     discoverSkipUntil:{},
+    skippedMovies:{}, // hidden per-user skip memory: { [movieKey]: { count,lastAt,until } }
     watchlistRollCount:0,
     watchlistRollDate:null,
     betaRedeemLocked:false,
     appActiveMs:0,
     firstUseAt:null,
     profileMonthView:{},
+    spotifyMusicSignals:[],
+    spotifyMusicPool:[],
+    spotifyMusicUpdatedAt:null,
+    spotifyUserName:null,
   };
 }
 
-// ─── CSS ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CSS=`
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1859,7 +1925,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 @keyframes dropPulse{0%{transform:scale(1);opacity:0.7;}50%{transform:scale(1.12);opacity:1;}100%{transform:scale(1);opacity:0.7;}}
 @keyframes countUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-/* ── Jeepney ── */
+/* â”€â”€ Jeepney â”€â”€ */
 @keyframes jeepRoll{0%{left:calc(100% + 20px);}100%{left:-220px;}}
 @keyframes dashMove{to{background-position:-28px 0;}}
 .jroad{position:fixed;bottom:68px;left:0;right:0;height:44px;pointer-events:none;overflow:hidden;z-index:199;}
@@ -1867,23 +1933,23 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .jeep{position:absolute;bottom:2px;width:110px;height:44px;animation:jeepRoll 6s linear infinite;}
 .j-win{position:absolute;background:rgba(200,240,255,0.6);border-radius:2px;}
 
-/* ── Tsinelas ── */
+/* â”€â”€ Tsinelas â”€â”€ */
 @keyframes tsinelasArc{0%{left:-50px;bottom:72px;transform:rotate(0deg);}30%{bottom:110px;transform:rotate(-160deg);}60%{bottom:72px;transform:rotate(-320deg);}80%{bottom:100px;transform:rotate(-460deg);}100%{left:calc(100% + 50px);bottom:72px;transform:rotate(-600deg);}}
 .tsinelas-wrap{position:fixed;bottom:0;left:0;right:0;height:140px;pointer-events:none;overflow:hidden;z-index:199;}
 .tsinelas-item{position:absolute;font-size:26px;animation:tsinelasArc 3.2s ease-in-out infinite;}
 .tsinelas-item2{animation-delay:1.6s;}
 
-/* ── Bahay Kubo fireflies ── */
+/* â”€â”€ Bahay Kubo fireflies â”€â”€ */
 @keyframes fireflyDrift{0%{transform:translate(0,0) scale(1);opacity:0;}15%{opacity:0.9;}50%{transform:translate(18px,-35px) scale(1.1);opacity:1;}85%{transform:translate(-10px,-65px) scale(0.8);opacity:0.5;}100%{transform:translate(5px,-90px) scale(0.5);opacity:0;}}
 .ff-wrap{position:fixed;inset:0;bottom:70px;pointer-events:none;z-index:1;overflow:hidden;}
 .ff{position:absolute;width:5px;height:5px;border-radius:50%;background:#b8ff60;box-shadow:0 0 6px #b8ff60,0 0 14px #6db330;animation:fireflyDrift linear infinite;}
 
-/* ── Manila Nights ── */
+/* â”€â”€ Manila Nights â”€â”€ */
 @keyframes neonStreak{0%{left:-120px;opacity:0;}12%{opacity:1;}88%{opacity:0.5;}100%{left:calc(100% + 120px);opacity:0;}}
 .neon-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
 .neon-streak{position:absolute;height:2px;width:90px;border-radius:2px;animation:neonStreak linear infinite;}
 
-/* ── Fiesta ── */
+/* â”€â”€ Fiesta â”€â”€ */
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(130px) rotate(400deg);opacity:0;}}
 @keyframes blobDrift{0%{transform:translate(0,0) scale(1);}33%{transform:translate(18px,-12px) scale(1.08);}66%{transform:translate(-10px,8px) scale(0.94);}100%{transform:translate(0,0) scale(1);}}
 @keyframes blobDrift2{0%{transform:translate(0,0) scale(1);}33%{transform:translate(-14px,10px) scale(1.06);}66%{transform:translate(12px,-8px) scale(0.96);}100%{transform:translate(0,0) scale(1);}}
@@ -1975,7 +2041,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .ulan-modal input::placeholder,.ulan-modal textarea::placeholder{ color:#7aaabb!important; }
 .ulan-modal input,.ulan-modal textarea{ border-bottom-color:rgba(91,168,212,0.35)!important; }
 
-/* ── Hapon ── */
+/* â”€â”€ Hapon â”€â”€ */
 @keyframes sunsetGlow{0%{opacity:0.0;transform:scale(0.85);}40%{opacity:0.25;}100%{opacity:0.0;transform:scale(1.4);}}
 @keyframes sunsetCloud{0%{transform:translateX(-30px);opacity:0;}20%{opacity:0.6;}80%{opacity:0.4;}100%{transform:translateX(calc(100vw + 30px));opacity:0;}}
 @keyframes haponLayer1{0%,100%{opacity:1;}40%,60%{opacity:0;}}
@@ -1986,10 +2052,10 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .cloud-streak{position:absolute;border-radius:40px;animation:sunsetCloud ease-in-out infinite;}
 @keyframes haponBounce{0%{transform:scale(0.85);opacity:0;}60%{transform:scale(1.18);}100%{transform:scale(1);opacity:1;}}
 
-/* ── Ulan ── */
+/* â”€â”€ Ulan â”€â”€ */
 .ulan-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
 
-/* ── Taho ── */
+/* â”€â”€ Taho â”€â”€ */
 @keyframes steamRise{
   0%{transform:translateY(0) translateX(0) scale(0.6);opacity:0;}
   25%{opacity:0.85;transform:translateY(-40px) translateX(6px) scale(1);}
@@ -2010,7 +2076,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 `;
 
 
-// ─── ULAN RAIN ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ ULAN RAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function UlanRain(){
   const fullRef=React.useRef(null);
 
@@ -2090,7 +2156,7 @@ function UlanRain(){
   );
 }
 
-// ─── FIREFLY CANVAS ──────────────────────────────────────────────────────────
+// â”€â”€â”€ FIREFLY CANVAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FireflyCanvas(){
   const canvasRef=React.useRef(null);
   React.useEffect(()=>{
@@ -2170,7 +2236,7 @@ function FireflyCanvas(){
   );
 }
 
-// ─── THEME ANIMATIONS ────────────────────────────────────────────────────────
+// â”€â”€â”€ THEME ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
   if(animationsOff) return null;
   if(theme==="jeepney") return modalOpen?null:(
@@ -2222,7 +2288,7 @@ function ThemeAnimations({theme,modalOpen=false,animationsOff=false}){
   return null;
 }
 
-// ─── PHOTO CROPPER ───────────────────────────────────────────────────────────
+// â”€â”€â”€ PHOTO CROPPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PhotoCropper({photo,pos,setPos,size=100,accent}){
   const ref=useRef(null);
   // working copy lives purely in a ref - never read pos prop mid-gesture
@@ -2304,7 +2370,7 @@ function PhotoCropper({photo,pos,setPos,size=100,accent}){
   );
 }
 
-// ─── ONBOARDING ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ ONBOARDING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Onboarding({onComplete}){
   const [step,setStep]=useState(0);
   const [lang,setLang]=useState("en");
@@ -2435,8 +2501,8 @@ function Onboarding({onComplete}){
   );
 }
 
-// ─── LOG MODAL ───────────────────────────────────────────────────────────────
-// ─── OMDB ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ LOG MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ OMDB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const OMDB_KEY="24654217";
 // Legacy source HTML for migrating existing OMDB cache
 const MIGRATE_OMDB_SRC="MIGRATE OMDB LIBRARY, MAKE SURE TO NOT DUPLICATE.html";
@@ -2449,6 +2515,12 @@ const GH_TOKEN_KEY="kwento_gh_token";
 const SHARED_QUEUE_KEY="kwento_shared_queue";
 const SHARED_PENDING_KEY="kwento_shared_pending_count";
 const SHARED_SENT_KEY="kwento_shared_sent_keys";
+const SPOTIFY_CLIENT_ID_KEY="kwento_spotify_client_id";
+const SPOTIFY_AUTH_KEY="kwento_spotify_auth";
+const SPOTIFY_LAST_STATUS_KEY="kwento_spotify_last_status";
+const SPOTIFY_PKCE_STATE_KEY="kwento_spotify_pkce_state";
+const SPOTIFY_PKCE_VERIFIER_KEY="kwento_spotify_pkce_verifier";
+const SPOTIFY_PUBLIC_CLIENT_ID="b58d8f1b8d9149f1bd94a2b66ba797b7";
 const OFFLINE_WATCHLIST_POSTERS=80;
 const OFFLINE_DISCOVER_POSTERS=20;
 const POSTER_MAX_BYTES=260*1024;
@@ -2508,6 +2580,280 @@ function _setGhToken(v){
     if(!v) localStorage.removeItem(GH_TOKEN_KEY);
     else localStorage.setItem(GH_TOKEN_KEY,v);
   }catch(_){}
+}
+function _getSpotifyClientId(){
+  try{ return localStorage.getItem(SPOTIFY_CLIENT_ID_KEY)||SPOTIFY_PUBLIC_CLIENT_ID||""; }catch(_){ return SPOTIFY_PUBLIC_CLIENT_ID||""; }
+}
+function _getSpotifyRedirectUri(){
+  // For this single-file web app, callback comes back to this same page URL.
+  // If opened directly from local file (file:///D:/...), use public app URL instead.
+  const isFile=(window.location.protocol||"").toLowerCase()==="file:";
+  if(isFile) return "https://foklorse-prog.github.io/Kwento/";
+  return `${window.location.origin}${window.location.pathname}`;
+}
+function _getSpotifyAuth(){
+  try{
+    const raw=localStorage.getItem(SPOTIFY_AUTH_KEY);
+    const parsed=raw?JSON.parse(raw):null;
+    return parsed&&typeof parsed==="object"?parsed:null;
+  }catch(_){ return null; }
+}
+function _setSpotifyAuth(v){
+  try{
+    if(!v) localStorage.removeItem(SPOTIFY_AUTH_KEY);
+    else localStorage.setItem(SPOTIFY_AUTH_KEY,JSON.stringify(v));
+  }catch(_){}
+}
+async function _refreshSpotifyAccessToken(){
+  const auth=_getSpotifyAuth();
+  const clientId=_getSpotifyClientId();
+  const refreshToken=auth?.refresh_token||"";
+  if(!clientId||!refreshToken) return null;
+  const body=new URLSearchParams();
+  body.set("grant_type","refresh_token");
+  body.set("refresh_token",refreshToken);
+  body.set("client_id",clientId);
+  const res=await fetch("https://accounts.spotify.com/api/token",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:body.toString()
+  });
+  if(!res.ok) return null;
+  const token=await res.json();
+  const next={
+    ...auth,
+    access_token:token.access_token||auth?.access_token||null,
+    refresh_token:token.refresh_token||refreshToken,
+    scope:token.scope||auth?.scope||"",
+    token_type:token.token_type||auth?.token_type||"Bearer",
+    expires_at:Date.now()+((token.expires_in||3600)*1000)
+  };
+  _setSpotifyAuth(next);
+  return next;
+}
+async function _getSpotifyAccessToken(){
+  let auth=_getSpotifyAuth();
+  if(!auth?.access_token) return null;
+  const exp=Number(auth.expires_at||0);
+  if(exp && Date.now()<exp-60000) return auth.access_token;
+  auth=await _refreshSpotifyAccessToken();
+  return auth?.access_token||null;
+}
+async function spotifyApiGet(path){
+  const token=await _getSpotifyAccessToken();
+  if(!token) return {ok:false,status:401,data:null};
+  const res=await fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
+    headers:{Authorization:`Bearer ${token}`}
+  });
+  let data=null;
+  try{ data=await res.json(); }catch(_){}
+  return {ok:res.ok,status:res.status,data};
+}
+function _spotifyTagNorm(s){
+  return (s||"")
+    .toLowerCase()
+    .replace(/&/g," and ")
+    .replace(/[^\w+\-\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function _spotifyGenreTags(genres=[]){
+  const out=new Set();
+  (genres||[]).forEach(g=>{
+    const norm=_spotifyTagNorm(g);
+    if(!norm) return;
+    if(!VIBE_TAG_DROPLIST.has(norm)) out.add(norm);
+    norm.split(" ").forEach(tok=>{
+      const t=_spotifyTagNorm(tok);
+      if(!t||t.length<3) return;
+      if(VIBE_TAG_DROPLIST.has(t)) return;
+      out.add(t);
+    });
+  });
+  const filtered=[...out].filter(t=>VIBE_TAG_ALLOWLIST.has(t) || t==="music");
+  return filtered.length?filtered:["music"];
+}
+async function fetchSpotifyMusicBundle(){
+  const me=await spotifyApiGet("me");
+  if(!me.ok) return {ok:false,status:me.status||401,err:"Spotify not connected."};
+
+  const [topArtistsRes,topTracksRes,recentRes]=await Promise.all([
+    spotifyApiGet("me/top/artists?limit=20&time_range=medium_term"),
+    spotifyApiGet("me/top/tracks?limit=20&time_range=short_term"),
+    spotifyApiGet("me/player/recently-played?limit=20"),
+  ]);
+  const topArtists=(topArtistsRes.ok&&(topArtistsRes.data?.items||[]))||[];
+  const topTracks=(topTracksRes.ok&&(topTracksRes.data?.items||[]))||[];
+  const recentTracks=(recentRes.ok&&((recentRes.data?.items||[]).map(x=>x?.track).filter(Boolean)))||[];
+
+  const artistIds=new Set();
+  topArtists.forEach(a=>a?.id&&artistIds.add(a.id));
+  [...topTracks,...recentTracks].forEach(t=>(t?.artists||[]).forEach(a=>a?.id&&artistIds.add(a.id)));
+
+  const genreByArtist={};
+  const ids=[...artistIds];
+  for(let i=0;i<ids.length;i+=50){
+    const chunk=ids.slice(i,i+50);
+    if(!chunk.length) continue;
+    const res=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
+    if(!res.ok) continue;
+    (res.data?.artists||[]).forEach(a=>{
+      if(a?.id) genreByArtist[a.id]=_spotifyGenreTags(a.genres||[]);
+    });
+  }
+
+  const signals=[];
+  const pushSignal=(tags,w,date)=>{
+    const norm=(tags||[]).map(_spotifyTagNorm).filter(Boolean);
+    if(!norm.length) return;
+    signals.push({category:"music",tags:[...new Set(norm)],date:date||new Date().toISOString(),_weight:w});
+  };
+
+  topArtists.forEach((a,idx)=>{
+    const tags=_spotifyGenreTags(a.genres||[]);
+    pushSignal(tags,2.8-(idx*0.05),new Date().toISOString());
+  });
+  topTracks.forEach((t,idx)=>{
+    const tags=(t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
+    pushSignal(tags,2.0-(idx*0.03),new Date().toISOString());
+  });
+  recentTracks.forEach((t,idx)=>{
+    const tags=(t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
+    pushSignal(tags,1.5-(idx*0.02),new Date().toISOString());
+  });
+
+  const pool=[];
+  const seen=new Set();
+  [...topTracks,...recentTracks].forEach(track=>{
+    const mainArtist=(track?.artists||[])[0]?.name||"Unknown Artist";
+    const key=(track?.id||`${(track?.name||"").toLowerCase()}|${mainArtist.toLowerCase()}`);
+    if(!key||seen.has(key)) return;
+    seen.add(key);
+    const tags=(track?.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
+    pool.push({
+      title:`${track?.name||"Untitled"} — ${mainArtist}`,
+      category:"music",
+      genre:"Music",
+      tags:[...new Set(tags.length?tags:["music"])],
+      ph:false,
+      _spotify:true,
+      spotifyTrackId:track?.id||null,
+      spotifyArtists:(track?.artists||[]).map(a=>a?.name).filter(Boolean),
+    });
+  });
+
+  return {
+    ok:true,
+    userName:me.data?.display_name||me.data?.id||"Spotify user",
+    signals,
+    pool,
+    updatedAt:new Date().toISOString(),
+  };
+}
+function _b64UrlFromBytes(bytes){
+  let s="";
+  for(let i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function _randomPkceString(len=64){
+  const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const arr=new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(v=>chars[v%chars.length]).join("");
+}
+async function _pkceChallenge(verifier){
+  const enc=new TextEncoder().encode(verifier);
+  const digest=await crypto.subtle.digest("SHA-256",enc);
+  return _b64UrlFromBytes(new Uint8Array(digest));
+}
+async function beginSpotifyAuth(scopes=[]){
+  const clientId=_getSpotifyClientId();
+  if(!clientId) return {ok:false,err:"Missing Spotify Client ID"};
+  const redirectUri=_getSpotifyRedirectUri();
+  const verifier=_randomPkceString(64);
+  const state=_randomPkceString(24);
+  const challenge=await _pkceChallenge(verifier);
+  try{
+    sessionStorage.setItem(SPOTIFY_PKCE_VERIFIER_KEY,verifier);
+    sessionStorage.setItem(SPOTIFY_PKCE_STATE_KEY,state);
+  }catch(_){}
+  const u=new URL("https://accounts.spotify.com/authorize");
+  u.searchParams.set("client_id",clientId);
+  u.searchParams.set("response_type","code");
+  u.searchParams.set("redirect_uri",redirectUri);
+  u.searchParams.set("code_challenge_method","S256");
+  u.searchParams.set("code_challenge",challenge);
+  u.searchParams.set("state",state);
+  u.searchParams.set("scope",(scopes||[]).join(" "));
+  window.location.assign(u.toString());
+  return {ok:true};
+}
+async function finishSpotifyAuthFromUrl(){
+  const url=new URL(window.location.href);
+  const code=url.searchParams.get("code");
+  const state=url.searchParams.get("state");
+  const err=url.searchParams.get("error");
+  if(!code&&!err) return {ok:true,skipped:true};
+  const cleanupUrl=()=>{
+    url.searchParams.delete("code");
+    url.searchParams.delete("state");
+    url.searchParams.delete("error");
+    history.replaceState({},document.title,url.toString());
+  };
+  if(err){
+    try{ localStorage.setItem(SPOTIFY_LAST_STATUS_KEY,`Spotify auth failed: ${err}`); }catch(_){}
+    cleanupUrl();
+    return {ok:false,err:`Spotify auth failed: ${err}`};
+  }
+  let savedState="", verifier="";
+  try{
+    savedState=sessionStorage.getItem(SPOTIFY_PKCE_STATE_KEY)||"";
+    verifier=sessionStorage.getItem(SPOTIFY_PKCE_VERIFIER_KEY)||"";
+  }catch(_){}
+  if(!savedState||!verifier||state!==savedState){
+    try{ localStorage.setItem(SPOTIFY_LAST_STATUS_KEY,"Spotify auth state mismatch"); }catch(_){}
+    cleanupUrl();
+    return {ok:false,err:"Spotify auth state mismatch"};
+  }
+  const clientId=_getSpotifyClientId();
+  if(!clientId){
+    try{ localStorage.setItem(SPOTIFY_LAST_STATUS_KEY,"Missing Spotify Client ID"); }catch(_){}
+    cleanupUrl();
+    return {ok:false,err:"Missing Spotify Client ID"};
+  }
+  const body=new URLSearchParams();
+  body.set("grant_type","authorization_code");
+  body.set("code",code);
+  body.set("redirect_uri",_getSpotifyRedirectUri());
+  body.set("client_id",clientId);
+  body.set("code_verifier",verifier);
+  const res=await fetch("https://accounts.spotify.com/api/token",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:body.toString()
+  });
+  if(!res.ok){
+    let detail="";
+    try{ detail=(await res.json())?.error_description||""; }catch(_){}
+    try{ localStorage.setItem(SPOTIFY_LAST_STATUS_KEY,`Spotify token exchange failed (${res.status})${detail?": "+detail:""}`); }catch(_){}
+    cleanupUrl();
+    return {ok:false,err:`Spotify token exchange failed (${res.status})${detail?": "+detail:""}`};
+  }
+  const token=await res.json();
+  _setSpotifyAuth({
+    access_token:token.access_token||null,
+    refresh_token:token.refresh_token||null,
+    scope:token.scope||"",
+    token_type:token.token_type||"Bearer",
+    expires_at:Date.now()+((token.expires_in||3600)*1000)
+  });
+  try{
+    sessionStorage.removeItem(SPOTIFY_PKCE_STATE_KEY);
+    sessionStorage.removeItem(SPOTIFY_PKCE_VERIFIER_KEY);
+  }catch(_){}
+  cleanupUrl();
+  try{ localStorage.setItem(SPOTIFY_LAST_STATUS_KEY,"Spotify connected."); }catch(_){}
+  return {ok:true};
 }
 function queueSharedCandidate(item,source="unknown"){
   if(!item) return;
@@ -2736,14 +3082,17 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   },[cat]);
 
   const omdbSearchTimer=useRef(null);
+  const spotifySearchTimer=useRef(null);
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
+      const spotifyMusicPool=(data.spotifyMusicPool||[]).map(i=>({...i,_cat:"music"}));
       const pool=cat
-        ? ((cat==="movies")?[]:(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat})))
+        ? ((cat==="movies")?[]:(cat==="music"?spotifyMusicPool:(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat}))))
         : Object.entries(LIBRARY)
-            .filter(([cid])=>cid!=="movies")
+            .filter(([cid])=>cid!=="movies"&&cid!=="music")
             .flatMap(([cid,items])=>items.map(i=>({...i,_cat:cid})));
+      const basePool=cat?pool:[...pool,...spotifyMusicPool];
       // Movie search pool comes from shared/local movie library only.
   const dynMovies=(data.libraryMovies||[]).map(m=>({...m,_cat:"movies"}));
   // Search fallback should also see shared JSON cache, even if item was not curated into local library.
@@ -2762,7 +3111,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
     dedupeTitle.add(k);
     return true;
   });
-  const fullPool=cat==="movies"||!cat?[...pool,...mergedMovies]:pool;
+  const fullPool=cat==="movies"||!cat?[...basePool,...mergedMovies]:basePool;
       const wordStart=i=>{
         const t=i.title.toLowerCase();
         if(t.startsWith(lq)) return true;
@@ -2774,6 +3123,41 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         .slice(0,5);
       setResults(local);
       if(local.length>0) setOmdbError("");
+
+      // Spotify live fallback — only for music when local matches are empty
+      if(local.length===0&&(cat==="music"||!cat)){
+        clearTimeout(spotifySearchTimer.current);
+        spotifySearchTimer.current=setTimeout(async()=>{
+          try{
+            const r=await spotifyApiGet(`search?type=track&limit=5&q=${encodeURIComponent(query)}`);
+            if(r.ok){
+              const tracks=(r.data?.tracks?.items||[]);
+              if(tracks.length){
+                const items=tracks.map(tr=>{
+                  const artist=(tr.artists||[])[0]?.name||"Unknown Artist";
+                  const artistTags=(tr.artists||[])
+                    .map(a=>(a?.name||"").toLowerCase().trim())
+                    .filter(Boolean)
+                    .slice(0,3);
+                  const g=(tr.album?.genres||[])[0]||"Music";
+                  return {
+                    title:`${tr.name||"Untitled"} — ${artist}`,
+                    tags:[...new Set(["music",...artistTags])],
+                    genre:g||"Music",
+                    _cat:"music",
+                    _spotify:true,
+                    spotifyTrackId:tr.id||null,
+                    spotifyArtists:(tr.artists||[]).map(a=>a?.name).filter(Boolean),
+                    year:(tr.album?.release_date||"").slice(0,4)||null,
+                  };
+                });
+                setResults(items);
+                setOmdbError("");
+              }
+            }
+          }catch(_){}
+        },250);
+      }
 
       // OMDB fallback — only for movies, only when local has no results
       if(local.length===0&&(cat==="movies"||!cat)){
@@ -2805,12 +3189,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       }
     } else {
       clearTimeout(omdbSearchTimer.current);
+      clearTimeout(spotifySearchTimer.current);
       setResults([]);
       setOmdbError("");
     }
-  },[query,cat]);
+  },[query,cat,isEdit,data.libraryMovies,data.spotifyMusicPool]);
 
   const getGenreForCat=(item,category)=>{
+    if(category==="music") return item.genre||"Music";
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
     const inLib=(LIBRARY[category]||[]).some(i=>i.title.toLowerCase()===item.title.toLowerCase());
     if(inLib){
@@ -3188,7 +3574,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                           color:pinOnSave?th.accent:weekFull?th.sub:th.sub,
                           opacity:weekFull?0.45:1,
                           fontSize:11,fontWeight:pinOnSave?600:400,alignSelf:"flex-start"}}>
-                        <span style={{fontSize:10}}>{pinOnSave?"✦":"○"}</span>
+                        <span style={{fontSize:10}}>{pinOnSave?"✦":"◯"}</span>
                         {pinOnSave?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                       </div>
                     );
@@ -3238,7 +3624,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
 }
 
 
-// ─── TAB BAR ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TAB BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // TimelineIcon lives outside TabBar so it never remounts on tab switch
 function TimelineTabIcon({accent,sub,active,flash,animKey}){
   return(
@@ -3550,7 +3936,7 @@ function TabBar({tab,setTab,data,flash=0,animKey=0}){
   );
 }
 
-// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ HOME PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HomePage({data,onOpenLog,onRelog}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
@@ -3573,7 +3959,7 @@ function HomePage({data,onOpenLog,onRelog}){
   return(
     <div className="fade-in" style={{padding:"24px 20px 130px",height:"calc(100vh - 68px)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
 
-      {/* ── Greeting block ── */}
+      {/* — Greeting block — */}
       <div style={{marginBottom:32}}>
         <p style={{fontSize:11,fontWeight:700,color:th.text,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10,opacity:0.55}}>
           {new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}
@@ -3584,7 +3970,7 @@ function HomePage({data,onOpenLog,onRelog}){
         <p style={{color:th.text,fontSize:14,fontStyle:"italic",lineHeight:1.5,opacity:0.6}}>{t.tagline}</p>
       </div>
 
-      {/* ── New entry CTA ── */}
+      {/* — New entry CTA — */}
       <button onClick={()=>onOpenLog(null)}
         style={{width:"100%",padding:"15px 20px",borderRadius:18,marginBottom:36,
           background:`linear-gradient(135deg,${th.accent},${th.accent2||th.accent})`,
@@ -3595,7 +3981,7 @@ function HomePage({data,onOpenLog,onRelog}){
         <span style={{fontSize:13,fontWeight:400,opacity:0.75}}>{data.logs.length} {t.entries}</span>
       </button>
 
-      {/* ── This week ── */}
+      {/* — This week — */}
       <div style={{marginBottom:36}}>
         <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:14}}>
           <p style={{fontSize:13,fontWeight:700,color:th.text,textTransform:"uppercase",letterSpacing:1.5,marginBottom:0}}>{t.this_week}</p>
@@ -3628,7 +4014,7 @@ function HomePage({data,onOpenLog,onRelog}){
         </div>
       </div>
 
-      {/* ── Quick log ── */}
+      {/* — Quick log — */}
       {data.logs.length>0&&(()=>{
         const freq={};
         data.logs.filter(l=>!l.fromHealthKit).forEach(l=>{
@@ -3727,8 +4113,8 @@ function HomePage({data,onOpenLog,onRelog}){
   );
 }
 
-// ─── TIMELINE PAGE ────────────────────────────────────────────────────────────
-// ─── CUSTOM ENTRY FUZZY MATCHER ──────────────────────────────────────────────
+// â”€â”€â”€ TIMELINE PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ CUSTOM ENTRY FUZZY MATCHER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Offline, no API. Scores library titles against a custom entry title.
 // Returns best match above threshold, or null.
 
@@ -3823,7 +4209,7 @@ function MatchPrompt({log, match, th, onAccept, onSkip, onNever}) {
   );
 }
 
-// ─── SWIPEABLE ENTRY ─────────────────────────────────────────────────────────
+// â”€â”€â”€ SWIPEABLE ENTRY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   const [drag,setDrag]=useState(0);
   const [confirmed,setConfirmed]=useState(false);
@@ -4173,7 +4559,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
                       opacity:weekFull?0.4:1,
                       fontSize:11,fontWeight:isPinned?600:400,alignSelf:"flex-start",
                       userSelect:"none",WebkitUserSelect:"none",WebkitTouchCallout:"none"}}>
-                    <span style={{fontSize:10}}>{isPinned?"✦":"○"}</span>
+                    <span style={{fontSize:10}}>{isPinned?"✦":"◯"}</span>
                     {isPinned?"On profile":weekFull?"Maxed":`Show on profile · ${pinnedThisWeek.length} of 3`}
                   </div>
                 );
@@ -4223,7 +4609,7 @@ function SwipeableEntry({log, th, onDelete, onSave, data, onChange}){
   );
 }
 
-// ─── INLINE UNDO PLACEHOLDER ─────────────────────────────────────────────────
+// â”€â”€â”€ INLINE UNDO PLACEHOLDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function UndoPlaceholder({log, th, onUndo, createdAt}){
   const DURATION=30000;
   const [progress,setProgress]=useState(()=>Math.max(0,100-((Date.now()-createdAt)/DURATION)*100));
@@ -4418,7 +4804,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
         );})}
       </div>
       {(!data.logs.length&&undoEntries.length===0)?(
-        <div style={{textAlign:"center",padding:"60px 20px",color:th.sub}}><div style={{fontSize:44,marginBottom:10}}>📭</div><p>{t.empty_state}</p></div>
+        <div style={{textAlign:"center",padding:"60px 20px",color:th.sub}}><div style={{fontSize:44,marginBottom:10}}>📰</div><p>{t.empty_state}</p></div>
       ):(
         <>
           {_topSugg&&<MatchPrompt
@@ -4443,7 +4829,7 @@ function TimelinePage({data,onOpenLog,onDelete,onRestore,onSave,onUpdateData}){
   );
 }
 
-// ─── SINGLE SUGGESTION CARD ───────────────────────────────────────────────────
+// â”€â”€â”€ SINGLE SUGGESTION CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // No metadata (tags/genre/category) shown. Swipe left = skip, right = like.
 function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada,onFindNearMe}){
   const [drag,setDrag]=useState(0);
@@ -4528,7 +4914,7 @@ function SingleCard({item,description,index,total,onLeft,onRight,th,isBarkada,on
   );
 }
 
-// ─── DISCOVER PAGE — stacked category cards ─────────────────────────────────
+// â”€â”€â”€ DISCOVER PAGE — stacked category cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 6 category cards stacked like a deck. Swipe left/right to move between
 // categories. Each card shows one suggestion on load (counts as 1 use).
 // Generate button fetches the next suggestion per category (5/day free).
@@ -4538,7 +4924,7 @@ const DISCOVER_FREE_LIMIT = 10;
 const DISCOVER_CATS = ["movies","music","books","food","games","activities"];
 
 // Build a per-category suggestion pool, scored by taste profile
-function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}, skipUntil={}) {
+function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], tasteSeed=[], discoverSkips={}, skipSignals={}, likedSuggestions={}, watchlistKeys=[], skipLastAt={}, skipUntil={}, spotifySignals=[], spotifyMusicPool=[]) {
   const signalLogs = [
     ...(logs||[])
       .filter(l=>!l.fromHealthKit)
@@ -4561,18 +4947,44 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
         date:s.savedAt||new Date().toISOString(),
         _weight:s.signal==="like"?2.4:1.4,
       }))),
+    ...((cat==="music"&&Array.isArray(spotifySignals))?spotifySignals:[]),
   ];
   const tc = buildTagScore(signalLogs, feedback);
+  // Movies now use time-bucketed blend:
+  // 60% long-term, 25% medium-term (30d), 15% recent (7d)
+  const nowMs=Date.now();
+  const mediumCutoff=nowMs-(30*86400000);
+  const recentCutoff=nowMs-(7*86400000);
+  const signalTs=s=>{
+    const dt=s.customDate?new Date(s.customDate+"T12:00:00").getTime():new Date(s.date||s.savedAt||0).getTime();
+    return isNaN(dt)?0:dt;
+  };
+  const mediumSignals=signalLogs.filter(s=>signalTs(s)>=mediumCutoff);
+  const recentSignals=signalLogs.filter(s=>signalTs(s)>=recentCutoff);
+  const tcLong=tc;
+  const tcMedium=buildTagScore(mediumSignals, feedback);
+  const tcRecent=buildTagScore(recentSignals, feedback);
+  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
   let items = cat==="movies"
     ? ((libraryMovies||[]).map(m=>({...m,ph:!!m.ph})))
-    : (LIBRARY[cat]||[]);
+    : (cat==="music"
+      ? ([...(spotifyMusicPool||[])])
+      : (LIBRARY[cat]||[]));
+  if(cat==="music"){
+    const seen=new Set();
+    items=items.filter(i=>{
+      const key=(i.spotifyTrackId||normTitle(i.title)||"").toLowerCase();
+      if(!key||seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
   if(cat==="movies"){
     items=items
       .filter(isActualMovieOrSeries)
       // Never surface placeholder/custom-only movie stubs in Discover.
       .filter(i=>!(((i.genre||"").toLowerCase()==="custom") && !i.imdbID));
   }
-  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
   const loggedTitleKeys=new Set(
     logs
       .filter(l=>l.category===cat)
@@ -4600,7 +5012,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
   const geoFoodSuggs = (cat==="food"&&locationData) ? getFoodSuggestions(logs,locationData,20) : null;
   const varietyBoosts = cat==="food" ? getFoodVarietyBoosts(logs) : null;
 
-  // ── Movie-specific signals ────────────────────────────────────────────────
+  // â”€â”€ Movie-specific signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let avgYear=null, loggedGenres=new Set(), loggedDecades={};
   if(cat==="movies"){
     const movieLogs=logs.filter(l=>l.category==="movies"&&!l.fromLetterboxd&&l.year);
@@ -4671,7 +5083,15 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       const tagMap=skipSignals.tag||{};
 
       // Tag relevance
-      const tagScore=(i.tags||[]).reduce((s,t)=>s+(tc[t]||0),0);
+      const candidateTags=[
+        ...((i.tags||[]).map(t=>(t||"").toLowerCase()).filter(Boolean)),
+        ...((i.genre)?[(i.genre||"").toLowerCase()]:[]),
+        ...((i.genres||[]).map(g=>(g||"").toLowerCase()).filter(Boolean)),
+      ];
+      const uniqCandidateTags=[...new Set(candidateTags)];
+      const tagScore=(cat==="movies")
+        ?uniqCandidateTags.reduce((s,t)=>s+((tcLong[t]||0)*0.60+(tcMedium[t]||0)*0.25+(tcRecent[t]||0)*0.15),0)
+        :uniqCandidateTags.reduce((s,t)=>s+(tc[t]||0),0);
       score+=tagScore*15;
       score-=skipPenalty;
 
@@ -4743,7 +5163,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
     })
     .sort((a,b)=>b.score-a.score||Math.random()-0.5);
 
-  // ── Soft 60/40 Filipino/global mix for movies ─────────────────────────────
+  // â”€â”€ Soft 60/40 Filipino/global mix for movies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // After quality sorting, interleave so roughly every 5 suggestions has
   // 3 Filipino and 2 global. Never forces bad films in — if there aren't
   // enough Filipino films to fill the slots, globals fill naturally.
@@ -4760,7 +5180,7 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
     return mixed;
   }
 
-  // ── Wildcard slot for movies — surface one high-quality film from a genre ──
+  // â”€â”€ Wildcard slot for movies — surface one high-quality film from a genre â”€â”€
   // the user hasn't explored yet. Keeps suggestions from being an echo chamber.
   if(cat==="movies" && scored.length>5 && loggedGenres.size>0){
     const wildcardIdx=scored.findIndex(m=>{
@@ -4865,6 +5285,88 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const y=(item.year||"").toString().slice(0,4);
     return t?(y?`${t}|${y}`:t):"";
   };
+  const movieIdentityKeys=item=>{
+    if(!item) return [];
+    const imdb=(item.imdbID||"").toLowerCase();
+    const t=normTitle(item.title||"");
+    const y=(item.year||"").toString().slice(0,4);
+    const out=[];
+    if(imdb) out.push(imdb);
+    if(t&&y) out.push(`${t}|${y}`);
+    if(t) out.push(t);
+    return [...new Set(out.filter(Boolean))];
+  };
+  const getSkipState=item=>{
+    const keys=movieIdentityKeys(item);
+    const legacyCounts=(data.discoverSkips||{});
+    const legacyLast=(data.discoverSkipLastAt||{});
+    const legacyUntil=(data.discoverSkipUntil||{});
+    const v2=(data.skippedMovies||{});
+    let best={count:0,lastAt:null,until:null};
+    keys.forEach(k=>{
+      const s=v2[k];
+      if(s && ((s.count||0)>best.count)){
+        best={count:s.count||0,lastAt:s.lastAt||null,until:s.until||null};
+      }
+      const lc=legacyCounts[k]||0;
+      if(lc>best.count){
+        best={count:lc,lastAt:legacyLast[k]||null,until:legacyUntil[k]||null};
+      }
+    });
+    return best;
+  };
+  const splitMovieLanes=(items)=>{
+    const list=[...(items||[])];
+    if(!list.length) return {core:[],adjacent:[],explore:[]};
+    const n=list.length;
+    const coreN=Math.max(1,Math.floor(n*0.4));
+    const adjacentN=Math.max(1,Math.floor(n*0.35));
+    const core=list.slice(0,coreN).map(x=>({...x,_lane:"core"}));
+    const adjacent=list.slice(coreN,coreN+adjacentN).map(x=>({...x,_lane:"adjacent"}));
+    const explore=list.slice(coreN+adjacentN).map(x=>({...x,_lane:"explore"}));
+    return {core,adjacent,explore};
+  };
+  const laneTargets={core:6,adjacent:3,explore:1};
+  const buildMovieQueue=(candidates,baseQueue=[])=>{
+    const queue=[...(baseQueue||[])];
+    const maxLen=10;
+    const byLane=splitMovieLanes(candidates);
+    const used=new Set(queue.map(it=>movieKey(it)).filter(Boolean));
+    const takeFromLane=(lane)=>{
+      const src=byLane[lane]||[];
+      const idx=src.findIndex(it=>{
+        const k=movieKey(it);
+        return k&&!used.has(k);
+      });
+      if(idx<0) return null;
+      const [it]=src.splice(idx,1);
+      return it;
+    };
+    const allMerged=()=>[...byLane.core,...byLane.adjacent,...byLane.explore];
+    while(queue.length<maxLen){
+      const counts={core:0,adjacent:0,explore:0};
+      queue.forEach(it=>{ if(it&&it._lane&&counts[it._lane]!=null) counts[it._lane]++; });
+      const deficits=[
+        {lane:"core",def:laneTargets.core-counts.core},
+        {lane:"adjacent",def:laneTargets.adjacent-counts.adjacent},
+        {lane:"explore",def:laneTargets.explore-counts.explore},
+      ].sort((a,b)=>b.def-a.def);
+      let pick=null;
+      for(const d of deficits){
+        if(d.def<=0) continue;
+        pick=takeFromLane(d.lane);
+        if(pick) break;
+      }
+      if(!pick){
+        pick=allMerged().find(it=>{const k=movieKey(it); return k&&!used.has(k);})||null;
+      }
+      if(!pick) break;
+      const k=movieKey(pick);
+      if(k) used.add(k);
+      queue.push(pick);
+    }
+    return queue.slice(0,maxLen);
+  };
   const watchlistKeys=watchlistAll.flatMap(w=>[movieKey(w),(w.title||"").toLowerCase(),normTitle(w.title)]).filter(Boolean);
   const loggedTitleKeys=new Set((data.logs||[]).filter(l=>l.category===cat).map(l=>normTitle(l.title)).filter(Boolean));
   const loggedImdbKeys=new Set((data.logs||[]).filter(l=>l.category===cat&&l.imdbID).map(l=>(l.imdbID||"").toLowerCase()));
@@ -4885,15 +5387,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       if(!dedupeKey) return false;
       if(seen.has(dedupeKey)) return false;
       if(cat==="movies"){
-        const untilA=(data.discoverSkipUntil||{})[key]?new Date((data.discoverSkipUntil||{})[key]).getTime():0;
-        const untilB=(data.discoverSkipUntil||{})[titleKey]?new Date((data.discoverSkipUntil||{})[titleKey]).getTime():0;
-        const until=Math.max(untilA,untilB);
+        const skipState=getSkipState(it);
+        const until=skipState.until?new Date(skipState.until).getTime():0;
         if(until&&until>Date.now()) return false;
-        const skipCount=Math.max((data.discoverSkips||{})[key]||0,(data.discoverSkips||{})[titleKey]||0);
+        const skipCount=skipState.count||0;
         if(skipCount>0){
-          const lastA=(data.discoverSkipLastAt||{})[key]?new Date((data.discoverSkipLastAt||{})[key]).getTime():0;
-          const lastB=(data.discoverSkipLastAt||{})[titleKey]?new Date((data.discoverSkipLastAt||{})[titleKey]).getTime():0;
-          const lastAt=Math.max(lastA,lastB);
+          const lastAt=skipState.lastAt?new Date(skipState.lastAt).getTime():0;
           const ageDays=lastAt?((Date.now()-lastAt)/86400000):9999;
           const cooldown=skipCount>=3?120:(skipCount===2?45:14);
           if(ageDays<cooldown) return false;
@@ -4919,7 +5418,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       data.likedSuggestions||{},
       watchlistKeys,
       mergedSkipLastAt,
-      mergedSkipUntil
+      mergedSkipUntil,
+      data.spotifyMusicSignals||[],
+      data.spotifyMusicPool||[]
     ));
     let built=buildWithMovies(data.libraryMovies||[]);
     if(cat==="movies"&&(!built||!built.length)){
@@ -4972,8 +5473,12 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   // Per-category queue — persisted in data.discoverQueues
   const [pool,setPool]=useState(()=>{
     const saved=data.discoverQueues?.[cat];
-    if(saved&&saved.length&&data.discoverDate===today) return sanitizePool(saved);
-    return buildFreshPool();
+    if(saved&&saved.length&&data.discoverDate===today){
+      const cleaned=sanitizePool(saved);
+      return cat==="movies"?buildMovieQueue(cleaned,cleaned):cleaned;
+    }
+    const fresh=buildFreshPool();
+    return cat==="movies"?buildMovieQueue(fresh,[]):fresh;
   });
   const [poolIdx,setPoolIdx]=useState(()=>data.discoverDate===today?(data.discoverIndexes?.[cat]||0):0);
 
@@ -4985,7 +5490,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
 
   // Define currentItem before all effects so they can reference it safely
   const currentItem=pool[poolIdx%Math.max(pool.length,1)]||null;
-  const displayItem=movieLockedByLimit?null:currentItem;
+  const currentPassesGate=!currentItem||sanitizePool([currentItem]).length>0;
+  const displayItem=movieLockedByLimit?null:(currentPassesGate?currentItem:null);
   const description=displayItem?generateDescription(displayItem,data.logs,data.feedback,poolIdx):"";
   const likedKey=movieKey(displayItem);
   const likedMap=data.likedSuggestions||{};
@@ -5001,6 +5507,24 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     d.setHours(20,0,0,0);
     return d.toISOString().slice(0,16);
   });
+  useEffect(()=>{
+    if(cat!=="movies") return;
+    if(!currentItem) return;
+    if(currentPassesGate) return;
+    const nextPool=[...pool];
+    if(nextPool.length){
+      nextPool.splice(Math.min(poolIdx,Math.max(nextPool.length-1,0)),1);
+    }
+    const freshRaw=buildFreshPool();
+    const repaired=buildMovieQueue(freshRaw,nextPool);
+    setPool(repaired);
+    setPoolIdx(0);
+    onChange("__batch__",{
+      discoverQueues:{...(data.discoverQueues||{}),[cat]:repaired},
+      discoverIndexes:{...(data.discoverIndexes||{}),[cat]:0},
+      discoverDate:today,
+    });
+  },[cat,currentItem?.imdbID,currentItem?.title,currentPassesGate]);
 
   // Count the first suggestion on mount — card is always the active one now
   const countedRef=useRef(false);
@@ -5032,7 +5556,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   useEffect(()=>{
     if(hasSavedOnMount.current){ hasSavedOnMount.current=false; return; }
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
-    setPool(buildFreshPool());
+    const fresh=buildFreshPool();
+    setPool(cat==="movies"?buildMovieQueue(fresh,[]):fresh);
   },[cat,data.tasteSeed,data.discoverSkips,data.discoverSkipYears,data.discoverSkipGenres,data.discoverSkipDirectors,data.discoverSkipTags,data.discoverSkipLastAt,data.discoverSkipUntil]);
   useEffect(()=>{
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
@@ -5075,7 +5600,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(sig===movieLibSigRef.current) return;
     movieLibSigRef.current=sig;
     if(Date.now()<suppressAutoRebuildUntilRef.current) return;
-    const rebuilt=buildFreshPool();
+    const rebuiltRaw=buildFreshPool();
+    const rebuilt=cat==="movies"?buildMovieQueue(rebuiltRaw,[]):rebuiltRaw;
     setPool(rebuilt);
     setPoolIdx(0);
     onChange("__batch__",{
@@ -5088,7 +5614,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     if(cat!=="movies") return;
     if(movieLockedByLimit) return;
     if(displayItem) return;
-    const rebuilt=buildFreshPool();
+    const rebuiltRaw=buildFreshPool();
+    const rebuilt=cat==="movies"?buildMovieQueue(rebuiltRaw,[]):rebuiltRaw;
     if(!rebuilt.length) return;
     setPool(rebuilt);
     setPoolIdx(0);
@@ -5159,23 +5686,27 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       const ds={...(data.discoverSkips||{})};
       const dl={...(data.discoverSkipLastAt||{})};
       const du={...(data.discoverSkipUntil||{})};
-      const k1=(currentItem.imdbID||currentItem.title||"").toLowerCase();
-      const k2=normTitle(currentItem.title||"");
-      const keys=[...new Set([k1,k2].filter(Boolean))];
-      const nextCount=Math.max(...keys.map(k=>(ds[k]||0)))+1;
+      const sm={...(data.skippedMovies||{})};
+      const keys=movieIdentityKeys(currentItem);
+      const prevCount=Math.max(0,...keys.map(k=>Math.max(ds[k]||0,sm[k]?.count||0)));
+      const nextCount=prevCount+1;
       const cooldownDays=nextCount>=3?120:(nextCount===2?45:14);
+      const nowIso=new Date().toISOString();
       const untilIso=new Date(Date.now()+cooldownDays*86400000).toISOString();
       keys.forEach(k=>{
-        ds[k]=(ds[k]||0)+1;
-        dl[k]=new Date().toISOString();
+        ds[k]=nextCount;
+        dl[k]=nowIso;
         du[k]=untilIso;
+        sm[k]={count:nextCount,lastAt:nowIso,until:untilIso};
       });
-      optimisticSkips={discoverSkips:ds,skipLastAt:dl,skipUntil:du};
+      optimisticSkips={discoverSkips:ds,skipLastAt:dl,skipUntil:du,skippedMovies:sm};
     }
     if(!currentItem){
-      let rebuilt=buildFreshPool(null,optimisticSkips||{});
+      let rebuiltRaw=buildFreshPool(null,optimisticSkips||{});
+      let rebuilt=cat==="movies"?buildMovieQueue(rebuiltRaw,[]):rebuiltRaw;
       if((!rebuilt||!rebuilt.length) && data.betaMode){
-        rebuilt=buildPremiumFallbackPool();
+        const fb=buildPremiumFallbackPool();
+        rebuilt=cat==="movies"?buildMovieQueue(fb,[]):fb;
       }
       setPool(rebuilt);
       setPoolIdx(0);
@@ -5189,28 +5720,37 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextPool=[...pool];
     const removeIdx=Math.min(poolIdx,Math.max(nextPool.length-1,0));
     if(nextPool.length) nextPool.splice(removeIdx,1);
-    let finalPool=nextPool.length?nextPool:buildFreshPool(null,optimisticSkips||{});
+    const freshRaw=buildFreshPool(null,optimisticSkips||{});
+    let finalPool=nextPool.length
+      ?(cat==="movies"?buildMovieQueue(freshRaw,nextPool):nextPool)
+      :(cat==="movies"?buildMovieQueue(freshRaw,[]):freshRaw);
     if((!finalPool||!finalPool.length) && data.betaMode){
-      finalPool=buildPremiumFallbackPool();
+      const fb=buildPremiumFallbackPool();
+      finalPool=cat==="movies"?buildMovieQueue(fb,[]):fb;
     }
     const newIdx=0;
     setPool(finalPool);
     setPoolIdx(newIdx);
     const skipPatch=(recordSkip&&cat==="movies"&&currentItem)
       ?(()=>{
-        const key=(currentItem.imdbID||currentItem.title||"").toLowerCase();
+        const key=movieKey(currentItem);
         if(!key) return {};
         if(interactedMap[key]) return {};
-        const titleKey=normTitle(currentItem.title||"");
-        const keys=[...new Set([key,titleKey].filter(Boolean))];
+        const keys=movieIdentityKeys(currentItem);
         const ds={...(data.discoverSkips||{})};
         const dl={...(data.discoverSkipLastAt||{})};
         const du={...(data.discoverSkipUntil||{})};
+        const sm={...(data.skippedMovies||{})};
+        const prevCount=Math.max(0,...keys.map(k=>Math.max(ds[k]||0,sm[k]?.count||0)));
+        const nextCount=prevCount+1;
+        const cooldownDays=nextCount>=3?120:(nextCount===2?45:14);
+        const nowIso=new Date().toISOString();
+        const untilIso=new Date(Date.now()+cooldownDays*86400000).toISOString();
         keys.forEach(k=>{
-          ds[k]=(ds[k]||0)+1;
-          dl[k]=new Date().toISOString();
-          const cooldownDays=ds[k]>=3?120:(ds[k]===2?45:14);
-          du[k]=new Date(Date.now()+cooldownDays*86400000).toISOString();
+          ds[k]=nextCount;
+          dl[k]=nowIso;
+          du[k]=untilIso;
+          sm[k]={count:nextCount,lastAt:nowIso,until:untilIso};
         });
         const y={...(data.discoverSkipYears||{})};
         const g={...(data.discoverSkipGenres||{})};
@@ -5238,6 +5778,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
           discoverSkips:ds,
           discoverSkipLastAt:dl,
           discoverSkipUntil:du,
+          skippedMovies:sm,
           discoverSkipYears:y,
           discoverSkipGenres:g,
           discoverSkipDirectors:d,
@@ -5281,11 +5822,10 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===key)&&s.signal==="like"));
     } else {
       nextLiked[key]=true;
-      const titleKey=normTitle(currentItem.title||"");
-      delete nextSkips[key];
-      if(titleKey) delete nextSkips[titleKey];
-      delete nextSkipUntil[key];
-      if(titleKey) delete nextSkipUntil[titleKey];
+      movieIdentityKeys(currentItem).forEach(k=>{
+        delete nextSkips[k];
+        delete nextSkipUntil[k];
+      });
       if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===key&&s.signal==="like"))){
         nextSeed.push({
           title:currentItem.title,
@@ -5376,11 +5916,10 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const nextSkips={...(data.discoverSkips||{})};
     const nextSkipUntil={...(data.discoverSkipUntil||{})};
     if(!has){
-      const titleKey=normTitle(currentItem.title||"");
-      delete nextSkips[key];
-      if(titleKey) delete nextSkips[titleKey];
-      delete nextSkipUntil[key];
-      if(titleKey) delete nextSkipUntil[titleKey];
+      movieIdentityKeys(currentItem).forEach(k=>{
+        delete nextSkips[k];
+        delete nextSkipUntil[k];
+      });
     }
     const nextReminders=has
       ?(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key))
@@ -5500,19 +6039,17 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
                   )}
                 </div>
               </div>
-              {/* Plot if available, else Why this for you */}
-              <div style={{padding:"12px 14px",borderRadius:14,background:`${catInfo.color}12`,borderLeft:`3px solid ${catInfo.color}`,marginBottom:16}}>
-                {cat==="movies"&&displayItem.plot?(
-                  <>
-                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Plot</div>
-                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,opacity:0.85}}>{displayItem.plot}</div>
-                  </>
-                ):(
-                  <>
-                    <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this now</div>
-                    <div style={{fontSize:13,color:th.text,lineHeight:1.65,fontStyle:"italic",opacity:0.85}}>{description}</div>
-                  </>
-                )}
+              {/* Plot */}
+              {cat==="movies"&&displayItem.plot&&(
+                <div style={{padding:"12px 14px",borderRadius:14,background:`${catInfo.color}12`,borderLeft:`3px solid ${catInfo.color}`,marginBottom:8}}>
+                  <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Plot</div>
+                  <div style={{fontSize:13,color:th.text,lineHeight:1.65,opacity:0.85}}>{displayItem.plot}</div>
+                </div>
+              )}
+              {/* Why this now (separate block) */}
+              <div style={{padding:"10px 14px",borderRadius:12,background:`${catInfo.color}0E`,border:`1px solid ${th.border}`,marginBottom:16}}>
+                <div style={{fontSize:10,fontWeight:700,color:catInfo.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why this now</div>
+                <div style={{fontSize:12,color:th.sub,lineHeight:1.5,fontStyle:"italic",opacity:0.95}}>{description}</div>
               </div>
               {/* Food: find near me */}
               {cat==="food"&&(
@@ -5706,7 +6243,7 @@ function DiscoverDeck({data,onChange,onOpenMovieLog}){
 }
 
 
-// ─── BARKADA CARD — same stacked treatment as discover cats ──────────────────
+// â”€â”€â”€ BARKADA CARD — same stacked treatment as discover cats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BarkadaStackCard({data,onChange,th,isTop,stackOffset}){
   const today=todayKey();
   const FREE_LIMIT=DISCOVER_FREE_LIMIT;
@@ -5839,7 +6376,7 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
   );
 }
 
-// ─── SHARE CARD MODAL — renders to canvas for saving as image ────────────────
+// â”€â”€â”€ SHARE CARD MODAL — renders to canvas for saving as image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
   const items=_normalizeWatchlistItems(data);
@@ -6455,8 +6992,8 @@ function ShareCardModal({archetype,data,av,onClose}){
   );
 }
 
-// ─── PROFILE PAGE ────────────────────────────────────────────────────────────
-// ─── STAT STICKER — Manila Nights only ───────────────────────────────────────
+// â”€â”€â”€ PROFILE PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ STAT STICKER — Manila Nights only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Flow: tap card → modal preview (full sticker visible) → long-press preview → iOS share
 // Freemium: 3 generations per day for free users
 const STICKER_FREE_LIMIT=3;
@@ -6479,7 +7016,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
 
   ctx.clearRect(0,0,W,H);
 
-  // ── Background (skip when using shared glass)
+  // â”€â”€ Background (skip when using shared glass)
   if(!sharedGlass){
     ctx.save();
     ctx.beginPath(); ctx.roundRect(0,0,W,H,20); ctx.clip();
@@ -6495,13 +7032,13 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ctx.restore();
   }
 
-  // ── Border
+  // â”€â”€ Border
   ctx.save();
   ctx.beginPath(); ctx.roundRect(0.5,0.5,W-1,H-1,20);
   ctx.strokeStyle="rgba(200,204,216,0.22)"; ctx.lineWidth=1; ctx.stroke();
   ctx.restore();
 
-  // ── Layout constants
+  // â”€â”€ Layout constants
   const PAD=12;
   const cW=W-PAD*2;
   const cH=CARD_H-PAD*2;
@@ -6518,14 +7055,14 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ?(lc.colSpan>=2&&lc.rowSpan===1?"wide":(lc.rowSpan>=2?"tall":"compact"))
     :null;
 
-  // ── Vertical layout: icon top, value middle, label bottom (unless noLabel)
+  // â”€â”€ Vertical layout: icon top, value middle, label bottom (unless noLabel)
   const iconSize=Math.round(sizeRef*0.22);
   const iconScale=(iconSize/24);
   const iconY=noLabel||isMultiline ? PAD+cH*0.17 : PAD+cH*0.14;
   const valueY=noLabel ? PAD+cH*0.60 : isMultiline ? PAD+cH*0.24 : PAD+cH*0.58;
   const labelY=PAD+cH*0.90;
 
-  // ── Icon
+  // â”€â”€ Icon
   ctx.save();
   ctx.strokeStyle=(palette&&palette.accent)||"#00cfff"; ctx.lineWidth=Math.max(1,1.5*iconScale);
   ctx.lineCap="round"; ctx.lineJoin="round";
@@ -6582,7 +7119,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
   }
   ctx.restore();
 
-  // ── Value
+  // â”€â”€ Value
   ctx.textAlign="center";
   const accent=(palette&&palette.accent)||th.accent;
   ctx.fillStyle=accent;
@@ -6632,7 +7169,7 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ctx.shadowBlur=0; ctx.fillText(String(value),cx,valueY);
   }
 
-  // ── Label — only for cards that have a separate label
+  // â”€â”€ Label — only for cards that have a separate label
   if(!noLabel){
     const labelFontSize=9; // slightly reduced again
     ctx.font=`italic 400 ${labelFontSize}px 'DM Sans', sans-serif`;
@@ -6641,11 +7178,11 @@ function drawSticker(ctx, W, H, CARD_H, label, value, iconId, layout, sharedGlas
     ctx.fillText(label.toUpperCase(),cx,labelY);
   }
 
-  // ── Divider
+  // â”€â”€ Divider
   ctx.strokeStyle="rgba(200,204,216,0.08)"; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(PAD,CARD_H-1); ctx.lineTo(W-PAD,CARD_H-1); ctx.stroke();
 
-  // ── Branding
+  // â”€â”€ Branding
   const brandFontSize=Math.round(sizeRef*0.09);
   ctx.font=`400 ${brandFontSize}px 'DM Sans', sans-serif`;
   ctx.fillStyle="rgba(136,120,170,0.5)";
@@ -6806,7 +7343,7 @@ function StatSticker({iconId,label,value,data,onGenerate,onStickerOpen,span,onRe
   );
 }
 
-// ─── STAT GRID ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ STAT GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPhotoTap, scrollRef, sharedGlass}){
   const savedSizes = data.statCardSizes || {};
@@ -7311,7 +7848,7 @@ function StatGrid({cards, data, onChange, th, isHapon, isMN, onStickerOpen, onPh
   );
 }
 
-// ─── PROFILE PHOTO REPOSITIONER ──────────────────────────────────────────────
+// â”€â”€â”€ PROFILE PHOTO REPOSITIONER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Full image moves freely behind a fixed frame. No clipping during editing.
 // pos.x, pos.y (0-100): where the image is panned within the frame
 // pos.scale (>=1): how much bigger than the frame the image is
@@ -8032,7 +8569,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             else if(h>=5&&h<12) earlyBirdScore++;
           });
           const timeVibe=weekManualLogs.length>=3
-            ?(nightOwlScore>earlyBirdScore?"Night Owl 🦉":"Early Bird 🌅")
+            ?(nightOwlScore>earlyBirdScore?"Night Owl 🦉":"Early Bird 🌆")
             :null;
           const timeVibeRaw=weekManualLogs.length>=3
             ?(nightOwlScore>earlyBirdScore?"night_owl":"early_bird")
@@ -8154,7 +8691,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
 
           const wkId=id=>`${weekKey}_${id}`;
 
-          // ── Slot sequence ─────────────────────────────────────────────────────
+          // â”€â”€ Slot sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           // Each slot owns a shape. Cards flow into slots in registry order,
           // skipping any card that has no data. The card inherits the slot's shape —
           // the card itself has no predefined size. Photo slots are skipped when
@@ -8175,7 +8712,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             {colSpan:1,rowSpan:1},  // slot 13 — Top Director
           ];
 
-          // ── Card registry — ordered by priority ───────────────────────────────
+          // â”€â”€ Card registry — ordered by priority â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           // This defines which card gets the first available slot, second, etc.
           // If a card has no data it is simply absent and the next card moves up.
           const pinnedIds=(data.profilePhotoIds||[]);
@@ -8205,14 +8742,14 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           // Stat cards in priority order — matches your registry 1,2,4,5,7,8,10,11,12,13
           const vibeLabel=String(weekKey||"").startsWith("month_")?"This Month's Vibe":"This Week's Vibe";
           const statRegistry=[
-            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"📊",label:vibeLabel,value:weekBreakdownValue,min:1}]:[]),
+            ...(weekBreakdownValue?[{iconId:wkId("week_breakdown"),_baseId:"week_breakdown",emoji:"\uD83D\uDCDA",label:vibeLabel,value:weekBreakdownValue,min:1}]:[]),
             ...(weekPulse?[{iconId:wkId("week_pulse"),_baseId:"week_pulse",emoji:weekPulseEmoji,label:"",value:weekPulse,min:1}]:[]),
-            ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌅",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
+            ...(timeVibe?[{iconId:wkId("time_vibe"),_baseId:"time_vibe",emoji:timeVibeRaw==="night_owl"?"🦉":"🌆",label:"",value:timeVibeRaw==="night_owl"?"Night Owl":"Early Bird",min:1}]:[]),
             ...(stepsLogs.length>0?[{iconId:wkId("steps"),_baseId:"steps",emoji:"👟",label:"Steps",value:weekSteps,min:1}]:[]),
             ...(daysActiveCount>0?[{iconId:wkId("days"),_baseId:"days",emoji:"🗓",label:"Days Active",value:daysActiveCount,min:1}]:[]),
             ...(mostLoggedTitle?[{iconId:wkId("most_logged"),_baseId:"most_logged",emoji:"🔁",label:mostLoggedLabel,value:mostLoggedTitle,min:1}]:[]),
-            ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"🎭",label:"Actor",value:topActor,min:1}]:[]),
-            ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"🎬",label:"Director",value:topDirector,min:1}]:[]),
+            ...(topActor?[{iconId:wkId("top_actor"),_baseId:"top_actor",emoji:"\uD83C\uDFAD",label:"Actor",value:topActor,min:1}]:[]),
+            ...(topDirector?[{iconId:wkId("top_director"),_baseId:"top_director",emoji:"\uD83C\uDFAC",label:"Director",value:topDirector,min:1}]:[]),
             ...(weekLikedCount>0?[{iconId:wkId("liked"),_baseId:"liked",emoji:"👍",label:lang==="fil"?"Na-like":"Liked",value:weekLikedCount,min:1}]:[]),
           ];
 
@@ -8268,7 +8805,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
             })())
             :prevWeekPalette;
 
-          // ── Apply the user's saved drag order BEFORE assigning palette colors ──
+          // â”€â”€ Apply the user's saved drag order BEFORE assigning palette colors â”€â”€
           // This is the key fix: we sort by the persisted order first, so that
           // nearestPhotoSrc() sees each card in its actual grid position, not its
           // construction order. Any card the user dragged will now sample the photo
@@ -8292,7 +8829,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           const topKeys=new Set(["week_breakdown","week_pulse"]);
           const harmonyMode=(data.weekHarmony||{})[weekKey]||"analog";
 
-          // ── Find the first real photo card and tag its visual side-neighbor ──
+          // â”€â”€ Find the first real photo card and tag its visual side-neighbor â”€â”€
           // A 2x2 photo in a 3-column grid always leaves exactly 1 column beside it.
           // The card filling that column is always colSpan:1, rowSpan:2 — tall and
           // narrow. We find whichever non-photo card has that shape and sits closest
@@ -8345,7 +8882,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           return `${rangeFmt.format(start)}–${rangeFmt.format(end)}`;
         };
 
-        // ── Month grouping ────────────────────────────────────────────────────
+        // â”€â”€ Month grouping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const monthFmt=new Intl.DateTimeFormat("en-US",{timeZone:PH_TZ,month:"long",year:"numeric"});
         const phMonthKey=weekKey=>{
           const d=new Date(`${weekKey}T00:00:00+08:00`);
@@ -8787,7 +9324,7 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
   );
 }
 
-// ─── SETTINGS PAGE ────────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSuccess}){
   const th=THEMES[data.theme];
   const t=T[data.language]||T.en;
@@ -8808,9 +9345,23 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [ghTokenInput,setGhTokenInput]=useState("");
   const [ghStatus,setGhStatus]=useState("");
   const [sharedTotal,setSharedTotal]=useState(null);
+  const [spotifyStatus,setSpotifyStatus]=useState("");
+  const [spotifyConnected,setSpotifyConnected]=useState(false);
+  const [spotifyUser,setSpotifyUser]=useState("");
 
   useEffect(()=>{
     setGhTokenInput(_getGhToken());
+    setSpotifyConnected(!!(_getSpotifyAuth()?.access_token));
+    setSpotifyUser(data.spotifyUserName||"");
+    try{
+      const s=localStorage.getItem(SPOTIFY_LAST_STATUS_KEY)||"";
+      if(s) setSpotifyStatus(s);
+      localStorage.removeItem(SPOTIFY_LAST_STATUS_KEY);
+    }catch(_){}
+  },[]);
+  useEffect(()=>{
+    if(_getSpotifyAuth()?.access_token) handleSpotifyTest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
   useEffect(()=>{
     try{
@@ -8950,6 +9501,55 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       setRedeemMsg("❌ Invalid code.");
     }
     setTimeout(()=>setRedeemMsg(""),3000);
+  };
+  const handleSpotifyTest=async()=>{
+    setSpotifyStatus("Checking Spotify connection...");
+    const bundle=await fetchSpotifyMusicBundle();
+    if(!bundle.ok){
+      setSpotifyConnected(false);
+      setSpotifyUser("");
+      setSpotifyStatus(bundle.status===401?"Spotify not connected.":"Spotify check failed.");
+      return;
+    }
+    const name=bundle.userName||"Spotify user";
+    setSpotifyConnected(true);
+    setSpotifyUser(name);
+    onChange("__batch__",{
+      spotifyMusicSignals:bundle.signals||[],
+      spotifyMusicPool:bundle.pool||[],
+      spotifyMusicUpdatedAt:bundle.updatedAt||new Date().toISOString(),
+      spotifyUserName:name,
+    });
+    setSpotifyStatus(`Connected as ${name}.`);
+  };
+  const handleSpotifyConnect=async()=>{
+    if(!_getSpotifyClientId()){
+      setSpotifyStatus("Spotify is not configured yet.");
+      return;
+    }
+    const scopes=[
+      "user-read-private",
+      "user-read-email",
+      "user-top-read",
+      "user-read-recently-played",
+    ];
+    setSpotifyStatus("Redirecting to Spotify...");
+    const r=await beginSpotifyAuth(scopes);
+    if(!r.ok){
+      setSpotifyStatus(r.err||"Spotify connect failed.");
+    }
+  };
+  const handleSpotifyDisconnect=()=>{
+    _setSpotifyAuth(null);
+    setSpotifyConnected(false);
+    setSpotifyUser("");
+    onChange("__batch__",{
+      spotifyMusicSignals:[],
+      spotifyMusicPool:[],
+      spotifyMusicUpdatedAt:null,
+      spotifyUserName:null,
+    });
+    setSpotifyStatus("Spotify disconnected.");
   };
 
   const FEEDBACK_WEBAPP_URL="https://script.google.com/macros/s/AKfycbx-beQQasotN9xVQIHoEdiBrKFDGKoIP5b31lJJ3FWJmL_Kgkncm-ZzBtDJdSQ3Zohg/exec";
@@ -9105,6 +9705,42 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
             <div style={{marginTop:6,fontSize:11,color:th.sub}}>{ghStatus}</div>
           )}
         </div>
+      </div>
+
+      {/* Spotify */}
+      <div style={{borderRadius:18,padding:"18px",marginBottom:16,background:th.card,border:`1px solid ${th.border}`}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+        <span style={{fontSize:20}}>🎵</span>
+        <h3 style={{fontWeight:700,color:th.text}}>Spotify</h3>
+      </div>
+      <p style={{fontSize:12,color:th.sub,opacity:0.9,lineHeight:1.5,marginBottom:8}}>
+        Connect Spotify to personalize music recommendations.
+      </p>
+      <div style={{display:"flex",gap:8,marginTop:8,flexWrap:"wrap"}}>
+        <button onClick={handleSpotifyConnect}
+          style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+          Connect Spotify
+        </button>
+        {spotifyConnected&&<button onClick={handleSpotifyTest}
+          style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+          Refresh status
+        </button>}
+        <button onClick={handleSpotifyDisconnect}
+          style={{fontSize:11,color:th.sub,background:"transparent",border:`1px solid ${th.border}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+          Disconnect
+          </button>
+        </div>
+        <div style={{marginTop:6,fontSize:11,color:th.sub}}>
+          Status: {spotifyConnected?"Connected":"Not connected"}
+        </div>
+        {spotifyUser&&(
+          <div style={{marginTop:4,fontSize:11,color:th.sub}}>
+            Account: {spotifyUser}
+          </div>
+        )}
+        {spotifyStatus&&(
+          <div style={{marginTop:4,fontSize:11,color:th.sub}}>{spotifyStatus}</div>
+        )}
       </div>
 
       {/* Collaborate */}
@@ -9433,9 +10069,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   );
 }
 
-// ─── APP ROOT ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ APP ROOT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+// â”€â”€â”€ PULL TO REFRESH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function App(){
   const [data,setData]=useState(()=>loadData()||defaultData());
@@ -9535,7 +10171,7 @@ function App(){
     })();
   },[]);
 
-  // ── Shared global library (GitHub JSON) ────────────────────────────────────
+  // â”€â”€ Shared global library (GitHub JSON) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(()=>{
     let alive=true;
     let requestSeq=0;
@@ -9643,7 +10279,7 @@ function App(){
   },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.libraryMovies]);
   const switchTab=t=>{setTab(t);window.scrollTo({top:0,behavior:"instant"});if(t==="timeline")setTimelineUnread(0);};
 
-  // ── OMDB metadata hydration only (no discovery search) ────────────────────
+  // â”€â”€ OMDB metadata hydration only (no discovery search) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(()=>{
     (async()=>{
       try{
@@ -9763,6 +10399,26 @@ function App(){
   const [showStatsNerdsPage,setShowStatsNerdsPage]=useState(false);
 
   const anyModalOpen=showLog||showPatch||stickerOpen||showWatchlistPage||showLikedPage||showWatchedPage||showStatsNerdsPage;
+
+  useEffect(()=>{
+    (async()=>{
+      try{
+        await finishSpotifyAuthFromUrl();
+        if(!_getSpotifyAuth()?.access_token) return;
+        const prevTs=data.spotifyMusicUpdatedAt?new Date(data.spotifyMusicUpdatedAt).getTime():0;
+        if(prevTs && (Date.now()-prevTs)<(6*60*60*1000)) return;
+        const bundle=await fetchSpotifyMusicBundle();
+        if(!bundle.ok) return;
+        setData(prev=>({
+          ...prev,
+          spotifyMusicSignals:bundle.signals||[],
+          spotifyMusicPool:bundle.pool||[],
+          spotifyMusicUpdatedAt:bundle.updatedAt||new Date().toISOString(),
+          spotifyUserName:bundle.userName||prev.spotifyUserName||null,
+        }));
+      }catch(_){}
+    })();
+  },[]);
 
   useEffect(()=>{
     saveData(data);
@@ -9901,7 +10557,7 @@ function App(){
   }, []);
 
 
-  // ── Pull to Refresh ──
+  // â”€â”€ Pull to Refresh â”€â”€
   const ptrStartY = useRef(null);
   const ptrLockedAtTop = useRef(false);
   const [ptrY, setPtrY] = useState(0);
@@ -10325,3 +10981,6 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
+
