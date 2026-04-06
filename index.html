@@ -6137,29 +6137,24 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const webPlaybackUri=(displayItem.spotifyUri||"").trim() || (displayItem.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
     const previewUrl=(displayItem.previewUrl||"").trim();
     const openUrl=(displayItem.spotifyUrl||"").trim() || (displayItem.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
-    // Create popup synchronously during click to avoid mobile popup blockers.
-    let popupWin=null;
-    if(openUrl){
-      try{ popupWin=window.open("about:blank","_blank","noopener,noreferrer"); }catch(_){}
-    }
     const openFallback=()=>{
       if(previewUrl){
-        if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
         setPreviewOn(true);
         setMusicPlayMsg("Preview mode.");
         return true;
       }
       if(openUrl){
         try{
-          if(popupWin){ popupWin.location.href=openUrl; }
-          else window.open(openUrl,"_blank","noopener,noreferrer");
+          const w=window.open(openUrl,"_blank");
+          if(!w){
+            window.location.assign(openUrl);
+          }
         }catch(_){
-          try{ window.location.href=openUrl; }catch(__){}
+          try{ window.location.assign(openUrl); }catch(__){}
         }
         setMusicPlayMsg("Opening in Spotify.");
         return true;
       }
-      if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
       setMusicPlayMsg("Playback unavailable.");
       return false;
     };
@@ -6174,7 +6169,6 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         }
         const r=await playTrackViaSpotifyWeb(webPlaybackUri);
         if(r?.ok){
-          if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
           setMusicPlayMsg("Playing now.");
           setPreviewOn(false);
           return;
