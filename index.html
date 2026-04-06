@@ -2685,6 +2685,7 @@ function _spotifyTrackToItem(track, genreByArtist={}){
     albumReleaseDate:album.release_date||null,
     albumType:album.album_type||null,
     albumImage:bestImage,
+    poster:bestImage,
     albumImages:images.map(i=>({url:i.url,height:i.height,width:i.width})),
     durationMs:track.duration_ms??null,
     explicit:!!track.explicit,
@@ -5013,6 +5014,24 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       .map(l=>(l.imdbID||"").toLowerCase())
       .filter(Boolean)
   );
+  const loggedMusicTrackIds=new Set(
+    logs
+      .filter(l=>l.category==="music"&&l.spotifyTrackId)
+      .map(l=>(l.spotifyTrackId||"").toLowerCase())
+      .filter(Boolean)
+  );
+  const loggedMusicUris=new Set(
+    logs
+      .filter(l=>l.category==="music"&&l.spotifyUri)
+      .map(l=>(l.spotifyUri||"").toLowerCase())
+      .filter(Boolean)
+  );
+  const loggedMusicBaseTitles=new Set(
+    logs
+      .filter(l=>l.category==="music")
+      .map(l=>normTitle((l.title||"").split(" — ")[0]||l.title||""))
+      .filter(Boolean)
+  );
   const disliked=new Set(Object.entries(feedback||{}).filter(([,v])=>v==="left").map(([k])=>k));
   const likedSet=new Set(
     Object.entries(likedSuggestions||{})
@@ -5059,6 +5078,14 @@ function buildCatPool(cat, logs, feedback, locationData=null, libraryMovies=[], 
       if(likedSet.has(titleKey)) return false;
       if(itemKey&&watchSet.has(itemKey)) return false;
       if(watchSet.has(titleKey)) return false;
+      if(cat==="music"){
+        const trackId=(i.spotifyTrackId||"").toLowerCase();
+        const uri=(i.spotifyUri||"").toLowerCase();
+        const baseTitle=normTitle((i.title||"").split(" — ")[0]||i.title||"");
+        if(trackId&&loggedMusicTrackIds.has(trackId)) return false;
+        if(uri&&loggedMusicUris.has(uri)) return false;
+        if(baseTitle&&loggedMusicBaseTitles.has(baseTitle)) return false;
+      }
       if(cat==="movies"){
         const untilA=skipUntil[itemKey]?new Date(skipUntil[itemKey]).getTime():0;
         const untilB=skipUntil[titleKey]?new Date(skipUntil[titleKey]).getTime():0;
@@ -6032,9 +6059,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   };
   const handleMusicPlay=()=>{
     if(cat!=="music"||!displayItem) return;
-    const webPlaybackUri=(displayItem.spotifyUri||"").trim();
+    const webPlaybackUri=(displayItem.spotifyUri||"").trim() || (displayItem.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
     const previewUrl=(displayItem.previewUrl||"").trim();
-    const openUrl=(displayItem.spotifyUrl||"").trim();
+    const openUrl=(displayItem.spotifyUrl||"").trim() || (displayItem.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
     try{
       if(webPlaybackUri){
         const slug=webPlaybackUri.startsWith("spotify:track:")?webPlaybackUri.split(":").pop():"";
@@ -6053,9 +6080,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     }catch(_){}
   };
   const musicPlayMode=(()=>{
-    const trackUri=(displayItem?.spotifyUri||"").trim();
+    const trackUri=((displayItem?.spotifyUri||"").trim()) || (displayItem?.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
     const preview=(displayItem?.previewUrl||"").trim();
-    const spotifyWeb=(displayItem?.spotifyUrl||"").trim();
+    const spotifyWeb=((displayItem?.spotifyUrl||"").trim()) || (displayItem?.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
     if(trackUri&&trackUri.startsWith("spotify:track:")) return "play";
     if(preview) return "preview";
     if(spotifyWeb) return "open";
