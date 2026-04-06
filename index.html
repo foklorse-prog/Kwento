@@ -561,33 +561,7 @@ const LIBRARY = {
     {title:"Bon Appétit, Your Majesty",tags:["drama","food","slow","quiet","historical","Japanese","beautiful"],genre:"Drama",ph:false},
     {title:"One Tree Hill: Always & Forever",tags:["drama","TV","nostalgic","emotional","feel-good","teen"],genre:"Drama",ph:false},
   ],
-  music:[
-    {title:"Araw-Araw — IV of Spades",tags:["OPM","upbeat","indie","Filipino","fun","feel-good","guitar"],genre:"OPM Indie",ph:true},
-    {title:"Mundo — IV of Spades",tags:["OPM","romantic","indie","Filipino","emotional","nostalgic","guitar"],genre:"OPM Indie",ph:true},
-    {title:"Ere — Eraserheads",tags:["OPM","classic","chill","Filipino","nostalgic","relaxed","iconic"],genre:"OPM Classic",ph:true},
-    {title:"Alapaap — Eraserheads",tags:["OPM","classic","dreamy","Filipino","nostalgic","atmospheric","iconic"],genre:"OPM Classic",ph:true},
-    {title:"Huling El Bimbo — Eraserheads",tags:["OPM","classic","nostalgic","Filipino","emotional","romantic","iconic"],genre:"OPM Classic",ph:true},
-    {title:"With a Smile — Eraserheads",tags:["OPM","classic","upbeat","Filipino","feel-good","fun","iconic"],genre:"OPM Classic",ph:true},
-    {title:"Buwan — Juan Karlos",tags:["OPM","romantic","cozy","Filipino","calm","beautiful","acoustic"],genre:"OPM",ph:true},
-    {title:"Paalam — Ben&Ben",tags:["OPM","emotional","reflective","Filipino","melancholic","beautiful","acoustic"],genre:"OPM",ph:true},
-    {title:"Leaves — Ben&Ben",tags:["OPM","calm","reflective","Filipino","cozy","acoustic","quiet"],genre:"OPM",ph:true},
-    {title:"Kathang Isip — Ben&Ben",tags:["OPM","romantic","cozy","Filipino","dreamy","emotional","acoustic"],genre:"OPM",ph:true},
-    {title:"Pano — Zack Tabudlo",tags:["OPM","romantic","emotional","Filipino","contemporary","R&B","soulful"],genre:"OPM R&B",ph:true},
-    {title:"Binibini — Zack Tabudlo",tags:["OPM","romantic","upbeat","Filipino","contemporary","fun","feel-good"],genre:"OPM R&B",ph:true},
-    {title:"Sa Susunod na Habambuhay — Arthur Nery",tags:["OPM","romantic","emotional","Filipino","soulful","contemporary","melancholic"],genre:"OPM Soul",ph:true},
-    {title:"Golden Hour — JVKE",tags:["global","romantic","upbeat","pop","feel-good","summer","bright"],genre:"Pop",ph:false},
-    {title:"Harry Styles",tags:["global","pop","indie","upbeat","chill","feel-good","stylish","British","contemporary"],genre:"Pop",ph:false},
-    {title:"As It Was — Harry Styles",tags:["global","upbeat","chill","pop","feel-good","indie","bright"],genre:"Pop",ph:false},
-    {title:"Cruel Summer — Taylor Swift",tags:["global","pop","upbeat","summer","fun","romantic","bright"],genre:"Pop",ph:false},
-    {title:"All Too Well — Taylor Swift",tags:["global","emotional","nostalgic","reflective","romantic","intense","literary"],genre:"Pop",ph:false},
-    {title:"Heat Waves — Glass Animals",tags:["global","indie","dreamy","nostalgic","chill","summer","atmospheric"],genre:"Indie Pop",ph:false},
-    {title:"Blinding Lights — The Weeknd",tags:["global","upbeat","night","synth-pop","fun","energetic","bold"],genre:"Pop",ph:false},
-    {title:"Butter — BTS",tags:["global","K-pop","upbeat","fun","dance","feel-good","bright"],genre:"K-Pop",ph:false},
-    {title:"Hype Boy — NewJeans",tags:["global","K-pop","upbeat","fun","cute","feel-good","bright"],genre:"K-Pop",ph:false},
-    {title:"Too Sweet — Hozier",tags:["global","indie","romantic","chill","acoustic","feel-good","warm"],genre:"Indie Folk",ph:false},
-    {title:"Vienna — Billy Joel",tags:["global","classic","reflective","nostalgic","piano","calm","timeless"],genre:"Classic Rock",ph:false},
-    {title:"Bohemian Rhapsody — Queen",tags:["global","classic","epic","fun","rock","iconic","bold"],genre:"Classic Rock",ph:false},
-  ],
+  music:[],
   books:[
     {title:"Noli Me Tangere — Jose Rizal",tags:["Filipino","classic","historical","political","intense","literary","patriotic"],genre:"Classic",ph:true},
     {title:"El Filibusterismo — Jose Rizal",tags:["Filipino","classic","historical","political","dark","literary","patriotic"],genre:"Classic",ph:true},
@@ -796,9 +770,6 @@ const LIBRARY = {
   ],
 };
 
-// Music suggestions now come from Spotify + user taste signals.
-// Keep static music library disabled.
-LIBRARY.music = [];
 
 // â”€â”€â”€ BARKADA POOL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BARKADA_POOL = [
@@ -1824,6 +1795,7 @@ function defaultData(){
     onboarded:false,language:"en",theme:"manila_nights",animationsOff:false,profileVisibility:{steps:true,movies:true,music:true,books:true,food:true,games:true,activities:true},
     logs:[],feedback:{},tasteSeed:[],userName:"",avatar:"a4",profilePhotoIds:[],profilePhotoPosMap:{},
     watchlist:[],
+    savedMusic:[],
     watchlistReminders:[],
     likedSuggestions:{},
     __showAvatarPicker:false,
@@ -2649,6 +2621,21 @@ async function spotifyApiGet(path){
   try{ data=await res.json(); }catch(_){}
   return {ok:res.ok,status:res.status,data};
 }
+async function spotifyApiRequest(method,path,body=null){
+  const token=await _getSpotifyAccessToken();
+  if(!token) return {ok:false,status:401,data:null};
+  const res=await fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
+    method:method||"GET",
+    headers:{
+      Authorization:`Bearer ${token}`,
+      "Content-Type":"application/json"
+    },
+    body:body?JSON.stringify(body):undefined
+  });
+  let data=null;
+  try{ data=await res.json(); }catch(_){}
+  return {ok:res.ok,status:res.status,data};
+}
 function _spotifyTagNorm(s){
   return (s||"")
     .toLowerCase()
@@ -2672,6 +2659,46 @@ function _spotifyGenreTags(genres=[]){
   });
   const filtered=[...out].filter(t=>VIBE_TAG_ALLOWLIST.has(t) || t==="music");
   return filtered.length?filtered:["music"];
+}
+function _spotifyTrackToItem(track, genreByArtist={}){
+  if(!track) return null;
+  const artists=(track.artists||[]).filter(Boolean);
+  const mainArtist=artists[0]?.name||"Unknown Artist";
+  const byArtistGenres=artists.flatMap(a=>genreByArtist[a.id]||[]);
+  const album=track.album||{};
+  const images=(album.images||[]).filter(Boolean);
+  const bestImage=images[0]?.url||null;
+  const item={
+    title:`${track.name||"Untitled"} — ${mainArtist}`,
+    category:"music",
+    genre:((byArtistGenres[0]||"Music")+""),
+    tags:[...new Set((byArtistGenres.length?byArtistGenres:["music"]).map(_spotifyTagNorm).filter(Boolean))],
+    ph:false,
+    _spotify:true,
+    spotifyTrackId:track.id||null,
+    spotifyArtists:artists.map(a=>a.name).filter(Boolean),
+    spotifyArtistIds:artists.map(a=>a.id).filter(Boolean),
+    spotifyArtistUris:artists.map(a=>a.uri).filter(Boolean),
+    spotifyArtistUrls:artists.map(a=>a.external_urls?.spotify).filter(Boolean),
+    year:(album.release_date||"").slice(0,4)||null,
+    albumName:album.name||null,
+    albumReleaseDate:album.release_date||null,
+    albumType:album.album_type||null,
+    albumImage:bestImage,
+    albumImages:images.map(i=>({url:i.url,height:i.height,width:i.width})),
+    durationMs:track.duration_ms??null,
+    explicit:!!track.explicit,
+    spotifyUrl:track.external_urls?.spotify||null,
+    spotifyUri:track.uri||null,
+    previewUrl:track.preview_url||null,
+    popularity:track.popularity??null,
+    trackNumber:track.track_number??null,
+    discNumber:track.disc_number??null,
+    availableMarkets:track.available_markets||[],
+    isLocal:!!track.is_local,
+    spotifyMeta:track,
+  };
+  return item;
 }
 async function fetchSpotifyMusicBundle(){
   const me=await spotifyApiGet("me");
@@ -2729,17 +2756,8 @@ async function fetchSpotifyMusicBundle(){
     const key=(track?.id||`${(track?.name||"").toLowerCase()}|${mainArtist.toLowerCase()}`);
     if(!key||seen.has(key)) return;
     seen.add(key);
-    const tags=(track?.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
-    pool.push({
-      title:`${track?.name||"Untitled"} — ${mainArtist}`,
-      category:"music",
-      genre:"Music",
-      tags:[...new Set(tags.length?tags:["music"])],
-      ph:false,
-      _spotify:true,
-      spotifyTrackId:track?.id||null,
-      spotifyArtists:(track?.artists||[]).map(a=>a?.name).filter(Boolean),
-    });
+    const item=_spotifyTrackToItem(track,genreByArtist);
+    if(item) pool.push(item);
   });
 
   return {
@@ -3133,24 +3151,22 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
             if(r.ok){
               const tracks=(r.data?.tracks?.items||[]);
               if(tracks.length){
-                const items=tracks.map(tr=>{
-                  const artist=(tr.artists||[])[0]?.name||"Unknown Artist";
-                  const artistTags=(tr.artists||[])
-                    .map(a=>(a?.name||"").toLowerCase().trim())
-                    .filter(Boolean)
-                    .slice(0,3);
-                  const g=(tr.album?.genres||[])[0]||"Music";
-                  return {
-                    title:`${tr.name||"Untitled"} — ${artist}`,
-                    tags:[...new Set(["music",...artistTags])],
-                    genre:g||"Music",
-                    _cat:"music",
-                    _spotify:true,
-                    spotifyTrackId:tr.id||null,
-                    spotifyArtists:(tr.artists||[]).map(a=>a?.name).filter(Boolean),
-                    year:(tr.album?.release_date||"").slice(0,4)||null,
-                  };
-                });
+                const artistIds=[...new Set(tracks.flatMap(tr=>(tr.artists||[]).map(a=>a?.id).filter(Boolean)))];
+                const genreByArtist={};
+                for(let i=0;i<artistIds.length;i+=50){
+                  const chunk=artistIds.slice(i,i+50);
+                  const ar=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
+                  if(!ar.ok) continue;
+                  (ar.data?.artists||[]).forEach(a=>{
+                    if(a?.id) genreByArtist[a.id]=_spotifyGenreTags(a.genres||[]);
+                  });
+                }
+                const items=tracks
+                  .map(tr=>{
+                    const item=_spotifyTrackToItem(tr,genreByArtist);
+                    return item?{...item,_cat:"music"}:null;
+                  })
+                  .filter(Boolean);
                 setResults(items);
                 setOmdbError("");
               }
@@ -5234,6 +5250,14 @@ function _normalizeWatchlistItems(d){
     return x||null;
   }).filter(Boolean);
 }
+function _normalizeSavedMusicItems(d){
+  const raw=d.savedMusic||d.savedTracks||d.savedPlaylistItems||null;
+  if(!Array.isArray(raw)) return [];
+  return raw.map(x=>{
+    if(typeof x==="string") return {title:x,category:"music"};
+    return x||null;
+  }).filter(Boolean);
+}
 async function _fetchImageDataUrl(url){
   if(!url) return null;
   try{
@@ -5380,6 +5404,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const sanitizePool=(arr)=>{
     const seen=new Set();
     return (arr||[]).filter(it=>{
+      if(cat==="music" && !it?.spotifyTrackId) return false;
       const key=movieKey(it);
       const titleKey=normTitle(it.title);
       const yearKey=(it.year||"").toString().slice(0,4);
@@ -5475,7 +5500,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const saved=data.discoverQueues?.[cat];
     if(saved&&saved.length&&data.discoverDate===today){
       const cleaned=sanitizePool(saved);
-      return cat==="movies"?buildMovieQueue(cleaned,cleaned):cleaned;
+      if(cleaned.length) return cat==="movies"?buildMovieQueue(cleaned,cleaned):cleaned;
     }
     const fresh=buildFreshPool();
     return cat==="movies"?buildMovieQueue(fresh,[]):fresh;
@@ -5499,7 +5524,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
   const interactedMap=data.discoverInteractions||{};
   const watchlist=watchlistAll;
   const isWatchlisted=!!watchlist.find(w=>(w.imdbID||w.title||"").toLowerCase()===likedKey);
+  const isSavedMusic=!!(data.savedMusic||[]).find(s=>((s.spotifyTrackId||"").toLowerCase()===((displayItem?.spotifyTrackId||"").toLowerCase())||(s.spotifyUri&&displayItem?.spotifyUri&&s.spotifyUri===displayItem.spotifyUri)||(normTitle(s.title||"")===normTitle(displayItem?.title||""))));
   const isLogged=!!(data.logs||[]).find(l=>l.category==="movies"&&((l.imdbID&&displayItem?.imdbID&&l.imdbID===displayItem.imdbID)||((l.title||"").toLowerCase()===(displayItem?.title||"").toLowerCase())));
+  const isLoggedMusic=!!(data.logs||[]).find(l=>l.category==="music"&&(((l.spotifyTrackId||"").toLowerCase()===((displayItem?.spotifyTrackId||"").toLowerCase()))||((l.spotifyUri||"")===(displayItem?.spotifyUri||""))||(normTitle(l.title||"")===normTitle(displayItem?.title||""))));
   const [reminderMovie,setReminderMovie]=useState(null);
   const [reminderAt,setReminderAt]=useState(()=>{
     const d=new Date();
@@ -5938,6 +5965,82 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       });
     }
   };
+  const handleMusicLog=()=>{
+    if(cat!=="music"||!displayItem) return;
+    const key=movieKey(displayItem);
+    markInteracted(key);
+    onOpenMovieLog&&onOpenMovieLog(displayItem);
+  };
+  const handleMusicLike=()=>{
+    if(cat!=="music"||!displayItem) return;
+    const key=movieKey(displayItem);
+    if(!key) return;
+    markInteracted(key);
+    const nextLiked={...(data.likedSuggestions||{})};
+    let nextSeed=[...(data.tasteSeed||[])];
+    if(nextLiked[key]){
+      delete nextLiked[key];
+      delete nextLiked[normTitle(displayItem.title||"")];
+      nextSeed=nextSeed.filter(s=>!(((s.spotifyTrackId||s.spotifyUri||s.title||"").toLowerCase()===((displayItem.spotifyTrackId||displayItem.spotifyUri||displayItem.title||"").toLowerCase()))&&s.signal==="like"));
+    }else{
+      nextLiked[key]=true;
+      nextSeed.push({
+        title:displayItem.title,
+        category:"music",
+        tags:displayItem.tags||[],
+        genre:displayItem.genre||"Music",
+        signal:"like",
+        scoreWeight:1.35,
+        spotifyTrackId:displayItem.spotifyTrackId||null,
+        spotifyUri:displayItem.spotifyUri||null,
+        spotifyUrl:displayItem.spotifyUrl||null,
+        savedAt:new Date().toISOString(),
+      });
+    }
+    onChange("__batch__",{
+      likedSuggestions:nextLiked,
+      tasteSeed:nextSeed,
+    });
+  };
+  const handleSaveMusic=()=>{
+    if(cat!=="music"||!displayItem) return;
+    const key=movieKey(displayItem);
+    if(!key) return;
+    markInteracted(key);
+    const isSame=(s)=>(
+      ((s.spotifyTrackId||"").toLowerCase()===((displayItem.spotifyTrackId||"").toLowerCase())) ||
+      (!!s.spotifyUri && !!displayItem.spotifyUri && s.spotifyUri===displayItem.spotifyUri) ||
+      (normTitle(s.title||"")===normTitle(displayItem.title||""))
+    );
+    const existing=[...(data.savedMusic||[])];
+    const has=existing.some(isSame);
+    const next=has
+      ?existing.filter(s=>!isSame(s))
+      :[...existing,{...displayItem,savedAt:new Date().toISOString()}];
+    onChange("savedMusic",next);
+  };
+  const handleMusicPlay=()=>{
+    if(cat!=="music"||!displayItem) return;
+    const webPlaybackUri=(displayItem.spotifyUri||"").trim();
+    const previewUrl=(displayItem.previewUrl||"").trim();
+    const openUrl=(displayItem.spotifyUrl||"").trim();
+    try{
+      if(webPlaybackUri){
+        const slug=webPlaybackUri.startsWith("spotify:track:")?webPlaybackUri.split(":").pop():"";
+        if(slug){
+          window.open(`https://open.spotify.com/track/${slug}`,"_blank","noopener,noreferrer");
+          return;
+        }
+      }
+      if(previewUrl){
+        window.open(previewUrl,"_blank","noopener,noreferrer");
+        return;
+      }
+      if(openUrl){
+        window.open(openUrl,"_blank","noopener,noreferrer");
+      }
+    }catch(_){}
+  };
   const ActionBtn=({onClick,active,children,title})=>(
     <button onClick={onClick} title={title} disabled={actionBusy}
       style={{
@@ -6037,6 +6140,16 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
                       Director: <span style={{color:th.text,opacity:0.88}}>{displayItem.director}</span>
                     </div>
                   )}
+                  {cat==="music"&&displayItem.spotifyArtists?.length>0&&(
+                    <div style={{fontSize:11,color:th.sub,marginTop:3}}>
+                      Artist: <span style={{color:th.text,opacity:0.88}}>{displayItem.spotifyArtists.join(", ")}</span>
+                    </div>
+                  )}
+                  {cat==="music"&&displayItem.albumName&&(
+                    <div style={{fontSize:11,color:th.sub,marginTop:2}}>
+                      Album: <span style={{color:th.text,opacity:0.88}}>{displayItem.albumName}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Plot */}
@@ -6110,7 +6223,45 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
               Daily generate limit reached.
             </div>
           )}
-          {displayItem&&cat!=="movies"&&(
+          {displayItem&&cat==="music"&&(
+            <>
+              <button onClick={handleMusicPlay} style={{
+                width:"100%",padding:"9px",borderRadius:11,background:"transparent",
+                border:`1px solid ${th.border}`,fontSize:12,fontWeight:600,color:th.sub,
+                display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",marginBottom:10
+              }}>
+                ▶ Play
+              </button>
+              <div style={{display:"flex",gap:8,marginTop:2}}>
+                <ActionBtn onClick={()=>runAction(handleMusicLog)} active={isLoggedMusic} title="Log">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={isLoggedMusic?catInfo.color:"none"} stroke={isLoggedMusic?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                  </svg>
+                </ActionBtn>
+                <ActionBtn onClick={()=>runAction(handleMusicLike)} active={isLiked} title="Like">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={isLiked?catInfo.color:"none"} stroke={isLiked?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
+                  </svg>
+                </ActionBtn>
+                <ActionBtn onClick={()=>runAction(handleSaveMusic)} active={isSavedMusic} title="Save">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={isSavedMusic?catInfo.color:"none"} stroke={isSavedMusic?catInfo.color:th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/>
+                  </svg>
+                </ActionBtn>
+                <ActionBtn onClick={canGenerate?handleGenerate:()=>{}} title="Generate">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={th.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
+                  </svg>
+                </ActionBtn>
+              </div>
+              {!canGenerate&&(
+                <div style={{fontSize:11,color:th.sub,marginTop:8,textAlign:"center"}}>
+                  Daily generate limit reached.
+                </div>
+              )}
+            </>
+          )}
+          {displayItem&&cat!=="movies"&&cat!=="music"&&(
             canGenerate?(
               <button onClick={handleGenerate} style={{
                 width:"100%",padding:"11px",borderRadius:13,
@@ -6379,242 +6530,217 @@ function MyStoryPage({data,onFeedback,onUpdateSuggState,onUpdateBarkadaState,onC
 // â”€â”€â”€ SHARE CARD MODAL — renders to canvas for saving as image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
-  const items=_normalizeWatchlistItems(data);
+  const watchItems=_normalizeWatchlistItems(data);
+  const playlistItems=_normalizeSavedMusicItems(data);
   const [selected,setSelected]=useState(null);
+  const [mode,setMode]=useState("home"); // home | watchlist | playlist
+  const [exporting,setExporting]=useState(false);
+  const [exportMsg,setExportMsg]=useState("");
   const [reminderAt,setReminderAt]=useState("");
   const [reminderEditing,setReminderEditing]=useState(false);
-  const [randomPick,setRandomPick]=useState(null);
   const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
   const reminderMap=new Map((data.watchlistReminders||[]).map(r=>[((r.imdbID||r.title||"").toLowerCase()),r]));
-  const detailSwipeStart=useRef(null);
-  useEffect(()=>{
-    setReminderEditing(false);
-    setReminderAt("");
-  },[selected?.imdbID,selected?.title]);
-  const enriched=items.map(i=>{
+  const enrichedWatch=watchItems.map(i=>{
     const key=(i.imdbID||i.title||"").toLowerCase();
     const meta=byKey.get(key)||null;
     return {...meta,...i};
   });
-  useEffect(()=>{
-    if(!selected) return;
-    const key=(selected.imdbID||selected.title||"").toLowerCase();
-    const exists=items.some(w=>((w.imdbID||w.title||"").toLowerCase()===key));
-    if(!exists){
-      setSelected(null);
-      setReminderEditing(false);
-      setReminderAt("");
+
+  const exportPlaylistToSpotify=async()=>{
+    if(exporting) return;
+    const uris=[...new Set((playlistItems||[]).map(i=>i.spotifyUri).filter(Boolean))];
+    if(!uris.length){ setExportMsg("No Spotify tracks to export."); return; }
+    setExporting(true);
+    setExportMsg("Exporting...");
+    try{
+      const me=await spotifyApiGet("me");
+      if(!me.ok){ setExportMsg("Connect Spotify first."); setExporting(false); return; }
+      const userId=me.data?.id;
+      if(!userId){ setExportMsg("Spotify account not available."); setExporting(false); return; }
+      const created=await spotifyApiRequest("POST",`users/${encodeURIComponent(userId)}/playlists`,{
+        name:`Kwento Saved ${new Date().toLocaleDateString()}`,
+        description:"Saved from Kwento Discover",
+        public:false
+      });
+      if(!created.ok||!created.data?.id){ setExportMsg("Could not create playlist."); setExporting(false); return; }
+      const pid=created.data.id;
+      for(let i=0;i<uris.length;i+=100){
+        const chunk=uris.slice(i,i+100);
+        const add=await spotifyApiRequest("POST",`playlists/${encodeURIComponent(pid)}/tracks`,{uris:chunk});
+        if(!add.ok){ setExportMsg("Playlist created, but some tracks failed to add."); setExporting(false); return; }
+      }
+      setExportMsg("Exported to Spotify playlist.");
+    }catch(_){
+      setExportMsg("Export failed.");
     }
-  },[items,selected]);
+    setExporting(false);
+  };
+
   if(selected){
+    const isMusic=selected.category==="music"||!!selected.spotifyTrackId;
     const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
     const selectedReminder=reminderMap.get(selectedKey)||null;
-    const selectedLiked=!!(data.likedSuggestions||{})[selectedKey];
-    const castText=selected.actors&&selected.actors.length
-      ?selected.actors.join(", ")
-      :(selected.actor||"");
-    const openReminderEditor=()=>{
-      const base=selectedReminder?.at?new Date(selectedReminder.at):new Date(Date.now()+24*60*60*1000);
-      base.setSeconds(0,0);
-      if(!selectedReminder?.at) base.setHours(20,0,0,0);
-      setReminderAt(base.toISOString().slice(0,16));
-      setReminderEditing(true);
-    };
     return(
-      <>
-      <div
-        style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}
-        onTouchStart={e=>{
-          const x=e.touches?.[0]?.clientX||0;
-          if(x<=36) detailSwipeStart.current=x;
-          else detailSwipeStart.current=null;
-        }}
-        onTouchEnd={e=>{
-          const sx=detailSwipeStart.current;
-          detailSwipeStart.current=null;
-          if(sx==null) return;
-          const ex=e.changedTouches?.[0]?.clientX||sx;
-          if(ex-sx>80) setSelected(null);
-        }}
-      >
+      <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
         <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-            <button onClick={()=>{setSelected(null);setReminderEditing(false);}} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0}}>← Back</button>
-          </div>
-          <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14,boxShadow:"0 8px 24px rgba(0,0,0,0.22)"}}>
+          <button onClick={()=>setSelected(null)} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+          <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14}}>
             <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-              {selected.poster&&(
-                <img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>
-              )}
+              {!isMusic&&selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>
-                  {selected.title}
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr",gap:7}}>
-                  {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
-                  {selected.imdbRating&&<div style={{fontSize:12,color:th.sub}}>IMDb: <span style={{color:th.text}}>{selected.imdbRating}/10</span></div>}
-                  {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
-                  {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
-                  {castText&&<div style={{fontSize:12,color:th.sub}}>Cast: <span style={{color:th.text}}>{castText}</span></div>}
-                </div>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>{selected.title}</div>
+                {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
+                {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
+                {isMusic&&selected.spotifyArtists?.length>0&&<div style={{fontSize:12,color:th.sub}}>Artist: <span style={{color:th.text}}>{selected.spotifyArtists.join(", ")}</span></div>}
+                {isMusic&&selected.albumName&&<div style={{fontSize:12,color:th.sub}}>Album: <span style={{color:th.text}}>{selected.albumName}</span></div>}
+                {isMusic&&selected.durationMs!=null&&<div style={{fontSize:12,color:th.sub}}>Duration: <span style={{color:th.text}}>{Math.floor(selected.durationMs/60000)}:{String(Math.floor((selected.durationMs%60000)/1000)).padStart(2,"0")}</span></div>}
               </div>
             </div>
-            {selected.plot&&(
-              <div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:4}}>
-                {selected.plot}
+            {!isMusic&&selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14}}>{selected.plot}</div>}
+            {isMusic&&(
+              <div style={{display:"flex",gap:8,marginTop:12}}>
+                {selected.spotifyUrl&&<button onClick={()=>window.open(selected.spotifyUrl,"_blank","noopener,noreferrer")} style={{flex:1,padding:"9px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Open in Spotify</button>}
               </div>
             )}
-            <div style={{display:"flex",gap:8,marginTop:12}}>
-              <button onClick={()=>{
-                onOpenMovieLog&&onOpenMovieLog(selected);
-              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                </svg>
-              </button>
-              <button onClick={()=>{
-                const next={...(data.likedSuggestions||{})};
-                let nextSeed=[...(data.tasteSeed||[])];
-                if(next[selectedKey]) delete next[selectedKey];
-                else next[selectedKey]=true;
-                if(next[selectedKey]){
-                  if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===selectedKey&&s.signal==="like"))){
-                    nextSeed.push({
-                      title:selected.title,
-                      imdbID:selected.imdbID||null,
-                      category:"movies",
-                      tags:selected.tags||[],
-                      genre:selected.genre||null,
-                      signal:"like",
-                      scoreWeight:1.35,
-                      savedAt:new Date().toISOString(),
-                    });
-                  }
-                } else {
-                  nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===selectedKey)&&s.signal==="like"));
-                }
-                onChange&&onChange("__batch__",{likedSuggestions:next,tasteSeed:nextSeed});
-              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:selectedLiked?`${th.accent}22`:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={selectedLiked?th.accent:"none"} stroke={selectedLiked?th.accent:th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
-                </svg>
-              </button>
-            </div>
-            {selectedReminder?.at&&(
-              <div style={{marginTop:22,paddingTop:10,fontSize:12,color:th.sub,opacity:0.9,fontStyle:"italic",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-                <span>Reminder set for {new Date(selectedReminder.at).toLocaleString()}</span>
-                <button onClick={openReminderEditor} style={{background:"none",border:"none",color:th.accent,textDecoration:"underline",fontSize:12,cursor:"pointer",padding:0}}>Edit</button>
-              </div>
-            )}
-            {!selectedReminder?.at&&(
-              <div style={{marginTop:22,paddingTop:10,display:"flex",justifyContent:"flex-start"}}>
-                <button onClick={openReminderEditor} style={{background:"none",border:`1px solid ${th.border}`,borderRadius:999,padding:"7px 11px",fontSize:11,color:th.sub,cursor:"pointer"}}>
-                  Set reminder
-                </button>
-              </div>
-            )}
-            {reminderEditing&&(
-              <div style={{marginTop:10,paddingTop:8,borderTop:`1px dashed ${th.border}`}}>
-                <input type="datetime-local" value={reminderAt} onChange={e=>setReminderAt(e.target.value)}
-                  style={{width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:th.bg,color:th.text,marginBottom:8}}/>
-                <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>setReminderEditing(false)} style={{flex:1,padding:"9px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Cancel</button>
-                  <button onClick={()=>{
-                    const atIso=reminderAt?new Date(reminderAt).toISOString():null;
-                    if(!atIso) return;
-                    const key=(selected.imdbID||selected.title||"").toLowerCase();
-                    const clean=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
-                    const next=[...clean,{
-                      id:selectedReminder?.id||Date.now()+"_"+key,
-                      title:selected.title,
-                      imdbID:selected.imdbID||null,
-                      poster:selected.poster||null,
-                      at:atIso,
-                      createdAt:selectedReminder?.createdAt||new Date().toISOString(),
-                      sentAt:null,
-                    }];
-                    onChange&&onChange("watchlistReminders",next);
-                    setReminderEditing(false);
-                  }} style={{flex:1,padding:"9px",borderRadius:10,border:"none",background:th.accent,color:"#fff",fontWeight:700,cursor:"pointer"}}>Save</button>
+            {!isMusic&&(
+              <>
+                <div style={{display:"flex",gap:8,marginTop:12}}>
+                  <button onClick={()=>onOpenMovieLog&&onOpenMovieLog(selected)} style={{flex:1,padding:"9px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Log</button>
                 </div>
-                {selectedReminder&&(
-                  <button onClick={()=>{
-                    const key=(selected.imdbID||selected.title||"").toLowerCase();
-                    const next=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
-                    onChange&&onChange("watchlistReminders",next);
-                    setReminderEditing(false);
-                  }} style={{marginTop:8,width:"100%",padding:"9px",borderRadius:10,border:`1px solid #ef444466`,background:"transparent",color:"#ef4444",cursor:"pointer"}}>
-                    Remove reminder
-                  </button>
+                {selectedReminder?.at&&(
+                  <div style={{marginTop:14,fontSize:12,color:th.sub,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span>Reminder: {new Date(selectedReminder.at).toLocaleString()}</span>
+                    <button onClick={()=>{
+                      const base=new Date(selectedReminder.at);
+                      base.setSeconds(0,0);
+                      setReminderAt(base.toISOString().slice(0,16));
+                      setReminderEditing(true);
+                    }} style={{background:"none",border:"none",color:th.accent,textDecoration:"underline",fontSize:12,cursor:"pointer",padding:0}}>Edit</button>
+                  </div>
                 )}
-              </div>
+                {!selectedReminder?.at&&(
+                  <div style={{marginTop:14}}>
+                    <button onClick={()=>{
+                      const base=new Date(Date.now()+24*60*60*1000); base.setHours(20,0,0,0);
+                      setReminderAt(base.toISOString().slice(0,16));
+                      setReminderEditing(true);
+                    }} style={{padding:"7px 11px",borderRadius:999,border:`1px solid ${th.border}`,background:"none",fontSize:11,color:th.sub,cursor:"pointer"}}>Set reminder</button>
+                  </div>
+                )}
+                {reminderEditing&&(
+                  <div style={{marginTop:10,paddingTop:8,borderTop:`1px dashed ${th.border}`}}>
+                    <input type="datetime-local" value={reminderAt} onChange={e=>setReminderAt(e.target.value)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1px solid ${th.border}`,background:th.bg,color:th.text,marginBottom:8}}/>
+                    <div style={{display:"flex",gap:8}}>
+                      <button onClick={()=>setReminderEditing(false)} style={{flex:1,padding:"9px",borderRadius:10,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Cancel</button>
+                      <button onClick={()=>{
+                        const atIso=reminderAt?new Date(reminderAt).toISOString():null;
+                        if(!atIso) return;
+                        const key=(selected.imdbID||selected.title||"").toLowerCase();
+                        const clean=(data.watchlistReminders||[]).filter(r=>((r.imdbID||r.title||"").toLowerCase()!==key));
+                        const next=[...clean,{id:Date.now()+"_"+key,title:selected.title,imdbID:selected.imdbID||null,poster:selected.poster||null,at:atIso,createdAt:new Date().toISOString(),sentAt:null}];
+                        onChange&&onChange("watchlistReminders",next);
+                        setReminderEditing(false);
+                      }} style={{flex:1,padding:"9px",borderRadius:10,border:"none",background:th.accent,color:"#fff",fontWeight:700,cursor:"pointer"}}>Save</button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
-      </>
     );
   }
+
+  const sectionHead=(title,onShowMore,canShowMore,extraBtn)=>(
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1}}>{title}</div>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        {extraBtn}
+        {canShowMore&&<button onClick={onShowMore} style={{background:"none",border:"none",color:th.accent,fontSize:11,fontWeight:700,cursor:"pointer",padding:0}}>Show more</button>}
+      </div>
+    </div>
+  );
+
+  const watchPreview=enrichedWatch.filter(w=>w.poster||w.title).slice(0,4);
+  const playlistPreview=playlistItems.slice(0,4);
+  const inWatchGrid=mode==="watchlist";
+  const inPlaylistGrid=mode==="playlist";
+
   return(
     <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
       <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Watchlist</h2>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Save</h2>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
         </div>
-        {enriched.length?(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-            {enriched.map((w,i)=>(
-              <button key={(w.imdbID||w.title||"w")+i} onClick={()=>setSelected(w)}
-                style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                {w.poster?(
-                  <img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                ):(
-                  <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>
-                )}
-              </button>
-            ))}
-          </div>
-        ):(
-          <div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>
+        {mode!=="home"&&(
+          <button onClick={()=>setMode("home")} style={{background:"none",border:"none",fontSize:14,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
         )}
-      </div>
-      {randomPick&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:269,display:"flex",alignItems:"center",justifyContent:"center",padding:18}} onClick={e=>{if(e.target===e.currentTarget)setRandomPick(null);}}>
-          <div onClick={()=>{setSelected(randomPick);setRandomPick(null);}} style={{width:"min(80vw, 304px)",aspectRatio:"2 / 3",borderRadius:20,padding:10,background:th.card,border:`1px solid ${th.border}`,boxShadow:"0 14px 32px rgba(0,0,0,0.45)",cursor:"pointer"}}>
-            <div style={{width:"100%",height:"100%",borderRadius:14,overflow:"hidden",position:"relative"}}>
-              {randomPick.poster?(
-                <img src={randomPick.poster} alt={randomPick.title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-              ):(
-                <div style={{width:"100%",height:"100%",background:th.card}}/>
-              )}
-              <div style={{position:"absolute",left:0,right:0,bottom:0,padding:"52px 12px 12px",background:"linear-gradient(to top, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0) 100%)"}}>
-                <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,lineHeight:1.08,fontWeight:700,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,0.55)"}}>
-                  {randomPick.title}
+
+        {mode==="home"&&(
+          <>
+            <div style={{marginBottom:18}}>
+              {sectionHead("Watchlist",()=>setMode("watchlist"),enrichedWatch.length>4,null)}
+              {watchPreview.length?(
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+                  {watchPreview.map((w,i)=>(
+                    <button key={(w.imdbID||w.title||"wp")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                      {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{w.title}</div>}
+                    </button>
+                  ))}
                 </div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,0.9)",marginTop:6,lineHeight:1.25,textShadow:"0 1px 6px rgba(0,0,0,0.5)"}}>
-                  {[randomPick.year,randomPick.genre].filter(Boolean).join(" · ")}
-                </div>
-              </div>
+              ):<div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>}
             </div>
-          </div>
-        </div>
-      )}
-      <div style={{position:"fixed",left:"50%",bottom:"max(84px, calc(env(safe-area-inset-bottom) + 72px))",transform:"translateX(-50%)",zIndex:268}}>
-        <button onClick={()=>{
-          const today=todayKey();
-          const used=(data.watchlistRollDate===today?(data.watchlistRollCount||0):0);
-          const canRoll=data.betaMode||used<5;
-          if(!canRoll||!enriched.length) return;
-          const pick=enriched[Math.floor(Math.random()*enriched.length)];
-          setRandomPick(pick);
-          onChange&&onChange("__batch__",{
-            watchlistRollDate:today,
-            watchlistRollCount:used+1
-          });
-        }} style={{width:68,height:68,borderRadius:999,border:`1px solid ${th.border}`,background:`linear-gradient(160deg,${th.accent}22 0%, ${th.card} 100%)`,boxShadow:"0 12px 30px rgba(0,0,0,0.35)",display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={th.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.4" fill={th.accent}/><circle cx="15" cy="15" r="1.4" fill={th.accent}/><circle cx="15" cy="9" r="1.4" fill={th.accent}/><circle cx="9" cy="15" r="1.4" fill={th.accent}/></svg>
-        </button>
+
+            <div>
+              {sectionHead("Playlist",()=>setMode("playlist"),playlistItems.length>4,null)}
+              {playlistPreview.length?(
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+                  {playlistPreview.map((m,i)=>(
+                    <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"pp")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                      {m.poster?<img src={m.poster} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
+                    </button>
+                  ))}
+                </div>
+              ):<div style={{fontSize:13,color:th.sub}}>No saved songs yet.</div>}
+              {exportMsg&&<div style={{fontSize:11,color:th.sub,marginTop:6}}>{exportMsg}</div>}
+            </div>
+          </>
+        )}
+
+        {inWatchGrid&&(
+          enrichedWatch.length?(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {enrichedWatch.map((w,i)=>(
+                <button key={(w.imdbID||w.title||"wg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{w.title}</div>}
+                </button>
+              ))}
+            </div>
+          ):<div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>
+        )}
+
+        {inPlaylistGrid&&(
+          <>
+            <div style={{display:"flex",justifyContent:"flex-end",marginBottom:8}}>
+              <button onClick={exportPlaylistToSpotify} disabled={exporting||!playlistItems.length} style={{background:"none",border:`1px solid ${th.border}`,borderRadius:999,padding:"5px 11px",fontSize:11,color:exporting?th.sub:th.accent,cursor:(exporting||!playlistItems.length)?"default":"pointer",opacity:(exporting||!playlistItems.length)?0.6:1}}>
+                {exporting?"Exporting...":"Export to Spotify"}
+              </button>
+            </div>
+            {playlistItems.length?(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(1,minmax(0,1fr))",gap:8}}>
+                {playlistItems.map((m,i)=>(
+                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"pg")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${th.border}`,background:th.card,cursor:"pointer",textAlign:"left"}}>
+                    <div style={{fontSize:13,color:th.text,fontWeight:600,lineHeight:1.4}}>{m.title}</div>
+                    {m.spotifyArtists?.length>0&&<div style={{fontSize:11,color:th.sub,marginTop:2}}>{m.spotifyArtists.join(", ")}</div>}
+                  </button>
+                ))}
+              </div>
+            ):<div style={{fontSize:13,color:th.sub}}>No saved songs yet.</div>}
+            {exportMsg&&<div style={{fontSize:11,color:th.sub,marginTop:6}}>{exportMsg}</div>}
+          </>
+        )}
       </div>
     </div>
   );
@@ -6632,39 +6758,78 @@ function LikedPage({data,onClose}){
     return t?(y?`${t}|${y}`:t):"";
   };
   const likedKeys=new Set(Object.entries(data.likedSuggestions||{}).filter(([,v])=>!!v).map(([k])=>(k||"").toLowerCase()));
-  const byKey=new Map();
+  const movieByKey=new Map();
   (data.libraryMovies||[]).forEach(m=>{
     const k1=(m.imdbID||"").toLowerCase();
     const k2=(m.title||"").toLowerCase();
     const k3=normTitle(m.title||"");
     const y=(m.year||"").toString().slice(0,4);
     const k4=k3?(y?`${k3}|${y}`:k3):"";
-    [k1,k2,k3,k4,movieKey(m)].filter(Boolean).forEach(k=>{ if(!byKey.has(k)) byKey.set(k,m); });
+    [k1,k2,k3,k4,movieKey(m)].filter(Boolean).forEach(k=>{ if(!movieByKey.has(k)) movieByKey.set(k,m); });
   });
-  const items=Array.from(likedKeys).map(k=>byKey.get(k)||{title:k}).filter(Boolean);
+  (data.logs||[]).filter(l=>l.category==="movies").forEach(l=>{
+    const k1=(l.imdbID||"").toLowerCase();
+    const k2=(l.title||"").toLowerCase();
+    const k3=normTitle(l.title||"");
+    const y=(l.year||"").toString().slice(0,4);
+    const k4=k3?(y?`${k3}|${y}`:k3):"";
+    [k1,k2,k3,k4,movieKey(l)].filter(Boolean).forEach(k=>{ if(!movieByKey.has(k)) movieByKey.set(k,l); });
+  });
+  const musicByKey=new Map();
+  (data.spotifyMusicPool||[]).forEach(m=>{
+    const baseTitle=(m.title||"").split(" — ")[0]||"";
+    const keys=[(m.spotifyTrackId||"").toLowerCase(),(m.spotifyUri||"").toLowerCase(),normTitle(m.title||""),normTitle(baseTitle),(m.title||"").toLowerCase(),baseTitle.toLowerCase()].filter(Boolean);
+    keys.forEach(k=>{ if(!musicByKey.has(k)) musicByKey.set(k,m); });
+  });
+  (data.logs||[]).filter(l=>l.category==="music").forEach(l=>{
+    const baseTitle=(l.title||"").split(" — ")[0]||"";
+    const keys=[(l.spotifyTrackId||"").toLowerCase(),(l.spotifyUri||"").toLowerCase(),normTitle(l.title||""),normTitle(baseTitle),(l.title||"").toLowerCase(),baseTitle.toLowerCase()].filter(Boolean);
+    keys.forEach(k=>{ if(!musicByKey.has(k)) musicByKey.set(k,l); });
+  });
+  const movieItems=[], musicItems=[];
+  Array.from(likedKeys).forEach(k=>{
+    const m=movieByKey.get(k);
+    if(m){ movieItems.push({...m,category:"movies"}); return; }
+    const s=musicByKey.get(k);
+    if(s){ musicItems.push({...s,category:"music"}); return; }
+  });
   const [selected,setSelected]=useState(null);
-  const [showAll,setShowAll]=useState(false);
+  const [showAllMovies,setShowAllMovies]=useState(false);
+  const [showAllMusic,setShowAllMusic]=useState(false);
   if(selected){
+    const isMusic=selected.category==="music";
     return(
       <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
         <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
           <button onClick={()=>setSelected(null)} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
           <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14}}>
             <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
+              {!isMusic&&selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>{selected.title}</div>
                 {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
                 {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
-                {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                {!isMusic&&selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                {isMusic&&selected.spotifyArtists?.length>0&&<div style={{fontSize:12,color:th.sub}}>Artist: <span style={{color:th.text}}>{selected.spotifyArtists.join(", ")}</span></div>}
+                {isMusic&&selected.albumName&&<div style={{fontSize:12,color:th.sub}}>Album: <span style={{color:th.text}}>{selected.albumName}</span></div>}
               </div>
             </div>
-            {selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
+            {!isMusic&&selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
           </div>
         </div>
       </div>
     );
   }
+  const sectionTitleStyle={fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:7};
+  const sectionHead=(title,onShowMore,canShowMore)=>(
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={sectionTitleStyle}>{title}</div>
+      {canShowMore&&<button onClick={onShowMore} style={{background:"none",border:"none",color:th.accent,fontSize:11,fontWeight:700,cursor:"pointer",padding:0}}>Show more</button>}
+    </div>
+  );
+  const musicCover=m=>m?.poster||m?.albumImage||m?.albumImages?.[0]?.url||null;
+  const moviePreview=movieItems.filter(m=>!!m?.poster).slice(0,4);
+  const musicPreview=musicItems.filter(m=>!!musicCover(m)).slice(0,4);
   return(
     <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
       <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -6672,38 +6837,58 @@ function LikedPage({data,onClose}){
           <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Likes</h2>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
         </div>
-        {items.length?(
-          !showAll?(
-            <div>
-              <div style={{fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>Movies</div>
+
+        <div style={{marginBottom:16}}>
+          {sectionHead("Movies",()=>setShowAllMovies(true),movieItems.length>4 && !showAllMovies)}
+          {movieItems.length?(
+            !showAllMovies?(
               <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
-                {items.slice(0,4).map((w,i)=>(
-                  <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
+                {moviePreview.map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"lm")+i} onClick={()=>setSelected(w)}
                     style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
-                    {w.poster?<img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>:<div style={{width:76,height:114,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center",borderRadius:10,border:`1px solid ${th.border}`,background:th.card}}>{w.title}</div>}
+                    <img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>
                   </button>
                 ))}
-                {items.length>4&&(
-                  <button onClick={()=>setShowAll(true)}
-                    style={{width:76,height:114,flex:"0 0 auto",borderRadius:10,border:`1px solid ${th.border}`,background:th.card,color:th.accent,cursor:"pointer",fontSize:11,fontWeight:700}}>
-                    Show more
-                  </button>
-                )}
               </div>
-            </div>
-          ):(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-              {items.map((w,i)=>(
-                <button key={(w.imdbID||w.title||"l")+i} onClick={()=>setSelected(w)}
-                  style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
-                </button>
-              ))}
-            </div>
-          )
-        ):(
-          <div style={{fontSize:13,color:th.sub}}>No liked movies yet.</div>
-        )}
+            ):(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+                {movieItems.map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"lmg")+i} onClick={()=>setSelected(w)}
+                    style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                    {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+                  </button>
+                ))}
+              </div>
+            )
+          ):<div style={{fontSize:13,color:th.sub}}>No liked movies yet.</div>}
+          {!showAllMovies && movieItems.length>0 && moviePreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked movie posters yet.</div>}
+        </div>
+
+        <div>
+          {sectionHead("Music",()=>setShowAllMusic(true),musicItems.length>4 && !showAllMusic)}
+          {musicItems.length?(
+            !showAllMusic?(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+                {musicPreview.map((m,i)=>(
+                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"ls")+i} onClick={()=>setSelected({...m,category:"music"})}
+                    style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                    <img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  </button>
+                ))}
+              </div>
+            ):(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+                {musicItems.map((m,i)=>(
+                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"lss")+i} onClick={()=>setSelected({...m,category:"music"})}
+                    style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                    {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
+                  </button>
+                ))}
+              </div>
+            )
+          ):<div style={{fontSize:13,color:th.sub}}>No liked songs yet.</div>}
+          {!showAllMusic && musicItems.length>0 && musicPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked song covers yet.</div>}
+        </div>
       </div>
     </div>
   );
@@ -6711,22 +6896,48 @@ function LikedPage({data,onClose}){
 
 function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
   const th=THEMES[data.theme];
-  const logs=(data.logs||[]).filter(l=>l.category==="movies");
+  const movieLogs=(data.logs||[]).filter(l=>l.category==="movies");
+  const musicLogs=(data.logs||[]).filter(l=>l.category==="music");
   const byKey=new Map((data.libraryMovies||[]).map(m=>[((m.imdbID||m.title||"").toLowerCase()),m]));
-  const seen=new Set();
-  const items=[];
-  logs.forEach(l=>{
+  const seenMovies=new Set();
+  const movieItems=[];
+  movieLogs.forEach(l=>{
     const key=(l.imdbID||l.title||"").toLowerCase();
     const norm=(l.title||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
     const dedupeKey=key||norm;
-    if(!dedupeKey||seen.has(dedupeKey)) return;
-    seen.add(dedupeKey);
-    items.push({...byKey.get(key),...l});
+    if(!dedupeKey||seenMovies.has(dedupeKey)) return;
+    seenMovies.add(dedupeKey);
+    movieItems.push({...byKey.get(key),...l,category:"movies"});
+  });
+  const seenMusic=new Set();
+  const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+  const musicPoolByKey=new Map();
+  (data.spotifyMusicPool||[]).forEach(m=>{
+    const baseTitle=(m.title||"").split(" — ")[0]||"";
+    const keys=[(m.spotifyTrackId||"").toLowerCase(),(m.spotifyUri||"").toLowerCase(),normTitle(m.title||""),normTitle(baseTitle),(m.title||"").toLowerCase(),baseTitle.toLowerCase()].filter(Boolean);
+    keys.forEach(k=>{ if(!musicPoolByKey.has(k)) musicPoolByKey.set(k,m); });
+  });
+  const musicItems=[];
+  musicLogs.forEach(l=>{
+    const key=(l.spotifyTrackId||l.spotifyUri||l.title||"").toLowerCase();
+    if(!key||seenMusic.has(key)) return;
+    seenMusic.add(key);
+    const baseTitle=(l.title||"").split(" — ")[0]||"";
+    const fromPool=
+      musicPoolByKey.get((l.spotifyTrackId||"").toLowerCase())||
+      musicPoolByKey.get((l.spotifyUri||"").toLowerCase())||
+      musicPoolByKey.get(normTitle(l.title||""))||
+      musicPoolByKey.get(normTitle(baseTitle))||
+      musicPoolByKey.get((l.title||"").toLowerCase())||
+      musicPoolByKey.get(baseTitle.toLowerCase())||
+      null;
+    musicItems.push({...fromPool,...l,category:"music"});
   });
   const [selected,setSelected]=useState(null);
+  const [showAllMovies,setShowAllMovies]=useState(false);
+  const [showAllMusic,setShowAllMusic]=useState(false);
   if(selected){
-    const selectedKey=(selected.imdbID||selected.title||"").toLowerCase();
-    const selectedLiked=!!(data.likedSuggestions||{})[selectedKey];
+    const isMusic=selected.category==="music";
     const loggedDate=selected.customDate||((selected.date||"").split("T")[0]||"");
     return(
       <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
@@ -6734,78 +6945,95 @@ function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
           <button onClick={()=>setSelected(null)} style={{background:"none",border:"none",fontSize:15,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
           <div style={{border:`1px solid ${th.border}`,borderRadius:16,background:`linear-gradient(165deg,${th.card} 0%, ${th.bg} 120%)`,padding:14}}>
             <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-              {selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
+              {!isMusic&&selected.poster&&<img src={selected.poster} alt={selected.title} style={{width:110,height:165,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`,flexShrink:0}}/>}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,color:th.text,lineHeight:1.15,marginBottom:8}}>{selected.title}</div>
                 {selected.year&&<div style={{fontSize:12,color:th.sub}}>Year: <span style={{color:th.text}}>{selected.year}</span></div>}
                 {selected.genre&&<div style={{fontSize:12,color:th.sub}}>Genre: <span style={{color:th.text}}>{selected.genre}</span></div>}
-                {selected.director&&<div style={{fontSize:12,color:th.sub}}>Director: <span style={{color:th.text}}>{selected.director}</span></div>}
+                {isMusic&&selected.spotifyArtists?.length>0&&<div style={{fontSize:12,color:th.sub}}>Artist: <span style={{color:th.text}}>{selected.spotifyArtists.join(", ")}</span></div>}
+                {isMusic&&selected.albumName&&<div style={{fontSize:12,color:th.sub}}>Album: <span style={{color:th.text}}>{selected.albumName}</span></div>}
               </div>
             </div>
-            {selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
+            {!isMusic&&selected.plot&&<div style={{fontSize:14,color:th.text,lineHeight:1.68,opacity:0.92,marginTop:14,paddingTop:12,borderTop:`1px dashed ${th.border}`}}>{selected.plot}</div>}
           </div>
           <div style={{marginTop:12,border:`1px solid ${th.border}`,borderRadius:12,background:th.card,padding:"12px 14px"}}>
             <div style={{fontSize:12,color:th.sub,lineHeight:1.5,marginBottom:10}}>
-              {loggedDate?`You logged this on ${new Date(loggedDate+"T12:00:00").toLocaleDateString()}.`:"You logged this movie."}
+              {loggedDate?`You logged this on ${new Date(loggedDate+"T12:00:00").toLocaleDateString()}.`:"You logged this item."}
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{onOpenMovieLog&&onOpenMovieLog(selected);}} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                </svg>
-              </button>
-              <button onClick={()=>{
-                const next={...(data.likedSuggestions||{})};
-                let nextSeed=[...(data.tasteSeed||[])];
-                if(next[selectedKey]) delete next[selectedKey];
-                else next[selectedKey]=true;
-                if(next[selectedKey]){
-                  if(!nextSeed.some(s=>((s.imdbID||s.title||"").toLowerCase()===selectedKey&&s.signal==="like"))){
-                    nextSeed.push({
-                      title:selected.title,
-                      imdbID:selected.imdbID||null,
-                      category:"movies",
-                      tags:selected.tags||[],
-                      genre:selected.genre||null,
-                      signal:"like",
-                      scoreWeight:1.35,
-                      savedAt:new Date().toISOString(),
-                    });
-                  }
-                } else {
-                  nextSeed=nextSeed.filter(s=>!(((s.imdbID||s.title||"").toLowerCase()===selectedKey)&&s.signal==="like"));
-                }
-                onChange&&onChange("__batch__",{likedSuggestions:next,tasteSeed:nextSeed});
-              }} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:selectedLiked?`${th.accent}22`:`${th.bg}66`,color:th.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={selectedLiked?th.accent:"none"} stroke={selectedLiked?th.accent:th.sub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/>
-                </svg>
-              </button>
+              <button onClick={()=>{onOpenMovieLog&&onOpenMovieLog(selected);}} style={{flex:1,padding:"8px 6px",borderRadius:8,border:"none",background:`${th.bg}66`,color:th.sub,cursor:"pointer"}}>Log again</button>
+              {isMusic&&selected.spotifyUrl&&<button onClick={()=>window.open(selected.spotifyUrl,"_blank","noopener,noreferrer")} style={{flex:1,padding:"8px 6px",borderRadius:8,border:`1px solid ${th.border}`,background:"transparent",color:th.sub,cursor:"pointer"}}>Open in Spotify</button>}
             </div>
           </div>
         </div>
       </div>
     );
   }
+  const sectionTitleStyle={fontSize:11,fontWeight:700,color:th.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:7};
+  const sectionHead=(title,onShowMore,canShowMore)=>(
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={sectionTitleStyle}>{title}</div>
+      {canShowMore&&<button onClick={onShowMore} style={{background:"none",border:"none",color:th.accent,fontSize:11,fontWeight:700,cursor:"pointer",padding:0}}>Show more</button>}
+    </div>
+  );
+  const musicCover=m=>m?.poster||m?.albumImage||m?.albumImages?.[0]?.url||null;
+  const watchedPreview=movieItems.filter(m=>!!m?.poster).slice(0,4);
+  const songsPreview=musicItems.filter(m=>!!musicCover(m)).slice(0,4);
   return(
     <div style={{position:"fixed",inset:0,zIndex:260,background:th.grad,color:th.text}}>
       <div style={{maxWidth:500,height:"100%",margin:"0 auto",padding:"18px 20px 24px",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Watched</h2>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:700,margin:0}}>Logged</h2>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
         </div>
-        {items.length?(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-            {items.map((w,i)=>(
-              <button key={(w.imdbID||w.title||"w")+i} onClick={()=>setSelected(w)}
-                style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
-              </button>
-            ))}
-          </div>
-        ):(
-          <div style={{fontSize:13,color:th.sub}}>No watched movies yet.</div>
-        )}
+
+        <div style={{marginBottom:16}}>
+          {sectionHead("Watched",()=>setShowAllMovies(true),movieItems.length>4 && !showAllMovies)}
+          {movieItems.length?(
+            !showAllMovies?(
+              <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2,flexWrap:"nowrap"}}>
+                {watchedPreview.map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"wm")+i} onClick={()=>setSelected(w)} style={{padding:0,border:"none",background:"none",cursor:"pointer",flex:"0 0 auto"}}>
+                    <img src={w.poster} alt={w.title} style={{width:76,height:114,objectFit:"cover",borderRadius:10,border:`1px solid ${th.border}`}}/>
+                  </button>
+                ))}
+              </div>
+            ):(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+                {movieItems.map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"wmg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                    {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+                  </button>
+                ))}
+              </div>
+            )
+          ):<div style={{fontSize:13,color:th.sub}}>No watched movies yet.</div>}
+          {!showAllMovies && movieItems.length>0 && watchedPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No watched movie posters yet.</div>}
+        </div>
+
+        <div>
+          {sectionHead("Songs",()=>setShowAllMusic(true),musicItems.length>4 && !showAllMusic)}
+          {musicItems.length?(
+            !showAllMusic?(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+                {songsPreview.map((m,i)=>(
+                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"sm")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                    <img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  </button>
+                ))}
+              </div>
+            ):(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+                {musicItems.map((m,i)=>(
+                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"smg")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                    {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
+                  </button>
+                ))}
+              </div>
+            )
+          ):<div style={{fontSize:13,color:th.sub}}>No logged songs yet.</div>}
+          {!showAllMusic && musicItems.length>0 && songsPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No logged song covers yet.</div>}
+        </div>
       </div>
     </div>
   );
@@ -9532,6 +9760,8 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       "user-read-email",
       "user-top-read",
       "user-read-recently-played",
+      "playlist-modify-private",
+      "playlist-modify-public",
     ];
     setSpotifyStatus("Redirecting to Spotify...");
     const r=await beginSpotifyAuth(scopes);
@@ -10139,6 +10369,20 @@ function App(){
         d.omdbCleanedAt=new Date().toISOString();
         saveData(d);
       }
+      // One-time migration: clear legacy static music discover queue/state.
+      // Music suggestions are now Spotify-driven only.
+      try{
+        const mk="kwento_music_queue_migrated_v1";
+        if(localStorage.getItem(mk)!=="1"){
+          d.discoverQueues={...(d.discoverQueues||{}),music:[]};
+          d.discoverIndexes={...(d.discoverIndexes||{}),music:0};
+          if(d.discoverCounts && typeof d.discoverCounts==="object"){
+            d.discoverCounts={...d.discoverCounts,music:0};
+          }
+          saveData(d);
+          localStorage.setItem(mk,"1");
+        }
+      }catch(_){}
       // One-time migration: move any photos still in localStorage → IDB
       await migratePhotosToIDB(d);
       // Hydrate IDB photos into state.
@@ -10871,7 +11115,7 @@ function App(){
                 const restored=[...data.logs,log].sort((a,b)=>{const dt=new Date(b.date)-new Date(a.date);return dt!==0?dt:b.id-a.id;});
                 update({logs:restored});
               }} onSave={entry=>setData(d=>({...d,logs:d.logs.map(l=>l.id===entry.id?entry:l)}))} onUpdateData={patch=>setData(prev=>{const next={...prev,...patch};saveData(next);return next;})}/>}
-              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
+              {tab==="mystory"&&<MyStoryPage data={data} onFeedback={handleFeedback} onUpdateSuggState={handleUpdateSuggState} onUpdateBarkadaState={handleUpdateBarkadaState} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat(item?.category||"movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {tab==="profile"&&<ProfilePage data={data} onChange={handleSetting} onStickerOpen={setStickerOpen} stickerOpen={stickerOpen} photosReady={photosReady} onOpenStats={()=>setShowStatsNerdsPage(true)} onOpenWatchlist={()=>setShowWatchlistPage(true)} onOpenLiked={()=>setShowLikedPage(true)} onOpenWatched={()=>setShowWatchedPage(true)}/>}
               {tab==="settings"&&<SettingsPage data={data} onChange={handleSetting} onReset={handleReset} onImport={d=>{setData({...d,__showAvatarPicker:false});}} onShowPatch={()=>setShowPatch(true)} onImportSuccess={cnt=>{setTimelineUnread(n=>n+cnt);setBadgeAnimKey(k=>k+1);}}/>}
               </div>
@@ -10964,7 +11208,7 @@ function App(){
               }} editEntry={editEntry} initialCat={logCat} initialQuery={logPrefill} discoverQuickLog={logFromDiscover}/>}
               {showWatchlistPage&&<WatchlistPage data={data} onClose={()=>setShowWatchlistPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setRemoveWatchOnLogKey((item?.imdbID||item?.title||"").toLowerCase());setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {showLikedPage&&<LikedPage data={data} onClose={()=>setShowLikedPage(false)}/>}
-              {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat("movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
+              {showWatchedPage&&<WatchedMoviesPage data={data} onClose={()=>setShowWatchedPage(false)} onChange={handleSetting} onOpenMovieLog={item=>{setEditEntry(null);setLogCat(item?.category||"movies");setLogPrefill(item?.title||"");setLogFromDiscover(true);setShowLog(true);}}/>}
               {showStatsNerdsPage&&<StatsNerdsPage data={data} onClose={()=>setShowStatsNerdsPage(false)}/>}
               <ThemeAnimations theme={data.theme} modalOpen={showLog||showWatchlistPage||showLikedPage||showWatchedPage||showStatsNerdsPage||tab==="profile"} animationsOff={data.animationsOff||false}/>
             </>
@@ -10981,6 +11225,7 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
 
 
 
