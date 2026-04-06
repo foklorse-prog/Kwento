@@ -2672,6 +2672,7 @@ function _spotifyTrackToItem(track, genreByArtist={}){
     title:`${track.name||"Untitled"} — ${mainArtist}`,
     category:"music",
     genre:((byArtistGenres[0]||"Music")+""),
+    spotifyPrimaryGenre:byArtistGenres[0]||null,
     tags:[...new Set((byArtistGenres.length?byArtistGenres:["music"]).map(_spotifyTagNorm).filter(Boolean))],
     ph:false,
     _spotify:true,
@@ -3213,7 +3214,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   },[query,cat,isEdit,data.libraryMovies,data.spotifyMusicPool]);
 
   const getGenreForCat=(item,category)=>{
-    if(category==="music") return item.genre||"Music";
+    if(category==="music") return item.genre||item.spotifyPrimaryGenre||"Music";
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
     const inLib=(LIBRARY[category]||[]).some(i=>i.title.toLowerCase()===item.title.toLowerCase());
     if(inLib){
@@ -5281,8 +5282,9 @@ function _normalizeSavedMusicItems(d){
   const raw=d.savedMusic||d.savedTracks||d.savedPlaylistItems||null;
   if(!Array.isArray(raw)) return [];
   return raw.map(x=>{
-    if(typeof x==="string") return {title:x,category:"music"};
-    return x||null;
+    if(typeof x==="string") return {title:x,category:"music",genre:"Music"};
+    if(!x) return null;
+    return {...x,category:"music",genre:x.genre||x.spotifyPrimaryGenre||"Music"};
   }).filter(Boolean);
 }
 async function _fetchImageDataUrl(url){
@@ -6026,7 +6028,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         title:displayItem.title,
         category:"music",
         tags:displayItem.tags||[],
-        genre:displayItem.genre||"Music",
+        genre:displayItem.genre||displayItem.spotifyPrimaryGenre||"Music",
         signal:"like",
         scoreWeight:1.35,
         spotifyTrackId:displayItem.spotifyTrackId||null,
@@ -10496,6 +10498,56 @@ function App(){
           }
           saveData(d);
           localStorage.setItem(mk,"1");
+        }
+      }catch(_){}
+      // One-time migration: restore music genres from Spotify metadata when available.
+      try{
+        const mk2="kwento_music_genre_restore_v1";
+        if(localStorage.getItem(mk2)!=="1"){
+          let touched=false;
+          const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
+          const gBy=new Map();
+          (d.spotifyMusicPool||[]).forEach(m=>{
+            const g=m?.genre||m?.spotifyPrimaryGenre||null;
+            if(!g) return;
+            const keys=[
+              (m.spotifyTrackId||"").toLowerCase(),
+              (m.spotifyUri||"").toLowerCase(),
+              normTitle(m.title||""),
+              normTitle((m.title||"").split(" — ")[0]||""),
+            ].filter(Boolean);
+            keys.forEach(k=>{ if(!gBy.has(k)) gBy.set(k,g); });
+          });
+          const findGenre=(x)=>{
+            const keys=[
+              (x.spotifyTrackId||"").toLowerCase(),
+              (x.spotifyUri||"").toLowerCase(),
+              normTitle(x.title||""),
+              normTitle((x.title||"").split(" — ")[0]||""),
+            ].filter(Boolean);
+            for(const k of keys){ if(gBy.has(k)) return gBy.get(k); }
+            return null;
+          };
+          if(Array.isArray(d.savedMusic)){
+            d.savedMusic=d.savedMusic.map(m=>{
+              if(!m) return m;
+              const g=findGenre(m);
+              if(!g || m.genre===g) return {...m,category:"music"};
+              touched=true;
+              return {...m,category:"music",genre:g};
+            });
+          }
+          if(Array.isArray(d.logs)){
+            d.logs=d.logs.map(l=>{
+              if(!l||l.category!=="music") return l;
+              const g=findGenre(l);
+              if(!g || l.genre===g) return l;
+              touched=true;
+              return {...l,genre:g};
+            });
+          }
+          if(touched) saveData(d);
+          localStorage.setItem(mk2,"1");
         }
       }catch(_){}
       // One-time migration: move any photos still in localStorage → IDB
