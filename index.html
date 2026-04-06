@@ -6586,6 +6586,7 @@ function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
   const watchItems=_normalizeWatchlistItems(data);
   const playlistItems=_normalizeSavedMusicItems(data);
   const [selected,setSelected]=useState(null);
+  const [randomPick,setRandomPick]=useState(null);
   const [mode,setMode]=useState("home"); // home | watchlist | playlist
   const [exporting,setExporting]=useState(false);
   const [exportMsg,setExportMsg]=useState("");
@@ -6764,13 +6765,39 @@ function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
 
         {inWatchGrid&&(
           enrichedWatch.length?(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-              {enrichedWatch.map((w,i)=>(
-                <button key={(w.imdbID||w.title||"wg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{w.title}</div>}
-                </button>
-              ))}
-            </div>
+            <>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,paddingBottom:86}}>
+                {enrichedWatch.map((w,i)=>(
+                  <button key={(w.imdbID||w.title||"wg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                    {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{w.title}</div>}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={()=>{
+                  if(!enrichedWatch.length) return;
+                  const pick=enrichedWatch[Math.floor(Math.random()*enrichedWatch.length)];
+                  if(pick) setRandomPick(pick);
+                }}
+                style={{
+                  position:"fixed",left:"50%",transform:"translateX(-50%)",
+                  bottom:22,zIndex:265,width:68,height:68,borderRadius:"50%",
+                  border:`1px solid ${th.accent}55`,
+                  background:`radial-gradient(circle at 30% 25%, ${th.accent}44 0%, ${th.card} 55%, ${th.bg} 100%)`,
+                  color:th.text,boxShadow:`0 12px 30px rgba(0,0,0,.35), 0 0 0 1px ${th.accent}22 inset`,
+                  cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"
+                }}
+                title="Random pick"
+                aria-label="Random pick"
+              >
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={th.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+                  <circle cx="9" cy="9" r="1.2" fill={th.text} stroke="none"></circle>
+                  <circle cx="15" cy="15" r="1.2" fill={th.text} stroke="none"></circle>
+                  <circle cx="9" cy="15" r="1.2" fill={th.text} stroke="none"></circle>
+                </svg>
+              </button>
+            </>
           ):<div style={{fontSize:13,color:th.sub}}>No watchlist items yet.</div>
         )}
 
@@ -6795,6 +6822,33 @@ function WatchlistPage({data,onClose,onChange,onOpenMovieLog}){
           </>
         )}
       </div>
+      {randomPick&&(
+        <div
+          onClick={()=>setRandomPick(null)}
+          style={{position:"fixed",inset:0,zIndex:280,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:"18px"}}
+        >
+          <div
+            onClick={e=>e.stopPropagation()}
+            style={{
+              width:"min(86vw,320px)",
+              borderRadius:22,
+              border:`1px solid ${th.border}`,
+              background:th.card,
+              overflow:"hidden",
+              boxShadow:"0 20px 50px rgba(0,0,0,.45)"
+            }}
+          >
+            <div style={{position:"relative",aspectRatio:"2/3",background:th.bg}}>
+              {randomPick.poster&&<img src={randomPick.poster} alt={randomPick.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
+              <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,0,0,.72) 100%)"}}></div>
+              <div style={{position:"absolute",left:14,right:14,bottom:14,color:"#fff"}}>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:23,fontWeight:700,lineHeight:1.1}}>{randomPick.title}</div>
+                <div style={{marginTop:4,fontSize:12,opacity:.92}}>{[randomPick.year,randomPick.genre].filter(Boolean).join(" • ")}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -6847,8 +6901,7 @@ function LikedPage({data,onClose}){
     if(s){ musicItems.push({...s,category:"music"}); return; }
   });
   const [selected,setSelected]=useState(null);
-  const [showAllMovies,setShowAllMovies]=useState(false);
-  const [showAllMusic,setShowAllMusic]=useState(false);
+  const [mode,setMode]=useState("home");
   if(selected){
     const isMusic=selected.category==="music";
     return(
@@ -6891,10 +6944,9 @@ function LikedPage({data,onClose}){
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
         </div>
 
-        <div style={{marginBottom:16}}>
-          {sectionHead("Movies",()=>setShowAllMovies(true),movieItems.length>4 && !showAllMovies)}
-          {movieItems.length?(
-            !showAllMovies?(
+        {mode==="home"&&<div style={{marginBottom:16}}>
+          {sectionHead("Movies",()=>setMode("movies"),movieItems.length>4 && mode==="home")}
+          {mode==="home"&&movieItems.length?(
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
                 {moviePreview.map((w,i)=>(
                   <button key={(w.imdbID||w.title||"lm")+i} onClick={()=>setSelected(w)}
@@ -6903,24 +6955,13 @@ function LikedPage({data,onClose}){
                   </button>
                 ))}
               </div>
-            ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-                {movieItems.map((w,i)=>(
-                  <button key={(w.imdbID||w.title||"lmg")+i} onClick={()=>setSelected(w)}
-                    style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                    {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
-                  </button>
-                ))}
-              </div>
-            )
           ):<div style={{fontSize:13,color:th.sub}}>No liked movies yet.</div>}
-          {!showAllMovies && movieItems.length>0 && moviePreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked movie posters yet.</div>}
-        </div>
+          {mode==="home" && movieItems.length>0 && moviePreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked movie posters yet.</div>}
+        </div>}
 
-        <div>
-          {sectionHead("Music",()=>setShowAllMusic(true),musicItems.length>4 && !showAllMusic)}
-          {musicItems.length?(
-            !showAllMusic?(
+        {mode==="home"&&<div>
+          {sectionHead("Music",()=>setMode("music"),musicItems.length>4 && mode==="home")}
+          {mode==="home"&&musicItems.length?(
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
                 {musicPreview.map((m,i)=>(
                   <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"ls")+i} onClick={()=>setSelected({...m,category:"music"})}
@@ -6929,19 +6970,36 @@ function LikedPage({data,onClose}){
                   </button>
                 ))}
               </div>
-            ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-                {musicItems.map((m,i)=>(
-                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"lss")+i} onClick={()=>setSelected({...m,category:"music"})}
-                    style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
-                    {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
-                  </button>
-                ))}
-              </div>
-            )
           ):<div style={{fontSize:13,color:th.sub}}>No liked songs yet.</div>}
-          {!showAllMusic && musicItems.length>0 && musicPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked song covers yet.</div>}
-        </div>
+          {mode==="home" && musicItems.length>0 && musicPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No liked song covers yet.</div>}
+        </div>}
+
+        {mode==="movies"&&(
+          <>
+            <button onClick={()=>setMode("home")} style={{background:"none",border:"none",fontSize:14,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {movieItems.map((w,i)=>(
+                <button key={(w.imdbID||w.title||"lmg")+i} onClick={()=>setSelected(w)}
+                  style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {mode==="music"&&(
+          <>
+            <button onClick={()=>setMode("home")} style={{background:"none",border:"none",fontSize:14,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {musicItems.map((m,i)=>(
+                <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"lss")+i} onClick={()=>setSelected({...m,category:"music"})}
+                  style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                  {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -6987,8 +7045,7 @@ function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
     musicItems.push({...fromPool,...l,category:"music"});
   });
   const [selected,setSelected]=useState(null);
-  const [showAllMovies,setShowAllMovies]=useState(false);
-  const [showAllMusic,setShowAllMusic]=useState(false);
+  const [mode,setMode]=useState("home");
   if(selected){
     const isMusic=selected.category==="music";
     const loggedDate=selected.customDate||((selected.date||"").split("T")[0]||"");
@@ -7040,10 +7097,9 @@ function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,color:th.sub,cursor:"pointer",padding:0}}>×</button>
         </div>
 
-        <div style={{marginBottom:16}}>
-          {sectionHead("Watched",()=>setShowAllMovies(true),movieItems.length>4 && !showAllMovies)}
+        {mode==="home"&&<div style={{marginBottom:16}}>
+          {sectionHead("Watched",()=>setMode("watched"),movieItems.length>4 && mode==="home")}
           {movieItems.length?(
-            !showAllMovies?(
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
                 {watchedPreview.map((w,i)=>(
                   <button key={(w.imdbID||w.title||"wm")+i} onClick={()=>setSelected(w)} style={{padding:0,border:"none",background:"none",cursor:"pointer",width:"100%",aspectRatio:"2/3"}}>
@@ -7051,23 +7107,13 @@ function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
                   </button>
                 ))}
               </div>
-            ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-                {movieItems.map((w,i)=>(
-                  <button key={(w.imdbID||w.title||"wmg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
-                    {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
-                  </button>
-                ))}
-              </div>
-            )
           ):<div style={{fontSize:13,color:th.sub}}>No watched movies yet.</div>}
-          {!showAllMovies && movieItems.length>0 && watchedPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No watched movie posters yet.</div>}
-        </div>
+          {movieItems.length>0 && watchedPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No watched movie posters yet.</div>}
+        </div>}
 
-        <div>
-          {sectionHead("Songs",()=>setShowAllMusic(true),musicItems.length>4 && !showAllMusic)}
+        {mode==="home"&&<div>
+          {sectionHead("Songs",()=>setMode("songs"),musicItems.length>4 && mode==="home")}
           {musicItems.length?(
-            !showAllMusic?(
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
                 {songsPreview.map((m,i)=>(
                   <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"sm")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
@@ -7075,18 +7121,34 @@ function WatchedMoviesPage({data,onClose,onChange,onOpenMovieLog}){
                   </button>
                 ))}
               </div>
-            ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
-                {musicItems.map((m,i)=>(
-                  <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"smg")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
-                    {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
-                  </button>
-                ))}
-              </div>
-            )
           ):<div style={{fontSize:13,color:th.sub}}>No logged songs yet.</div>}
-          {!showAllMusic && musicItems.length>0 && songsPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No logged song covers yet.</div>}
-        </div>
+          {musicItems.length>0 && songsPreview.length===0 && <div style={{fontSize:13,color:th.sub}}>No logged song covers yet.</div>}
+        </div>}
+
+        {mode==="watched"&&(
+          <>
+            <button onClick={()=>setMode("home")} style={{background:"none",border:"none",fontSize:14,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {movieItems.map((w,i)=>(
+                <button key={(w.imdbID||w.title||"wmg")+i} onClick={()=>setSelected(w)} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"2/3"}}>
+                  {w.poster?<img src={w.poster} alt={w.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:th.sub,padding:8,textAlign:"center"}}>{w.title}</div>}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {mode==="songs"&&(
+          <>
+            <button onClick={()=>setMode("home")} style={{background:"none",border:"none",fontSize:14,color:th.accent,cursor:"pointer",padding:0,marginBottom:12}}>← Back</button>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+              {musicItems.map((m,i)=>(
+                <button key={(m.spotifyTrackId||m.spotifyUri||m.title||"smg")+i} onClick={()=>setSelected({...m,category:"music"})} style={{padding:0,border:`1px solid ${th.border}`,background:th.card,borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1/1"}}>
+                  {musicCover(m)?<img src={musicCover(m)} alt={m.title} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:th.sub,padding:6,textAlign:"center"}}>{m.title}</div>}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
