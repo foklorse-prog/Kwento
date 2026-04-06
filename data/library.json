@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-06T03:34:16.118Z",
+  "updatedAt": "2026-04-06T06:18:06.138Z",
   "items": [
     {
       "title": "Mid90s",
@@ -33441,6 +33441,2135 @@
       "awards": "Nominated for 1 Oscar. 1 nomination total",
       "omdbType": "movie",
       "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "You Can't Take It with You",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Frank Capra",
+      "actor": "Jean Arthur",
+      "actors": [
+        "Jean Arthur",
+        "James Stewart",
+        "Lionel Barrymore"
+      ],
+      "plot": "The son of a snobbish Wall Street banker becomes engaged to a woman from a good-natured but decidedly eccentric family not realizing that his father is trying to force her family from their home for a real estate development.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWU4Y2I3YzItZWY1MC00ODRhLTljNWYtYmI0NWU0MzNiZmMwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030993",
+      "imdbID": "tt0030993",
+      "imdbRating": 7.8,
+      "imdbVotes": 29299,
+      "runtime": "126 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Russian",
+      "awards": "Won 2 Oscars. 6 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Adventures of Robin Hood",
+      "year": "1938",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Romance"
+      ],
+      "director": "Michael Curtiz, William Keighley",
+      "actor": "Errol Flynn",
+      "actors": [
+        "Errol Flynn",
+        "Olivia de Havilland",
+        "Basil Rathbone"
+      ],
+      "plot": "When Prince John and the Norman Lords begin oppressing the Saxon masses in King Richard's absence in 1190s England, a Saxon lord fights back as the outlaw leader of a resistance movement.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjA3NzFjNmItYTkwZi00NmMyLWFiMDgtMzY4NjY1ODE0NTg1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029843",
+      "imdbID": "tt0029843",
+      "imdbRating": 7.9,
+      "imdbVotes": 55980,
+      "runtime": "102 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 3 Oscars. 11 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Boys Town",
+      "year": "1938",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Family"
+      ],
+      "director": "Norman Taurog",
+      "actor": "Spencer Tracy",
+      "actors": [
+        "Spencer Tracy",
+        "Mickey Rooney",
+        "Henry Hull"
+      ],
+      "plot": "When a death row prisoner tells him he wouldn't have led a life of crime if only he had had one friend as a child, Father Edward Flanagan decides to start a home for young boys.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BN2UyNmM2MjAtYzdmYS00ODNkLWE0NTUtYmRlYzM5OTllYTE4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029942",
+      "imdbID": "tt0029942",
+      "imdbRating": 7.2,
+      "imdbVotes": 6657,
+      "runtime": "96 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Hebrew",
+      "awards": "Won 2 Oscars. 6 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Jezebel",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "William Wyler",
+      "actor": "Bette Davis",
+      "actors": [
+        "Bette Davis",
+        "Henry Fonda",
+        "George Brent"
+      ],
+      "plot": "In 1850s Louisiana, a free-spirited Southern belle loses her fiancé due to her stubborn vanity and pride, and vows to win him back.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGUxZDFiNmUtM2I4Ni00Yjk5LWE3ZmUtZjQ5ZGUyY2JkMmY0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030287",
+      "imdbID": "tt0030287",
+      "imdbRating": 7.4,
+      "imdbVotes": 15819,
+      "runtime": "104 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Won 2 Oscars. 9 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Alexander's Ragtime Band",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Musical"
+      ],
+      "director": "Henry King",
+      "actor": "Tyrone Power",
+      "actors": [
+        "Tyrone Power",
+        "Alice Faye",
+        "Don Ameche"
+      ],
+      "plot": "This send-up of ragtime song and dance begins in 1915 San Francisco when society boy Roger Grant decides to pursue popular rather than serious music.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzczN2NmNmUtNjcyYS00MmVmLThmZDAtYTNiYjE0ODgyOTllXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029852",
+      "imdbID": "tt0029852",
+      "imdbRating": 6.8,
+      "imdbVotes": 2353,
+      "runtime": "106 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Pygmalion",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Anthony Asquith, Leslie Howard",
+      "actor": "Leslie Howard",
+      "actors": [
+        "Leslie Howard",
+        "Wendy Hiller",
+        "Wilfrid Lawson"
+      ],
+      "plot": "A phonetics and diction expert makes a bet that he can teach a cockney flower girl to speak proper English and pass as a lady in high society.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDJjOGE2YjItOWNlYi00MjgzLTllYjYtNzRlOTdlZTIyNmVkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030637",
+      "imdbID": "tt0030637",
+      "imdbRating": 7.7,
+      "imdbVotes": 10214,
+      "runtime": "89 min",
+      "rated": "Approved",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Won 1 Oscar. 4 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Cowboy and the Lady",
+      "year": "1938",
+      "genre": "Western",
+      "genres": [
+        "Western"
+      ],
+      "director": "H.C. Potter, Stuart Heisler, William Wyler",
+      "actor": "Gary Cooper",
+      "actors": [
+        "Gary Cooper",
+        "Merle Oberon",
+        "Patsy Kelly"
+      ],
+      "plot": "A lonely socialite masquerades as a maid and meets an unpretentious, plain-spoken cowboy who is unaware of her true identity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjVjNWNkOWYtZWMxNS00ZGJhLTliYTctOTk1YzA1MzEzMDYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030018",
+      "imdbID": "tt0030018",
+      "imdbRating": 6.5,
+      "imdbVotes": 1865,
+      "runtime": "91 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 2 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Great Waltz",
+      "year": "1938",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Music"
+      ],
+      "director": "Julien Duvivier, Victor Fleming, Josef von Sternberg",
+      "actor": "Luise Rainer",
+      "actors": [
+        "Luise Rainer",
+        "Fernand Gravey",
+        "Miliza Korjus"
+      ],
+      "plot": "In 1845 Vienna, Johann Strauss II (Fernand Gravey) - 'Jonahi' to his friends - would rather write and perform waltzes than anything else, this at a time when a waltz is not considered proper society music. After he is fired from h...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWJlYTZkZmYtNTY2Mi00MGM4LTk0ZjItMmI4YjRlNjA1Y2Q5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030202",
+      "imdbID": "tt0030202",
+      "imdbRating": 6.5,
+      "imdbVotes": 1340,
+      "runtime": "104 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ferdinand the Bull",
+      "year": "1938",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Dick Rickard",
+      "actor": "Don Wilson",
+      "actors": [
+        "Don Wilson",
+        "Walt Disney",
+        "Milt Kahl"
+      ],
+      "plot": "Ferdinand is a quiet, gentle bull who only wants to stop and smell the flowers. After he is stung by a bee, the townspeople believe he is ferocious and take him to the bullfight.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGIwMzY3NTUtMWE1Ni00Zjc1LWE4OWYtYzNlNmFjMWRkNTM1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030128",
+      "imdbID": "tt0030128",
+      "imdbRating": 7.1,
+      "imdbVotes": 3832,
+      "runtime": "8 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Big Broadcast of 1938",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical",
+        "Romance"
+      ],
+      "director": "Mitchell Leisen, James P. Hogan",
+      "actor": "W.C. Fields",
+      "actors": [
+        "W.C. Fields",
+        "Martha Raye",
+        "Dorothy Lamour"
+      ],
+      "plot": "The Bellows family causes comic confusion on an ocean liner, with time out for radio-style musical acts.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGIwNGFlMzQtNGMyYS00MmIzLWI1NDAtN2VhZjc0MTQ3MjRiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029912",
+      "imdbID": "tt0029912",
+      "imdbRating": 6.1,
+      "imdbVotes": 1107,
+      "runtime": "91 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 2 wins total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Merrily We Live",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "director": "Norman Z. McLeod",
+      "actor": "Constance Bennett",
+      "actors": [
+        "Constance Bennett",
+        "Brian Aherne",
+        "Alan Mowbray"
+      ],
+      "plot": "Dizzy society matron Emily Kilbourne has a habit of hiring ex-cons and hobos as servants. Her latest find is a handsome \"tramp\" who shows up at her doorstep and soon ends up in a chauffeur's uniform. He also catches the eye of her...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODJkZTE4MjctM2Y2Ni00YzI2LTgyMzMtY2YzNzYwYWRjYjhlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030442",
+      "imdbID": "tt0030442",
+      "imdbRating": 7.3,
+      "imdbVotes": 2392,
+      "runtime": "95 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 5 Oscars. 1 win & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Algiers",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Romance"
+      ],
+      "director": "John Cromwell",
+      "actor": "Charles Boyer",
+      "actors": [
+        "Charles Boyer",
+        "Hedy Lamarr",
+        "Sigrid Gurie"
+      ],
+      "plot": "A wanted jewel thief ensconced in the Casbah meets a beautiful woman who makes him long for an escape.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzhiMDMzYjAtMDJhNi00M2MzLTk5YmEtZjY5YTdkMDdlYzE1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029855",
+      "imdbID": "tt0029855",
+      "imdbRating": 6.6,
+      "imdbVotes": 3341,
+      "runtime": "96 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 1 win & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "If I Were King",
+      "year": "1938",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "History"
+      ],
+      "director": "Frank Lloyd",
+      "actor": "Ronald Colman",
+      "actors": [
+        "Ronald Colman",
+        "Basil Rathbone",
+        "Frances Dee"
+      ],
+      "plot": "Vagabond poet François Villon rises to high office in 1463 Paris.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMmNkYWJlMjktYzkzNy00NmM0LWI3ZGEtNmJmNWQ5YzU4MTA1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030265",
+      "imdbID": "tt0030265",
+      "imdbRating": 7.1,
+      "imdbVotes": 1041,
+      "runtime": "101 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 4 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Marie Antoinette",
+      "year": "2006",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Sofia Coppola",
+      "actor": "Kirsten Dunst",
+      "actors": [
+        "Kirsten Dunst",
+        "Jason Schwartzman",
+        "Rip Torn"
+      ],
+      "plot": "The retelling of France's iconic but ill-fated queen, Marie Antoinette. From her betrothal and marriage to Louis XVI at 14 to her reign as queen at 19 and to the end of her reign as queen, and ultimately the fall of Versailles.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMmE4NzQzNGItNTY4My00ZTBhLTk2ZjItZDJkMjRlYTE2MGRiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0422720",
+      "imdbID": "tt0422720",
+      "imdbRating": 6.5,
+      "imdbVotes": 129772,
+      "runtime": "123 min",
+      "rated": "PG-13",
+      "country": "United States, France, Japan",
+      "language": "English, Latin, French",
+      "awards": "Won 1 Oscar. 19 wins & 24 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Citadel",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "King Vidor",
+      "actor": "Robert Donat",
+      "actors": [
+        "Robert Donat",
+        "Rosalind Russell",
+        "Ralph Richardson"
+      ],
+      "plot": "An enthusiastic young doctor happily embarks on his career, but it isn't long before he finds out what being a doctor really entails.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTkwZmFlODQtM2FlNS00ZmI4LWE1M2YtMzg0ZTFhNmYxNDVhXkEyXkFqcGdeQXVyMTU3NDU4MDg2._V1_SX300.jpg",
+      "posterId": "tt0029995",
+      "imdbID": "tt0029995",
+      "imdbRating": 7.1,
+      "imdbVotes": 2344,
+      "runtime": "110 min",
+      "rated": "Passed",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 4 Oscars. 5 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Angels with Dirty Faces",
+      "year": "1938",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Film-Noir"
+      ],
+      "director": "Michael Curtiz",
+      "actor": "James Cagney",
+      "actors": [
+        "James Cagney",
+        "Pat O'Brien",
+        "Humphrey Bogart"
+      ],
+      "plot": "A priest tries to stop a gangster from corrupting a group of street kids.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTkzZjA5NDctNWYzMS00ZTM1LTkwMzItNWZkMDEzYTBjN2VjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029870",
+      "imdbID": "tt0029870",
+      "imdbRating": 7.9,
+      "imdbVotes": 24257,
+      "runtime": "97 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 8 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Carefree",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical",
+        "Romance"
+      ],
+      "director": "Mark Sandrich",
+      "actor": "Fred Astaire",
+      "actors": [
+        "Fred Astaire",
+        "Ginger Rogers",
+        "Ralph Bellamy"
+      ],
+      "plot": "A psychiatrist falls in love with the woman he's supposed to be nudging into marriage with someone else.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWZlNjVlMTYtZjBjNy00YmQwLWIwOWQtMTE4ZWUzODdlNGVkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029971",
+      "imdbID": "tt0029971",
+      "imdbRating": 7,
+      "imdbVotes": 4443,
+      "runtime": "83 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Test Pilot",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Victor Fleming",
+      "actor": "Clark Gable",
+      "actors": [
+        "Clark Gable",
+        "Myrna Loy",
+        "Spencer Tracy"
+      ],
+      "plot": "Jim is a test pilot. His wife Ann and best friend Gunner try their best to keep him sober. But the life of a test pilot is anything but safe.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjllOWNkMWUtODVmYi00YzdkLWI4OWYtMGYyOTYzYTM4NzdhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030848",
+      "imdbID": "tt0030848",
+      "imdbRating": 6.8,
+      "imdbVotes": 2787,
+      "runtime": "119 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Young in Heart",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Richard Wallace, Lewis Milestone, Gilbert Pratt",
+      "actor": "Janet Gaynor",
+      "actors": [
+        "Janet Gaynor",
+        "Douglas Fairbanks Jr.",
+        "Roland Young"
+      ],
+      "plot": "Thrown out of the Riviera, a family of grifters meets a lonely, vulnerable rich old woman and insinuate themselves into her life while they sponge off her.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDg5OTdmYzItN2IyNy00MzhmLTgxNmEtOTVlNjFjMjc1ODRkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031002",
+      "imdbID": "tt0031002",
+      "imdbRating": 7.3,
+      "imdbVotes": 1670,
+      "runtime": "90 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Vivacious Lady",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "director": "George Stevens",
+      "actor": "Ginger Rogers",
+      "actors": [
+        "Ginger Rogers",
+        "James Stewart",
+        "James Ellison"
+      ],
+      "plot": "A professor marries a nightclub singer, much to the consternation of his family and friends back home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzBhZjBlOTUtYzRjOC00YzVlLTlmNjQtMTc5NWQ3YjBkOTYyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030944",
+      "imdbID": "tt0030944",
+      "imdbRating": 7.1,
+      "imdbVotes": 4302,
+      "runtime": "90 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 1 win & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Block-Heads",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Family",
+        "War"
+      ],
+      "director": "John G. Blystone",
+      "actor": "Stan Laurel",
+      "actors": [
+        "Stan Laurel",
+        "Oliver Hardy",
+        "Patricia Ellis"
+      ],
+      "plot": "Stan, who has remained faithfully at his World War I post for twenty years, finally comes home where his best friend, Ollie, takes him in, thus allowing him to discover the many conveniences of the modern world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDhiN2JiYjktOWVhNi00YzkxLWExZjctMTIzZDQ0YzdkMDlmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029923",
+      "imdbID": "tt0029923",
+      "imdbRating": 7.5,
+      "imdbVotes": 4621,
+      "runtime": "57 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Brave Little Tailor",
+      "year": "1938",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Burt Gillett, Bill Roberts",
+      "actor": "Walt Disney",
+      "actors": [
+        "Walt Disney",
+        "Marcellite Garner",
+        "Eddie Holden"
+      ],
+      "plot": "Inspired by the Grimm's fairy tale, this classic 1938 Mickey cartoon finds our hero (voiced by Walt Disney) battling a hilariously huge problem.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjliZjI3NGItNDZlMi00NzFiLWI1NjgtZjIwYzg2MzRlMDM0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029943",
+      "imdbID": "tt0029943",
+      "imdbRating": 7.5,
+      "imdbVotes": 3539,
+      "runtime": "9 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Going Places",
+      "year": "1974",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Bertrand Blier",
+      "actor": "Gérard Depardieu",
+      "actors": [
+        "Gérard Depardieu",
+        "Miou-Miou",
+        "Patrick Dewaere"
+      ],
+      "plot": "Two thugs travel around France terrorizing their compatriots.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzdkNGU1OWMtMzdiZi00NGMwLTgxMTctMjY3NmJjYTVmNzliXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0072353",
+      "imdbID": "tt0072353",
+      "imdbRating": 7.1,
+      "imdbVotes": 10234,
+      "runtime": "117 min",
+      "rated": "R",
+      "country": "France",
+      "language": "French",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Good Scouts",
+      "year": "1938",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Adventure"
+      ],
+      "director": "Jack King",
+      "actor": "James MacDonald",
+      "actors": [
+        "James MacDonald",
+        "Clarence Nash"
+      ],
+      "plot": "Donald Duck is Scoutmaster of his nephews on a camping trip at Yellowstone National Park, but his lack of leadership skills results in the Scouts having to help the Scoutmaster out of one predicament after another.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzljMjdiY2UtMjcxMy00ODhjLWE0YjItODQ4YmRjYzg2NWJkXkEyXkFqcGdeQXVyMTU3NDU4MDg2._V1_SX300.jpg",
+      "posterId": "tt0030196",
+      "imdbID": "tt0030196",
+      "imdbRating": 6.8,
+      "imdbVotes": 1107,
+      "runtime": "8 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "La grande illusion",
+      "year": "1986",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short"
+      ],
+      "director": "Thomas Ott",
+      "actor": null,
+      "actors": [],
+      "plot": "A nostalgic serviceman battling against the recruits of today.",
+      "poster": null,
+      "posterId": "tt32402570",
+      "imdbID": "tt32402570",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": "2 min",
+      "rated": null,
+      "country": "Switzerland",
+      "language": null,
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mannequin",
+      "year": "1987",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Fantasy",
+        "Romance"
+      ],
+      "director": "Michael Gottlieb",
+      "actor": "Andrew McCarthy",
+      "actors": [
+        "Andrew McCarthy",
+        "Kim Cattrall",
+        "Estelle Getty"
+      ],
+      "plot": "A young artist, searching for his vocation, makes a mannequin so perfect he falls in love with it. Finding the mannequin in a store window, he gets a job there and his creation comes to life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzkzOTdhODctYjQwNC00NjgwLWE5NzEtMDJhMGRjMjIxOTFjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0093493",
+      "imdbID": "tt0093493",
+      "imdbRating": 6,
+      "imdbVotes": 39088,
+      "runtime": "90 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 5 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Of Human Hearts",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Western"
+      ],
+      "director": "Clarence Brown",
+      "actor": "Walter Huston",
+      "actors": [
+        "Walter Huston",
+        "James Stewart",
+        "Gene Reynolds"
+      ],
+      "plot": "Ethan Wilkins is a poor and honest man who ministers to the human soul, while his son Jason yearns to be a doctor, helping people in the earthly realm.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDA4MGMxMmItN2Q5ZS00N2I0LWJhZTAtMTljMjU4MmZlMzk4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030517",
+      "imdbID": "tt0030517",
+      "imdbRating": 6.8,
+      "imdbVotes": 1388,
+      "runtime": "103 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Adventures of Tom Sawyer",
+      "year": "1938",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Family"
+      ],
+      "director": "Norman Taurog",
+      "actor": "Tommy Kelly",
+      "actors": [
+        "Tommy Kelly",
+        "Jackie Moran",
+        "Ann Gillis"
+      ],
+      "plot": "Tom Sawyer and his pal Huckleberry Finn have great adventures on the Mississippi River, pretending to be pirates, attending their own funeral and witnessing a murder.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGVjNWMyZmYtNDBhYi00MzU4LWE2OTgtMjBiZWY4YmFkM2Q1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0029844",
+      "imdbID": "tt0029844",
+      "imdbRating": 7,
+      "imdbVotes": 2371,
+      "runtime": "91 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Buccaneer",
+      "year": "1958",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "History"
+      ],
+      "director": "Anthony Quinn",
+      "actor": "Yul Brynner",
+      "actors": [
+        "Yul Brynner",
+        "Claire Bloom",
+        "Charles Boyer"
+      ],
+      "plot": "During the War of 1812, Louisiana buccaneer Jean Lafitte assists the Americans in defending New Orleans against the attacking British war fleet.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODYzZjI4MTAtN2VhYi00Zjk3LWE2ZjUtNzIxM2Y3YTk5MmJlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0051436",
+      "imdbID": "tt0051436",
+      "imdbRating": 6.4,
+      "imdbVotes": 2844,
+      "runtime": "119 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Three Comrades",
+      "year": "1938",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Frank Borzage",
+      "actor": "Robert Taylor",
+      "actors": [
+        "Robert Taylor",
+        "Margaret Sullavan",
+        "Franchot Tone"
+      ],
+      "plot": "The close friendship of three German soldiers is strengthened by their shared love for the same woman, who is dying of tuberculosis.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzg5ZWM2NWMtODU4Yy00NjAzLWIzNDAtYWVmZGUxNDVmNTczXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0030865",
+      "imdbID": "tt0030865",
+      "imdbRating": 7.1,
+      "imdbVotes": 2144,
+      "runtime": "98 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Gone with the Wind",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "War"
+      ],
+      "director": "Victor Fleming",
+      "actor": "Clark Gable",
+      "actors": [
+        "Clark Gable",
+        "Vivien Leigh",
+        "Thomas Mitchell"
+      ],
+      "plot": "A sheltered and manipulative Southern belle and a roguish profiteer face off in a turbulent romance as the society around them crumbles with the end of slavery and is rebuilt during the Civil War and Reconstruction periods.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYmYxZTE3YzMtYmE2Yy00NmFlLTkzYTAtYTAzN2IzNDFkN2E0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031381",
+      "imdbID": "tt0031381",
+      "imdbRating": 8.2,
+      "imdbVotes": 354268,
+      "runtime": "238 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 8 Oscars. 26 wins & 10 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Stagecoach",
+      "year": "1939",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Western"
+      ],
+      "director": "John Ford",
+      "actor": "Claire Trevor",
+      "actors": [
+        "Claire Trevor",
+        "John Wayne",
+        "Andy Devine"
+      ],
+      "plot": "A group of people traveling on a stagecoach find their journey complicated by the threat of Geronimo and learn something about each other in the process.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmQ5ZGIyMjYtMjczYy00N2EzLWE3ZjMtNmI4ZDc3MDVmOWEwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031971",
+      "imdbID": "tt0031971",
+      "imdbRating": 7.8,
+      "imdbVotes": 57694,
+      "runtime": "96 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Spanish, French",
+      "awards": "Won 2 Oscars. 10 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Wizard of Oz",
+      "year": "1939",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Family",
+        "Fantasy"
+      ],
+      "director": "Victor Fleming, George Cukor, Norman Taurog",
+      "actor": "Judy Garland",
+      "actors": [
+        "Judy Garland",
+        "Frank Morgan",
+        "Ray Bolger"
+      ],
+      "plot": "Young Dorothy Gale and her dog Toto are swept away by a tornado from their Kansas farm to the magical Land of Oz and embark on a quest with three new friends to see the Wizard, who can return her to her home and fulfill the others...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWRmY2I0MGItYTQ0OC00NWZmLWIwMDktYjJlNDc0MzVhMmViXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032138",
+      "imdbID": "tt0032138",
+      "imdbRating": 8.1,
+      "imdbVotes": 464833,
+      "runtime": "102 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 16 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mr. Smith Goes to Washington",
+      "year": "1939",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Frank Capra",
+      "actor": "James Stewart",
+      "actors": [
+        "James Stewart",
+        "Jean Arthur",
+        "Claude Rains"
+      ],
+      "plot": "A naive youth leader is appointed to fill a vacancy in the U.S. Senate. His idealistic plans promptly collide with corruption at home and subterfuge from his hero in Washington, but he tries to forge ahead despite attacks on his c...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDU4ZjNmMjEtMjcxYi00NDAxLWFlMjQtNWIyNjg5NWUzNTdjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031679",
+      "imdbID": "tt0031679",
+      "imdbRating": 8.1,
+      "imdbVotes": 128934,
+      "runtime": "129 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 8 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Wuthering Heights",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "William Wyler",
+      "actor": "Merle Oberon",
+      "actors": [
+        "Merle Oberon",
+        "Laurence Olivier",
+        "David Niven"
+      ],
+      "plot": "A servant in the house of Wuthering Heights tells a traveler the unfortunate tale of lovers Cathy and Heathcliff.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTk5NzI2NGUtMTgzNS00YmY3LWE3MGItYWYwZTAwOThhM2IyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032145",
+      "imdbID": "tt0032145",
+      "imdbRating": 7.5,
+      "imdbVotes": 22068,
+      "runtime": "104 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 10 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Goodbye, Mr. Chips",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Sam Wood, Sidney Franklin",
+      "actor": "Robert Donat",
+      "actors": [
+        "Robert Donat",
+        "Greer Garson",
+        "Terry Kilburn"
+      ],
+      "plot": "An aged teacher and former headmaster of a boarding school recalls his career and his personal life over the decades.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDVlMDM4M2QtNzZhZS00NWYwLTk1OTctYTUxZTgxNDkxMWI3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031385",
+      "imdbID": "tt0031385",
+      "imdbRating": 7.9,
+      "imdbVotes": 11777,
+      "runtime": "114 min",
+      "rated": "Approved",
+      "country": "United Kingdom, United States",
+      "language": "English, Latin, German",
+      "awards": "Won 1 Oscar. 3 wins & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Rains Came",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Clarence Brown",
+      "actor": "Myrna Loy",
+      "actors": [
+        "Myrna Loy",
+        "Tyrone Power",
+        "George Brent"
+      ],
+      "plot": "In India, a married British aristocrat is reunited with an old flame, but she truly has her sights set on a handsome surgeon.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGRiYTRkMzAtMDZlMS00NWM3LTg4MzgtZGJjMzU1OWJiZDVhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031835",
+      "imdbID": "tt0031835",
+      "imdbRating": 6.8,
+      "imdbVotes": 2404,
+      "runtime": "103 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 5 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sons of Liberty",
+      "year": "2015",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "History"
+      ],
+      "director": null,
+      "actor": "Ben Barnes",
+      "actors": [
+        "Ben Barnes",
+        "Marton Csokas",
+        "Henry Thomas"
+      ],
+      "plot": "The story of a group of very different men fighting in the American Colonies for freedom, and how they will shape the future for the United States of America. Based on true stories.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODMzMTM5MzAyNl5BMl5BanBnXkFtZTgwNjQ3MDUxNDE@._V1_SX300.jpg",
+      "posterId": "tt3782838",
+      "imdbID": "tt3782838",
+      "imdbRating": 7.4,
+      "imdbVotes": 4880,
+      "runtime": null,
+      "rated": "TV-14",
+      "country": "United States",
+      "language": "English",
+      "awards": "2 wins & 7 nominations",
+      "omdbType": "series",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Ugly Duckling",
+      "year": "1931",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Family",
+        "Short"
+      ],
+      "director": "Wilfred Jackson",
+      "actor": "Pinto Colvig",
+      "actors": [
+        "Pinto Colvig",
+        "Walt Disney",
+        "Florence Gill"
+      ],
+      "plot": "A black duckling is rejected by its mother, a hen, but manages to prove his worth when a tornado threatens the hen's chicks.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDRjOTZhYzItZTkxMi00YWE0LTg5ZGEtY2EzZjgwYTMxNzI3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0022515",
+      "imdbID": "tt0022515",
+      "imdbRating": 7,
+      "imdbVotes": 1150,
+      "runtime": "7 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Love Affair",
+      "year": "1939",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Leo McCarey",
+      "actor": "Irene Dunne",
+      "actors": [
+        "Irene Dunne",
+        "Charles Boyer",
+        "Maria Ouspenskaya"
+      ],
+      "plot": "A French playboy and an American former nightclub singer fall in love aboard a ship.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzIwNTBhMDItNGNmZi00YzlkLTgxNDktOTkwNWE4YjkwMzVjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031593",
+      "imdbID": "tt0031593",
+      "imdbRating": 7.3,
+      "imdbVotes": 6880,
+      "runtime": "88 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 6 Oscars. 3 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Private Lives of Elizabeth and Essex",
+      "year": "1939",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Michael Curtiz",
+      "actor": "Bette Davis",
+      "actors": [
+        "Bette Davis",
+        "Errol Flynn",
+        "Olivia de Havilland"
+      ],
+      "plot": "A depiction of the love/hate relationship between Queen Elizabeth I and Robert Devereux, the Earl of Essex.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDliYTNlZjctYTA2Ny00YTBlLThlZmEtZWIxZGMzZjdmMTIxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031826",
+      "imdbID": "tt0031826",
+      "imdbRating": 7,
+      "imdbVotes": 6247,
+      "runtime": "106 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 5 Oscars. 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ninotchka",
+      "year": "1939",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "director": "Ernst Lubitsch",
+      "actor": "Greta Garbo",
+      "actors": [
+        "Greta Garbo",
+        "Melvyn Douglas",
+        "Ina Claire"
+      ],
+      "plot": "A stern Soviet woman sent to Paris to supervise the sale of jewels seized from Russian nobles finds herself attracted to a man who represents everything she is supposed to detest.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTllODg3NmItOTY2Yi00NDhkLWE2OWYtNmE0ZWU4NTZiYjljXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031725",
+      "imdbID": "tt0031725",
+      "imdbRating": 7.8,
+      "imdbVotes": 23776,
+      "runtime": "110 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Russian, French",
+      "awards": "Nominated for 4 Oscars. 5 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Of Mice and Men",
+      "year": "1992",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Western"
+      ],
+      "director": "Gary Sinise",
+      "actor": "John Malkovich",
+      "actors": [
+        "John Malkovich",
+        "Gary Sinise",
+        "Ray Walston"
+      ],
+      "plot": "A nomadic farm worker looks after his dimwitted, gentle-giant friend during the Great Depression.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODYwNDdlNGUtMDY0ZS00YjI3LWI1MjUtYjE4ODYyZTQwYjVlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0105046",
+      "imdbID": "tt0105046",
+      "imdbRating": 7.4,
+      "imdbVotes": 49550,
+      "runtime": "115 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Dark Victory",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Edmund Goulding",
+      "actor": "Bette Davis",
+      "actors": [
+        "Bette Davis",
+        "George Brent",
+        "Humphrey Bogart"
+      ],
+      "plot": "A young socialite is diagnosed with an inoperable brain tumor, and must decide whether or not she'll meet her final days with dignity.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWI1ZGMzN2UtNGRiZS00MTllLTk3ODYtNmNiYzhhZGI1NjE0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031210",
+      "imdbID": "tt0031210",
+      "imdbRating": 7.4,
+      "imdbVotes": 12737,
+      "runtime": "104 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 2 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Babes in Arms",
+      "year": "1939",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Musical"
+      ],
+      "director": "Busby Berkeley",
+      "actor": "Mickey Rooney",
+      "actors": [
+        "Mickey Rooney",
+        "Judy Garland",
+        "Charles Winninger"
+      ],
+      "plot": "A group of vaudevillians struggling to compete with talkies hits the road hoping for a comeback. Frustrated to be left behind, all of their kids put on a show themselves to raise money for the families and to prove they've got tal...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ1MzUwNjkxOV5BMl5BanBnXkFtZTgwNzk3NTQ2MzE@._V1_SX300.jpg",
+      "posterId": "tt0031066",
+      "imdbID": "tt0031066",
+      "imdbRating": 6.3,
+      "imdbVotes": 2895,
+      "runtime": "94 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Beau Geste",
+      "year": "1939",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "William A. Wellman",
+      "actor": "Gary Cooper",
+      "actors": [
+        "Gary Cooper",
+        "Ray Milland",
+        "Robert Preston"
+      ],
+      "plot": "Three adopted English brothers join the French Foreign Legion in North Africa after one of them steals their adoptive family's famous heirloom sapphire.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjc2YWE3NjAtZmMwOS00NjM2LTk1NWUtNjdkMzJhYTc4MDhhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031088",
+      "imdbID": "tt0031088",
+      "imdbRating": 7.5,
+      "imdbVotes": 6727,
+      "runtime": "112 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Arabic",
+      "awards": "Nominated for 2 Oscars. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "First Love",
+      "year": "2019",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Takashi Miike",
+      "actor": "Becky",
+      "actors": [
+        "Becky",
+        "Bengal",
+        "Masayuki Deai"
+      ],
+      "plot": "A young boxer and a call girl get caught up in a drug-smuggling scheme over the course of one night in Tokyo.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWY5MTlmMDItMjFjMC00ODMyLTg3ZTEtZTk3Y2JiMzk4YmEwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt10228168",
+      "imdbID": "tt10228168",
+      "imdbRating": 6.7,
+      "imdbVotes": 8749,
+      "runtime": "108 min",
+      "rated": "TV-MA",
+      "country": "Japan, United Kingdom",
+      "language": "Japanese, Mandarin",
+      "awards": "9 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Hunchback of Notre Dame",
+      "year": "1996",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Drama",
+        "Family"
+      ],
+      "director": "Gary Trousdale, Kirk Wise",
+      "actor": "Demi Moore",
+      "actors": [
+        "Demi Moore",
+        "Jason Alexander",
+        "Mary Kay Bergman"
+      ],
+      "plot": "A deformed bell-ringer must assert his independence from a vicious government minister in order to help his friend, a gypsy dancer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BY2QzMGEzNGMtMDQyNC00YTlmLWEwYjMtOGI1NWYxMTM4NjA2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0116583",
+      "imdbID": "tt0116583",
+      "imdbRating": 7,
+      "imdbVotes": 183121,
+      "runtime": "91 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English, Latin",
+      "awards": "Nominated for 1 Oscar. 8 wins & 26 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bachelor Mother",
+      "year": "1939",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "director": "Garson Kanin",
+      "actor": "Ginger Rogers",
+      "actors": [
+        "Ginger Rogers",
+        "David Niven",
+        "Charles Coburn"
+      ],
+      "plot": "An unemployed woman discovers an abandoned baby on the steps of an orphanage, and accepts an offer to take responsibility for the child in return for a job.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWYwNTJkOWItMTVjMC00YjkxLWExMWYtMTljZjgwOTUxZWU4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031067",
+      "imdbID": "tt0031067",
+      "imdbRating": 7.5,
+      "imdbVotes": 5153,
+      "runtime": "82 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Drums Along the Mohawk",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "War"
+      ],
+      "director": "John Ford",
+      "actor": "Claudette Colbert",
+      "actors": [
+        "Claudette Colbert",
+        "Henry Fonda",
+        "Edna May Oliver"
+      ],
+      "plot": "Newlyweds Gil and Lana Martin try to establish a farm in the Mohawk Valley but are menaced by Indians and Tories as the Revolutionary War begins.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDE4ZjJiNzktMWJlMC00ZWJiLTkwOWYtZjgyYWFhMmZhZjUxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031252",
+      "imdbID": "tt0031252",
+      "imdbRating": 7,
+      "imdbVotes": 6957,
+      "runtime": "104 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Golden Boy",
+      "year": "1995",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Comedy"
+      ],
+      "director": null,
+      "actor": "Doug Smith",
+      "actors": [
+        "Doug Smith",
+        "Matt Greenfield",
+        "Mitsuo Iwata"
+      ],
+      "plot": "A University drop-out rides Japan on his bicycle, taking part-time jobs and trying not to take women.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGI0Njg4YjctNTc1MS00MDJmLWEyZjktNGQ1ZDc2OTE3MTYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0159145",
+      "imdbID": "tt0159145",
+      "imdbRating": 8,
+      "imdbVotes": 8926,
+      "runtime": "1 min",
+      "rated": "Not Rated",
+      "country": "Japan",
+      "language": "Japanese, English",
+      "awards": null,
+      "omdbType": "series",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Intermezzo",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Romance"
+      ],
+      "director": "Gregory Ratoff",
+      "actor": "Ingrid Bergman",
+      "actors": [
+        "Ingrid Bergman",
+        "Leslie Howard",
+        "Edna Best"
+      ],
+      "plot": "A violinist's piano accompanist retires. He hears his daughter's piano teacher (Ingrid Bergman) play, asks her to play on his next international tour, and they fall in love.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZmU1MDk1MzItZDY4Ny00MDcyLThhZGItY2U5MzUxMzc5YjE0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031491",
+      "imdbID": "tt0031491",
+      "imdbRating": 6.6,
+      "imdbVotes": 2954,
+      "runtime": "70 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Juarez",
+      "year": "1939",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "William Dieterle",
+      "actor": "Paul Muni",
+      "actors": [
+        "Paul Muni",
+        "Bette Davis",
+        "Brian Aherne"
+      ],
+      "plot": "Louis Napoleon III (Claude Rains) takes advantage of the American Civil War to circumvent the Monroe Doctrine and expand his power by helping Emperor Maximilian von Habsburg (Brian Aherne) to add Mexico to his empire.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjUwNzZlYTEtN2M1NS00OTViLWIyNzEtODg2NDFhODZiYjYxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031516",
+      "imdbID": "tt0031516",
+      "imdbRating": 6.9,
+      "imdbVotes": 2584,
+      "runtime": "125 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Only Angels Have Wings",
+      "year": "1939",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Howard Hawks",
+      "actor": "Cary Grant",
+      "actors": [
+        "Cary Grant",
+        "Jean Arthur",
+        "Rita Hayworth"
+      ],
+      "plot": "At a remote South American trading port, the manager of an air-freight company is compelled to risk the lives of his pilots in order to win an important contract as a traveling American showgirl/harlot stops in town.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDE0ZDk3MjQtOTE5Ny00MTM3LWIyNGUtZWZjOWU0YmE3NGI1XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031762",
+      "imdbID": "tt0031762",
+      "imdbRating": 7.6,
+      "imdbVotes": 16494,
+      "runtime": "121 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 5 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Peace on Earth",
+      "year": "1939",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Drama"
+      ],
+      "director": "Hugh Harman",
+      "actor": "Mel Blanc",
+      "actors": [
+        "Mel Blanc",
+        "Jeanne Dunne",
+        "The Hollywood Choir Boys"
+      ],
+      "plot": "Two baby squirrels ask grandpa to explain what \"men\" are when they hear everyone singing of \"peace on earth, goodwill to men\". Grandpa tells the story of man's last war.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMWJiYWY1ZWEtYzliNi00MzVlLWJlMzEtY2NkMGMwMDNlYzA2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0031790",
+      "imdbID": "tt0031790",
+      "imdbRating": 7.5,
+      "imdbVotes": 1797,
+      "runtime": "9 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Man in the Iron Mask",
+      "year": "1998",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "director": "Randall Wallace",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Jeremy Irons",
+        "John Malkovich"
+      ],
+      "plot": "The cruel King Louis XIV of France has a secret twin brother whom he keeps imprisoned. Can the twin be substituted for the real king?",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDc4YWYzNzEtNWMwMC00Y2ZlLWEzZWEtZDcwYjcwYTE3Y2ZlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0120744",
+      "imdbID": "tt0120744",
+      "imdbRating": 6.5,
+      "imdbVotes": 189340,
+      "runtime": "132 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, Italian",
+      "awards": "3 wins & 4 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Topper Takes a Trip",
+      "year": "1938",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Fantasy",
+        "Romance"
+      ],
+      "director": "Norman Z. McLeod",
+      "actor": "Constance Bennett",
+      "actors": [
+        "Constance Bennett",
+        "Roland Young",
+        "Billie Burke"
+      ],
+      "plot": "To gain entry to Heaven, a ghost attempts to reunite a divorcing couple as a good deed.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGUxYjM0ODAtZjY1NS00NmY0LWI5M2YtNTUxYTdmMzFjYTZjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032043",
+      "imdbID": "tt0032043",
+      "imdbRating": 6.5,
+      "imdbVotes": 1648,
+      "runtime": "80 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "romantic",
+        "fun",
+        "lighthearted",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Union Pacific",
+      "year": "1939",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Western"
+      ],
+      "director": "Cecil B. DeMille",
+      "actor": "Barbara Stanwyck",
+      "actors": [
+        "Barbara Stanwyck",
+        "Joel McCrea",
+        "Akim Tamiroff"
+      ],
+      "plot": "In 1862, Central Pacific and Union Pacific Railroads compete westward across the wilderness toward California.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzZiYjE4M2YtYjYzMy00MzkyLWFjNzktYTBmNWEwNjlhYzFhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032080",
+      "imdbID": "tt0032080",
+      "imdbRating": 7,
+      "imdbVotes": 3461,
+      "runtime": "135 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 4 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Young Mr. Lincoln",
+      "year": "1939",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "John Ford",
+      "actor": "Henry Fonda",
+      "actors": [
+        "Henry Fonda",
+        "Alice Brady",
+        "Marjorie Weaver"
+      ],
+      "plot": "A fictionalized account of the early life of the American president as a young lawyer facing his greatest court case.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNGRjNTgxMTUtOGUwMy00OWMxLTk3ZWEtMGViOGFhNDcxMzg4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0032155",
+      "imdbID": "tt0032155",
+      "imdbRating": 7.5,
+      "imdbVotes": 9368,
+      "runtime": "100 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
