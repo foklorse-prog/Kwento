@@ -2746,7 +2746,7 @@ function _spotifyTrackToItem(track, genreByArtist={}){
     category:"music",
     genre:((byArtistGenres[0]||"Music")+""),
     spotifyPrimaryGenre:byArtistGenres[0]||null,
-    tags:[...new Set((byArtistGenres.length?byArtistGenres:["music"]).map(_spotifyTagNorm).filter(Boolean))],
+    tags:[...new Set(_spotifyGenreTags(byArtistGenres))],
     ph:false,
     _spotify:true,
     spotifyTrackId:track.id||null,
@@ -2800,7 +2800,7 @@ async function fetchSpotifyMusicBundle(){
     const res=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
     if(!res.ok) continue;
     (res.data?.artists||[]).forEach(a=>{
-      if(a?.id) genreByArtist[a.id]=_spotifyGenreTags(a.genres||[]);
+      if(a?.id) genreByArtist[a.id]=(a.genres||[]);
     });
   }
 
@@ -2816,11 +2816,11 @@ async function fetchSpotifyMusicBundle(){
     pushSignal(tags,2.8-(idx*0.05),new Date().toISOString());
   });
   topTracks.forEach((t,idx)=>{
-    const tags=(t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
+    const tags=_spotifyGenreTags((t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]));
     pushSignal(tags,2.0-(idx*0.03),new Date().toISOString());
   });
   recentTracks.forEach((t,idx)=>{
-    const tags=(t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]);
+    const tags=_spotifyGenreTags((t.artists||[]).flatMap(a=>genreByArtist[a.id]||[]));
     pushSignal(tags,1.5-(idx*0.02),new Date().toISOString());
   });
 
@@ -6137,17 +6137,29 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
     const webPlaybackUri=(displayItem.spotifyUri||"").trim() || (displayItem.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
     const previewUrl=(displayItem.previewUrl||"").trim();
     const openUrl=(displayItem.spotifyUrl||"").trim() || (displayItem.spotifyTrackId?`https://open.spotify.com/track/${displayItem.spotifyTrackId}`:"");
+    // Create popup synchronously during click to avoid mobile popup blockers.
+    let popupWin=null;
+    if(openUrl){
+      try{ popupWin=window.open("about:blank","_blank","noopener,noreferrer"); }catch(_){}
+    }
     const openFallback=()=>{
       if(previewUrl){
+        if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
         setPreviewOn(true);
         setMusicPlayMsg("Preview mode.");
         return true;
       }
       if(openUrl){
-        window.open(openUrl,"_blank","noopener,noreferrer");
+        try{
+          if(popupWin){ popupWin.location.href=openUrl; }
+          else window.open(openUrl,"_blank","noopener,noreferrer");
+        }catch(_){
+          try{ window.location.href=openUrl; }catch(__){}
+        }
         setMusicPlayMsg("Opening in Spotify.");
         return true;
       }
+      if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
       setMusicPlayMsg("Playback unavailable.");
       return false;
     };
@@ -6162,6 +6174,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         }
         const r=await playTrackViaSpotifyWeb(webPlaybackUri);
         if(r?.ok){
+          if(popupWin){ try{ popupWin.close(); }catch(_){} popupWin=null; }
           setMusicPlayMsg("Playing now.");
           setPreviewOn(false);
           return;
@@ -6170,7 +6183,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         return;
       }
       openFallback();
-    }catch(_){}
+    }catch(_){
+      openFallback();
+    }
   };
   const musicPlayMode=(()=>{
     const trackUri=((displayItem?.spotifyUri||"").trim()) || (displayItem?.spotifyTrackId?`spotify:track:${displayItem.spotifyTrackId}`:"");
