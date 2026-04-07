@@ -3675,7 +3675,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                   style={{padding:"10px 16px",cursor:"pointer",background:th.card,
                     borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                     display:"flex",alignItems:"center",gap:12}}>
-                  <span style={{fontSize:18,flexShrink:0}}>{CAT_MAP[item._cat||cat]?.emoji}</span>
+                  {((item._cat||cat)==="music"&&((item.albumImage)||item.poster||item.albumImages?.[0]?.url))
+                    ?<img
+                      src={(item.albumImage)||item.poster||item.albumImages?.[0]?.url}
+                      alt={item.title||"album"}
+                      style={{width:28,height:28,borderRadius:6,objectFit:"cover",flexShrink:0,border:`1px solid ${th.border}`}}
+                    />
+                    :<span style={{fontSize:18,flexShrink:0}}>{CAT_MAP[item._cat||cat]?.emoji}</span>
+                  }
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:13,fontWeight:500,color:th.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {item.title}{(item._cat||cat)==="movies"?(()=>{const y=item.year||MOVIE_YEARS[item.title];return y?<span style={{fontSize:11,fontWeight:400,color:th.sub}}> ({y})</span>:null;})():null}
