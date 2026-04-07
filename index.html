@@ -3351,7 +3351,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const actPhotoRef=useRef(null);
   const inputRef=useRef(null);
   const catRowRef=useRef(null);
-  const spotifyConnectedForMusic=!!((_getSpotifyAuth()?.access_token)||(_getSpotifyAuth()?.refresh_token)||data.spotifyUserName);
+  const spotifyConnectedForMusic=!!((_getSpotifyAuth()?.access_token)||(_getSpotifyAuth()?.refresh_token));
 
   // Scroll active category pill into view
   useEffect(()=>{
@@ -3832,7 +3832,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
           )}
           {omdbError&&results.length===0&&(
             <div style={{fontSize:11,color:"#ef4444",marginTop:4,marginBottom:8}}>
-              {`OMDB: ${omdbError}`}
+              {cat==="movies"?`OMDB: ${omdbError}`:omdbError}
             </div>
           )}
 
@@ -10125,10 +10125,11 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [spotifyStatus,setSpotifyStatus]=useState("");
   const [spotifyConnected,setSpotifyConnected]=useState(false);
   const [spotifyUser,setSpotifyUser]=useState("");
+  const spotifySyncingRef=useRef(false);
 
   useEffect(()=>{
     setGhTokenInput(_getGhToken());
-    setSpotifyConnected(!!(_getSpotifyAuth()?.access_token));
+    setSpotifyConnected(false);
     setSpotifyUser(data.spotifyUserName||"");
     try{
       const s=localStorage.getItem(SPOTIFY_LAST_STATUS_KEY)||"";
@@ -10137,7 +10138,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }catch(_){}
   },[]);
   useEffect(()=>{
-    if(_getSpotifyAuth()?.access_token) handleSpotifyTest();
+    syncSpotifyConnectionSilently({showStatus:false,runBundle:true});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
   useEffect(()=>{
@@ -10279,25 +10280,68 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }
     setTimeout(()=>setRedeemMsg(""),3000);
   };
-  const handleSpotifyTest=async()=>{
-    setSpotifyStatus("Checking Spotify connection...");
-    const bundle=await fetchSpotifyMusicBundle();
-    if(!bundle.ok){
+  const syncSpotifyConnectionSilently=async({showStatus=false,runBundle=false}={})=>{
+    if(spotifySyncingRef.current) return;
+    spotifySyncingRef.current=true;
+    try{
+      if(showStatus) setSpotifyStatus("Checking Spotify connection...");
+      const token=await _getSpotifyAccessToken();
+      if(!token){
+        _setSpotifyAuth(null);
+        setSpotifyConnected(false);
+        setSpotifyUser("");
+        onChange("__batch__",{
+          spotifyMusicSignals:[],
+          spotifyMusicPool:[],
+          spotifyMusicUpdatedAt:null,
+          spotifyUserName:null,
+        });
+        if(showStatus) setSpotifyStatus("Spotify not connected.");
+        return;
+      }
+      const me=await Promise.race([
+        spotifyApiGet("me"),
+        new Promise(res=>setTimeout(()=>res({ok:false,status:0,data:null}),8000))
+      ]);
+      if(!me.ok){
+        setSpotifyConnected(false);
+        setSpotifyUser("");
+        if(me.status===401){
+          _setSpotifyAuth(null);
+          onChange("__batch__",{
+            spotifyMusicSignals:[],
+            spotifyMusicPool:[],
+            spotifyMusicUpdatedAt:null,
+            spotifyUserName:null,
+          });
+        }
+        if(showStatus) setSpotifyStatus(me.status===401?"Spotify not connected.":"Spotify check failed.");
+        return;
+      }
+      const name=me.data?.display_name||me.data?.id||"Spotify user";
+      setSpotifyConnected(true);
+      setSpotifyUser(name);
+      if(showStatus) setSpotifyStatus(`Connected as ${name}.`);
+      if(runBundle){
+        const bundle=await fetchSpotifyMusicBundle();
+        if(bundle.ok){
+          onChange("__batch__",{
+            spotifyMusicSignals:bundle.signals||[],
+            spotifyMusicPool:bundle.pool||[],
+            spotifyMusicUpdatedAt:bundle.updatedAt||new Date().toISOString(),
+            spotifyUserName:name,
+          });
+        }
+      }
+    }catch(_){
       setSpotifyConnected(false);
-      setSpotifyUser("");
-      setSpotifyStatus(bundle.status===401?"Spotify not connected.":"Spotify check failed.");
-      return;
+      if(showStatus) setSpotifyStatus("Spotify check failed.");
+    }finally{
+      spotifySyncingRef.current=false;
     }
-    const name=bundle.userName||"Spotify user";
-    setSpotifyConnected(true);
-    setSpotifyUser(name);
-    onChange("__batch__",{
-      spotifyMusicSignals:bundle.signals||[],
-      spotifyMusicPool:bundle.pool||[],
-      spotifyMusicUpdatedAt:bundle.updatedAt||new Date().toISOString(),
-      spotifyUserName:name,
-    });
-    setSpotifyStatus(`Connected as ${name}.`);
+  };
+  const handleSpotifyTest=async()=>{
+    await syncSpotifyConnectionSilently({showStatus:true,runBundle:true});
   };
   const handleSpotifyConnect=async()=>{
     if(!_getSpotifyClientId()){
