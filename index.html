@@ -3179,7 +3179,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const lq=query.toLowerCase();
-      const spotifyMusicPool=(data.spotifyMusicPool||[]).map(i=>({...i,_cat:"music"}));
+      const spotifyMusicPool=(data.spotifyMusicPool||[]).map(i=>({
+        ...i,
+        genre:(i?.genre??i?.spotifyPrimaryGenre??null),
+        _cat:"music"
+      }));
       const pool=cat
         ? ((cat==="movies")?[]:(cat==="music"?spotifyMusicPool:(LIBRARY[cat]||[]).map(i=>({...i,_cat:cat}))))
         : Object.entries(LIBRARY)
@@ -3217,8 +3221,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       setResults(local);
       if(local.length>0) setOmdbError("");
 
-      // Spotify live fallback — only for music when local matches are empty
-      if(local.length===0&&(cat==="music"||!cat)){
+      // Spotify live search for music (always run when category is music)
+      if(cat==="music"){
         clearTimeout(spotifySearchTimer.current);
         spotifySearchTimer.current=setTimeout(async()=>{
           try{
@@ -3242,8 +3246,12 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                     return item?{...item,_cat:"music"}:null;
                   })
                   .filter(Boolean);
-                setResults(items);
-                setOmdbError("");
+                if(items.length){
+                  setResults(items);
+                  setOmdbError("");
+                }else{
+                  setResults(local);
+                }
               }
             }
           }catch(_){}
