@@ -3423,6 +3423,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         if(local.length>0) setOmdbError("");
       }else{
         setResults([]);
+        setOmdbError("");
       }
 
       // Music search source:
@@ -3433,19 +3434,38 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         spotifySearchTimer.current=setTimeout(async()=>{
           try{
             if(spotifyConnectedForMusic){
+              if(query.trim().length<2){
+                if(spotifySearchReqRef.current!==reqId) return;
+                setResults([]);
+                setOmdbError("");
+                return;
+              }
               const rawQ=query.trim();
               const qTrack=encodeURIComponent(`track:${rawQ}`);
               let s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+              if(!s.ok && s.status===401){
+                await _refreshSpotifyAccessToken();
+                s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+              }else if(!s.ok && s.status===0){
+                // one fast retry for transient network hiccup
+                s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+              }
               let tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
               if(!tracks.length){
                 const qLoose=encodeURIComponent(rawQ);
                 s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                if(!s.ok && s.status===401){
+                  await _refreshSpotifyAccessToken();
+                  s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                }else if(!s.ok && s.status===0){
+                  s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                }
                 tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
               }
               if(!s.ok){
                 if(spotifySearchReqRef.current!==reqId) return;
                 setResults([]);
-                setOmdbError("Spotify search failed.");
+                setOmdbError(s.status===401?"Spotify not connected.":"Spotify search failed.");
                 return;
               }
               const qNorm=_normMusicTitle(rawQ);
