@@ -3250,6 +3250,37 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                     return item?{...item,_cat:"music"}:null;
                   })
                   .filter(Boolean);
+                // Live-only Spotify genre hardening: if a result still has no genre,
+                // do a second artist lookup from Spotify and attach first artist genre.
+                const missingIdx=[];
+                const missingArtistIds=[];
+                items.forEach((it,idx)=>{
+                  if(it?.genre) return;
+                  const aid=(it?.spotifyArtistIds?.[0]||"").trim();
+                  if(!aid) return;
+                  missingIdx.push(idx);
+                  missingArtistIds.push(aid);
+                });
+                if(missingArtistIds.length){
+                  const uniq=[...new Set(missingArtistIds)];
+                  const artistMap={};
+                  for(let i=0;i<uniq.length;i+=50){
+                    const chunk=uniq.slice(i,i+50);
+                    const ar2=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
+                    if(!ar2.ok) continue;
+                    (ar2.data?.artists||[]).forEach(a=>{
+                      if(a?.id) artistMap[a.id]=(a.genres||[]);
+                    });
+                  }
+                  missingIdx.forEach(idx=>{
+                    const it=items[idx];
+                    const aid=(it?.spotifyArtistIds?.[0]||"").trim();
+                    const g=(artistMap[aid]||[])[0]||null;
+                    if(g){
+                      items[idx]={...it,genre:g,spotifyPrimaryGenre:g};
+                    }
+                  });
+                }
                 setResults(items);
                 setOmdbError("");
               }
