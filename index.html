@@ -2493,6 +2493,7 @@ const SPOTIFY_LAST_STATUS_KEY="kwento_spotify_last_status";
 const SPOTIFY_PKCE_STATE_KEY="kwento_spotify_pkce_state";
 const SPOTIFY_PKCE_VERIFIER_KEY="kwento_spotify_pkce_verifier";
 const SPOTIFY_PUBLIC_CLIENT_ID="b58d8f1b8d9149f1bd94a2b66ba797b7";
+const LASTFM_API_KEY="0493fd971c4bd2325e6a92289539fce0";
 const OFFLINE_WATCHLIST_POSTERS=80;
 const OFFLINE_DISCOVER_POSTERS=20;
 const POSTER_MAX_BYTES=260*1024;
@@ -2709,9 +2710,9 @@ async function playTrackViaSpotifyWeb(trackUri){
   if(!play.ok&&play.status!==204) return {ok:false,status:play.status,err:"Play request failed"};
   return {ok:true};
 }
-function _deezerJsonp(url,timeoutMs=7000){
+function _lastfmJsonp(url,timeoutMs=7000){
   return new Promise((resolve,reject)=>{
-    const cb=`dz_cb_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const cb=`lfm_cb_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
     const script=document.createElement("script");
     let done=false;
     const cleanup=()=>{
@@ -2722,7 +2723,7 @@ function _deezerJsonp(url,timeoutMs=7000){
     };
     const timer=setTimeout(()=>{
       cleanup();
-      reject(new Error("deezer_timeout"));
+      reject(new Error("lastfm_timeout"));
     },timeoutMs);
     window[cb]=(data)=>{
       clearTimeout(timer);
@@ -2732,47 +2733,73 @@ function _deezerJsonp(url,timeoutMs=7000){
     script.onerror=()=>{
       clearTimeout(timer);
       cleanup();
-      reject(new Error("deezer_error"));
+      reject(new Error("lastfm_error"));
     };
-    script.src=`${url}${url.includes("?")?"&":"?"}output=jsonp&callback=${cb}`;
+    script.src=`${url}${url.includes("?")?"&":"?"}format=json&callback=${cb}`;
     document.head.appendChild(script);
   });
 }
 function _normMusicTitle(t){
   return (t||"").toLowerCase().replace(/\s+\(.*?\)\s*$/g,"").replace(/[^\w\s]/g," ").replace(/\s+/g," ").trim();
 }
-async function _hydrateMusicGenreFromDeezer(item){
+async function _hydrateMusicGenreFromLastfm(item){
   if(!item) return item;
   if(item.genre) return item;
   try{
     const rawTitle=(item.title||"").split(" — ")[0].trim();
     const firstArtist=(item.spotifyArtists||[])[0]||"";
-    const q=encodeURIComponent(`${rawTitle} ${firstArtist}`.trim());
-    const search=await _deezerJsonp(`https://api.deezer.com/search/track?q=${q}`);
-    const rows=Array.isArray(search?.data)?search.data:[];
-    if(!rows.length) return item;
-    const tNorm=_normMusicTitle(rawTitle);
-    const aNorm=(firstArtist||"").toLowerCase().trim();
-    const pick=rows.find(r=>{
-      const rt=_normMusicTitle(r?.title||"");
-      const ra=(r?.artist?.name||"").toLowerCase().trim();
-      if(tNorm&&rt&&tNorm!==rt) return false;
-      if(aNorm&&ra&&aNorm!==ra) return false;
-      return true;
-    })||rows[0];
-    const albumId=pick?.album?.id||null;
-    let genreId=pick?.genre_id||null;
-    if(!genreId&&albumId){
-      const album=await _deezerJsonp(`https://api.deezer.com/album/${encodeURIComponent(albumId)}`);
-      genreId=album?.genre_id||null;
-    }
-    if(!genreId) return item;
-    const genreRes=await _deezerJsonp(`https://api.deezer.com/genre/${encodeURIComponent(genreId)}`);
-    const g=(genreRes?.name||"").trim();
-    if(!g) return item;
-    return {...item,genre:g,genreSource:"deezer",deezerGenreId:genreId};
+    if(!LASTFM_API_KEY||!rawTitle||!firstArtist) return item;
+    const url=`https://ws.audioscrobbler.com/2.0/?method=track.getTopTags&api_key=${encodeURIComponent(LASTFM_API_KEY)}&artist=${encodeURIComponent(firstArtist)}&track=${encodeURIComponent(rawTitle)}&autocorrect=1`;
+    const data=await _lastfmJsonp(url);
+    const tagsRaw=data?.toptags?.tag;
+    const tags=Array.isArray(tagsRaw)?tagsRaw.map(t=>(t?.name||"").trim()).filter(Boolean):[];
+    const top=tags[0]||null;
+    if(!top) return item;
+    return {...item,genre:top,tags:[...new Set([...(item.tags||[]),...tags.map(_spotifyTagNorm).filter(Boolean)])],genreSource:"lastfm"};
   }catch(_){
     return item;
+  }
+}
+async function _fetchLastfmRecommendedSpotifyPool(seedArtists=[],limit=12){
+  try{
+    if(!LASTFM_API_KEY) return [];
+    const names=[...new Set((seedArtists||[]).map(a=>(a?.name||"").trim()).filter(Boolean))].slice(0,3);
+    if(!names.length) return [];
+    const recs=[];
+    for(const name of names){
+      const url=`https://ws.audioscrobbler.com/2.0/?method=artist.getTopTracks&api_key=${encodeURIComponent(LASTFM_API_KEY)}&artist=${encodeURIComponent(name)}&autocorrect=1&limit=8`;
+      const data=await _lastfmJsonp(url);
+      const rows=Array.isArray(data?.toptracks?.track)?data.toptracks.track:[];
+      rows.forEach(r=>{
+        const t=(r?.name||"").trim();
+        const a=((r?.artist?.name||name)+"").trim();
+        if(t&&a) recs.push({title:t,artist:a});
+      });
+      if(recs.length>=limit) break;
+    }
+    const uniq=[];
+    const seen=new Set();
+    recs.forEach(r=>{
+      const k=`${_normMusicTitle(r.title)}|${(r.artist||"").toLowerCase()}`;
+      if(!k||seen.has(k)) return;
+      seen.add(k);
+      uniq.push(r);
+    });
+    const picked=uniq.slice(0,limit);
+    const out=[];
+    for(const r of picked){
+      const q=encodeURIComponent(`track:${r.title} artist:${r.artist}`);
+      const s=await spotifyApiGet(`search?type=track&limit=1&q=${q}`);
+      const tr=s.ok?(s.data?.tracks?.items?.[0]||null):null;
+      if(!tr) continue;
+      const item=_spotifyTrackToItem(tr,{});
+      if(!item) continue;
+      const withGenre=await _hydrateMusicGenreFromLastfm(item);
+      out.push(withGenre||item);
+    }
+    return out;
+  }catch(_){
+    return [];
   }
 }
 function _spotifyTagNorm(s){
@@ -2841,25 +2868,6 @@ function _spotifyTrackToItem(track, genreByArtist={}){
   };
   return item;
 }
-async function _hydrateMusicGenreFromSpotify(item){
-  if(!item) return item;
-  if(item.genre) return item;
-  try{
-    const firstArtistId=(item.spotifyArtistIds||[])[0]||"";
-    if(firstArtistId){
-      const a=await spotifyApiGet(`artists/${encodeURIComponent(firstArtistId)}`);
-      const g=(a.ok&&a.data&&Array.isArray(a.data.genres)&&a.data.genres[0])?a.data.genres[0]:null;
-      if(g) return {...item,genre:g,spotifyPrimaryGenre:g};
-    }
-    const firstArtistName=(item.spotifyArtists||[])[0]||"";
-    if(firstArtistName){
-      const s=await spotifyApiGet(`search?type=artist&limit=1&q=${encodeURIComponent(firstArtistName)}`);
-      const g=(s.ok&&s.data?.artists?.items?.[0]?.genres?.[0])||null;
-      if(g) return {...item,genre:g,spotifyPrimaryGenre:g};
-    }
-  }catch(_){}
-  return item;
-}
 async function fetchSpotifyMusicBundle(){
   const me=await spotifyApiGet("me");
   if(!me.ok) return {ok:false,status:me.status||401,err:"Spotify not connected."};
@@ -2918,6 +2926,19 @@ async function fetchSpotifyMusicBundle(){
     seen.add(key);
     const item=_spotifyTrackToItem(track,genreByArtist);
     if(item) pool.push(item);
+  });
+  // Last.fm recommendations (no user login) resolved back to Spotify tracks for playback.
+  const lastfmRecs=await _fetchLastfmRecommendedSpotifyPool(topArtists,12);
+  (lastfmRecs||[]).forEach(it=>{
+    const k=(it?.spotifyTrackId||`${_normMusicTitle((it?.title||"").split(" — ")[0]||it?.title||"")}|${((it?.spotifyArtists||[])[0]||"").toLowerCase()}`).toLowerCase();
+    if(!k||seen.has(k)) return;
+    seen.add(k);
+    pool.push({...it,recoSource:"lastfm"});
+  });
+  // Also feed recommendation tags into signals for music lane scoring.
+  (lastfmRecs||[]).slice(0,10).forEach((it,idx)=>{
+    const tags=(it?.tags||[]).map(_spotifyTagNorm).filter(Boolean);
+    if(tags.length) pushSignal(tags,1.25-(idx*0.03),new Date().toISOString());
   });
 
   return {
@@ -3336,43 +3357,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                   })
                   .filter(Boolean);
                 for(let i=0;i<items.length;i++){
-                  items[i]=await _hydrateMusicGenreFromDeezer(items[i]);
-                }
-                // Live-only Spotify genre hardening: if a result still has no genre,
-                // do a second artist lookup from Spotify and attach first artist genre.
-                const missingIdx=[];
-                const missingArtistIds=[];
-                items.forEach((it,idx)=>{
-                  if(it?.genre) return;
-                  const aid=(it?.spotifyArtistIds?.[0]||"").trim();
-                  if(!aid) return;
-                  missingIdx.push(idx);
-                  missingArtistIds.push(aid);
-                });
-                if(missingArtistIds.length){
-                  const uniq=[...new Set(missingArtistIds)];
-                  const artistMap={};
-                  for(let i=0;i<uniq.length;i+=50){
-                    const chunk=uniq.slice(i,i+50);
-                    const ar2=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
-                    if(!ar2.ok) continue;
-                    (ar2.data?.artists||[]).forEach(a=>{
-                      if(a?.id) artistMap[a.id]=(a.genres||[]);
-                    });
-                  }
-                  missingIdx.forEach(idx=>{
-                    const it=items[idx];
-                    const aid=(it?.spotifyArtistIds?.[0]||"").trim();
-                    const g=(artistMap[aid]||[])[0]||null;
-                    if(g){
-                      items[idx]={...it,genre:g,spotifyPrimaryGenre:g};
-                    }
-                  });
-                }
-                for(let i=0;i<items.length;i++){
-                  if(!items[i]?.genre){
-                    items[i]=await _hydrateMusicGenreFromSpotify(items[i]);
-                  }
+                  items[i]=await _hydrateMusicGenreFromLastfm(items[i]);
                 }
                 setResults(items);
                 setOmdbError("");
@@ -3632,9 +3617,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                     (async()=>{
                       const first=results[0];
                       if((first?._cat||cat)==="music"){
-                        const dz=await _hydrateMusicGenreFromDeezer(first);
-                        const sp=await _hydrateMusicGenreFromSpotify(dz||first);
-                        addItem(sp||dz||first);
+                        const lf=await _hydrateMusicGenreFromLastfm(first);
+                        addItem(lf||first);
                       }else{
                         addItem(first);
                       }
@@ -3665,9 +3649,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               {results.map((item,i)=>(
                 <div key={i} onMouseDown={e=>e.preventDefault()} onClick={async()=>{
                   if((item?._cat||cat)==="music"){
-                    const dz=await _hydrateMusicGenreFromDeezer(item);
-                    const sp=await _hydrateMusicGenreFromSpotify(dz||item);
-                    addItem(sp||dz||item);
+                    const lf=await _hydrateMusicGenreFromLastfm(item);
+                    addItem(lf||item);
                   }else{
                     addItem(item);
                   }
@@ -11691,3 +11674,7 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
+
+
