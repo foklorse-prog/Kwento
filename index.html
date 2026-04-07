@@ -2742,6 +2742,30 @@ function _lastfmJsonp(url,timeoutMs=7000){
 function _normMusicTitle(t){
   return (t||"").toLowerCase().replace(/\s+\(.*?\)\s*$/g,"").replace(/[^\w\s]/g," ").replace(/\s+/g," ").trim();
 }
+function _capitalizeGenreLabel(s){
+  const v=(s||"").trim();
+  if(!v) return v;
+  return v.charAt(0).toUpperCase()+v.slice(1);
+}
+function _isUsefulLastfmGenreTag(tag,item){
+  const raw=(tag||"").trim();
+  if(!raw) return false;
+  const t=raw.toLowerCase();
+  const artist=((item?.spotifyArtists||[])[0]||"").toLowerCase().trim();
+  const track=((item?.title||"").split(" — ")[0]||"").toLowerCase().trim();
+  if(artist && (t===artist || t.includes(artist))) return false;
+  if(track && (t===track || t.includes(track))) return false;
+  if(t.length<3||t.length>28) return false;
+  const blocked=["seen live","favorites","favorite","my music","love","00s","90s","2010s","2020s","female vocalists","male vocalists"];
+  if(blocked.some(b=>t===b)) return false;
+  const keep=new Set([
+    "pop","dance pop","indie pop","alt-pop","k-pop","opm","opm indie","opm r&b","opm soul","r&b","hip hop","rap","rock","classic rock","alternative","indie","indie rock","indie folk","folk","jazz","blues","soul","electronic","house","techno","lo-fi","lofi","ambient","classical","soundtrack","metal","punk","emo","acoustic","synth-pop"
+  ]);
+  if(keep.has(t)) return true;
+  // Accept simple two-word style genres that are alphabetic.
+  if(/^[a-z][a-z+\-\s]{2,27}$/.test(t) && t.split(" ").length<=3) return true;
+  return false;
+}
 async function _hydrateMusicGenreFromLastfm(item){
   if(!item) return item;
   if(item.genre) return item;
@@ -2753,9 +2777,41 @@ async function _hydrateMusicGenreFromLastfm(item){
     const data=await _lastfmJsonp(url);
     const tagsRaw=data?.toptags?.tag;
     const tags=Array.isArray(tagsRaw)?tagsRaw.map(t=>(t?.name||"").trim()).filter(Boolean):[];
-    const top=tags[0]||null;
+    const top=tags.find(t=>_isUsefulLastfmGenreTag(t,item))||null;
     if(!top) return item;
-    return {...item,genre:top,tags:[...new Set([...(item.tags||[]),...tags.map(_spotifyTagNorm).filter(Boolean)])],genreSource:"lastfm"};
+    return {...item,genre:_capitalizeGenreLabel(top),tags:[...new Set([...(item.tags||[]),...tags.map(_spotifyTagNorm).filter(Boolean)])],genreSource:"lastfm"};
+  }catch(_){
+    return item;
+  }
+}
+async function _enrichMusicItemFromSpotify(item){
+  if(!item) return item;
+  try{
+    const rawTitle=(item.title||"").split(" — ")[0].trim();
+    const firstArtist=(item.spotifyArtists||[])[0]||"";
+    if(!rawTitle) return item;
+    const q=encodeURIComponent(`track:${rawTitle}${firstArtist?` artist:${firstArtist}`:""}`);
+    const s=await spotifyApiGet(`search?type=track&limit=1&q=${q}`);
+    const tr=s.ok?(s.data?.tracks?.items?.[0]||null):null;
+    if(!tr) return item;
+    const artistIds=[...new Set((tr.artists||[]).map(a=>a?.id).filter(Boolean))];
+    const genreByArtist={};
+    if(artistIds.length){
+      const ar=await spotifyApiGet(`artists?ids=${artistIds.slice(0,50).join(",")}`);
+      if(ar.ok){
+        (ar.data?.artists||[]).forEach(a=>{
+          if(a?.id) genreByArtist[a.id]=(a.genres||[]);
+        });
+      }
+    }
+    const sp=_spotifyTrackToItem(tr,genreByArtist);
+    if(!sp) return item;
+    return {
+      ...item,
+      ...sp,
+      genre:item.genre||sp.genre||null,
+      _cat:"music"
+    };
   }catch(_){
     return item;
   }
@@ -2815,17 +2871,23 @@ function _spotifyGenreTags(genres=[]){
   (genres||[]).forEach(g=>{
     const norm=_spotifyTagNorm(g);
     if(!norm) return;
-    if(!VIBE_TAG_DROPLIST.has(norm)) out.add(norm);
+    if(!(VIBE_TAG_DROPLIST.has(norm) && !VIBE_TAG_ALLOWLIST.has(norm))) out.add(norm);
     norm.split(" ").forEach(tok=>{
       const t=_spotifyTagNorm(tok);
       if(!t||t.length<3) return;
-      if(VIBE_TAG_DROPLIST.has(t)) return;
+      if(VIBE_TAG_DROPLIST.has(t) && !VIBE_TAG_ALLOWLIST.has(t)) return;
       out.add(t);
     });
   });
   const filtered=[...out].filter(t=>VIBE_TAG_ALLOWLIST.has(t) || t==="music");
   return filtered.length?filtered:["music"];
 }
+[
+  "pop","dance pop","indie pop","alt-pop","k-pop","opm","opm indie","opm r&b","opm soul",
+  "r&b","hip hop","rap","rock","classic rock","alternative","indie","indie rock","indie folk",
+  "folk","jazz","blues","soul","electronic","house","techno","lo-fi","lofi","ambient",
+  "classical","soundtrack","metal","punk","emo","acoustic","synth-pop"
+].forEach(t=>VIBE_TAG_ALLOWLIST.add(t));
 function _spotifyTrackToItem(track, genreByArtist={}){
   if(!track) return null;
   const artists=(track.artists||[]).filter(Boolean);
@@ -3282,8 +3344,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
 
   const omdbSearchTimer=useRef(null);
   const spotifySearchTimer=useRef(null);
+  const spotifySearchReqRef=useRef(0);
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
+      const reqId=++spotifySearchReqRef.current;
       const lq=query.toLowerCase();
       const spotifyMusicPool=(data.spotifyMusicPool||[]).map(i=>({
         ...i,
@@ -3331,39 +3395,72 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         setResults([]);
       }
 
-      // Spotify live search for music (always run when category is music)
+      // Last.fm live search for music (Spotify is playback-only)
       if(cat==="music"){
         clearTimeout(spotifySearchTimer.current);
         spotifySearchTimer.current=setTimeout(async()=>{
           try{
-            const r=await spotifyApiGet(`search?type=track&limit=5&q=${encodeURIComponent(query)}`);
-            if(r.ok){
-              const tracks=(r.data?.tracks?.items||[]);
-              if(tracks.length){
-                const artistIds=[...new Set(tracks.flatMap(tr=>(tr.artists||[]).map(a=>a?.id).filter(Boolean)))];
-                const genreByArtist={};
-                for(let i=0;i<artistIds.length;i+=50){
-                  const chunk=artistIds.slice(i,i+50);
-                  const ar=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
-                  if(!ar.ok) continue;
-                  (ar.data?.artists||[]).forEach(a=>{
-                    if(a?.id) genreByArtist[a.id]=(a.genres||[]);
-                  });
-                }
-                const items=tracks
-                  .map(tr=>{
-                    const item=_spotifyTrackToItem(tr,genreByArtist);
-                    return item?{...item,_cat:"music"}:null;
-                  })
-                  .filter(Boolean);
-                for(let i=0;i<items.length;i++){
-                  items[i]=await _hydrateMusicGenreFromLastfm(items[i]);
-                }
-                setResults(items);
-                setOmdbError("");
-              }
+            if(!LASTFM_API_KEY){
+              if(spotifySearchReqRef.current!==reqId) return;
+              setResults([]);
+              setOmdbError("Last.fm key missing.");
+              return;
             }
-          }catch(_){}
+            const url=`https://ws.audioscrobbler.com/2.0/?method=track.search&api_key=${encodeURIComponent(LASTFM_API_KEY)}&track=${encodeURIComponent(query)}&limit=8&autocorrect=1`;
+            const data=await _lastfmJsonp(url);
+            const rowsRaw=data?.results?.trackmatches?.track;
+            const rows=Array.isArray(rowsRaw)?rowsRaw:(rowsRaw?[rowsRaw]:[]);
+            const items=rows.slice(0,8).map(r=>{
+              const artist=(r?.artist||"").trim();
+              const name=(r?.name||"").trim();
+              const imgs=Array.isArray(r?.image)?r.image:[];
+              const img=imgs.reverse().map(x=>(x?.["#text"]||"").trim()).find(Boolean)||null;
+              return {
+                title:artist&&name?`${name} — ${artist}`:(name||artist||"Untitled"),
+                category:"music",
+                genre:null,
+                tags:[],
+                _cat:"music",
+                spotifyTrackId:null,
+                spotifyUri:null,
+                spotifyUrl:null,
+                previewUrl:null,
+                spotifyArtists:artist?[artist]:[],
+                spotifyArtistIds:[],
+                spotifyArtistUris:[],
+                spotifyArtistUrls:[],
+                albumName:null,
+                albumReleaseDate:null,
+                albumType:null,
+                albumImage:img,
+                poster:img,
+                albumImages:img?[{url:img,height:null,width:null}]:[],
+                durationMs:null,
+                explicit:null,
+                popularity:null,
+                trackNumber:null,
+                discNumber:null,
+                availableMarkets:[],
+                isLocal:false,
+                year:null,
+                spotifyMeta:null,
+              };
+            }).filter(it=>it.title&&it.title!=="—");
+            if(spotifySearchReqRef.current!==reqId) return;
+            setResults(items);
+            setOmdbError("");
+            for(let i=0;i<items.length;i++){
+              items[i]=await _hydrateMusicGenreFromLastfm(items[i]);
+              items[i]=await _enrichMusicItemFromSpotify(items[i]);
+            }
+            if(spotifySearchReqRef.current!==reqId) return;
+            setResults([...items]);
+            setOmdbError("");
+          }catch(_){
+            if(spotifySearchReqRef.current!==reqId) return;
+            setResults([]);
+            setOmdbError("Last.fm search failed.");
+          }
         },250);
       }
 
@@ -3618,7 +3715,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                       const first=results[0];
                       if((first?._cat||cat)==="music"){
                         const lf=await _hydrateMusicGenreFromLastfm(first);
-                        addItem(lf||first);
+                        const sp=await _enrichMusicItemFromSpotify(lf||first);
+                        addItem(sp||lf||first);
                       }else{
                         addItem(first);
                       }
@@ -3650,7 +3748,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                 <div key={i} onMouseDown={e=>e.preventDefault()} onClick={async()=>{
                   if((item?._cat||cat)==="music"){
                     const lf=await _hydrateMusicGenreFromLastfm(item);
-                    addItem(lf||item);
+                    const sp=await _enrichMusicItemFromSpotify(lf||item);
+                    addItem(sp||lf||item);
                   }else{
                     addItem(item);
                   }
