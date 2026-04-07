@@ -2263,6 +2263,7 @@ const GH_TOKEN_KEY="kwento_gh_token";
 const SHARED_QUEUE_KEY="kwento_shared_queue";
 const SHARED_PENDING_KEY="kwento_shared_pending_count";
 const SHARED_SENT_KEY="kwento_shared_sent_keys";
+const OMDB_RUNTIME_KEY="kwento_omdb_runtime";
 const SPOTIFY_CLIENT_ID_KEY="kwento_spotify_client_id";
 const SPOTIFY_AUTH_KEY="kwento_spotify_auth";
 const SPOTIFY_LAST_STATUS_KEY="kwento_spotify_last_status";
@@ -2320,7 +2321,21 @@ function _getSharedPendingCount(){
   try{ return parseInt(localStorage.getItem(SHARED_PENDING_KEY)||"0"); }catch(_){ return 0; }
 }
 function _setSharedPendingCount(n){
-  try{ localStorage.setItem(SHARED_PENDING_KEY,String(Math.max(0,n||0))); }catch(_){}
+  try{ localStorage.setItem(SHARED_PENDING_KEY,String(Math.max(0,n||0))); }catch(_){ }
+}
+function _getOmdbRuntime(){
+  try{
+    const raw=localStorage.getItem(OMDB_RUNTIME_KEY);
+    const v=raw?JSON.parse(raw):null;
+    return v&&typeof v==="object"?v:{};
+  }catch(_){ return {}; }
+}
+function _setOmdbRuntime(patch){
+  try{
+    const prev=_getOmdbRuntime();
+    const next={...prev,...(patch||{}),at:new Date().toISOString()};
+    localStorage.setItem(OMDB_RUNTIME_KEY,JSON.stringify(next));
+  }catch(_){ }
 }
 function _getGhToken(){
   try{ return localStorage.getItem(GH_TOKEN_KEY)||""; }catch(_){ return ""; }
@@ -3366,7 +3381,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         },650);
       }
 
-      // OMDB live first for movies. If OMDB is limited/unavailable, fallback to shared JSON matches.
+            // OMDB live first for movies. If OMDB is limited/unavailable, fallback to shared JSON matches.
       if(cat==="movies"){
         clearTimeout(omdbSearchTimer.current);
         omdbSearchTimer.current=setTimeout(async()=>{
@@ -3388,19 +3403,24 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                 }));
               setResults(omdbResults);
               setOmdbError("");
+              _setOmdbRuntime({status:"live",source:"omdb",httpStatus:res.status||200,lastError:""});
             } else if(rateLimited){
               setResults(local);
               setOmdbError("");
+              _setOmdbRuntime({status:"rate_limited",source:"fallback_local",httpStatus:res.status||429,lastError:(d&&d.Error)||"rate limited"});
             } else if(d && d.Error){
               setResults([]);
               setOmdbError(d.Error);
+              _setOmdbRuntime({status:"error",source:"omdb",httpStatus:res.status||0,lastError:d.Error||"Unknown OMDB error"});
             } else {
               setResults([]);
               setOmdbError("No movie results.");
+              _setOmdbRuntime({status:"no_results",source:"omdb",httpStatus:res.status||200,lastError:"No movie results."});
             }
           }catch(e){
             setResults(local);
             setOmdbError("");
+            _setOmdbRuntime({status:"network_fallback",source:"fallback_local",httpStatus:0,lastError:(e&&e.message)||"Network error"});
           }
         },400);
       }
@@ -9962,6 +9982,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
   const [ghTokenInput,setGhTokenInput]=useState("");
   const [ghStatus,setGhStatus]=useState("");
   const [sharedTotal,setSharedTotal]=useState(null);
+  const [omdbRuntime,setOmdbRuntime]=useState(()=>_getOmdbRuntime());
   const [spotifyStatus,setSpotifyStatus]=useState("");
   const [spotifyConnected,setSpotifyConnected]=useState(false);
   const [spotifyUser,setSpotifyUser]=useState("");
@@ -9989,23 +10010,37 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }catch(_){
       setSharedTotal(null);
     }
-  },[data.libraryMovies,ghStatus]);
+  },[data.libraryMovies]);
   const refreshSharedLibrary=async()=>{
+    setGhStatus("Syncing...");
     try{
       const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
-      if(!res.ok) throw new Error("Fetch failed");
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const json=await res.json();
       const items=((json.items||json.library||json)||[]).filter(isActualMovieOrSeries);
       setSharedTotal(Array.isArray(items)?items.length:0);
-      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){}
+      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){ }
       onChange("__batch__",{
         libraryMovies:items,
         sharedLastSyncAt:json.updatedAt||new Date().toISOString(),
         sharedSyncDone:true
       });
-    }catch(_){}
+      setGhStatus("Synced");
+    }catch(err){
+      try{
+        const raw=localStorage.getItem("kwento_shared_library_cache");
+        const list=raw?JSON.parse(raw):[];
+        setSharedTotal(Array.isArray(list)?list.length:0);
+      }catch(_){ }
+      setGhStatus("Sync failed (using saved copy)");
+    }
   };
 
+  useEffect(()=>{
+    refreshSharedLibrary();
+    setOmdbRuntime(_getOmdbRuntime());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
   const splitTitleList=raw=>{
     const s=(raw||"").trim();
     if(!s) return [];
@@ -10337,42 +10372,33 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
           {`Shared library total: ${sharedTotal!=null?sharedTotal:"Unknown"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
-          {`Local movie library total: ${(data.libraryMovies||[]).length}`}
-        </p>
-        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
-          {`Shared sync status: ${_getGhToken() ? (data.sharedSyncDone ? "Synced" : "Not synced") : "No token"}`}
+          {`Shared sync status: ${ghStatus||"Idle"}`}
         </p>
         <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
           {`Last updated: ${data.sharedLastSyncAt ? new Date(data.sharedLastSyncAt).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
         </p>
-        <div style={{marginTop:10}}>
-          <div style={{fontSize:11,fontWeight:700,color:th.sub,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>Bulk add titles</div>
-          <textarea value={omdbBulkInput} onChange={e=>setOmdbBulkInput(e.target.value)}
-            placeholder={"Comma or newline separated titles (double-spaces also work)"}
-            style={{width:"100%",minHeight:74,resize:"vertical",background:th.bg,border:`1px solid ${th.border}`,borderRadius:10,padding:"8px 10px",fontSize:12,color:th.text,lineHeight:1.5}}/>
-          <button onClick={handleOmdbBulkAdd} disabled={omdbBulkWorking}
-            style={{marginTop:8,fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 12px",cursor:omdbBulkWorking?"default":"pointer",opacity:omdbBulkWorking?0.6:1}}>
-            {omdbBulkWorking?"Adding...":"Add to library"}
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:8}}>
+          {`OMDB status: ${omdbRuntime?.status||"unknown"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`OMDB HTTP: ${omdbRuntime?.httpStatus??"n/a"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`OMDB last error: ${omdbRuntime?.lastError||"none"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`OMDB source: ${omdbRuntime?.source||"n/a"}`}
+        </p>
+        <p style={{fontSize:11,color:th.sub,opacity:0.8,marginTop:4}}>
+          {`OMDB checked: ${omdbRuntime?.at ? new Date(omdbRuntime.at).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "Not yet"}`}
+        </p>
+        <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+          <button onClick={refreshSharedLibrary} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+            Refresh shared library
           </button>
-          {omdbBulkStatus&&(
-            <div style={{marginTop:6,fontSize:11,color:th.sub}}>{omdbBulkStatus}</div>
-          )}
-        </div>
-        <div style={{marginTop:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:th.sub,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>GitHub Shared Library</div>
-          <div style={{fontSize:11,color:th.sub,marginBottom:6}}>
-            {`Shared JSON: ${SHARED_LIBRARY_PATH}`}
-          </div>
-          <input type="password" value={ghTokenInput} onChange={e=>{const v=e.target.value;setGhTokenInput(v);_setGhToken(v.trim());}} placeholder="GitHub token (stored locally)"
-            style={{width:"100%",background:th.bg,border:`1px solid ${th.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:th.text}}/>
-          <div style={{display:"flex",gap:8,marginTop:8}}>
-            <button onClick={testGhSync} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
-              Sync now
-            </button>
-          </div>
-          {ghStatus&&(
-            <div style={{marginTop:6,fontSize:11,color:th.sub}}>{ghStatus}</div>
-          )}
+          <button onClick={()=>setOmdbRuntime(_getOmdbRuntime())} style={{fontSize:11,color:th.accent,background:"transparent",border:`1px solid ${th.accent}`,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>
+            Refresh OMDB status
+          </button>
         </div>
       </div>
 
@@ -11703,17 +11729,5 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
