@@ -246,7 +246,9 @@ const MUSIC_GENRE_ALLOWLIST = new Set([
   "pop","dance pop","indie pop","alt-pop","k-pop","opm","opm indie","opm r&b","opm soul",
   "r&b","hip hop","rap","rock","classic rock","alternative","indie","indie rock","indie folk",
   "folk","jazz","blues","soul","electronic","house","techno","lo-fi","lofi","ambient",
-  "classical","soundtrack","metal","punk","emo","acoustic","synth-pop","pop rock"
+  "classical","soundtrack","metal","punk","emo","acoustic","synth-pop","pop rock",
+  "alternative rock","hard rock","soft rock","art pop","electropop","indie alternative",
+  "new wave","singer-songwriter","p-pop","j-pop","mandopop","c-pop","asian pop","asian music"
 ]);
 
 
@@ -2908,7 +2910,20 @@ function _normMusicGenreKey(s){
     .trim();
 }
 function _sanitizeMusicGenre(genre){
-  const norm=_normMusicGenreKey(genre||"");
+  let norm=_normMusicGenreKey(genre||"");
+  const alias={
+    "indiepop":"indie pop",
+    "electro pop":"electropop",
+    "synth pop":"synth-pop",
+    "hip-hop":"hip hop",
+    "rnb":"r&b",
+    "alt pop":"alt-pop",
+    "lo fi":"lo-fi",
+    "kpop":"k-pop",
+    "jpop":"j-pop",
+    "ppop":"p-pop"
+  };
+  norm=alias[norm]||norm;
   if(!norm) return null;
   if(!MUSIC_GENRE_ALLOWLIST.has(norm)) return null;
   return _capitalizeGenreLabel(norm);
