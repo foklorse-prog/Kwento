@@ -2493,6 +2493,7 @@ const SPOTIFY_LAST_STATUS_KEY="kwento_spotify_last_status";
 const SPOTIFY_PKCE_STATE_KEY="kwento_spotify_pkce_state";
 const SPOTIFY_PKCE_VERIFIER_KEY="kwento_spotify_pkce_verifier";
 const SPOTIFY_PUBLIC_CLIENT_ID="b58d8f1b8d9149f1bd94a2b66ba797b7";
+const SPOTIFY_HTTP_TIMEOUT_MS=8000;
 const LASTFM_API_KEY="0493fd971c4bd2325e6a92289539fce0";
 const OFFLINE_WATCHLIST_POSTERS=80;
 const OFFLINE_DISCOVER_POSTERS=20;
@@ -2586,11 +2587,14 @@ async function _refreshSpotifyAccessToken(){
   body.set("grant_type","refresh_token");
   body.set("refresh_token",refreshToken);
   body.set("client_id",clientId);
-  const res=await fetch("https://accounts.spotify.com/api/token",{
+  const res=await Promise.race([
+    fetch("https://accounts.spotify.com/api/token",{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
     body:body.toString()
-  });
+    }),
+    new Promise(res=>setTimeout(()=>res({ok:false,status:0,json:async()=>({})}),SPOTIFY_HTTP_TIMEOUT_MS))
+  ]);
   if(!res.ok) return null;
   const token=await res.json();
   const next={
@@ -2615,9 +2619,12 @@ async function _getSpotifyAccessToken(){
 async function spotifyApiGet(path){
   const token=await _getSpotifyAccessToken();
   if(!token) return {ok:false,status:401,data:null};
-  const res=await fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
-    headers:{Authorization:`Bearer ${token}`}
-  });
+  const res=await Promise.race([
+    fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
+      headers:{Authorization:`Bearer ${token}`}
+    }),
+    new Promise(res=>setTimeout(()=>res({ok:false,status:0,json:async()=>({})}),SPOTIFY_HTTP_TIMEOUT_MS))
+  ]);
   let data=null;
   try{ data=await res.json(); }catch(_){}
   return {ok:res.ok,status:res.status,data};
@@ -2625,14 +2632,17 @@ async function spotifyApiGet(path){
 async function spotifyApiRequest(method,path,body=null){
   const token=await _getSpotifyAccessToken();
   if(!token) return {ok:false,status:401,data:null};
-  const res=await fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
-    method:method||"GET",
-    headers:{
-      Authorization:`Bearer ${token}`,
-      "Content-Type":"application/json"
-    },
-    body:body?JSON.stringify(body):undefined
-  });
+  const res=await Promise.race([
+    fetch(`https://api.spotify.com/v1/${path.replace(/^\/+/,"")}`,{
+      method:method||"GET",
+      headers:{
+        Authorization:`Bearer ${token}`,
+        "Content-Type":"application/json"
+      },
+      body:body?JSON.stringify(body):undefined
+    }),
+    new Promise(res=>setTimeout(()=>res({ok:false,status:0,json:async()=>({})}),SPOTIFY_HTTP_TIMEOUT_MS))
+  ]);
   let data=null;
   try{ data=await res.json(); }catch(_){}
   return {ok:res.ok,status:res.status,data};
@@ -10281,7 +10291,10 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     setTimeout(()=>setRedeemMsg(""),3000);
   };
   const syncSpotifyConnectionSilently=async({showStatus=false,runBundle=false}={})=>{
-    if(spotifySyncingRef.current) return;
+    if(spotifySyncingRef.current){
+      if(showStatus) setSpotifyStatus("Checking Spotify connection...");
+      return;
+    }
     spotifySyncingRef.current=true;
     try{
       if(showStatus) setSpotifyStatus("Checking Spotify connection...");
