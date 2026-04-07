@@ -2744,7 +2744,7 @@ function _spotifyTrackToItem(track, genreByArtist={}){
   const item={
     title:`${track.name||"Untitled"} — ${mainArtist}`,
     category:"music",
-    genre:((byArtistGenres[0]||"Music")+""),
+    genre:(byArtistGenres[0]||null),
     spotifyPrimaryGenre:byArtistGenres[0]||null,
     tags:[...new Set(_spotifyGenreTags(byArtistGenres))],
     ph:false,
@@ -3233,7 +3233,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                   const ar=await spotifyApiGet(`artists?ids=${chunk.join(",")}`);
                   if(!ar.ok) continue;
                   (ar.data?.artists||[]).forEach(a=>{
-                    if(a?.id) genreByArtist[a.id]=_spotifyGenreTags(a.genres||[]);
+                    if(a?.id) genreByArtist[a.id]=(a.genres||[]);
                   });
                 }
                 const items=tracks
@@ -3287,7 +3287,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   },[query,cat,isEdit,data.libraryMovies,data.spotifyMusicPool]);
 
   const getGenreForCat=(item,category)=>{
-    if(category==="music") return item.genre||item.spotifyPrimaryGenre||"Music";
+    if(category==="music"){
+      const g=(item?.genre||"").trim();
+      if(g && g.toLowerCase()!=="music") return g;
+      return null;
+    }
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
     const inLib=(LIBRARY[category]||[]).some(i=>i.title.toLowerCase()===item.title.toLowerCase());
     if(inLib){
@@ -5355,9 +5359,9 @@ function _normalizeSavedMusicItems(d){
   const raw=d.savedMusic||d.savedTracks||d.savedPlaylistItems||null;
   if(!Array.isArray(raw)) return [];
   return raw.map(x=>{
-    if(typeof x==="string") return {title:x,category:"music",genre:"Music"};
+    if(typeof x==="string") return {title:x,category:"music",genre:null};
     if(!x) return null;
-    return {...x,category:"music",genre:x.genre||x.spotifyPrimaryGenre||"Music"};
+    return {...x,category:"music",genre:(x.genre??null)};
   }).filter(Boolean);
 }
 async function _fetchImageDataUrl(url){
@@ -6101,7 +6105,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
         title:displayItem.title,
         category:"music",
         tags:displayItem.tags||[],
-        genre:displayItem.genre||displayItem.spotifyPrimaryGenre||"Music",
+        genre:(displayItem.genre??null),
         signal:"like",
         scoreWeight:1.35,
         spotifyTrackId:displayItem.spotifyTrackId||null,
@@ -10645,7 +10649,7 @@ function App(){
           const normTitle=t=>(t||"").toLowerCase().replace(/\(\d{4}\)/g,"").replace(/[^a-z0-9]/g,"");
           const gBy=new Map();
           (d.spotifyMusicPool||[]).forEach(m=>{
-            const g=m?.genre||m?.spotifyPrimaryGenre||null;
+            const g=m?.genre??null;
             if(!g) return;
             const keys=[
               (m.spotifyTrackId||"").toLowerCase(),
