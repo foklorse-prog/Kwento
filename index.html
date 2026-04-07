@@ -3442,30 +3442,30 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               }
               const rawQ=query.trim();
               const qTrack=encodeURIComponent(`track:${rawQ}`);
-              let s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+              let s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
               if(!s.ok && s.status===401){
                 await _refreshSpotifyAccessToken();
-                s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+                s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
               }else if(!s.ok && s.status===0){
                 // one fast retry for transient network hiccup
-                s=await spotifyApiGet(`search?type=track&limit=30&q=${qTrack}`);
+                s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
               }
               let tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
               if(!tracks.length){
                 const qLoose=encodeURIComponent(rawQ);
-                s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
                 if(!s.ok && s.status===401){
                   await _refreshSpotifyAccessToken();
-                  s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                  s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
                 }else if(!s.ok && s.status===0){
-                  s=await spotifyApiGet(`search?type=track&limit=30&q=${qLoose}`);
+                  s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
                 }
                 tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
               }
               if(!s.ok){
                 if(spotifySearchReqRef.current!==reqId) return;
                 setResults([]);
-                setOmdbError(s.status===401?"Spotify not connected.":"Spotify search failed.");
+                setOmdbError(s.status===401?"Spotify not connected.":`Spotify search failed (${s.status||"network"}).`);
                 return;
               }
               const qNorm=_normMusicTitle(rawQ);
@@ -3484,15 +3484,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                 .sort((a,b)=>b.score-a.score)
                 .map(x=>x.tr);
               const picked=(rankedTracks.length?rankedTracks:tracks).slice(0,8);
-              const artistIds=[...new Set(picked.flatMap(t=>(t.artists||[]).map(a=>a?.id).filter(Boolean)))].slice(0,50);
-              let genreByArtist={};
-              if(artistIds.length){
-                const ar=await spotifyApiGet(`artists?ids=${artistIds.join(",")}`);
-                if(ar.ok){
-                  (ar.data?.artists||[]).forEach(a=>{ if(a?.id) genreByArtist[a.id]=a.genres||[]; });
-                }
-              }
-              let items=picked.map(tr=>_spotifyTrackToItem(tr,genreByArtist)).filter(Boolean).map(it=>({...it,_cat:"music"}));
+              let items=picked.map(tr=>_spotifyTrackToItem(tr,{})).filter(Boolean).map(it=>({...it,_cat:"music"}));
               if(spotifySearchReqRef.current!==reqId) return;
               setResults(items);
               setOmdbError("");
