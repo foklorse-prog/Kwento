@@ -3375,6 +3375,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const omdbSearchTimer=useRef(null);
   const spotifySearchTimer=useRef(null);
   const spotifySearchReqRef=useRef(0);
+  const spotifySearchCooldownUntilRef=useRef(0);
   useEffect(()=>{
     if(query.length>=2&&!isEdit){
       const reqId=++spotifySearchReqRef.current;
@@ -3440,6 +3441,12 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                 setOmdbError("");
                 return;
               }
+              if(Date.now()<spotifySearchCooldownUntilRef.current){
+                if(spotifySearchReqRef.current!==reqId) return;
+                setResults([]);
+                setOmdbError("Spotify is busy. Please wait a few seconds.");
+                return;
+              }
               const rawQ=query.trim();
               const qTrack=encodeURIComponent(`track:${rawQ}`);
               let s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
@@ -3465,6 +3472,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               if(!s.ok){
                 if(spotifySearchReqRef.current!==reqId) return;
                 setResults([]);
+                if(s.status===429){
+                  spotifySearchCooldownUntilRef.current=Date.now()+15000;
+                  setOmdbError("Spotify rate limit reached. Try again in 15s.");
+                  return;
+                }
                 setOmdbError(s.status===401?"Spotify not connected.":`Spotify search failed (${s.status||"network"}).`);
                 return;
               }
@@ -3551,7 +3563,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
             setResults([]);
             setOmdbError((cat==="music"&&spotifyConnectedForMusic)?"Spotify search failed.":"Last.fm search failed.");
           }
-        },250);
+        },450);
       }
 
       // OMDB fallback — only for movies, only when local has no results
@@ -10160,7 +10172,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     }catch(_){}
   },[]);
   useEffect(()=>{
-    syncSpotifyConnectionSilently({showStatus:false,runBundle:true});
+    syncSpotifyConnectionSilently({showStatus:false,runBundle:false});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
   useEffect(()=>{
