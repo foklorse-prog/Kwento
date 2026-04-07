@@ -3449,26 +3449,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               }
               const rawQ=query.trim();
               const qTrack=encodeURIComponent(`track:${rawQ}`);
-              let s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
-              if(!s.ok && s.status===401){
-                await _refreshSpotifyAccessToken();
-                s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
-              }else if(!s.ok && s.status===0){
-                // one fast retry for transient network hiccup
-                s=await spotifyApiGet(`search?type=track&limit=12&q=${qTrack}`);
-              }
+              const s=await spotifyApiGet(`search?type=track&limit=8&q=${qTrack}`);
               let tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
-              if(!tracks.length){
-                const qLoose=encodeURIComponent(rawQ);
-                s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
-                if(!s.ok && s.status===401){
-                  await _refreshSpotifyAccessToken();
-                  s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
-                }else if(!s.ok && s.status===0){
-                  s=await spotifyApiGet(`search?type=track&limit=12&q=${qLoose}`);
-                }
-                tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
-              }
               if(!s.ok){
                 if(spotifySearchReqRef.current!==reqId) return;
                 setResults([]);
@@ -3563,7 +3545,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
             setResults([]);
             setOmdbError((cat==="music"&&spotifyConnectedForMusic)?"Spotify search failed.":"Last.fm search failed.");
           }
-        },450);
+        },650);
       }
 
       // OMDB fallback — only for movies, only when local has no results
@@ -11331,18 +11313,6 @@ function App(){
     (async()=>{
       try{
         await finishSpotifyAuthFromUrl();
-        if(!_getSpotifyAuth()?.access_token) return;
-        const prevTs=data.spotifyMusicUpdatedAt?new Date(data.spotifyMusicUpdatedAt).getTime():0;
-        if(prevTs && (Date.now()-prevTs)<(6*60*60*1000)) return;
-        const bundle=await fetchSpotifyMusicBundle();
-        if(!bundle.ok) return;
-        setData(prev=>({
-          ...prev,
-          spotifyMusicSignals:bundle.signals||[],
-          spotifyMusicPool:bundle.pool||[],
-          spotifyMusicUpdatedAt:bundle.updatedAt||new Date().toISOString(),
-          spotifyUserName:bundle.userName||prev.spotifyUserName||null,
-        }));
       }catch(_){}
     })();
   },[]);
