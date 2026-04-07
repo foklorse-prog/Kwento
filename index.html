@@ -3577,14 +3577,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
 
           {/* Category chips — horizontal scroll */}
           {!discoverQuickLog&&(
-            <div ref={catRowRef} style={{display:"flex",gap:6,overflowX:"auto",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",paddingBottom:2}}>
+            <div ref={catRowRef} style={{display:"flex",alignItems:"center",gap:6,overflowX:"auto",overflowY:"hidden",marginBottom:18,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",minHeight:34,paddingRight:8}}>
               {CATEGORIES.map(c=>{
                 const active=cat===c.id;
                 return(
                   <button key={c.id} data-cat={c.id}
                     onClick={()=>{setCat(c.id);requestAnimationFrame(()=>inputRef.current?.focus());}}
                     style={data.theme==="fiesta"?{
-                      padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
+                      height:28,padding:"0 14px",borderRadius:99,whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",lineHeight:"28px",boxSizing:"border-box",
                       fontSize:12,fontWeight:active?600:500,
                       cursor:"pointer",flexShrink:0,transition:"all 0.18s",
                       background:active
@@ -3598,7 +3598,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                         ?"0 1px 0 rgba(255,255,255,0.50) inset,0 -1px 0 rgba(0,0,0,0.10) inset,0 2px 6px rgba(0,0,0,0.09)"
                         :"0 1px 0 rgba(255,255,255,0.32) inset,0 -1px 0 rgba(0,0,0,0.07) inset,0 1px 3px rgba(0,0,0,0.06)",
                     }:{
-                      padding:"5px 13px",borderRadius:99,whiteSpace:"nowrap",
+                      height:28,padding:"0 14px",borderRadius:99,whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",lineHeight:"28px",boxSizing:"border-box",
                       fontSize:12,fontWeight:active?600:400,
                       background:active?c.color:"transparent",
                       color:active?"#fff":th.sub,
@@ -3655,10 +3655,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                   style={{padding:"10px 16px",cursor:"pointer",background:th.card,
                     borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                     display:"flex",alignItems:"center",gap:12}}>
-                  {((item._cat||cat)==="music"&&spotifyConnectedForMusic&&((item.albumImage)||item.poster||item.albumImages?.[0]?.url))
+                  {((((item._cat||cat)==="music")&&spotifyConnectedForMusic&&((item.albumImage)||item.poster||item.albumImages?.[0]?.url)) || (((item._cat||cat)==="movies")&&item.poster))
                     ?<img
-                      src={(item.albumImage)||item.poster||item.albumImages?.[0]?.url}
-                      alt={item.title||"album"}
+                      src={((item._cat||cat)==="movies")?item.poster:((item.albumImage)||item.poster||item.albumImages?.[0]?.url)}
+                      alt={item.title||"cover"}
                       style={{width:28,height:28,borderRadius:6,objectFit:"cover",flexShrink:0,border:`1px solid ${th.border}`}}
                     />
                     :null
@@ -6543,9 +6543,9 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:musicPlayMode==="none"?"default":"pointer",marginBottom:10,
                 opacity:musicPlayMode==="none"?0.6:1
               }} disabled={musicPlayMode==="none"}>
-                {musicPlayMode==="play"&&"? "}
-                {musicPlayMode==="preview"&&"? "}
-                {musicPlayMode==="open"&&"? "}
+                
+                
+                
                 {musicPlayLabel}
               
               </button>
@@ -9015,8 +9015,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           ?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{display:"inline-block",verticalAlign:"middle",marginLeft:2}}><circle cx="12" cy="12" r="4" fill={th.accent}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke={th.accent} strokeWidth="2" strokeLinecap="round"/></svg>
           :null}</p>
         <div style={{display:"flex",justifyContent:"center",gap:26,marginTop:14,marginBottom:2}}>
-          <button onClick={onOpenStats} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg>
+          <button onClick={onOpenWatched} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
           <button onClick={onOpenLiked} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 21-1.4-1.2C5 15 2 12.2 2 8.8A4.8 4.8 0 0 1 6.8 4 5.3 5.3 0 0 1 12 7a5.3 5.3 0 0 1 5.2-3A4.8 4.8 0 0 1 22 8.8c0 3.4-3 6.2-8.6 11z"/></svg>
@@ -9024,8 +9024,8 @@ function ProfilePage({data,onChange,onStickerOpen,stickerOpen,photosReady,onOpen
           <button onClick={onOpenWatchlist} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>
           </button>
-          <button onClick={onOpenWatched} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <button onClick={onOpenStats} style={{background:"none",border:"none",padding:0,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:th.sub}}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={th.sub} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg>
           </button>
         </div>
       </div>
@@ -11703,6 +11703,13 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
