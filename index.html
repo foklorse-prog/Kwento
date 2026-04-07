@@ -242,6 +242,12 @@ function normalizeMoodKey(mood){
 
 const VIBE_TAG_ALLOWLIST = new Set(["acoustic","action","action adventure","action rpg","adventure","adventurous","aesthetic","ambition","animation","aromatic","art game","arthouse","artistic","atmospheric","balanced","battle royale","beautiful","bold","bright","calm","calming","casual","challenge","challenging","cheerleading","chill","cinematic","classic","classic rock","clean","clever","colorful","comedy","comfort","complex","contemporary","co-op","cozy","cozy fantasy","creative","crude","focused","raw","cultural","cute","dark","deep","discovery","disturbing","documentary","drama","dramatic","dreamy","earthy","educational","elegant","emotional","empowering","energetic","ensemble","entertainment","epic","everyday","exciting","fantasy","fantasy drama","fantasy romance","fascinating","fast","feel-good","female-led","feminist","festive","fiction","fps","fresh","friendship","fruity","fun","gritty","healing","heartwarming","hearty","historical","historical drama","historical fiction","hopeful","horror","horror comedy","iconic","indie","indie folk","indie pop","indoor","inspirational","inspiring","intense","interactive","intimate","jrpg","k-pop","life sim","light","lighthearted","literary","loud","magical","main","management","meditative","melancholic","memoir","memorable","meta","mind-bending","mindful","moba","musical","mystery","mythological fiction","narrative","natural","nonfiction","nostalgic","opm","opm classic","opm indie","opm r&b","opm soul","outdoor","peaceful","philosophical","platformer","political","pop","practical","provocative","psychological","quiet","quirky","realistic","redemption","reflective","refreshing","relaxed","rich","rivalry","roguelike","romance","romantic","rowdy","rpg","sandbox","satisfying","scenic","sci-fi","seasonal","self-help","self-improvement","silly","simple","simulation","slow","slow-burn","smart","smoky","social","social deduction","soft","solo","soulful","special","spicy","sport","sports strategy","stylish","summer","surreal","suspense","sweet","tension","theatrical","thriller","timeless","trending","trendy","twist","unique","upbeat","uplifting","warm","wholesome"]);
 const VIBE_TAG_DROPLIST = new Set(["active","addiction","adult","american","animated","anime","annatto","anthology","art","asian","asian-american","bacolod","baked","ballet","banana","banana-fritter","bangus","barcelona","barkada","batangas","battle-royale","beef","bicolano","biographical","birthday","bitter","boat","bone-marrow","braised","breakfast","british","bro","brown","brunch","budget","building","campy","caramelized","cebu","cebuano","celebratory","cheap","cheese","chewy","chicken","chinese","chinese-filipino","chocolate","choice-driven","christmas","coconut","coffee","cold","coming-of-age","competition","competitive","con-artist","corn","creamy","crime","crispy","crunchy","cured","curry","dance","date-night","death","deduction","dessert","drink","duck-egg","egg","enemies-to-lovers","erotic","expat","exploration","family","farming","fashion","fast-food","fermented","ferry","filipino","filipino-american","fish","food","fragrant","freedom","french","fried","fried-dough","fried-rice","fusion","gacha","garlic","garlic-rice","ginger","glass-noodles","global","gothic","green","grief","grilled","grinding","ground-pork","guitar","healthy","heritage","history","holiday","ilocano","iloilo","ilonggo","indian","indonesian","indulgent","italian","jackfruit","japanese","journey","korean","la","lgbtq+","live","long-distance","luca guadagnino","lunch","luzon","marriage","masochistic","meatloaf","merienda","middle-eastern","mild","milkfish","mixed","morning","multigenerational","music","must-play","mythology","nature","new york","night","noir","noodles","norwegian","octopus","offal","ofw","omelette","one-night","online","open-world","orange","origin-story","pampanga","party","patriotic","period","piano","pixel","pop-culture","popular","pork","porridge","portable","pregnancy","pulutan","purple","purple-yam","quail-egg","quick","r&b","rainy-day","raw","rice","rice-cake","rice-roll","road-trip","roasted","rock","roulade","salad","sam raimi","samgyup","sandra bullock","sandwich","sausage","savory","seafood","sequel","sesame","sharing","shaved-ice","shooter","short","shrimp","sick-day","silog","sinangag","sizzling","slasher","slow-cooked","snack","snacks","soft-tofu","soup","sour","southeast-asian","space","sports","spring-roll","spy","squad","steamed","stew","sticky","stir-fried","story","strategy","street-food","strong","stuffed","suburban","superhero","survival","synth-pop","tactical","tangy","tapa","team","teen","temptation","thai","thick","time-loop","time-travel","tofu","tom cruise","tomato","traditional","tropical","tv","umami","urban","useful","valentine's day","vampire","variety","vegetables","vietnamese","vinegar","visayan","volleyball","war","water","weekend","woody allen","wordless","wrap","wrapped","wwii","ya","yogurt","yorgos lanthimos"]);
+const MUSIC_GENRE_ALLOWLIST = new Set([
+  "pop","dance pop","indie pop","alt-pop","k-pop","opm","opm indie","opm r&b","opm soul",
+  "r&b","hip hop","rap","rock","classic rock","alternative","indie","indie rock","indie folk",
+  "folk","jazz","blues","soul","electronic","house","techno","lo-fi","lofi","ambient",
+  "classical","soundtrack","metal","punk","emo","acoustic","synth-pop","pop rock"
+]);
 
 
 // â”€â”€â”€ MOVIE YEARS LOOKUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -2783,7 +2789,7 @@ async function _hydrateMusicGenreFromLastfm(item){
   try{
     const rawTitle=(item.title||"").split(" — ")[0].trim();
     const firstArtist=(item.spotifyArtists||[])[0]||"";
-    if(!LASTFM_API_KEY||!firstArtist) return {...item,genre:item?.genre?_capitalizeGenreLabel(item.genre):item?.genre};
+    if(!LASTFM_API_KEY||!firstArtist) return {...item,genre:_sanitizeMusicGenre(item?.genre)||null};
     let tags=[];
     if(rawTitle){
       const trackUrl=`https://ws.audioscrobbler.com/2.0/?method=track.getTopTags&api_key=${encodeURIComponent(LASTFM_API_KEY)}&artist=${encodeURIComponent(firstArtist)}&track=${encodeURIComponent(rawTitle)}&autocorrect=1`;
@@ -2801,16 +2807,17 @@ async function _hydrateMusicGenreFromLastfm(item){
     }
     const dedup=[...new Set(tags)];
     const top=dedup.find(t=>_isUsefulLastfmGenreTag(t,item))||null;
-    if(!top){
+    const topAllowed=_sanitizeMusicGenre(top||"");
+    if(!topAllowed){
       return {
         ...item,
-        genre:item?.genre?_capitalizeGenreLabel(item.genre):item?.genre,
+        genre:_sanitizeMusicGenre(item?.genre)||null,
         tags:[...new Set([...(item.tags||[]),...dedup.map(_spotifyTagNorm).filter(Boolean)])]
       };
     }
-    return {...item,genre:_capitalizeGenreLabel(top),tags:[...new Set([...(item.tags||[]),...dedup.map(_spotifyTagNorm).filter(Boolean)])],genreSource:"lastfm"};
+    return {...item,genre:topAllowed,tags:[...new Set([...(item.tags||[]),...dedup.map(_spotifyTagNorm).filter(Boolean)])],genreSource:"lastfm"};
   }catch(_){
-    return {...item,genre:item?.genre?_capitalizeGenreLabel(item.genre):item?.genre};
+    return {...item,genre:_sanitizeMusicGenre(item?.genre)||null};
   }
 }
 async function _enrichMusicItemFromSpotify(item){
@@ -2838,7 +2845,7 @@ async function _enrichMusicItemFromSpotify(item){
     return {
       ...item,
       ...sp,
-      genre:item.genre||sp.genre||null,
+      genre:_sanitizeMusicGenre(item.genre)||_sanitizeMusicGenre(sp.genre)||null,
       _cat:"music"
     };
   }catch(_){
@@ -2895,6 +2902,24 @@ function _spotifyTagNorm(s){
     .replace(/\s+/g," ")
     .trim();
 }
+function _normMusicGenreKey(s){
+  return _spotifyTagNorm(s||"")
+    .replace(/\s*-\s*/g,"-")
+    .trim();
+}
+function _sanitizeMusicGenre(genre){
+  const norm=_normMusicGenreKey(genre||"");
+  if(!norm) return null;
+  if(!MUSIC_GENRE_ALLOWLIST.has(norm)) return null;
+  return _capitalizeGenreLabel(norm);
+}
+function _pickAllowedMusicGenre(genres=[]){
+  for(const g of (genres||[])){
+    const clean=_sanitizeMusicGenre(g);
+    if(clean) return clean;
+  }
+  return null;
+}
 function _spotifyGenreTags(genres=[]){
   const out=new Set();
   (genres||[]).forEach(g=>{
@@ -2922,14 +2947,15 @@ function _spotifyTrackToItem(track, genreByArtist={}){
   const artists=(track.artists||[]).filter(Boolean);
   const mainArtist=artists[0]?.name||"Unknown Artist";
   const byArtistGenres=artists.flatMap(a=>genreByArtist[a.id]||[]);
+  const allowedGenre=_pickAllowedMusicGenre(byArtistGenres);
   const album=track.album||{};
   const images=(album.images||[]).filter(Boolean);
   const bestImage=images[0]?.url||null;
   const item={
     title:`${track.name||"Untitled"} — ${mainArtist}`,
     category:"music",
-    genre:(byArtistGenres[0]||null),
-    spotifyPrimaryGenre:byArtistGenres[0]||null,
+    genre:allowedGenre||null,
+    spotifyPrimaryGenre:allowedGenre||null,
     tags:[...new Set(_spotifyGenreTags(byArtistGenres))],
     ph:false,
     _spotify:true,
@@ -3586,8 +3612,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
 
   const getGenreForCat=(item,category)=>{
     if(category==="music"){
-      const g=(item?.genre||"").trim();
-      if(g && g.toLowerCase()!=="music") return g;
+      const g=_sanitizeMusicGenre(item?.genre||item?.spotifyPrimaryGenre||"");
+      if(g) return g;
       return null;
     }
     if(item.genre&&item.genre!=="Film"&&item.genre!=="Custom")return item.genre;
@@ -11583,6 +11609,7 @@ function App(){
         ...e,
         id:e.id||Date.now()+idx,
         category:cat,
+        genre:cat==="music"?(_sanitizeMusicGenre(e.genre)||null):(e.genre||null),
         source:e.source||(logFromDiscover?"discover":"manual"),
         note:cat==="movies"?movieText:noteText,
         review:cat==="movies"?movieText:(e.review||""),
