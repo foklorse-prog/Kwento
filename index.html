@@ -2775,6 +2775,25 @@ function _spotifyTrackToItem(track, genreByArtist={}){
   };
   return item;
 }
+async function _hydrateMusicGenreFromSpotify(item){
+  if(!item) return item;
+  if(item.genre) return item;
+  try{
+    const firstArtistId=(item.spotifyArtistIds||[])[0]||"";
+    if(firstArtistId){
+      const a=await spotifyApiGet(`artists/${encodeURIComponent(firstArtistId)}`);
+      const g=(a.ok&&a.data&&Array.isArray(a.data.genres)&&a.data.genres[0])?a.data.genres[0]:null;
+      if(g) return {...item,genre:g,spotifyPrimaryGenre:g};
+    }
+    const firstArtistName=(item.spotifyArtists||[])[0]||"";
+    if(firstArtistName){
+      const s=await spotifyApiGet(`search?type=artist&limit=1&q=${encodeURIComponent(firstArtistName)}`);
+      const g=(s.ok&&s.data?.artists?.items?.[0]?.genres?.[0])||null;
+      if(g) return {...item,genre:g,spotifyPrimaryGenre:g};
+    }
+  }catch(_){}
+  return item;
+}
 async function fetchSpotifyMusicBundle(){
   const me=await spotifyApiGet("me");
   if(!me.ok) return {ok:false,status:me.status||401,err:"Spotify not connected."};
@@ -3281,6 +3300,11 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                     }
                   });
                 }
+                for(let i=0;i<items.length;i++){
+                  if(!items[i]?.genre){
+                    items[i]=await _hydrateMusicGenreFromSpotify(items[i]);
+                  }
+                }
                 setResults(items);
                 setOmdbError("");
               }
@@ -3535,7 +3559,13 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               onChange={e=>{setQuery(e.target.value);setSelected(null);}}
               onKeyDown={e=>{
                 if(e.key==="Enter"){
-                  if(results.length>0) addItem(results[0]);
+                  if(results.length>0){
+                    (async()=>{
+                      const first=results[0];
+                      const hydrated=((first?._cat||cat)==="music")?await _hydrateMusicGenreFromSpotify(first):first;
+                      addItem(hydrated||first);
+                    })();
+                  }
                   else if(query.trim()&&cat) addCustom();
                 }
               }}
@@ -3559,7 +3589,10 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               boxShadow:`0 6px 20px rgba(0,0,0,${th.dark?0.35:0.08})`,
               border:`1px solid ${th.border}`,borderTop:"none"}}>
               {results.map((item,i)=>(
-                <div key={i} onMouseDown={e=>e.preventDefault()} onClick={()=>addItem(item)}
+                <div key={i} onMouseDown={e=>e.preventDefault()} onClick={async()=>{
+                  const hydrated=((item?._cat||cat)==="music")?await _hydrateMusicGenreFromSpotify(item):item;
+                  addItem(hydrated||item);
+                }}
                   style={{padding:"10px 16px",cursor:"pointer",background:th.card,
                     borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                     display:"flex",alignItems:"center",gap:12}}>
