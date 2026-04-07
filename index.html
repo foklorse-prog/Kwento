@@ -2745,7 +2745,10 @@ function _normMusicTitle(t){
 function _capitalizeGenreLabel(s){
   const v=(s||"").trim();
   if(!v) return v;
-  return v.charAt(0).toUpperCase()+v.slice(1);
+  return v
+    .split(/\s+/)
+    .map(w=>w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"")
+    .join(" ");
 }
 function _isUsefulLastfmGenreTag(tag,item){
   const raw=(tag||"").trim();
@@ -3332,6 +3335,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
   const actPhotoRef=useRef(null);
   const inputRef=useRef(null);
   const catRowRef=useRef(null);
+  const spotifyConnectedForMusic=!!((_getSpotifyAuth()?.access_token)||(_getSpotifyAuth()?.refresh_token)||data.spotifyUserName);
 
   // Scroll active category pill into view
   useEffect(()=>{
@@ -3395,11 +3399,42 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         setResults([]);
       }
 
-      // Last.fm live search for music (Spotify is playback-only)
+      // Music search source:
+      // - Not connected: Last.fm only
+      // - Connected: Spotify search + Last.fm genre enrichment
       if(cat==="music"){
         clearTimeout(spotifySearchTimer.current);
         spotifySearchTimer.current=setTimeout(async()=>{
           try{
+            if(spotifyConnectedForMusic){
+              const q=encodeURIComponent(query.trim());
+              const s=await spotifyApiGet(`search?type=track&limit=8&q=${q}`);
+              if(!s.ok){
+                if(spotifySearchReqRef.current!==reqId) return;
+                setResults([]);
+                setOmdbError("Spotify search failed.");
+                return;
+              }
+              const tracks=Array.isArray(s.data?.tracks?.items)?s.data.tracks.items:[];
+              const artistIds=[...new Set(tracks.flatMap(t=>(t.artists||[]).map(a=>a?.id).filter(Boolean)))].slice(0,50);
+              let genreByArtist={};
+              if(artistIds.length){
+                const ar=await spotifyApiGet(`artists?ids=${artistIds.join(",")}`);
+                if(ar.ok){
+                  (ar.data?.artists||[]).forEach(a=>{ if(a?.id) genreByArtist[a.id]=a.genres||[]; });
+                }
+              }
+              let items=tracks.map(tr=>_spotifyTrackToItem(tr,genreByArtist)).filter(Boolean).map(it=>({...it,_cat:"music"}));
+              if(spotifySearchReqRef.current!==reqId) return;
+              setResults(items);
+              setOmdbError("");
+              items=await Promise.all(items.map(it=>_hydrateMusicGenreFromLastfm(it)));
+              if(spotifySearchReqRef.current!==reqId) return;
+              setResults(items);
+              setOmdbError("");
+              return;
+            }
+
             if(!LASTFM_API_KEY){
               if(spotifySearchReqRef.current!==reqId) return;
               setResults([]);
@@ -3410,11 +3445,9 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
             const data=await _lastfmJsonp(url);
             const rowsRaw=data?.results?.trackmatches?.track;
             const rows=Array.isArray(rowsRaw)?rowsRaw:(rowsRaw?[rowsRaw]:[]);
-            const items=rows.slice(0,8).map(r=>{
+            let items=rows.slice(0,8).map(r=>{
               const artist=(r?.artist||"").trim();
               const name=(r?.name||"").trim();
-              const imgs=Array.isArray(r?.image)?r.image:[];
-              const img=imgs.reverse().map(x=>(x?.["#text"]||"").trim()).find(Boolean)||null;
               return {
                 title:artist&&name?`${name} — ${artist}`:(name||artist||"Untitled"),
                 category:"music",
@@ -3432,9 +3465,9 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                 albumName:null,
                 albumReleaseDate:null,
                 albumType:null,
-                albumImage:img,
-                poster:img,
-                albumImages:img?[{url:img,height:null,width:null}]:[],
+                albumImage:null,
+                poster:null,
+                albumImages:[],
                 durationMs:null,
                 explicit:null,
                 popularity:null,
@@ -3449,17 +3482,14 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
             if(spotifySearchReqRef.current!==reqId) return;
             setResults(items);
             setOmdbError("");
-            for(let i=0;i<items.length;i++){
-              items[i]=await _hydrateMusicGenreFromLastfm(items[i]);
-              items[i]=await _enrichMusicItemFromSpotify(items[i]);
-            }
+            items=await Promise.all(items.map(it=>_hydrateMusicGenreFromLastfm(it)));
             if(spotifySearchReqRef.current!==reqId) return;
-            setResults([...items]);
+            setResults(items);
             setOmdbError("");
           }catch(_){
             if(spotifySearchReqRef.current!==reqId) return;
             setResults([]);
-            setOmdbError("Last.fm search failed.");
+            setOmdbError((cat==="music"&&spotifyConnectedForMusic)?"Spotify search failed.":"Last.fm search failed.");
           }
         },250);
       }
@@ -3498,7 +3528,7 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       setResults([]);
       setOmdbError("");
     }
-  },[query,cat,isEdit,data.libraryMovies,data.spotifyMusicPool]);
+  },[query,cat,isEdit,data.libraryMovies,data.spotifyMusicPool,spotifyConnectedForMusic]);
 
   const getGenreForCat=(item,category)=>{
     if(category==="music"){
@@ -3711,16 +3741,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               onKeyDown={e=>{
                 if(e.key==="Enter"){
                   if(results.length>0){
-                    (async()=>{
-                      const first=results[0];
-                      if((first?._cat||cat)==="music"){
-                        const lf=await _hydrateMusicGenreFromLastfm(first);
-                        const sp=await _enrichMusicItemFromSpotify(lf||first);
-                        addItem(sp||lf||first);
-                      }else{
-                        addItem(first);
-                      }
-                    })();
+                    const first=results[0];
+                    addItem(first);
                   }
                   else if(query.trim()&&cat) addCustom();
                 }
@@ -3746,18 +3768,12 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
               border:`1px solid ${th.border}`,borderTop:"none"}}>
               {results.map((item,i)=>(
                 <div key={i} onMouseDown={e=>e.preventDefault()} onClick={async()=>{
-                  if((item?._cat||cat)==="music"){
-                    const lf=await _hydrateMusicGenreFromLastfm(item);
-                    const sp=await _enrichMusicItemFromSpotify(lf||item);
-                    addItem(sp||lf||item);
-                  }else{
-                    addItem(item);
-                  }
+                  addItem(item);
                 }}
                   style={{padding:"10px 16px",cursor:"pointer",background:th.card,
                     borderBottom:i<results.length-1?`1px solid ${th.border}`:"none",
                     display:"flex",alignItems:"center",gap:12}}>
-                  {((item._cat||cat)==="music"&&((item.albumImage)||item.poster||item.albumImages?.[0]?.url))
+                  {((item._cat||cat)==="music"&&spotifyConnectedForMusic&&((item.albumImage)||item.poster||item.albumImages?.[0]?.url))
                     ?<img
                       src={(item.albumImage)||item.poster||item.albumImages?.[0]?.url}
                       alt={item.title||"album"}
