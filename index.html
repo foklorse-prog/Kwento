@@ -3218,8 +3218,12 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
         .filter(wordStart)
         .filter(i=>((i._cat||cat)==="movies")?isActualMovieOrSeries(i):true)
         .slice(0,5);
-      setResults(local);
-      if(local.length>0) setOmdbError("");
+      if(cat!=="music"){
+        setResults(local);
+        if(local.length>0) setOmdbError("");
+      }else{
+        setResults([]);
+      }
 
       // Spotify live search for music (always run when category is music)
       if(cat==="music"){
@@ -3246,12 +3250,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
                     return item?{...item,_cat:"music"}:null;
                   })
                   .filter(Boolean);
-                if(items.length){
-                  setResults(items);
-                  setOmdbError("");
-                }else{
-                  setResults(local);
-                }
+                setResults(items);
+                setOmdbError("");
               }
             }
           }catch(_){}
