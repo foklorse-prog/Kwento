@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-08T01:15:54.293Z",
+  "updatedAt": "2026-04-08T07:04:57.724Z",
   "items": [
     {
       "title": "Mid90s",
@@ -35569,6 +35569,3128 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Which Way Home",
+      "year": "2009",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Rebecca Cammisa",
+      "actor": null,
+      "actors": [],
+      "plot": "Young migrants from Honduras and El Salvador face dangerous journeys attempting to reach the United States, often seeking family reunification or economic opportunities.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU5ODI3NTQxN15BMl5BanBnXkFtZTcwOTQ5MDA4Mg@@._V1_SX300.jpg",
+      "posterId": "tt0489342",
+      "imdbID": "tt0489342",
+      "imdbRating": 7.8,
+      "imdbVotes": 1269,
+      "runtime": "90 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 3 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Transformers: Revenge of the Fallen",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Michael Bay",
+      "actor": "Shia LaBeouf",
+      "actors": [
+        "Shia LaBeouf",
+        "Megan Fox",
+        "Josh Duhamel"
+      ],
+      "plot": "Sam Witwicky leaves the Autobots behind for a normal life. But when his mind is filled with cryptic symbols, the Decepticons target him and he is dragged back into the Transformers' war.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjk4OTczOTk0NF5BMl5BanBnXkFtZTcwNjQ0NzMzMw@@._V1_SX300.jpg",
+      "posterId": "tt1055369",
+      "imdbID": "tt1055369",
+      "imdbRating": 6,
+      "imdbVotes": 451650,
+      "runtime": "149 min",
+      "rated": "PG-13",
+      "country": "United States, Jordan, United Kingdom, Egypt",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 15 wins & 30 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Secret of Kells",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Family"
+      ],
+      "director": "Tomm Moore, Nora Twomey",
+      "actor": "Evan McGuire",
+      "actors": [
+        "Evan McGuire",
+        "Brendan Gleeson",
+        "Mick Lally"
+      ],
+      "plot": "A young boy in a remote medieval outpost under siege from barbarian raids is beckoned to adventure when a celebrated master illuminator arrives with an ancient book, brimming with secret wisdom and powers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjEzMjEzNTIzOF5BMl5BanBnXkFtZTcwMTg2MjAyMw@@._V1_SX300.jpg",
+      "posterId": "tt0485601",
+      "imdbID": "tt0485601",
+      "imdbRating": 7.5,
+      "imdbVotes": 40569,
+      "runtime": "75 min",
+      "rated": "Not Rated",
+      "country": "Ireland, Belgium, France, Luxembourg",
+      "language": "Irish Gaelic, Norwegian, Latin, English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Most Dangerous Man in America: Daniel Ellsberg and the Pentagon Papers",
+      "year": "2009",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Judith Ehrlich, Rick Goldsmith",
+      "actor": "Robert McNamara",
+      "actors": [
+        "Robert McNamara",
+        "Peter Arnett",
+        "Ben Bagdikian"
+      ],
+      "plot": "An exploration of the life and work of Dr. Daniel Ellsberg, former Marine and military strategist, who was responsible for the publication of secret government documents that revealed the truth behind America's involvement in Viet...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ0Nzg0MDQ2M15BMl5BanBnXkFtZTcwMzAwOTIyMw@@._V1_SX300.jpg",
+      "posterId": "tt1319726",
+      "imdbID": "tt1319726",
+      "imdbRating": 7.7,
+      "imdbVotes": 2493,
+      "runtime": "92 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 5 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Milk of Sorrow",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "director": "Claudia Llosa",
+      "actor": "Magaly Solier",
+      "actors": [
+        "Magaly Solier",
+        "Susi Sánchez",
+        "Efraín Solís"
+      ],
+      "plot": "Fausta is suffering from a rare disease called the Milk of Sorrow, which is transmitted through the breast milk of pregnant women who were abused or raped during or soon after pregnancy. While living in constant fear and confusion...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNWY5ZjZkMzgtZDRlYy00YzNiLWJiNGMtYzQ3ZjUyM2Q2ZWRmXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1206488",
+      "imdbID": "tt1206488",
+      "imdbRating": 6.7,
+      "imdbVotes": 7444,
+      "runtime": "94 min",
+      "rated": null,
+      "country": "Spain, Peru",
+      "language": "Spanish, Quechua",
+      "awards": "Nominated for 1 Oscar. 16 wins & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lovely Bones",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Fantasy",
+        "Thriller"
+      ],
+      "director": "Peter Jackson",
+      "actor": "Rachel Weisz",
+      "actors": [
+        "Rachel Weisz",
+        "Mark Wahlberg",
+        "Saoirse Ronan"
+      ],
+      "plot": "Centers on a young girl who has been murdered and watches over her family - and her killer - from purgatory. She must weigh her desire for vengeance against her desire for her family to heal.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAwNDA1MTM2MF5BMl5BanBnXkFtZTcwMzg3NDcwMw@@._V1_SX300.jpg",
+      "posterId": "tt0380510",
+      "imdbID": "tt0380510",
+      "imdbRating": 6.6,
+      "imdbVotes": 189603,
+      "runtime": "135 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, New Zealand, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 10 wins & 46 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Lady and the Reaper (La dama y la muerte)",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Action"
+      ],
+      "director": "Javier Recio Gracia",
+      "actor": "Miguel Angel Perez",
+      "actors": [
+        "Miguel Angel Perez",
+        "Eva Molina"
+      ],
+      "plot": "On her deathbed, a sad, white-haired woman yearns to reunite with her beloved late husband. However, the road to the afterlife can be long, and today's modern medicine works miracles.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYWI1NTEyNzQtYTM1Ny00OTMwLTgyZWMtNDYxZmVmMzZhY2ZlXkEyXkFqcGdeQXVyNDE5MTU2MDE@._V1_SX300.jpg",
+      "posterId": "tt1523317",
+      "imdbID": "tt1523317",
+      "imdbRating": 7.2,
+      "imdbVotes": 2710,
+      "runtime": "8 min",
+      "rated": "TV-G",
+      "country": "Spain",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Door",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Sci-Fi"
+      ],
+      "director": "Anno Saul",
+      "actor": "Mads Mikkelsen",
+      "actors": [
+        "Mads Mikkelsen",
+        "Jessica Schwarz",
+        "Valeria Eisenbart"
+      ],
+      "plot": "A successful artist loses control of his life after his young daughter's death. A chance for a new start appears, but all is not what it seems.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTkwMjkwNjI3NF5BMl5BanBnXkFtZTgwNjUxMzcwMzE@._V1_SX300.jpg",
+      "posterId": "tt1223934",
+      "imdbID": "tt1223934",
+      "imdbRating": 6.7,
+      "imdbVotes": 6516,
+      "runtime": "103 min",
+      "rated": null,
+      "country": "Germany",
+      "language": "German",
+      "awards": "2 wins & 3 nominations",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Julie & Julia",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Nora Ephron",
+      "actor": "Amy Adams",
+      "actors": [
+        "Amy Adams",
+        "Meryl Streep",
+        "Chris Messina"
+      ],
+      "plot": "Julie Powell, a young blogger, is determined to emulate Julia Child's cooking techniques. Though separated by time, the two women share a common passion for food that intertwines their lives.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzA4NjA2NjI2NV5BMl5BanBnXkFtZTcwOTEzNzI2Mg@@._V1_SX300.jpg",
+      "posterId": "tt1135503",
+      "imdbID": "tt1135503",
+      "imdbRating": 7,
+      "imdbVotes": 134333,
+      "runtime": "123 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 26 wins & 48 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "In the Loop",
+      "year": "2009",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": "Armando Iannucci",
+      "actor": "Tom Hollander",
+      "actors": [
+        "Tom Hollander",
+        "Peter Capaldi",
+        "James Gandolfini"
+      ],
+      "plot": "A political satire about a group of skeptical American and British operatives attempting to prevent a war between two countries.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU2NzQxNzA1OF5BMl5BanBnXkFtZTcwNzQ0NDk0Mg@@._V1_SX300.jpg",
+      "posterId": "tt1226774",
+      "imdbID": "tt1226774",
+      "imdbRating": 7.4,
+      "imdbVotes": 63276,
+      "runtime": "106 min",
+      "rated": "Not Rated",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 16 wins & 43 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Il Divo",
+      "year": "2008",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Paolo Sorrentino",
+      "actor": "Toni Servillo",
+      "actors": [
+        "Toni Servillo",
+        "Anna Bonaiuto",
+        "Giulio Bosetti"
+      ],
+      "plot": "The story of Italian politician Giulio Andreotti, who has served as Prime Minister of Italy seven times since the restoration of democracy in 1946.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTJhZTFlNWMtNDEwZS00NTJhLWE1MzYtNWQyZGUxOGM0NGFiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1023490",
+      "imdbID": "tt1023490",
+      "imdbRating": 7.2,
+      "imdbVotes": 19951,
+      "runtime": "110 min",
+      "rated": "Not Rated",
+      "country": "Italy, France",
+      "language": "Italian, English",
+      "awards": "Nominated for 1 Oscar. 32 wins & 40 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Harry Potter and the Half-Blood Prince",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Family"
+      ],
+      "director": "David Yates",
+      "actor": "Daniel Radcliffe",
+      "actors": [
+        "Daniel Radcliffe",
+        "Emma Watson",
+        "Rupert Grint"
+      ],
+      "plot": "As Harry Potter begins his sixth year at Hogwarts, he discovers an old book marked as \"the property of the Half-Blood Prince\" and begins to learn more about Lord Voldemort's dark past.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzU3NDg4NTAyNV5BMl5BanBnXkFtZTcwOTg2ODg1Mg@@._V1_SX300.jpg",
+      "posterId": "tt0417741",
+      "imdbID": "tt0417741",
+      "imdbRating": 7.6,
+      "imdbVotes": 653701,
+      "runtime": "153 min",
+      "rated": "PG",
+      "country": "United Kingdom, United States",
+      "language": "English, Latin",
+      "awards": "Nominated for 1 Oscar. 9 wins & 39 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Granny O'Grimm's Sleeping Beauty",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Nicky Phelan",
+      "actor": "Kathleen O'Rourke",
+      "actors": [
+        "Kathleen O'Rourke"
+      ],
+      "plot": "It's night; a wide-eyed fearful child is in bed. When her granny enters the room, the child pretends to be asleep. Granny O'Grimm isn't fooled; she pokes the child with a walker and picks up the book \"Sleeping Beauty.\" We see the ...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGNlZjViMTMtMmI5NC00ZmMxLWIyZGMtMDcyMjdhYzM5MmM3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1382454",
+      "imdbID": "tt1382454",
+      "imdbRating": 6.4,
+      "imdbVotes": 1688,
+      "runtime": "6 min",
+      "rated": "Not Rated",
+      "country": "Ireland",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "French Roast",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Fabrice Joubert",
+      "actor": null,
+      "actors": [],
+      "plot": "In a fancy Parisian Café, an uptight businessman discovers he forgot to bring his wallet and bides his time by ordering more coffee.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTkxMjY1MTExMV5BMl5BanBnXkFtZTcwMjY0MTA4OQ@@._V1_SX300.jpg",
+      "posterId": "tt1323520",
+      "imdbID": "tt1323520",
+      "imdbRating": 7.1,
+      "imdbVotes": 3032,
+      "runtime": "8 min",
+      "rated": "TV-PG",
+      "country": "France",
+      "language": "French",
+      "awards": "Nominated for 1 Oscar. 10 wins & 9 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Food, Inc.",
+      "year": "2008",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "News"
+      ],
+      "director": "Robert Kenner",
+      "actor": "Michael Pollan",
+      "actors": [
+        "Michael Pollan",
+        "Eric Schlosser",
+        "Richard Lobb"
+      ],
+      "plot": "An unflattering look inside America's corporate controlled food industry.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmQyY2VlNTYtYjYzNi00YmY3LTgzNTktOWJkZmNlMmFlNWQyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1286537",
+      "imdbID": "tt1286537",
+      "imdbRating": 7.8,
+      "imdbVotes": 52823,
+      "runtime": "94 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 20 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Coraline",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Drama",
+        "Family"
+      ],
+      "director": "Henry Selick",
+      "actor": "Dakota Fanning",
+      "actors": [
+        "Dakota Fanning",
+        "Teri Hatcher",
+        "John Hodgman"
+      ],
+      "plot": "Wandering her rambling old house in her boring new town, a young girl discovers a hidden door to a strangely idealized version of her life that seems too good to be true.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzQxNjM5NzkxNV5BMl5BanBnXkFtZTcwMzg5NDMwMg@@._V1_SX300.jpg",
+      "posterId": "tt0327597",
+      "imdbID": "tt0327597",
+      "imdbRating": 7.8,
+      "imdbVotes": 297596,
+      "runtime": "100 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English, Russian",
+      "awards": "Nominated for 1 Oscar. 8 wins & 46 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Coco Before Chanel",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama"
+      ],
+      "director": "Anne Fontaine",
+      "actor": "Audrey Tautou",
+      "actors": [
+        "Audrey Tautou",
+        "Benoît Poelvoorde",
+        "Alessandro Nivola"
+      ],
+      "plot": "The story of Coco Chanel's rise from obscure beginnings to the heights of the fashion world.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTA0NjYzMzQxNzBeQTJeQWpwZ15BbWU3MDI2MDA0ODI@._V1_SX300.jpg",
+      "posterId": "tt1035736",
+      "imdbID": "tt1035736",
+      "imdbRating": 6.6,
+      "imdbVotes": 42747,
+      "runtime": "105 min",
+      "rated": "PG-13",
+      "country": "France, Belgium",
+      "language": "French, English",
+      "awards": "Nominated for 1 Oscar. 5 wins & 20 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Burma VJ: Reporting from a Closed Country",
+      "year": "2008",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "History",
+        "News"
+      ],
+      "director": "Anders Østergaard",
+      "actor": "George W. Bush",
+      "actors": [
+        "George W. Bush",
+        "Joshua Min Htut",
+        "Ko Muang"
+      ],
+      "plot": "Using smuggled footage, this documentary tells the story of the 2007 protests in Burma by thousands of monks.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA4OTQ4MTE0OF5BMl5BanBnXkFtZTcwMjM5NjAyMw@@._V1_SX300.jpg",
+      "posterId": "tt1333634",
+      "imdbID": "tt1333634",
+      "imdbRating": 7.8,
+      "imdbVotes": 2538,
+      "runtime": "84 min",
+      "rated": "Unrated",
+      "country": "Denmark, Sweden, Norway, United Kingdom, United States, Germany, Netherlands, Israel, Spain, Belgium, Canada",
+      "language": "Burmese, English",
+      "awards": "Nominated for 1 Oscar. 20 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bright Star",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Jane Campion",
+      "actor": "Abbie Cornish",
+      "actors": [
+        "Abbie Cornish",
+        "Ben Whishaw",
+        "Paul Schneider"
+      ],
+      "plot": "Nineteenth-century English poet, John Keats and his dressmaking neighbor, Fanny Brawne, have total disregard for each other. An unlikely romance develops and they fall deeply in love near the end of his life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg0NjEwNDgxNF5BMl5BanBnXkFtZTcwMjkyOTM3Mg@@._V1_SX300.jpg",
+      "posterId": "tt0810784",
+      "imdbID": "tt0810784",
+      "imdbRating": 6.9,
+      "imdbVotes": 29294,
+      "runtime": "119 min",
+      "rated": "PG",
+      "country": "Australia, United Kingdom, France",
+      "language": "English, French",
+      "awards": "Nominated for 1 Oscar. 16 wins & 54 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Ajami",
+      "year": "2009",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Scandar Copti, Yaron Shani",
+      "actor": "Fouad Habash",
+      "actors": [
+        "Fouad Habash",
+        "Nisrin Siksik",
+        "Elias Saba"
+      ],
+      "plot": "Ajami is the religiously mixed community of Muslims and Christians in Tel Aviv. These are five stories about the everyday life in Ajami.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTMyNjY0MDE3MF5BMl5BanBnXkFtZTcwNDk4NTgxMw@@._V1_SX300.jpg",
+      "posterId": "tt1077262",
+      "imdbID": "tt1077262",
+      "imdbRating": 7.2,
+      "imdbVotes": 6684,
+      "runtime": "124 min",
+      "rated": "Not Rated",
+      "country": "Israel, Germany, United Kingdom",
+      "language": "Arabic, Hebrew",
+      "awards": "Nominated for 1 Oscar. 15 wins & 11 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Single Man",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "Thriller"
+      ],
+      "director": "Tom Ford",
+      "actor": "Colin Firth",
+      "actors": [
+        "Colin Firth",
+        "Julianne Moore",
+        "Matthew Goode"
+      ],
+      "plot": "An English professor, one year after the sudden death of his boyfriend, is unable to cope with his typical days in 1960s Los Angeles.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzU5MTk4MjQ2M15BMl5BanBnXkFtZTcwNDU0MzEwMw@@._V1_SX300.jpg",
+      "posterId": "tt1315981",
+      "imdbID": "tt1315981",
+      "imdbRating": 7.5,
+      "imdbVotes": 121021,
+      "runtime": "99 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 39 wins & 59 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Prophet",
+      "year": "2009",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Jacques Audiard",
+      "actor": "Tahar Rahim",
+      "actors": [
+        "Tahar Rahim",
+        "Niels Arestrup",
+        "Adel Bencherif"
+      ],
+      "plot": "A delinquent Muslim man struggles to get by in prison until he is taken under the wing of a powerful mob boss, but his gradual rise through the organization's ranks brings him in conflict with his mentor.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUyMjQ1MTY5OV5BMl5BanBnXkFtZTcwNzY5NjExMw@@._V1_SX300.jpg",
+      "posterId": "tt1235166",
+      "imdbID": "tt1235166",
+      "imdbRating": 7.8,
+      "imdbVotes": 107123,
+      "runtime": "155 min",
+      "rated": "R",
+      "country": "France, Italy",
+      "language": "French, Arabic, Corsican",
+      "awards": "Nominated for 1 Oscar. 52 wins & 57 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Wallace & Gromit: A Matter of Loaf and Death",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Nick Park",
+      "actor": "Peter Sallis",
+      "actors": [
+        "Peter Sallis",
+        "Sally Lindsay",
+        "Melissa Collier"
+      ],
+      "plot": "Wallace and his dog, Gromit, open a bakery and get tied up with a murder mystery. But when Wallace falls in love, Gromit is left to solve the case.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzE2ODE0YjMtY2IwMy00MzRlLTkxZDQtOTRhZTJmNDVhNmRhXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1118511",
+      "imdbID": "tt1118511",
+      "imdbRating": 7.6,
+      "imdbVotes": 20936,
+      "runtime": "29 min",
+      "rated": "TV-PG",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 3 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The White Ribbon",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Thriller"
+      ],
+      "director": "Michael Haneke",
+      "actor": "Christian Friedel",
+      "actors": [
+        "Christian Friedel",
+        "Ernst Jacobi",
+        "Leonie Benesch"
+      ],
+      "plot": "Strange events happen in a small village in the north of Germany during the years before World War I, which seem to be ritual punishment. Who is responsible?",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQ2OTYyNzUxOF5BMl5BanBnXkFtZTcwMzUwMDY4Mg@@._V1_SX300.jpg",
+      "posterId": "tt1149362",
+      "imdbID": "tt1149362",
+      "imdbRating": 7.8,
+      "imdbVotes": 80927,
+      "runtime": "144 min",
+      "rated": "R",
+      "country": "Germany, Austria, France, Italy, Canada",
+      "language": "German, Italian, Polish, Latin",
+      "awards": "Nominated for 2 Oscars. 62 wins & 49 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Messenger",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance",
+        "War"
+      ],
+      "director": "Oren Moverman",
+      "actor": "Ben Foster",
+      "actors": [
+        "Ben Foster",
+        "Samantha Morton",
+        "Woody Harrelson"
+      ],
+      "plot": "An American soldier struggles with an ethical dilemma when he becomes involved with a widow of a fallen officer.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQyMzQ2Nzc5Ml5BMl5BanBnXkFtZTcwNDk4NjAyMw@@._V1_SX300.jpg",
+      "posterId": "tt0790712",
+      "imdbID": "tt0790712",
+      "imdbRating": 7.1,
+      "imdbVotes": 38238,
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 2 Oscars. 17 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Last Station",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Michael Hoffman",
+      "actor": "Helen Mirren",
+      "actors": [
+        "Helen Mirren",
+        "James McAvoy",
+        "Christopher Plummer"
+      ],
+      "plot": "A historical drama that illustrates Russian author Leo Tolstoy's (Christopher Plummer's) struggle to balance fame and wealth with his commitment to a life devoid of material things.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTA4MTAzNTQzMDNeQTJeQWpwZ15BbWU3MDgzNTg2MDM@._V1_SX300.jpg",
+      "posterId": "tt0824758",
+      "imdbID": "tt0824758",
+      "imdbRating": 6.9,
+      "imdbVotes": 19435,
+      "runtime": "112 min",
+      "rated": "R",
+      "country": "Germany, United Kingdom, Russia",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 5 wins & 18 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Imaginarium of Doctor Parnassus",
+      "year": "2009",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Comedy",
+        "Fantasy"
+      ],
+      "director": "Terry Gilliam",
+      "actor": "Christopher Plummer",
+      "actors": [
+        "Christopher Plummer",
+        "Lily Cole",
+        "Heath Ledger"
+      ],
+      "plot": "Having made a deal with the Devil himself for immortality many millennia ago, the now decrepit mystic Doctor Parnassus fights for the freedom of his only daughter's soul.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY4Njg4NTA3Nl5BMl5BanBnXkFtZTcwNzYxMzg5Mg@@._V1_SX300.jpg",
+      "posterId": "tt1054606",
+      "imdbID": "tt1054606",
+      "imdbRating": 6.8,
+      "imdbVotes": 156272,
+      "runtime": "123 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, France, Canada",
+      "language": "English, Russian, French",
+      "awards": "Nominated for 2 Oscars. 5 wins & 23 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sherlock Holmes",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Mystery"
+      ],
+      "director": "Guy Ritchie",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Jude Law",
+        "Rachel McAdams"
+      ],
+      "plot": "Detective Sherlock Holmes and his stalwart partner Watson engage in a battle of wits and brawn with a nemesis whose plot is a threat to all of England.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg0NjEwNjUxM15BMl5BanBnXkFtZTcwMzk0MjQ5Mg@@._V1_SX300.jpg",
+      "posterId": "tt0988045",
+      "imdbID": "tt0988045",
+      "imdbRating": 7.5,
+      "imdbVotes": 702387,
+      "runtime": "128 min",
+      "rated": "PG-13",
+      "country": "United States, Germany",
+      "language": "English, French",
+      "awards": "Nominated for 2 Oscars. 10 wins & 31 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Invictus",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Clint Eastwood",
+      "actor": "Morgan Freeman",
+      "actors": [
+        "Morgan Freeman",
+        "Matt Damon",
+        "Tony Kgoroge"
+      ],
+      "plot": "Nelson Mandela, in his first term as President of South Africa, initiates a unique venture to unite the Apartheid-torn land: enlist the national rugby team on a mission to win the 1995 Rugby World Cup.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjAyMzExMDM1N15BMl5BanBnXkFtZTcwNTcyMTQ5Mg@@._V1_SX300.jpg",
+      "posterId": "tt1057500",
+      "imdbID": "tt1057500",
+      "imdbRating": 7.3,
+      "imdbVotes": 172199,
+      "runtime": "134 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Afrikaans, Maori, Zulu, Xhosa, Sotho",
+      "awards": "Nominated for 2 Oscars. 12 wins & 38 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Fantastic Mr. Fox",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Wes Anderson",
+      "actor": "George Clooney",
+      "actors": [
+        "George Clooney",
+        "Meryl Streep",
+        "Bill Murray"
+      ],
+      "plot": "An urbane fox cannot resist returning to his farm raiding ways and then must help his community survive the farmers' retaliation.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTA1ZTIxZDUtNGFjYS00YTc5LTgzNDMtZWNjYjBlMzI2OTk3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0432283",
+      "imdbID": "tt0432283",
+      "imdbRating": 7.9,
+      "imdbVotes": 296911,
+      "runtime": "87 min",
+      "rated": "PG",
+      "country": "United States, United Kingdom",
+      "language": "English, French",
+      "awards": "Nominated for 2 Oscars. 32 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "A Serious Man",
+      "year": "2009",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "director": "Ethan Coen, Joel Coen",
+      "actor": "Michael Stuhlbarg",
+      "actors": [
+        "Michael Stuhlbarg",
+        "Richard Kind",
+        "Sari Lennick"
+      ],
+      "plot": "Larry Gopnik, a Midwestern physics teacher, watches his life unravel over multiple sudden incidents. Despite seeking meaning and answers amidst his turmoils, he seems to keep sinking.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYTQ0MWU5ODItMmY0Yy00NTM1LWJjMmItMjg4MDgwMTE5YmY5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1019452",
+      "imdbID": "tt1019452",
+      "imdbRating": 7,
+      "imdbVotes": 155273,
+      "runtime": "106 min",
+      "rated": "R",
+      "country": "United Kingdom, France, United States",
+      "language": "English, Yiddish, Hebrew",
+      "awards": "Nominated for 2 Oscars. 17 wins & 80 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Princess and the Frog",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Ron Clements, John Musker",
+      "actor": "Anika Noni Rose",
+      "actors": [
+        "Anika Noni Rose",
+        "Keith David",
+        "Oprah Winfrey"
+      ],
+      "plot": "A waitress desperate to fulfill her dreams as a restaurant owner is set on a journey to turn a frog prince back into a human, but she has to face the same problem after she kisses him.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTE3YTExYTEtOTUxZC00OTM0LWJmYmItMDk5YjczNmIwNzA2XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0780521",
+      "imdbID": "tt0780521",
+      "imdbRating": 7.2,
+      "imdbVotes": 184917,
+      "runtime": "97 min",
+      "rated": "G",
+      "country": "United States, Brazil, Canada",
+      "language": "English, French",
+      "awards": "Nominated for 3 Oscars. 10 wins & 42 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "An Education",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Lone Scherfig",
+      "actor": "Carey Mulligan",
+      "actors": [
+        "Carey Mulligan",
+        "Peter Sarsgaard",
+        "Alfred Molina"
+      ],
+      "plot": "A coming-of-age story about a teenage girl in 1960s suburban London, and how her life changes with the arrival of a playboy nearly twice her age.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTg4NjgzOTc0MF5BMl5BanBnXkFtZTcwOTc2OTE3Mg@@._V1_SX300.jpg",
+      "posterId": "tt1174732",
+      "imdbID": "tt1174732",
+      "imdbRating": 7.2,
+      "imdbVotes": 140630,
+      "runtime": "100 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, French",
+      "awards": "Nominated for 3 Oscars. 36 wins & 96 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "District 9",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Sci-Fi",
+        "Thriller"
+      ],
+      "director": "Neill Blomkamp",
+      "actor": "Sharlto Copley",
+      "actors": [
+        "Sharlto Copley",
+        "David James",
+        "Jason Cope"
+      ],
+      "plot": "In a future Earth in which aliens are isolated in a remote ghetto, a government agent finds himself banished there.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM4OTI1OTM5NF5BMl5BanBnXkFtZTcwMzk5MTU1Mg@@._V1_SX300.jpg",
+      "posterId": "tt1136608",
+      "imdbID": "tt1136608",
+      "imdbRating": 7.9,
+      "imdbVotes": 748028,
+      "runtime": "112 min",
+      "rated": "R",
+      "country": "South Africa, United States, New Zealand, Canada",
+      "language": "English, Nyanja, Afrikaans, Zulu, Xhosa, Sotho",
+      "awards": "Nominated for 4 Oscars. 32 wins & 117 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Up in the Air",
+      "year": "2009",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Jason Reitman",
+      "actor": "George Clooney",
+      "actors": [
+        "George Clooney",
+        "Vera Farmiga",
+        "Anna Kendrick"
+      ],
+      "plot": "Ryan's job is to travel around the country firing off people. When his boss hires Natalie, who proposes firing people via video conference, he tries to convince her that her method is a mistake.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI3MzYxMTA4NF5BMl5BanBnXkFtZTcwMDE4ODg3Mg@@._V1_SX300.jpg",
+      "posterId": "tt1193138",
+      "imdbID": "tt1193138",
+      "imdbRating": 7.4,
+      "imdbVotes": 357535,
+      "runtime": "109 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 6 Oscars. 75 wins & 171 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Secret in Their Eyes",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Romance"
+      ],
+      "director": "Juan José Campanella",
+      "actor": "Ricardo Darín",
+      "actors": [
+        "Ricardo Darín",
+        "Soledad Villamil",
+        "Pablo Rago"
+      ],
+      "plot": "A retired legal counselor writes a novel hoping to find closure for one of his past unresolved homicide cases and for his unreciprocated love with his superior--both of which still haunt him decades later.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTgwNTI3OTczOV5BMl5BanBnXkFtZTcwMTM3MTUyMw@@._V1_SX300.jpg",
+      "posterId": "tt1305806",
+      "imdbID": "tt1305806",
+      "imdbRating": 8.2,
+      "imdbVotes": 240743,
+      "runtime": "129 min",
+      "rated": "R",
+      "country": "Argentina, Spain",
+      "language": "Spanish",
+      "awards": "Won 1 Oscar. 53 wins & 43 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The New Tenants",
+      "year": "2009",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Comedy",
+        "Crime"
+      ],
+      "director": "Joachim Back",
+      "actor": "Vincent D'Onofrio",
+      "actors": [
+        "Vincent D'Onofrio",
+        "Kevin Corrigan",
+        "Liane Balaban"
+      ],
+      "plot": "A nosy neighbor, a drug dealer and an angry husband make for a move-in day that two men will never forget.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTE4NjVmYTYtYmE2OC00Njg5LThmODEtMDc4NjZiMWU2YzliXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1520428",
+      "imdbID": "tt1520428",
+      "imdbRating": 6.8,
+      "imdbVotes": 1570,
+      "runtime": "21 min",
+      "rated": "TV-14",
+      "country": "Denmark, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 1 win & 6 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Cove",
+      "year": "2009",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Crime"
+      ],
+      "director": "Louie Psihoyos",
+      "actor": "Richard O'Barry",
+      "actors": [
+        "Richard O'Barry",
+        "Louie Psihoyos",
+        "Hardy Jones"
+      ],
+      "plot": "Using state-of-the-art equipment, a group of activists, led by renowned dolphin trainer Ric O'Barry, infiltrate a cove near Taijii, Japan to expose both a shocking instance of animal abuse and a serious threat to human health.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc3Nzg2NzM5MF5BMl5BanBnXkFtZTcwMTYwMjU2Mg@@._V1_SX300.jpg",
+      "posterId": "tt1313104",
+      "imdbID": "tt1313104",
+      "imdbRating": 8.4,
+      "imdbVotes": 52888,
+      "runtime": "92 min",
+      "rated": "PG-13",
+      "country": "United States, Japan, Germany, Chile, Canada, United Kingdom",
+      "language": "English, Japanese",
+      "awards": "Won 1 Oscar. 39 wins & 18 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Logorama",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Action"
+      ],
+      "director": "François Alaux, Hervé de Crécy, Ludovic Houplain",
+      "actor": "Bob Stephenson",
+      "actors": [
+        "Bob Stephenson",
+        "Sherman Augustus",
+        "Aja Evans"
+      ],
+      "plot": "Police chase an armed criminal in a version of Los Angeles comprised entirely of corporate logos.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc4Mjc5NjA4MV5BMl5BanBnXkFtZTgwNDIzNDA2MDE@._V1_SX300.jpg",
+      "posterId": "tt1563725",
+      "imdbID": "tt1563725",
+      "imdbRating": 7.5,
+      "imdbVotes": 6335,
+      "runtime": "16 min",
+      "rated": "R",
+      "country": "France",
+      "language": "English",
+      "awards": "Won 1 Oscar. 9 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Blind Side",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "Sport"
+      ],
+      "director": "John Lee Hancock",
+      "actor": "Quinton Aaron",
+      "actors": [
+        "Quinton Aaron",
+        "Sandra Bullock",
+        "Tim McGraw"
+      ],
+      "plot": "The story of Michael Oher, a homeless and traumatized boy who became an All-American football player and first-round NFL draft pick with the help of a caring woman and her family.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjEzOTE3ODM3OF5BMl5BanBnXkFtZTcwMzYyODI4Mg@@._V1_SX300.jpg",
+      "posterId": "tt0878804",
+      "imdbID": "tt0878804",
+      "imdbRating": 7.6,
+      "imdbVotes": 383190,
+      "runtime": "129 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 9 wins & 30 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Young Victoria",
+      "year": "2009",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Jean-Marc Vallée",
+      "actor": "Emily Blunt",
+      "actors": [
+        "Emily Blunt",
+        "Rupert Friend",
+        "Paul Bettany"
+      ],
+      "plot": "A dramatization of the turbulent first years of Queen Victoria's rule, and her enduring romance with Prince Albert.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDI4ODBlM2QtYjUxMS00OGRiLWI2YjgtZjI0YjU1YWY2MTJjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0962736",
+      "imdbID": "tt0962736",
+      "imdbRating": 7.2,
+      "imdbVotes": 68991,
+      "runtime": "105 min",
+      "rated": "PG",
+      "country": "United Kingdom",
+      "language": "English, German",
+      "awards": "Won 1 Oscar. 13 wins & 17 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Star Trek",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "J.J. Abrams",
+      "actor": "Chris Pine",
+      "actors": [
+        "Chris Pine",
+        "Zachary Quinto",
+        "Simon Pegg"
+      ],
+      "plot": "The brash James T. Kirk tries to live up to his father's legacy with Mr. Spock keeping him in check as a vengeful Romulan from the future creates black holes to destroy the Federation one planet at a time.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjE5NDQ5OTE4Ml5BMl5BanBnXkFtZTcwOTE3NDIzMw@@._V1_SX300.jpg",
+      "posterId": "tt0796366",
+      "imdbID": "tt0796366",
+      "imdbRating": 7.9,
+      "imdbVotes": 636122,
+      "runtime": "127 min",
+      "rated": "PG-13",
+      "country": "Germany, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 27 wins & 95 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Inglourious Basterds",
+      "year": "2009",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "War"
+      ],
+      "director": "Quentin Tarantino",
+      "actor": "Brad Pitt",
+      "actors": [
+        "Brad Pitt",
+        "Diane Kruger",
+        "Eli Roth"
+      ],
+      "plot": "In Nazi-occupied France during World War II, a plan to assassinate Nazi leaders by a group of Jewish U.S. soldiers coincides with a theatre owner's vengeful plans for the same.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODZhMWJlNjYtNDExNC00MTIzLTllM2ItOGQ2NGVjNDQ3MzkzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0361748",
+      "imdbID": "tt0361748",
+      "imdbRating": 8.4,
+      "imdbVotes": 1762277,
+      "runtime": "153 min",
+      "rated": "R",
+      "country": "United States, Germany",
+      "language": "English, German, French, Italian",
+      "awards": "Won 1 Oscar. 134 wins & 173 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Crazy Heart",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Romance"
+      ],
+      "director": "Scott Cooper",
+      "actor": "Jeff Bridges",
+      "actors": [
+        "Jeff Bridges",
+        "Maggie Gyllenhaal",
+        "Colin Farrell"
+      ],
+      "plot": "A faded country music musician is forced to reassess his dysfunctional life during a doomed romance that also inspires him.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU0NDc5NjgzNl5BMl5BanBnXkFtZTcwNzc0NDIzMw@@._V1_SX300.jpg",
+      "posterId": "tt1263670",
+      "imdbID": "tt1263670",
+      "imdbRating": 7.2,
+      "imdbVotes": 96025,
+      "runtime": "112 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Won 2 Oscars. 40 wins & 33 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Up",
+      "year": "2009",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Pete Docter, Bob Peterson",
+      "actor": "Edward Asner",
+      "actors": [
+        "Edward Asner",
+        "Jordan Nagai",
+        "John Ratzenberger"
+      ],
+      "plot": "78-year-old Carl Fredricksen travels to South America in his house equipped with balloons, inadvertently taking a young stowaway.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNmI1ZTc5MWMtMDYyOS00ZDc2LTkzOTAtNjQ4NWIxNjYyNDgzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1049413",
+      "imdbID": "tt1049413",
+      "imdbRating": 8.3,
+      "imdbVotes": 1225827,
+      "runtime": "96 min",
+      "rated": "PG",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 81 wins & 88 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Precious",
+      "year": "2009",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Lee Daniels",
+      "actor": "Gabourey Sidibe",
+      "actors": [
+        "Gabourey Sidibe",
+        "Mo'Nique",
+        "Paula Patton"
+      ],
+      "plot": "In New York City's Harlem circa 1987, an overweight, abused, illiterate teen who is pregnant with her second child is invited to enroll in an alternative school in hopes that she can re-route her life in a better direction.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDVkZDYzOTktMDI0Yy00YjE5LWIxMGEtOGZlNjllOTdhZjQ3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0929632",
+      "imdbID": "tt0929632",
+      "imdbRating": 7.3,
+      "imdbVotes": 117933,
+      "runtime": "110 min",
+      "rated": "Not Rated",
+      "country": "United States",
+      "language": "English, Italian",
+      "awards": "Won 2 Oscars. 114 wins & 103 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Avatar",
+      "year": "2009",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Fantasy"
+      ],
+      "director": "James Cameron",
+      "actor": "Sam Worthington",
+      "actors": [
+        "Sam Worthington",
+        "Zoe Saldaña",
+        "Sigourney Weaver"
+      ],
+      "plot": "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDEzMmQwZjctZWU2My00MWNlLWE0NjItMDJlYTRlNGJiZjcyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0499549",
+      "imdbID": "tt0499549",
+      "imdbRating": 7.9,
+      "imdbVotes": 1486308,
+      "runtime": "162 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom",
+      "language": "English, Spanish",
+      "awards": "Won 3 Oscars. 91 wins & 131 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Hurt Locker",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Thriller",
+        "War"
+      ],
+      "director": "Kathryn Bigelow",
+      "actor": "Jeremy Renner",
+      "actors": [
+        "Jeremy Renner",
+        "Anthony Mackie",
+        "Brian Geraghty"
+      ],
+      "plot": "During the Iraq War, a Sergeant recently assigned to an army bomb squad is put at odds with his squad mates due to his maverick way of handling his work.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNzgyMGM2YTItYzY2Yi00NDQ0LWE0M2EtMGUzYjFlMDgyY2M3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0887912",
+      "imdbID": "tt0887912",
+      "imdbRating": 7.5,
+      "imdbVotes": 494146,
+      "runtime": "131 min",
+      "rated": "R",
+      "country": "United States, Luxembourg, Canada",
+      "language": "English, Arabic",
+      "awards": "Won 6 Oscars. 125 wins & 130 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "intense",
+        "suspenseful"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Waltz with Bashir",
+      "year": "2008",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Animation",
+        "Biography"
+      ],
+      "director": "Ari Folman",
+      "actor": "Ari Folman",
+      "actors": [
+        "Ari Folman",
+        "Ron Ben-Yishai",
+        "Ronny Dayag"
+      ],
+      "plot": "An Israeli film director interviews fellow veterans of the 1982 invasion of Lebanon to reconstruct his own memories of his term of service in that conflict.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjM2OTI3NzQyNl5BMl5BanBnXkFtZTcwNjkzNzQ5MQ@@._V1_SX300.jpg",
+      "posterId": "tt1185616",
+      "imdbID": "tt1185616",
+      "imdbRating": 8,
+      "imdbVotes": 61713,
+      "runtime": "90 min",
+      "rated": "R",
+      "country": "Israel, France, Germany, United States, Finland, Switzerland, Belgium, Australia",
+      "language": "Hebrew, Arabic, German, English",
+      "awards": "Nominated for 1 Oscar. 46 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Trouble the Water",
+      "year": "2008",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Carl Deal, Tia Lessin",
+      "actor": "Michael Brown",
+      "actors": [
+        "Michael Brown",
+        "George W. Bush",
+        "Julie Chen Moonves"
+      ],
+      "plot": "A redemptive tale of an aspiring rap artist surviving failed levees and her own troubled past and seizing a chance for a new beginning.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI0MTQzNzEyNV5BMl5BanBnXkFtZTcwNjQzODE1Mg@@._V1_SX300.jpg",
+      "posterId": "tt1149405",
+      "imdbID": "tt1149405",
+      "imdbRating": 7.3,
+      "imdbVotes": 2065,
+      "runtime": "93 min",
+      "rated": "Unrated",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 7 wins & 14 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Tropic Thunder",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Comedy",
+        "War"
+      ],
+      "director": "Ben Stiller",
+      "actor": "Ben Stiller",
+      "actors": [
+        "Ben Stiller",
+        "Jack Black",
+        "Robert Downey Jr."
+      ],
+      "plot": "Through a series of freak occurrences, a group of actors shooting a big-budget war movie are forced to become the soldiers they are portraying.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDE5NjQzMDkzOF5BMl5BanBnXkFtZTcwODI3ODI3MQ@@._V1_SX300.jpg",
+      "posterId": "tt0942385",
+      "imdbID": "tt0942385",
+      "imdbRating": 7.1,
+      "imdbVotes": 485373,
+      "runtime": "107 min",
+      "rated": "R",
+      "country": "United Kingdom, Germany, United States",
+      "language": "English, Mandarin",
+      "awards": "Nominated for 1 Oscar. 10 wins & 47 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "This Way Up",
+      "year": "2019",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": null,
+      "actor": "Aisling Bea",
+      "actors": [
+        "Aisling Bea",
+        "Sharon Horgan",
+        "Tobias Menzies"
+      ],
+      "plot": "A young woman puts her life back together after suffering from a nervous breakdown.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTJlZmI2MTAtNTQ5Ny00MTZjLWI3YzgtMjUzYjZjZDdmNWYzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt8430356",
+      "imdbID": "tt8430356",
+      "imdbRating": 7.8,
+      "imdbVotes": 8740,
+      "runtime": "25 min",
+      "rated": null,
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 BAFTA Award1 win & 4 nominations total",
+      "omdbType": "series",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Visitor",
+      "year": "2007",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Tom McCarthy",
+      "actor": "Richard Jenkins",
+      "actors": [
+        "Richard Jenkins",
+        "Haaz Sleiman",
+        "Danai Gurira"
+      ],
+      "plot": "A college professor travels to New York City to attend a conference and finds a young couple living in his apartment.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTIzNTg3NzkzNV5BMl5BanBnXkFtZTcwNzMwMjU2MQ@@._V1_SX300.jpg",
+      "posterId": "tt0857191",
+      "imdbID": "tt0857191",
+      "imdbRating": 7.6,
+      "imdbVotes": 45060,
+      "runtime": "104 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, French, Arabic, Romanian",
+      "awards": "Nominated for 1 Oscar. 19 wins & 35 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Garden",
+      "year": "1995",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy"
+      ],
+      "director": "Martin Sulík",
+      "actor": "Roman Luknár",
+      "actors": [
+        "Roman Luknár",
+        "Zuzana Sulajová",
+        "Jana Svandová"
+      ],
+      "plot": "A disillusioned 30-something teacher falls out with his father and moves to a derelict house in their family garden. He is then visited by a stunningly beautiful neighbour, famous philosophers, his ex-lover and.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZTUyYjMyZDYtOWRlMi00MmRiLWEwMzctYTExMGE3NzE3MTc4XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0115040",
+      "imdbID": "tt0115040",
+      "imdbRating": 7.6,
+      "imdbVotes": 2280,
+      "runtime": "99 min",
+      "rated": null,
+      "country": "Slovakia, France",
+      "language": "Slovak",
+      "awards": "12 wins & 9 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Class",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Laurent Cantet",
+      "actor": "François Bégaudeau",
+      "actors": [
+        "François Bégaudeau",
+        "Agame Malembo-Emene",
+        "Angélica Sancio"
+      ],
+      "plot": "Teacher and novelist François Bégaudeau plays a version of himself as he negotiates a year with his racially mixed students from a tough Parisian neighborhood.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc4NjUzNDYxM15BMl5BanBnXkFtZTcwNjExNzMwMg@@._V1_SX300.jpg",
+      "posterId": "tt1068646",
+      "imdbID": "tt1068646",
+      "imdbRating": 7.5,
+      "imdbVotes": 36785,
+      "runtime": "128 min",
+      "rated": "PG-13",
+      "country": "France",
+      "language": "French, Bambara, Spanish",
+      "awards": "Nominated for 1 Oscar. 11 wins & 33 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Baader Meinhof Complex",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Biography",
+        "Crime"
+      ],
+      "director": "Uli Edel",
+      "actor": "Martina Gedeck",
+      "actors": [
+        "Martina Gedeck",
+        "Moritz Bleibtreu",
+        "Johanna Wokalek"
+      ],
+      "plot": "A look at Germany's terrorist group, The Red Army Faction (RAF), which organized bombings, robberies, kidnappings, and assassinations in the late 1960s and '70s.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTAyM2ZlYjUtZDRhYi00YjY5LWJiZWItMTM0OTdmMGE3MTk3XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0765432",
+      "imdbID": "tt0765432",
+      "imdbRating": 7.3,
+      "imdbVotes": 41543,
+      "runtime": "150 min",
+      "rated": "R",
+      "country": "Germany, France, Czech Republic",
+      "language": "German, English, French, Swedish, Arabic",
+      "awards": "Nominated for 1 Oscar. 4 wins & 22 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Revanche",
+      "year": "2008",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Götz Spielmann",
+      "actor": "Johannes Krisch",
+      "actors": [
+        "Johannes Krisch",
+        "Irina Potapenko",
+        "Andreas Lust"
+      ],
+      "plot": "Ex-con Alex plans to flee to the South with his girl after a robbery. But something terrible happens and revenge seems inevitable.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTk5NzU2MTQzOV5BMl5BanBnXkFtZTcwMzA2NDIzMg@@._V1_SX300.jpg",
+      "posterId": "tt1173745",
+      "imdbID": "tt1173745",
+      "imdbRating": 7.5,
+      "imdbVotes": 16327,
+      "runtime": "121 min",
+      "rated": "Not Rated",
+      "country": "Austria",
+      "language": "German, Russian",
+      "awards": "Nominated for 1 Oscar. 15 wins & 8 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Rachel Getting Married",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Jonathan Demme",
+      "actor": "Anne Hathaway",
+      "actors": [
+        "Anne Hathaway",
+        "Rosemarie DeWitt",
+        "Debra Winger"
+      ],
+      "plot": "A young woman who has been in and out of rehab for the past ten years returns home for the weekend for her sister's wedding.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTQ0MzQwOF5BMl5BanBnXkFtZTcwODY1NDI5MQ@@._V1_SX300.jpg",
+      "posterId": "tt1084950",
+      "imdbID": "tt1084950",
+      "imdbRating": 6.7,
+      "imdbVotes": 52070,
+      "runtime": "113 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 32 wins & 65 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Presto",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Doug Sweetland",
+      "actor": "Charles Pane",
+      "actors": [
+        "Charles Pane"
+      ],
+      "plot": "A stage magician's rabbit gets into a magical onstage brawl against his neglectful guardian with two magic hats.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYzVhMWQxMzUtNmE1OS00YzZlLWE4ZTgtMTg2YzFlZDNmZTgxXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1245104",
+      "imdbID": "tt1245104",
+      "imdbRating": 8.3,
+      "imdbVotes": 26319,
+      "runtime": "5 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Oktapodi",
+      "year": "2007",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short",
+        "Comedy"
+      ],
+      "director": "Julien Bocabeille, François-Xavier Chanioux, Olivier Delabarre",
+      "actor": null,
+      "actors": [],
+      "plot": "Two Octopi fight for their lives with a stubborn restaurant cook in a comical escape through the streets of a small Greek village.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjNiZmY4ZjYtYzk1MS00NDE4LTkzZmItYmJjNGQ4ZTRmZWUzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1323941",
+      "imdbID": "tt1323941",
+      "imdbRating": 7.2,
+      "imdbVotes": 3584,
+      "runtime": "3 min",
+      "rated": "TV-G",
+      "country": "France",
+      "language": "None",
+      "awards": "Nominated for 1 Oscar. 6 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "New Boy",
+      "year": "2007",
+      "genre": "Short",
+      "genres": [
+        "Short",
+        "Drama"
+      ],
+      "director": "Steph Green",
+      "actor": "Olutunji Ebun-Cole",
+      "actors": [
+        "Olutunji Ebun-Cole",
+        "Simon O'Driscoll",
+        "Fionn O'Shea"
+      ],
+      "plot": "Captures the experience of being the new kid in school through the eyes of Joseph, a nine year-old African boy.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjI5NjkzNjk5N15BMl5BanBnXkFtZTcwMzIxOTg3OQ@@._V1_SX300.jpg",
+      "posterId": "tt1095191",
+      "imdbID": "tt1095191",
+      "imdbRating": 7,
+      "imdbVotes": 1232,
+      "runtime": "11 min",
+      "rated": null,
+      "country": "Ireland",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 15 wins & 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Kung Fu Panda",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "director": "Mark Osborne, John Stevenson",
+      "actor": "Jack Black",
+      "actors": [
+        "Jack Black",
+        "Ian McShane",
+        "Angelina Jolie"
+      ],
+      "plot": "To everyone's surprise, including his own, Po, an overweight, clumsy panda, is chosen as protector of the Valley of Peace. His suitability will soon be tested as the valley's arch-enemy is on his way.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZDU5MDNiMGItYjVmZi00NDUxLTg2OTktNGE0NzNlNzM4NzgyXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0441773",
+      "imdbID": "tt0441773",
+      "imdbRating": 7.6,
+      "imdbVotes": 574537,
+      "runtime": "92 min",
+      "rated": "PG",
+      "country": "United States, Japan, China, Russia",
+      "language": "English, Japanese, Chinese",
+      "awards": "Nominated for 1 Oscar. 15 wins & 39 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "In Bruges",
+      "year": "2008",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Martin McDonagh",
+      "actor": "Colin Farrell",
+      "actors": [
+        "Colin Farrell",
+        "Brendan Gleeson",
+        "Ciarán Hinds"
+      ],
+      "plot": "After a job gone wrong, hitman Ray and his partner await orders from their ruthless boss in Bruges, Belgium, the last place in the world Ray wants to be.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNjliZjBlNDItOWUyZC00ZTExLTg5NmUtNzE5ZmQyZWVmZmE5XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0780536",
+      "imdbID": "tt0780536",
+      "imdbRating": 7.9,
+      "imdbVotes": 490275,
+      "runtime": "107 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 25 wins & 55 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "fun",
+        "lighthearted",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Hellboy II: The Golden Army",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Fantasy"
+      ],
+      "director": "Guillermo del Toro",
+      "actor": "Ron Perlman",
+      "actors": [
+        "Ron Perlman",
+        "Selma Blair",
+        "Doug Jones"
+      ],
+      "plot": "A prince of the mythical world starts a rebellion against humanity in order to rule the Earth. Hellboy and his team must fight to stop him from locating the all-powerful Golden Army.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMjA5NzgyMjc2Nl5BMl5BanBnXkFtZTcwOTU3MDI3MQ@@._V1_SX300.jpg",
+      "posterId": "tt0411477",
+      "imdbID": "tt0411477",
+      "imdbRating": 7,
+      "imdbVotes": 297109,
+      "runtime": "120 min",
+      "rated": "PG-13",
+      "country": "United States, Germany, Hungary",
+      "language": "English, Gaelic, German",
+      "awards": "Nominated for 1 Oscar. 6 wins & 36 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Happy-Go-Lucky",
+      "year": "2008",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Mike Leigh",
+      "actor": "Sally Hawkins",
+      "actors": [
+        "Sally Hawkins",
+        "Alexis Zegerman",
+        "Samuel Roukin"
+      ],
+      "plot": "A look at a few chapters in the life of Poppy, a cheery, colorful, North London schoolteacher whose optimism tends to exasperate those around her.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI4ODY1MjIyNV5BMl5BanBnXkFtZTcwMTExMTM5MQ@@._V1_SX300.jpg",
+      "posterId": "tt1045670",
+      "imdbID": "tt1045670",
+      "imdbRating": 7,
+      "imdbVotes": 41397,
+      "runtime": "118 min",
+      "rated": "R",
+      "country": "United Kingdom",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 39 wins & 63 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Encounters at the End of the World",
+      "year": "2007",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary"
+      ],
+      "director": "Werner Herzog",
+      "actor": "Werner Herzog",
+      "actors": [
+        "Werner Herzog",
+        "Scott Rowland",
+        "Stefan Pashov"
+      ],
+      "plot": "Film-maker Werner Herzog travels to the McMurdo Station in Antarctica, looking to capture the continent's beauty and investigate the characters living there.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTI3NjkyNjY2OV5BMl5BanBnXkFtZTcwOTUwMTU3MQ@@._V1_SX300.jpg",
+      "posterId": "tt1093824",
+      "imdbID": "tt1093824",
+      "imdbRating": 7.7,
+      "imdbVotes": 19488,
+      "runtime": "99 min",
+      "rated": "G",
+      "country": "United States",
+      "language": "English, Spanish",
+      "awards": "Nominated for 1 Oscar. 2 wins & 16 nominations total",
+      "omdbType": "movie",
+      "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Defiance",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "director": "Edward Zwick",
+      "actor": "Daniel Craig",
+      "actors": [
+        "Daniel Craig",
+        "Liev Schreiber",
+        "Jamie Bell"
+      ],
+      "plot": "Jewish brothers in German-occupied Eastern Europe escape into a Belorussian forest, where they join Russian resistance fighters, and endeavor to build a village, in order to protect themselves and about one thousand Jewish non-com...",
+      "poster": "https://m.media-amazon.com/images/M/MV5BM2YzY2UzMDUtODM1NS00MmNlLTg0Y2EtYjhiODczMmExMGFlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1034303",
+      "imdbID": "tt1034303",
+      "imdbRating": 7.1,
+      "imdbVotes": 159820,
+      "runtime": "137 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, German, Russian",
+      "awards": "Nominated for 1 Oscar. 2 wins & 5 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Bolt",
+      "year": "2008",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Comedy"
+      ],
+      "director": "Byron Howard, Chris Williams",
+      "actor": "John Travolta",
+      "actors": [
+        "John Travolta",
+        "Miley Cyrus",
+        "Susie Essman"
+      ],
+      "plot": "The canine star of a fictional sci-fi/action show that believes his powers are real embarks on a cross country trek to save his co-star from a threat he believes is just as real.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY3NGVkMmItYWNjMy00MmE0LTlkZmUtNGIxZGJmZTA1YWI0XkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0397892",
+      "imdbID": "tt0397892",
+      "imdbRating": 6.8,
+      "imdbVotes": 241714,
+      "runtime": "96 min",
+      "rated": "PG",
+      "country": "United States, Japan",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 win & 32 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Australia",
+      "year": "2008",
+      "genre": "Adventure",
+      "genres": [
+        "Adventure",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Baz Luhrmann",
+      "actor": "Nicole Kidman",
+      "actors": [
+        "Nicole Kidman",
+        "Hugh Jackman",
+        "Shea Adams"
+      ],
+      "plot": "In 1939, an Englishwoman inherits a sprawling ranch in northern Australia and reluctantly makes a pact with a stockman to drive 2000 head of cattle over unforgiving landscape.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BM2Q4NjBhMDUtZWJhNS00ZTM2LTk0ZDEtNDY2M2Y0NTAyOTBiXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0455824",
+      "imdbID": "tt0455824",
+      "imdbRating": 6.6,
+      "imdbVotes": 132196,
+      "runtime": "165 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Australia, United States",
+      "language": "English, Aboriginal, Chinese, Japanese",
+      "awards": "Nominated for 1 Oscar. 12 wins & 37 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Wanted",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Thriller"
+      ],
+      "director": "Timur Bekmambetov",
+      "actor": "Angelina Jolie",
+      "actors": [
+        "Angelina Jolie",
+        "James McAvoy",
+        "Morgan Freeman"
+      ],
+      "plot": "A frustrated office worker discovers that he is the son of a professional assassin, and that he shares his father's superhuman killing abilities.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTQwNDM2MTMwMl5BMl5BanBnXkFtZTgwMjE4NjQxMTE@._V1_SX300.jpg",
+      "posterId": "tt0493464",
+      "imdbID": "tt0493464",
+      "imdbRating": 6.7,
+      "imdbVotes": 425023,
+      "runtime": "110 min",
+      "rated": "R",
+      "country": "United States, Germany, Russia",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 4 wins & 28 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "intense",
+        "suspenseful",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Wrestler",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Sport"
+      ],
+      "director": "Darren Aronofsky",
+      "actor": "Mickey Rourke",
+      "actors": [
+        "Mickey Rourke",
+        "Marisa Tomei",
+        "Evan Rachel Wood"
+      ],
+      "plot": "A faded professional wrestler must retire, but finds his quest for a new life outside the ring a dispiriting struggle.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTc5MjYyOTg4MF5BMl5BanBnXkFtZTcwNDc2MzQwMg@@._V1_SX300.jpg",
+      "posterId": "tt1125849",
+      "imdbID": "tt1125849",
+      "imdbRating": 7.9,
+      "imdbVotes": 330212,
+      "runtime": "109 min",
+      "rated": "R",
+      "country": "United States, France",
+      "language": "English",
+      "awards": "Nominated for 2 Oscars. 58 wins & 93 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Iron Man",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "director": "Jon Favreau",
+      "actor": "Robert Downey Jr.",
+      "actors": [
+        "Robert Downey Jr.",
+        "Gwyneth Paltrow",
+        "Terrence Howard"
+      ],
+      "plot": "After being held captive in an Afghan cave, billionaire engineer Tony Stark creates a unique weaponized suit of armor to fight evil.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_SX300.jpg",
+      "posterId": "tt0371746",
+      "imdbID": "tt0371746",
+      "imdbRating": 7.9,
+      "imdbVotes": 1213667,
+      "runtime": "126 min",
+      "rated": "PG-13",
+      "country": "United States, Canada",
+      "language": "English, Persian, Urdu, Arabic, Kurdish, Hindi, Hungarian",
+      "awards": "Nominated for 2 Oscars. 24 wins & 73 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action",
+        "sci-fi"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Frozen River",
+      "year": "2008",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "director": "Courtney Hunt",
+      "actor": "Melissa Leo",
+      "actors": [
+        "Melissa Leo",
+        "Misty Upham",
+        "Charlie McDermott"
+      ],
+      "plot": "A mom looks for another source of income, when her husband leaves with the money meant for the new mobile home. A nearby Indian territory stretches across the border to Canada with a drivable frozen river between. Smuggling?",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTk2NjMwMDgzNF5BMl5BanBnXkFtZTcwMDY0NDY3MQ@@._V1_SX300.jpg",
+      "posterId": "tt0978759",
+      "imdbID": "tt0978759",
+      "imdbRating": 7.1,
+      "imdbVotes": 26675,
+      "runtime": "97 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English, French, Chinese, Urdu, Mohawk",
+      "awards": "Nominated for 2 Oscars. 32 wins & 39 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Revolutionary Road",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Romance"
+      ],
+      "director": "Sam Mendes",
+      "actor": "Leonardo DiCaprio",
+      "actors": [
+        "Leonardo DiCaprio",
+        "Kate Winslet",
+        "Christopher Fitzgerald"
+      ],
+      "plot": "A young couple living in a Connecticut suburb during the mid-1950s struggle to come to terms with their personal problems while trying to raise their two children.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTczNDgzMjczOV5BMl5BanBnXkFtZTcwOTU3MzMwMg@@._V1_SX300.jpg",
+      "posterId": "tt0959337",
+      "imdbID": "tt0959337",
+      "imdbRating": 7.3,
+      "imdbVotes": 234616,
+      "runtime": "119 min",
+      "rated": "R",
+      "country": "United Kingdom, United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 20 wins & 73 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Changeling",
+      "year": "2008",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Clint Eastwood",
+      "actor": "Angelina Jolie",
+      "actors": [
+        "Angelina Jolie",
+        "Colm Feore",
+        "Amy Ryan"
+      ],
+      "plot": "After Christine's son goes missing, she reaches out to the LAPD to find him, but when they try to pass off an impostor as her son to quiet public protests, she refuses to accept him or give up hope.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOTA1Mzg3NjIxNV5BMl5BanBnXkFtZTcwNzU2NTc5MQ@@._V1_SX300.jpg",
+      "posterId": "tt0824747",
+      "imdbID": "tt0824747",
+      "imdbRating": 7.7,
+      "imdbVotes": 273100,
+      "runtime": "141 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 14 wins & 55 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Frost/Nixon",
+      "year": "2008",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Ron Howard",
+      "actor": "Frank Langella",
+      "actors": [
+        "Frank Langella",
+        "Michael Sheen",
+        "Sam Rockwell"
+      ],
+      "plot": "A dramatic retelling of the post-Watergate television interviews between British talk-show host David Frost and former president Richard Nixon.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU2NDU2NDQtMTlhNC00ZGI3LWIzOGItNzQ3OTk0MjgyMGYzXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0870111",
+      "imdbID": "tt0870111",
+      "imdbRating": 7.6,
+      "imdbVotes": 115313,
+      "runtime": "122 min",
+      "rated": "R",
+      "country": "United States, United Kingdom, France",
+      "language": "English",
+      "awards": "Nominated for 5 Oscars. 23 wins & 81 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Doubt",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery"
+      ],
+      "director": "John Patrick Shanley",
+      "actor": "Meryl Streep",
+      "actors": [
+        "Meryl Streep",
+        "Philip Seymour Hoffman",
+        "Amy Adams"
+      ],
+      "plot": "A Catholic school principal questions a priest's ambiguous relationship with a troubled young student.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZWZmNDMyY2UtOWIwMC00MjE5LTkwNmUtYjRiMThkNjI0OGEwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0918927",
+      "imdbID": "tt0918927",
+      "imdbRating": 7.5,
+      "imdbVotes": 143509,
+      "runtime": "104 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 5 Oscars. 25 wins & 97 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Vicky Cristina Barcelona",
+      "year": "2008",
+      "genre": "Comedy",
+      "genres": [
+        "Comedy",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Woody Allen",
+      "actor": "Rebecca Hall",
+      "actors": [
+        "Rebecca Hall",
+        "Scarlett Johansson",
+        "Javier Bardem"
+      ],
+      "plot": "Two friends on a summer holiday in Spain become enamored with the same painter, unaware that his ex-wife, with whom he has a tempestuous relationship, is about to re-enter the picture.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGYyZTllMmUtZDFmYS00ZjJhLThhNmEtZmQwYzkzNjkyNzhlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0497465",
+      "imdbID": "tt0497465",
+      "imdbRating": 7.1,
+      "imdbVotes": 275462,
+      "runtime": "96 min",
+      "rated": "PG-13",
+      "country": "Spain, United States",
+      "language": "English, Spanish",
+      "awards": "Won 1 Oscar. 32 wins & 54 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fun",
+        "lighthearted"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Man on Wire",
+      "year": "2008",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "Crime"
+      ],
+      "director": "James Marsh",
+      "actor": "Philippe Petit",
+      "actors": [
+        "Philippe Petit",
+        "Jean François Heckel",
+        "Jean-Louis Blondeau"
+      ],
+      "plot": "A look at tightrope walker Philippe Petit's daring, but illegal, high-wire routine performed between New York City's World Trade Center's twin towers in 1974, what some consider, \"the artistic crime of the century\".",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTMxNTk3NDY1NV5BMl5BanBnXkFtZTcwNDk0ODg3MQ@@._V1_SX300.jpg",
+      "posterId": "tt1155592",
+      "imdbID": "tt1155592",
+      "imdbRating": 7.7,
+      "imdbVotes": 59935,
+      "runtime": "94 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, United States",
+      "language": "English, French",
+      "awards": "Won 1 Oscar. 46 wins & 13 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Departures",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Yôjirô Takita",
+      "actor": "Masahiro Motoki",
+      "actors": [
+        "Masahiro Motoki",
+        "Ryôko Hirosue",
+        "Tsutomu Yamazaki"
+      ],
+      "plot": "Soon after buying an expensive cello, Daigo learns that his orchestra is disbanding. He moves back to his hometown with his wife, where he answers an ad for what Daigo thinks is a travel agency but is, in actuality, a mortuary.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTUzOTcwOTA2NV5BMl5BanBnXkFtZTcwNDczMzczMg@@._V1_SX300.jpg",
+      "posterId": "tt1069238",
+      "imdbID": "tt1069238",
+      "imdbRating": 8,
+      "imdbVotes": 57249,
+      "runtime": "130 min",
+      "rated": "PG-13",
+      "country": "Japan",
+      "language": "Japanese",
+      "awards": "Won 1 Oscar. 40 wins & 12 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Duchess",
+      "year": "2008",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Saul Dibb",
+      "actor": "Keira Knightley",
+      "actors": [
+        "Keira Knightley",
+        "Ralph Fiennes",
+        "Dominic Cooper"
+      ],
+      "plot": "A chronicle of the life of 18th-century aristocrat Georgiana, Duchess of Devonshire, who was revered for her extravagant political and personal life.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU1MTQzMjgzNl5BMl5BanBnXkFtZTcwNTQxMzk3MQ@@._V1_SX300.jpg",
+      "posterId": "tt0864761",
+      "imdbID": "tt0864761",
+      "imdbRating": 6.9,
+      "imdbVotes": 90188,
+      "runtime": "110 min",
+      "rated": "PG-13",
+      "country": "United Kingdom, Italy, France, United States",
+      "language": "English",
+      "awards": "Won 1 Oscar. 8 wins & 21 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Reader",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Mystery",
+        "Romance"
+      ],
+      "director": "Stephen Daldry",
+      "actor": "Ralph Fiennes",
+      "actors": [
+        "Ralph Fiennes",
+        "Jeanette Hain",
+        "David Kross"
+      ],
+      "plot": "Post-WWII Germany: Nearly a decade after his affair with an older woman came to a mysterious end, law student Michael Berg re-encounters his former lover as she defends herself in a war-crime trial.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTM0NDQxNjA0N15BMl5BanBnXkFtZTcwNDUwMzcwMg@@._V1_SX300.jpg",
+      "posterId": "tt0976051",
+      "imdbID": "tt0976051",
+      "imdbRating": 7.6,
+      "imdbVotes": 271485,
+      "runtime": "124 min",
+      "rated": "R",
+      "country": "Germany, United States, Poland",
+      "language": "English, German, Greek, Latin",
+      "awards": "Won 1 Oscar. 26 wins & 48 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "mysterious"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Ultimate 'WALL-E' Recap Cartoon",
+      "year": "2022",
+      "genre": "Animation",
+      "genres": [
+        "Animation",
+        "Short"
+      ],
+      "director": "Brian Bear, Cas van de Pol",
+      "actor": "Pepijn Hikspoors",
+      "actors": [
+        "Pepijn Hikspoors",
+        "Joe Porter"
+      ],
+      "plot": null,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTY5Yjc1YzUtMjkxMS00YTY3LThkOTAtZGI0ODFlN2Y3OGJjXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt20453422",
+      "imdbID": "tt20453422",
+      "imdbRating": null,
+      "imdbVotes": null,
+      "runtime": "5 min",
+      "rated": null,
+      "country": "Netherlands",
+      "language": "English",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "animated"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Dark Knight",
+      "year": "2008",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "director": "Christopher Nolan",
+      "actor": "Christian Bale",
+      "actors": [
+        "Christian Bale",
+        "Heath Ledger",
+        "Aaron Eckhart"
+      ],
+      "plot": "When a menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman, James Gordon and Harvey Dent must work together to put an end to the madness.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
+      "posterId": "tt0468569",
+      "imdbID": "tt0468569",
+      "imdbRating": 9.1,
+      "imdbVotes": 3135889,
+      "runtime": "152 min",
+      "rated": "PG-13",
+      "country": "United States, United Kingdom",
+      "language": "English, Mandarin",
+      "awards": "Won 2 Oscars. 163 wins & 165 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "action",
+        "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Milk",
+      "year": "2008",
+      "genre": "Biography",
+      "genres": [
+        "Biography",
+        "Drama",
+        "History"
+      ],
+      "director": "Gus Van Sant",
+      "actor": "Sean Penn",
+      "actors": [
+        "Sean Penn",
+        "Josh Brolin",
+        "Emile Hirsch"
+      ],
+      "plot": "The story of American gay activist Harvey Milk, who fought for gay rights and was elected as California's first openly gay official.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOWVmZWYzMDEtN2NkMi00NWM4LThjYzYtNzBjNzIzN2FmM2NlXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1013753",
+      "imdbID": "tt1013753",
+      "imdbRating": 7.5,
+      "imdbVotes": 184363,
+      "runtime": "128 min",
+      "rated": "R",
+      "country": "United States",
+      "language": "English",
+      "awards": "Won 2 Oscars. 66 wins & 146 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "The Curious Case of Benjamin Button",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Fantasy",
+        "Romance"
+      ],
+      "director": "David Fincher",
+      "actor": "Brad Pitt",
+      "actors": [
+        "Brad Pitt",
+        "Cate Blanchett",
+        "Tilda Swinton"
+      ],
+      "plot": "Benjamin Button, born in 1918 with the physical state of an elderly man, ages in reverse. He experiences love and break-ups, ecstasy and sorrow, and timelessness by the time he dies in 2003 as a baby.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BYjIyNDExOWItM2Y4ZC00NmY3LWFlN2ItYTJlZDQ1NTJlZTUwXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt0421715",
+      "imdbID": "tt0421715",
+      "imdbRating": 7.8,
+      "imdbVotes": 740633,
+      "runtime": "166 min",
+      "rated": "PG-13",
+      "country": "United States",
+      "language": "English, Russian, French",
+      "awards": "Won 3 Oscars. 85 wins & 160 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "fantasy"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Slumdog Millionaire",
+      "year": "2008",
+      "genre": "Crime",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Romance"
+      ],
+      "director": "Danny Boyle, Loveleen Tandan",
+      "actor": "Dev Patel",
+      "actors": [
+        "Dev Patel",
+        "Freida Pinto",
+        "Saurabh Shukla"
+      ],
+      "plot": "When a teenager from the slums of Mumbai is interrogated about his suspicious performance on a quiz show, he revisits various events from his past to explain how he knew all the answers.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTE5ZTRkYWEtZmU5MC00NDJjLTk3NmUtZGJlYTM2MmQ3NTJkXkEyXkFqcGc@._V1_SX300.jpg",
+      "posterId": "tt1010048",
+      "imdbID": "tt1010048",
+      "imdbRating": 8,
+      "imdbVotes": 907124,
+      "runtime": "120 min",
+      "rated": "R",
+      "country": "United Kingdom, France, United States, India",
+      "language": "English, Hindi",
+      "awards": "Won 8 Oscars. 154 wins & 133 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
+        "romantic",
+        "crime"
       ],
       "ph": false,
       "source": "auto_candidates",
