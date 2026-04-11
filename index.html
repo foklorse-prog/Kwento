@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ================================================================
   KWENTO PATCH NOTES (dev only - update this every release)
 ================================================================
@@ -1460,9 +1460,17 @@ function saveData(d){
     const slim={...d};
     delete slim.customPhoto;
     delete slim.photoPos;
+    // Strip large fields that can be reconstructed on next load:
+    // - libraryMovies: re-fetched from shared library on startup
+    // - spotifyMusicPool: re-fetched from Spotify on startup
+    // These are the two most likely causes of localStorage quota errors.
+    delete slim.spotifyMusicPool;
     if(slim.libraryMovies){
+      // Keep a lightweight version — just the identifying fields, no posters or plots.
+      // This preserves enrichment metadata (imdbRating, genre, director) which
+      // improves suggestion quality, without storing large strings.
       slim.libraryMovies=slim.libraryMovies.map(m=>{
-        const {poster,...rest}=m;
+        const {poster,plot,actors,...rest}=m;
         return rest;
       });
     }
@@ -1474,7 +1482,49 @@ function saveData(d){
     const s=JSON.stringify(slim);
     localStorage.setItem(SK,s);
     if(d.onboarded) localStorage.setItem(SK+"_bk",s);
-  }catch{}
+  }catch(e){
+    // Quota exceeded — try again with a more aggressively trimmed version
+    // so at minimum the logs and core data survive.
+    try{
+      const emergency={
+        onboarded:d.onboarded,
+        language:d.language,
+        theme:d.theme,
+        userName:d.userName,
+        avatar:d.avatar,
+        logs:(d.logs||[]).map(l=>{
+          const {actPhotos,poster,plot,...rest}=l;
+          return rest;
+        }),
+        watchlist:(d.watchlist||[]).map(w=>{
+          const {poster,...rest}=w;
+          return rest;
+        }),
+        feedback:d.feedback,
+        tasteSeed:d.tasteSeed,
+        profilePhotoIds:d.profilePhotoIds,
+        profilePhotoPosMap:d.profilePhotoPosMap,
+        likedSuggestions:d.likedSuggestions,
+        watchlistReminders:d.watchlistReminders,
+        savedMusic:d.savedMusic,
+        betaMode:d.betaMode,
+        stickerGenCount:d.stickerGenCount,
+        stickerGenDate:d.stickerGenDate,
+        locationEnabled:d.locationEnabled,
+        weekHarmony:d.weekHarmony,
+        dismissedSugg:d.dismissedSugg,
+        discoverSkips:d.discoverSkips,
+        discoverCounts:d.discoverCounts,
+        discoverDate:d.discoverDate,
+        _feedbackWiped:d._feedbackWiped,
+        firstUseAt:d.firstUseAt,
+        appActiveMs:d.appActiveMs,
+      };
+      const s=JSON.stringify(emergency);
+      localStorage.setItem(SK,s);
+      if(d.onboarded) localStorage.setItem(SK+"_bk",s);
+    }catch(_){}
+  }
 }
 
 // ── Save photos to IndexedDB ──────────────────────────────────────────────────
@@ -5501,7 +5551,10 @@ function buildRelevantLocalLibrary(curated, logs, existing){
     if(!key) return;
     if(!byKey.has(key)) byKey.set(key,m);
   });
-  return Array.from(byKey.values());
+  // Cap at 800 entries to stay well within localStorage's ~5MB limit.
+  // Logged movies are always preserved above; the cap only trims the
+  // suggestion pool which can grow unbounded from OMDB enrichment.
+  return Array.from(byKey.values()).slice(0,800);
 }
 function _normalizeWatchlistItems(d){
   const raw=d.watchlist||d.watchlistMovies||d.watchlistItems||null;
@@ -11729,5 +11782,3 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
-
-
