@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ================================================================
   KWENTO PATCH NOTES (dev only - update this every release)
 ================================================================
@@ -1320,60 +1320,65 @@ function buildTasteProfile(logs, feedback) {
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 const SK = "kwento_v5";
 const IDB_NAME = "kwento_media";
-const IDB_STORE = "photos";
+const IDB_PHOTO_STORE = "photos";
+const IDB_CACHE_STORE = "cache";
+const SHARED_LIBRARY_CACHE_IDB_KEY = "shared_library_movies_v1";
+const MOVIE_STORAGE_MIGRATION_KEY = "kwento_movie_storage_migrated_v2";
 
 // ── IndexedDB helpers ─────────────────────────────────────────────────────────
 function idbOpen(){
   return new Promise((res,rej)=>{
-    const req=indexedDB.open(IDB_NAME,1);
+    const req=indexedDB.open(IDB_NAME,2);
     req.onupgradeneeded=e=>{
       const db=e.target.result;
-      if(!db.objectStoreNames.contains(IDB_STORE))
-        db.createObjectStore(IDB_STORE);
+      if(!db.objectStoreNames.contains(IDB_PHOTO_STORE))
+        db.createObjectStore(IDB_PHOTO_STORE);
+      if(!db.objectStoreNames.contains(IDB_CACHE_STORE))
+        db.createObjectStore(IDB_CACHE_STORE);
     };
     req.onsuccess=e=>res(e.target.result);
     req.onerror=()=>rej(req.error);
   });
 }
-async function idbGet(key){
+async function idbGetFrom(storeName,key){
   try{
     const db=await idbOpen();
     return new Promise((res,rej)=>{
-      const tx=db.transaction(IDB_STORE,"readonly");
-      const req=tx.objectStore(IDB_STORE).get(key);
+      const tx=db.transaction(storeName,"readonly");
+      const req=tx.objectStore(storeName).get(key);
       req.onsuccess=()=>res(req.result||null);
       req.onerror=()=>rej(req.error);
     });
   }catch{return null;}
 }
-async function idbSet(key,val){
+async function idbSetTo(storeName,key,val){
   try{
     const db=await idbOpen();
     return new Promise((res,rej)=>{
-      const tx=db.transaction(IDB_STORE,"readwrite");
-      const req=tx.objectStore(IDB_STORE).put(val,key);
+      const tx=db.transaction(storeName,"readwrite");
+      const req=tx.objectStore(storeName).put(val,key);
       req.onsuccess=()=>res(true);
       req.onerror=()=>rej(req.error);
     });
   }catch{return false;}
 }
-async function idbDel(key){
+async function idbDelFrom(storeName,key){
   try{
     const db=await idbOpen();
     return new Promise((res,rej)=>{
-      const tx=db.transaction(IDB_STORE,"readwrite");
-      const req=tx.objectStore(IDB_STORE).delete(key);
+      const tx=db.transaction(storeName,"readwrite");
+      const req=tx.objectStore(storeName).delete(key);
       req.onsuccess=()=>res(true);
       req.onerror=()=>rej(req.error);
     });
   }catch{return false;}
 }
-async function idbGetAll(){
+async function idbGetAllFrom(storeName){
   try{
     const db=await idbOpen();
     return new Promise((res,rej)=>{
-      const tx=db.transaction(IDB_STORE,"readonly");
-      const store=tx.objectStore(IDB_STORE);
+      const tx=db.transaction(storeName,"readonly");
+      const store=tx.objectStore(storeName);
       const keys=[],vals=[];
       const reqK=store.getAllKeys();
       const reqV=store.getAll();
@@ -1388,17 +1393,97 @@ async function idbGetAll(){
     });
   }catch{return {};}
 }
-async function idbSetAll(map){
+async function idbSetAllTo(storeName,map){
   try{
     const db=await idbOpen();
     return new Promise((res,rej)=>{
-      const tx=db.transaction(IDB_STORE,"readwrite");
-      const store=tx.objectStore(IDB_STORE);
+      const tx=db.transaction(storeName,"readwrite");
+      const store=tx.objectStore(storeName);
       Object.entries(map).forEach(([k,v])=>store.put(v,k));
       tx.oncomplete=()=>res(true);
       tx.onerror=()=>rej(tx.error);
     });
   }catch{return false;}
+}
+async function idbDelByPrefixFrom(storeName,prefix){
+  try{
+    const db=await idbOpen();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(storeName,"readwrite");
+      const store=tx.objectStore(storeName);
+      const req=store.getAllKeys();
+      req.onsuccess=()=>{
+        (req.result||[]).forEach(key=>{
+          if(typeof key==="string" && key.startsWith(prefix)) store.delete(key);
+        });
+      };
+      tx.oncomplete=()=>res(true);
+      tx.onerror=()=>rej(tx.error);
+    });
+  }catch{return false;}
+}
+async function idbGet(key){
+  return idbGetFrom(IDB_PHOTO_STORE,key);
+}
+async function idbSet(key,val){
+  return idbSetTo(IDB_PHOTO_STORE,key,val);
+}
+async function idbDel(key){
+  return idbDelFrom(IDB_PHOTO_STORE,key);
+}
+async function idbGetAll(){
+  return idbGetAllFrom(IDB_PHOTO_STORE);
+}
+async function idbSetAll(map){
+  return idbSetAllTo(IDB_PHOTO_STORE,map);
+}
+async function idbGetCache(key){
+  return idbGetFrom(IDB_CACHE_STORE,key);
+}
+async function idbSetCache(key,val){
+  return idbSetTo(IDB_CACHE_STORE,key,val);
+}
+async function idbDelCache(key){
+  return idbDelFrom(IDB_CACHE_STORE,key);
+}
+function sanitizeMovieCacheItem(item){
+  if(!item || !isActualMovieOrSeries(item)) return null;
+  const safePoster=(typeof item.poster==="string" && /^https?:\/\//i.test(item.poster))?item.poster:null;
+  return {
+    title:item.title||null,
+    year:item.year||null,
+    genre:item.genre||null,
+    genres:Array.isArray(item.genres)?item.genres.filter(Boolean):[],
+    director:item.director||null,
+    actor:item.actor||null,
+    actors:Array.isArray(item.actors)?item.actors.filter(Boolean):[],
+    plot:item.plot||null,
+    poster:safePoster,
+    imdbID:item.imdbID||null,
+    imdbRating:item.imdbRating!=null?item.imdbRating:null,
+    imdbVotes:item.imdbVotes!=null?item.imdbVotes:null,
+    runtime:item.runtime||null,
+    rated:item.rated||null,
+    country:item.country||null,
+    language:item.language||null,
+    awards:item.awards||null,
+    omdbType:item.omdbType||"movie",
+    tags:Array.isArray(item.tags)?item.tags.filter(Boolean):[],
+    ph:!!item.ph,
+    _fromOmdb:!!item._fromOmdb,
+  };
+}
+function sanitizeMovieCacheList(items){
+  const byKey=new Map();
+  (items||[]).forEach(item=>{
+    const safe=sanitizeMovieCacheItem(item);
+    if(!safe) return;
+    const key=(safe.imdbID||safe.title||"").toLowerCase();
+    if(!key) return;
+    const prev=byKey.get(key)||null;
+    byKey.set(key,prev?{...prev,...safe}:safe);
+  });
+  return Array.from(byKey.values());
 }
 
 // ── Load: text from localStorage, photos hydrated from IndexedDB async ────────
@@ -1409,7 +1494,14 @@ function loadData(){
       const parsed=JSON.parse(r);
       if(!parsed.onboarded){
         const bk=localStorage.getItem(SK+"_bk");
-        if(bk){const bp=JSON.parse(bk);if(bp.onboarded)return bp;}
+        if(bk){
+          const bp=JSON.parse(bk);
+          if(bp.onboarded){
+            delete bp.libraryMovies;
+            delete bp.omdbLibrary;
+            return bp;
+          }
+        }
       }
       if(parsed.logs){
         parsed.logs=parsed.logs.map(l=>
@@ -1428,10 +1520,20 @@ function loadData(){
         parsed.feedback={};
         parsed._feedbackWiped=true;
       }
+      delete parsed.libraryMovies;
+      delete parsed.omdbLibrary;
       return parsed;
     }
     const bk=localStorage.getItem(SK+"_bk");
-    if(bk){const bp=JSON.parse(bk);if(bp.onboarded){localStorage.setItem(SK,bk);return bp;}}
+    if(bk){
+      const bp=JSON.parse(bk);
+      if(bp.onboarded){
+        delete bp.libraryMovies;
+        delete bp.omdbLibrary;
+        localStorage.setItem(SK,JSON.stringify(bp));
+        return bp;
+      }
+    }
     const r4=localStorage.getItem("kwento_v4");
     if(r4){
       const d4=JSON.parse(r4);
@@ -1447,6 +1549,8 @@ function loadData(){
       };
       delete migrated.suggState;
       delete migrated.barkadaState;
+      delete migrated.libraryMovies;
+      delete migrated.omdbLibrary;
       return migrated;
     }
     return null;
@@ -1460,20 +1564,8 @@ function saveData(d){
     const slim={...d};
     delete slim.customPhoto;
     delete slim.photoPos;
-    // Strip large fields that can be reconstructed on next load:
-    // - libraryMovies: re-fetched from shared library on startup
-    // - spotifyMusicPool: re-fetched from Spotify on startup
-    // These are the two most likely causes of localStorage quota errors.
-    delete slim.spotifyMusicPool;
-    if(slim.libraryMovies){
-      // Keep a lightweight version — just the identifying fields, no posters or plots.
-      // This preserves enrichment metadata (imdbRating, genre, director) which
-      // improves suggestion quality, without storing large strings.
-      slim.libraryMovies=slim.libraryMovies.map(m=>{
-        const {poster,plot,actors,...rest}=m;
-        return rest;
-      });
-    }
+    delete slim.libraryMovies;
+    delete slim.omdbLibrary;
     if(slim.logs) slim.logs=slim.logs.map(l=>{
       if(!l.actPhotos||!l.actPhotos.length) return l;
       const {actPhotos,...rest}=l;
@@ -1482,49 +1574,7 @@ function saveData(d){
     const s=JSON.stringify(slim);
     localStorage.setItem(SK,s);
     if(d.onboarded) localStorage.setItem(SK+"_bk",s);
-  }catch(e){
-    // Quota exceeded — try again with a more aggressively trimmed version
-    // so at minimum the logs and core data survive.
-    try{
-      const emergency={
-        onboarded:d.onboarded,
-        language:d.language,
-        theme:d.theme,
-        userName:d.userName,
-        avatar:d.avatar,
-        logs:(d.logs||[]).map(l=>{
-          const {actPhotos,poster,plot,...rest}=l;
-          return rest;
-        }),
-        watchlist:(d.watchlist||[]).map(w=>{
-          const {poster,...rest}=w;
-          return rest;
-        }),
-        feedback:d.feedback,
-        tasteSeed:d.tasteSeed,
-        profilePhotoIds:d.profilePhotoIds,
-        profilePhotoPosMap:d.profilePhotoPosMap,
-        likedSuggestions:d.likedSuggestions,
-        watchlistReminders:d.watchlistReminders,
-        savedMusic:d.savedMusic,
-        betaMode:d.betaMode,
-        stickerGenCount:d.stickerGenCount,
-        stickerGenDate:d.stickerGenDate,
-        locationEnabled:d.locationEnabled,
-        weekHarmony:d.weekHarmony,
-        dismissedSugg:d.dismissedSugg,
-        discoverSkips:d.discoverSkips,
-        discoverCounts:d.discoverCounts,
-        discoverDate:d.discoverDate,
-        _feedbackWiped:d._feedbackWiped,
-        firstUseAt:d.firstUseAt,
-        appActiveMs:d.appActiveMs,
-      };
-      const s=JSON.stringify(emergency);
-      localStorage.setItem(SK,s);
-      if(d.onboarded) localStorage.setItem(SK+"_bk",s);
-    }catch(_){}
-  }
+  }catch{}
 }
 
 // ── Save photos to IndexedDB ──────────────────────────────────────────────────
@@ -1542,14 +1592,6 @@ async function savePhotos(d){
       }
     }
   }
-  // Movie posters
-  if(d.libraryMovies){
-    const posterMap={};
-    d.libraryMovies.forEach(m=>{
-      if(m.posterId && m.poster) posterMap["poster_"+m.posterId]=m.poster;
-    });
-    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
-  }
 }
 
 // ── Hydrate: merge IndexedDB photos back into data object ────────────────────
@@ -1565,13 +1607,6 @@ async function hydratePhotos(d){
     hydrated.logs=hydrated.logs.map(l=>{
       const photos=all["entry_"+l.id];
       return photos?{...l,actPhotos:photos}:l;
-    });
-  }
-  if(hydrated.libraryMovies){
-    hydrated.libraryMovies=hydrated.libraryMovies.map(m=>{
-      if(!m.posterId) return m;
-      const poster=all["poster_"+m.posterId];
-      return poster?{...m,poster}:m;
     });
   }
   return hydrated;
@@ -1593,25 +1628,6 @@ async function migratePhotosToIDB(d){
         changed=true;
       }
     }
-  }
-  // Library posters still in localStorage
-  if(d.libraryMovies){
-    const posterMap={};
-    d.libraryMovies=d.libraryMovies.map(m=>{
-      if(m.poster && !m.posterId){
-        const posterId=m.imdbID||`t_${_h(m.title||"")}`;
-        posterMap["poster_"+posterId]=m.poster;
-        changed=true;
-        const {poster,...rest}=m;
-        return {...rest,posterId};
-      }
-      if(m.poster && m.posterId){
-        posterMap["poster_"+m.posterId]=m.poster;
-        changed=true;
-      }
-      return m;
-    });
-    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
   }
   if(changed) saveData(d); // re-save slim version without photos
   return changed;
@@ -3271,19 +3287,8 @@ function LogModal({data,onClose,onSave,editEntry=null,initialCat=null,initialQue
       const basePool=cat?pool:[...pool,...spotifyMusicPool];
       // Movie search pool comes from shared/local movie library only.
   const dynMovies=(data.libraryMovies||[]).map(m=>({...m,_cat:"movies"}));
-  // Offline-only cache fallback for search.
-  let sharedDyn=[];
-  if(typeof navigator!=="undefined" && navigator.onLine===false){
-    try{
-      const raw=localStorage.getItem("kwento_shared_library_cache");
-      const items=raw?JSON.parse(raw):[];
-      if(Array.isArray(items)){
-        sharedDyn=items.map(m=>({...m,_cat:"movies"}));
-      }
-    }catch(_){}
-  }
   const dedupeTitle=new Set();
-  const mergedMovies=[...dynMovies,...sharedDyn].filter(m=>{
+  const mergedMovies=[...dynMovies].filter(m=>{
     const k=(m.title||"").toLowerCase();
     if(!k||dedupeTitle.has(k)) return false;
     dedupeTitle.add(k);
@@ -5551,10 +5556,7 @@ function buildRelevantLocalLibrary(curated, logs, existing){
     if(!key) return;
     if(!byKey.has(key)) byKey.set(key,m);
   });
-  // Cap at 800 entries to stay well within localStorage's ~5MB limit.
-  // Logged movies are always preserved above; the cap only trims the
-  // suggestion pool which can grow unbounded from OMDB enrichment.
-  return Array.from(byKey.values()).slice(0,800);
+  return Array.from(byKey.values());
 }
 function _normalizeWatchlistItems(d){
   const raw=d.watchlist||d.watchlistMovies||d.watchlistItems||null;
@@ -5573,42 +5575,6 @@ function _normalizeSavedMusicItems(d){
     return {...x,category:"music",genre:(x.genre??null)};
   }).filter(Boolean);
 }
-async function _fetchImageDataUrl(url){
-  if(!url) return null;
-  try{
-    const res=await fetch(url);
-    if(!res.ok) return null;
-    const blob=await res.blob();
-    if(blob.size>POSTER_MAX_BYTES) return null;
-    return await new Promise((resolve,reject)=>{
-      const fr=new FileReader();
-      fr.onload=()=>resolve(fr.result||null);
-      fr.onerror=()=>reject(fr.error);
-      fr.readAsDataURL(blob);
-    });
-  }catch(_){ return null; }
-}
-async function cachePostersForItems(items, limit){
-  const list=(items||[]).filter(Boolean).slice(0,limit);
-  const posterMap={};
-  for(const it of list){
-    const posterId=it.posterId||it.imdbID||`t_${_h(it.title||"")}`;
-    if(!posterId) continue;
-    const existing=await idbGet("poster_"+posterId);
-    if(existing) continue;
-    let poster=it.poster||null;
-    if(!poster){
-      const meta=await fetchMovieMeta(it.title,it.omdbType||null);
-      poster=meta?.poster||null;
-    }
-    const dataUrl=await _fetchImageDataUrl(poster);
-    if(dataUrl){
-      posterMap["poster_"+posterId]=dataUrl;
-    }
-  }
-  if(Object.keys(posterMap).length) await idbSetAll(posterMap);
-}
-
 function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,onOpenMovieLog}){
   const today=todayKey();
   const lang=data.language;
@@ -5773,17 +5739,7 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       data.spotifyMusicSignals||[],
       data.spotifyMusicPool||[]
     ));
-    let built=buildWithMovies(data.libraryMovies||[]);
-    if(cat==="movies"&&(!built||!built.length)){
-      try{
-        const raw=localStorage.getItem("kwento_shared_library_cache");
-        const cached=raw?JSON.parse(raw):[];
-        if(Array.isArray(cached)&&cached.length){
-          built=buildWithMovies(cached);
-        }
-      }catch(_){}
-    }
-    return built;
+    return buildWithMovies(data.libraryMovies||[]);
   };
   const buildPremiumFallbackPool=()=>{
     if(cat!=="movies"||!data.betaMode) return [];
@@ -6211,24 +6167,8 @@ function DiscoverCatCard({cat,data,onChange,th,flipAnim,onSwipeNext,onSwipePrev,
       const mk=(m.imdbID||m.title||"").toLowerCase();
       return mk&&mk===key;
     })||null;
-    let fromCache=null;
-    if(!fromLib && (typeof navigator!=="undefined" && navigator.onLine===false)){
-      try{
-        const raw=localStorage.getItem("kwento_shared_library_cache");
-        const cached=raw?JSON.parse(raw):[];
-        if(Array.isArray(cached)){
-          fromCache=cached.find(m=>((m.imdbID||m.title||"").toLowerCase()===key))||null;
-        }
-      }catch(_){}
-    }
-    let src={...(fromCache||{}),...(fromLib||{}),...(currentItem||{})};
+    let src={...(fromLib||{}),...(currentItem||{})};
     const posterIdGuess=src.posterId||src.imdbID||currentItem.posterId||currentItem.imdbID||`t_${_h((src.title||currentItem.title||""))}`;
-    if(!src.poster && posterIdGuess){
-      try{
-        const p=await idbGet("poster_"+posterIdGuess);
-        if(p) src={...src,poster:p};
-      }catch(_){}
-    }
     if((!src.poster||!src.plot||!src.director||!src.actors||!src.imdbRating) && (src.title||currentItem.title)){
       const meta=await fetchMovieMeta(src.title||currentItem.title,src.omdbType||null);
       if(meta){
@@ -10056,13 +9996,15 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
   useEffect(()=>{
-    try{
-      const raw=localStorage.getItem("kwento_shared_library_cache");
-      const list=raw?JSON.parse(raw):[];
-      setSharedTotal(Array.isArray(list)?list.length:0);
-    }catch(_){
-      setSharedTotal(null);
-    }
+    (async()=>{
+      try{
+        const cached=await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY);
+        const list=sanitizeMovieCacheList(cached?.items||[]);
+        setSharedTotal(list.length);
+      }catch(_){
+        setSharedTotal(null);
+      }
+    })();
   },[data.libraryMovies]);
   const refreshSharedLibrary=async()=>{
     setGhStatus("Syncing...");
@@ -10070,9 +10012,12 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       const res=await fetch(SHARED_LIBRARY_URL,{cache:"no-store"});
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const json=await res.json();
-      const items=((json.items||json.library||json)||[]).filter(isActualMovieOrSeries);
+      const items=sanitizeMovieCacheList((json.items||json.library||json)||[]);
       setSharedTotal(Array.isArray(items)?items.length:0);
-      try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){ }
+      await idbSetCache(SHARED_LIBRARY_CACHE_IDB_KEY,{
+        items,
+        updatedAt:json.updatedAt||new Date().toISOString()
+      });
       onChange("__batch__",{
         libraryMovies:items,
         sharedLastSyncAt:json.updatedAt||new Date().toISOString(),
@@ -10081,9 +10026,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
       setGhStatus("Synced");
     }catch(err){
       try{
-        const raw=localStorage.getItem("kwento_shared_library_cache");
-        const list=raw?JSON.parse(raw):[];
-        setSharedTotal(Array.isArray(list)?list.length:0);
+        const cached=await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY);
+        const list=sanitizeMovieCacheList(cached?.items||[]);
+        setSharedTotal(list.length);
       }catch(_){ }
       setGhStatus("Sync failed (using saved copy)");
     }
@@ -10124,8 +10069,6 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
     let added=0,updated=0,skipped=0,failed=0;
     const existing=[...(data.libraryMovies||[])];
     const indexMap=new Map(existing.map((m,i)=>[m.title.toLowerCase(),i]));
-    const posterMap={};
-
     for(const rawTitle of titles){
       const meta=await fetchMovieMeta(rawTitle,null);
       if(!meta){ failed++; continue; }
@@ -10169,11 +10112,7 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
         existing.push(entry);
         added++;
       }
-      if(entry.poster && entry.posterId){
-        posterMap["poster_"+entry.posterId]=entry.poster;
-      }
     }
-    if(Object.keys(posterMap).length) await idbSetAll(posterMap);
     if(added||updated){
       onChange("libraryMovies",existing);
     }
@@ -10549,7 +10488,6 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
               ...data,
               customPhoto:av?av.data:data.customPhoto||null,
               photoPos:av?av.pos:data.photoPos||{x:50,y:50,scale:1},
-              libraryMovies:(data.libraryMovies||[]).map(m=>{const {poster,...rest}=m;return rest;}),
               logs:(data.logs||[]).map(l=>{
                 const ep=allPhotos["entry_"+l.id];
                 return ep?{...l,actPhotos:ep}:l;
@@ -10598,8 +10536,9 @@ function SettingsPage({data,onChange,onReset,onImport,onShowPatch,onImportSucces
                   const slim={...parsed};
                   delete slim.customPhoto;
                   delete slim.photoPos;
+                  delete slim.libraryMovies;
+                  delete slim.omdbLibrary;
                   if(slim.logs) slim.logs=slim.logs.map(l=>{const {actPhotos,...rest}=l;return rest;});
-                  if(slim.libraryMovies) slim.libraryMovies=slim.libraryMovies.map(m=>{const {poster,...rest}=m;return rest;});
                   // Hydrate back from IDB so UI shows photos immediately
                   const hydrated=await hydratePhotos(slim);
                   onImport(hydrated);
@@ -10829,6 +10768,42 @@ function App(){
   useEffect(()=>{
     (async()=>{
       const d=loadData()||defaultData();
+      let legacySaved={};
+      try{
+        legacySaved=JSON.parse(localStorage.getItem(SK)||"null")||{};
+      }catch(_){}
+      try{
+        const legacySharedRaw=localStorage.getItem("kwento_shared_library_cache");
+        const legacyShared=legacySharedRaw?JSON.parse(legacySharedRaw):[];
+        const legacyLibrary=sanitizeMovieCacheList([
+          ...(legacySaved.libraryMovies||[]),
+          ...(legacySaved.omdbLibrary||[]),
+          ...(Array.isArray(legacyShared)?legacyShared:[])
+        ]);
+        const alreadyMigrated=localStorage.getItem(MOVIE_STORAGE_MIGRATION_KEY)==="1";
+        if(!alreadyMigrated){
+          if(legacyLibrary.length){
+            const currentCache=await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY);
+            const merged=sanitizeMovieCacheList([
+              ...(Array.isArray(currentCache?.items)?currentCache.items:[]),
+              ...legacyLibrary
+            ]);
+            await idbSetCache(SHARED_LIBRARY_CACHE_IDB_KEY,{
+              items:merged,
+              updatedAt:new Date().toISOString()
+            });
+          }
+          await idbDelByPrefixFrom(IDB_PHOTO_STORE,"poster_");
+          localStorage.removeItem("kwento_shared_library_cache");
+          delete d.libraryMovies;
+          delete d.omdbLibrary;
+          saveData(d);
+          localStorage.setItem(MOVIE_STORAGE_MIGRATION_KEY,"1");
+        } else {
+          delete d.libraryMovies;
+          delete d.omdbLibrary;
+        }
+      }catch(_){}
       try{
         const res=await fetch(MIGRATE_OMDB_SRC,{cache:"no-store"});
         if(res.ok){
@@ -10842,44 +10817,32 @@ function App(){
               srcList=[];
             }
             if(srcList.length){
-              const existing=new Set((d.libraryMovies||[]).map(x=>x.title.toLowerCase()));
-              const posterMap={};
-              const migrated=srcList.filter(x=>!existing.has(x.title.toLowerCase())).map(x=>{
-                if(x.poster){
-                  const posterId=x.posterId||x.imdbID||`t_${_h(x.title||"")}`;
-                  posterMap["poster_"+posterId]=x.poster;
-                  const {poster,...rest}=x;
-                  return {...rest,posterId};
-                }
-                return x;
-              });
-              if(migrated.length){
-                d.libraryMovies=[...(d.libraryMovies||[]),...migrated];
+              const merged=sanitizeMovieCacheList([
+                ...srcList,
+                ...((await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY))?.items||[])
+              ]);
+              if(merged.length){
                 d.omdbLastUpdated=new Date().toISOString();
+                await idbSetCache(SHARED_LIBRARY_CACHE_IDB_KEY,{
+                  items:merged,
+                  updatedAt:d.omdbLastUpdated
+                });
               }
-              if(Object.keys(posterMap).length) await idbSetAll(posterMap);
-              saveData(d);
             }
           }
         }
       }catch(_){}
       if(d.omdbLibrary && d.omdbLibrary.length){
-        const existing=new Set((d.libraryMovies||[]).map(m=>m.title.toLowerCase()));
-        const migratedRaw=(d.omdbLibrary||[]).filter(m=>!existing.has(m.title.toLowerCase()));
-        const posterMap={};
-        const migrated=migratedRaw.map(m=>{
-          if(m.poster){
-            const posterId=m.posterId||m.imdbID||`t_${_h(m.title||"")}`;
-            posterMap["poster_"+posterId]=m.poster;
-            const {poster,...rest}=m;
-            return {...rest,posterId};
-          }
-          return m;
-        });
-        if(migrated.length){
-          d.libraryMovies=[...(d.libraryMovies||[]),...migrated];
+        const merged=sanitizeMovieCacheList([
+          ...d.omdbLibrary,
+          ...((await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY))?.items||[])
+        ]);
+        if(merged.length){
+          await idbSetCache(SHARED_LIBRARY_CACHE_IDB_KEY,{
+            items:merged,
+            updatedAt:new Date().toISOString()
+          });
         }
-        if(Object.keys(posterMap).length) await idbSetAll(posterMap);
         delete d.omdbLibrary;
         saveData(d);
       }
@@ -10961,12 +10924,8 @@ function App(){
       // from being silently discarded when hydration completes.
       const all=await idbGetAll();
       const av=all["avatar"];
-      const hydratedLib=(d.libraryMovies||[]).map(m=>{
-        if(m.poster) return m;
-        if(!m.posterId) return m;
-        const p=all["poster_"+m.posterId];
-        return p?{...m,poster:p}:m;
-      });
+      const cachedShared=await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY);
+      const hydratedLib=sanitizeMovieCacheList(cachedShared?.items||[]);
       setData(prev=>({
         ...prev,
         libraryMovies:hydratedLib,
@@ -10988,12 +10947,10 @@ function App(){
     let alive=true;
     let requestSeq=0;
     let appliedSeq=0;
-    const fromCache=()=>{
+    const fromCache=async()=>{
       try{
-        const raw=localStorage.getItem("kwento_shared_library_cache");
-        if(!raw) return null;
-        const parsed=JSON.parse(raw)||[];
-        return Array.isArray(parsed)?parsed.filter(isActualMovieOrSeries):[];
+        const cached=await idbGetCache(SHARED_LIBRARY_CACHE_IDB_KEY);
+        return sanitizeMovieCacheList(cached?.items||[]);
       }catch(_){ return null; }
     };
     const applyShared=(items,updatedAt)=>setData(d=>({
@@ -11017,8 +10974,11 @@ function App(){
         }
       }
       if(json){
-        const items=((json.items||json.library||json)||[]).filter(isActualMovieOrSeries);
-        try{ localStorage.setItem("kwento_shared_library_cache",JSON.stringify(items)); }catch(_){}
+        const items=sanitizeMovieCacheList((json.items||json.library||json)||[]);
+        await idbSetCache(SHARED_LIBRARY_CACHE_IDB_KEY,{
+          items,
+          updatedAt:json.updatedAt||new Date().toISOString()
+        });
         if(alive && seq>=appliedSeq){
           appliedSeq=seq;
           applyShared(items,json.updatedAt||new Date().toISOString());
@@ -11026,7 +10986,7 @@ function App(){
         return true;
       }
       if(allowCache){
-        const cached=fromCache();
+        const cached=await fromCache();
         if(cached&&alive && seq>=appliedSeq){
           appliedSeq=seq;
           applyShared(cached,new Date().toISOString());
@@ -11051,19 +11011,6 @@ function App(){
   },[]);
   useEffect(()=>{
     if(!photosReady) return;
-    const last=data.offlinePosterCacheAt?new Date(data.offlinePosterCacheAt).toDateString():null;
-    const today=new Date().toDateString();
-    if(last===today) return;
-    (async()=>{
-      const watchlist=_normalizeWatchlistItems(data);
-      await cachePostersForItems(watchlist,OFFLINE_WATCHLIST_POSTERS);
-      const discover=(data.discoverQueues?.movies)||[];
-      await cachePostersForItems(discover,OFFLINE_DISCOVER_POSTERS);
-      setData(d=>({...d,offlinePosterCacheAt:new Date().toISOString()}));
-    })();
-  },[photosReady,data.watchlist,data.watchlistMovies,data.watchlistItems,data.discoverQueues]);
-  useEffect(()=>{
-    if(!photosReady) return;
     (async()=>{
       const items=_normalizeWatchlistItems(data);
       if(!items.length) return;
@@ -11075,11 +11022,6 @@ function App(){
         const lib=libByKey.get(key)||null;
         let poster=w.poster||lib?.poster||null;
         const posterId=w.posterId||lib?.posterId||w.imdbID||lib?.imdbID||`t_${_h((w.title||lib?.title||""))}`;
-        if(!poster && posterId){
-          try{
-            poster=await idbGet("poster_"+posterId);
-          }catch(_){}
-        }
         const merged={...lib,...w,poster:poster||null,posterId};
         if((merged.poster||"")!==(w.poster||"")||(merged.genre||"")!==(w.genre||"")||(merged.director||"")!==(w.director||"")) changed=true;
         next.push(merged);
@@ -11782,3 +11724,27 @@ root.render(React.createElement(App));
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
