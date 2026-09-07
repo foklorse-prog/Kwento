@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-07T01:35:37.791Z",
+  "updatedAt": "2026-09-07T10:54:06.981Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38691,6 +38691,40 @@
         "emotional",
         "romantic",
         "crime"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Blockade",
+      "year": "2022",
+      "genre": "Drama",
+      "genres": [
+        "Drama"
+      ],
+      "director": "Ádám Tõsér",
+      "actor": "Zoltán Seress",
+      "actors": [
+        "Zoltán Seress",
+        "Attila Ifj. Vidnyánszky",
+        "Tibor Gáspár"
+      ],
+      "plot": "In 1990, six months after his election as Prime Minister, József Antall faces the most difficult test of his life: taxi drivers blockading the whole country as a protest against the drastic rise in petrol prices.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODAwNmVlZTgtYWI0MC00MWY4LTkzYWMtYWU2Y2Y1ZTc1MDA1XkEyXkFqcGc@._V1_QL75_UX380_CR0,4,380,562_.jpg",
+      "posterId": "tt21264924",
+      "imdbID": "tt21264924",
+      "imdbRating": 6,
+      "imdbVotes": 2559,
+      "runtime": "105 min",
+      "rated": null,
+      "country": "Hungary",
+      "language": "Hungarian, German, Russian",
+      "awards": "1 win total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
       ],
       "ph": false,
       "source": "auto_candidates",
