@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-08T10:11:58.975Z",
+  "updatedAt": "2026-09-08T15:31:24.852Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38725,6 +38725,43 @@
       "tags": [
         "dramatic",
         "emotional"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Mickey's Orphans",
+      "year": "1931",
+      "genre": "Family",
+      "genres": [
+        "Family",
+        "Comedy",
+        "Animation"
+      ],
+      "director": "Burt Gillett",
+      "actor": "Walt Disney",
+      "actors": [
+        "Walt Disney",
+        "Marcellite Garner",
+        "Lee Millar"
+      ],
+      "plot": "At Christmastime, Mickey Mouse, Minnie and Pluto are beset by an enormous litter of bratty orphan cats.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZGVhY2YzMjctZDA0NC00ZTdjLWE0YzgtYzNhMTJmYjk2NDlmXkEyXkFqcGc@._V1_QL75_UX380_CR0,4,380,562_.jpg",
+      "posterId": "tt0022147",
+      "imdbID": "tt0022147",
+      "imdbRating": 6.3,
+      "imdbVotes": 1089,
+      "runtime": "7 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 1 Oscar. 1 nomination total",
+      "omdbType": "movie",
+      "tags": [
+        "fun",
+        "lighthearted",
+        "animated"
       ],
       "ph": false,
       "source": "auto_candidates",
