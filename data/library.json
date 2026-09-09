@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-09T15:26:49.030Z",
+  "updatedAt": "2026-09-09T20:08:11.415Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38763,6 +38763,39 @@
         "lighthearted",
         "animated"
       ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Sally",
+      "year": "2025",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Biography",
+        "History"
+      ],
+      "director": "Cristina Costantini",
+      "actor": "Sally Ride",
+      "actors": [
+        "Sally Ride",
+        "Tam O&apos;Shaughnessy",
+        "Molly Tyson"
+      ],
+      "plot": "Sally Ride's groundbreaking journey as the first American woman in space concealed a deeply personal story. Her life partner, Tam O'Shaughnessy, unveils their covert 27-year romance and its accompanying sacrifices.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDMyYzMwM2MtNjEzNC00MjcxLTk2N2UtZjI5NTdmNDU4ZWRkXkEyXkFqcGc@._V1_QL75_UY562_CR6,0,380,562_.jpg",
+      "posterId": "tt31193771",
+      "imdbID": "tt31193771",
+      "imdbRating": 7.3,
+      "imdbVotes": 1088,
+      "runtime": "103 min",
+      "rated": "TV-14",
+      "country": "United States",
+      "language": "English",
+      "awards": "1 win & 9 nominations total",
+      "omdbType": "movie",
+      "tags": [],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
