@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-19T01:58:31.968Z",
+  "updatedAt": "2026-09-19T09:51:04.300Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38796,6 +38796,42 @@
       "awards": "1 win & 9 nominations total",
       "omdbType": "movie",
       "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Paris 36",
+      "year": "2008",
+      "genre": "Drama",
+      "genres": [
+        "Drama",
+        "Music",
+        "Musical"
+      ],
+      "director": "Christophe Barratier",
+      "actor": "Gérard Jugnot",
+      "actors": [
+        "Gérard Jugnot",
+        "Clovis Cornillac",
+        "Kad Merad"
+      ],
+      "plot": "When Chansonia, a nightclub, is shut down by the landlord, the stage manager Pigoil is forced to look for a new job. He finds hope when he discovers a young woman with a lovely singing voice.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTU5NTI3ODE4M15BMl5BanBnXkFtZTcwMTg1NTEzMg@@._V1_QL75_UX380_CR0,0,380,562_.jpg",
+      "posterId": "tt0948535",
+      "imdbID": "tt0948535",
+      "imdbRating": 6.5,
+      "imdbVotes": 3041,
+      "runtime": "120 min",
+      "rated": "PG-13",
+      "country": "France, Germany, Czech Republic",
+      "language": "French",
+      "awards": "Nominated for 1 Oscar. 3 wins & 7 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional"
+      ],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
