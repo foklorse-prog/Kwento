@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-01T22:04:54.545Z",
+  "updatedAt": "2026-10-02T02:51:57.184Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38832,6 +38832,37 @@
         "dramatic",
         "emotional"
       ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "4.1 Miles",
+      "year": "2016",
+      "genre": "Documentary",
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "director": "Daphne Matziaraki",
+      "actor": "Christos Sapounas",
+      "actors": [
+        "Christos Sapounas",
+        "Giorgos Tsagarellis"
+      ],
+      "plot": "A coast guard captain on a small Greek island is suddenly charged with saving thousands of refugees from drowning at sea.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNTM3YWY2MWYtYWQxYy00NjYyLWEwNTktOGFhYzk4ZDM2MWMxXkEyXkFqcGc@._V1_QL75_UY562_CR7,0,380,562_.jpg",
+      "posterId": "tt6279726",
+      "imdbID": "tt6279726",
+      "imdbRating": 7.6,
+      "imdbVotes": 1001,
+      "runtime": "26 min",
+      "rated": null,
+      "country": "United States",
+      "language": "Greek, English, Arabic, Dari",
+      "awards": "Nominated for 1 Oscar. 3 wins & 2 nominations total",
+      "omdbType": "movie",
+      "tags": [],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
