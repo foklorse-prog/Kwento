@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-02T16:56:24.898Z",
+  "updatedAt": "2026-10-02T21:30:53.072Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38863,6 +38863,41 @@
       "awards": "Nominated for 1 Oscar. 3 wins & 2 nominations total",
       "omdbType": "movie",
       "tags": [],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Souls at Sea",
+      "year": "1937",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Adventure",
+        "History"
+      ],
+      "director": "Henry Hathaway",
+      "actor": "Gary Cooper",
+      "actors": [
+        "Gary Cooper",
+        "George Raft",
+        "Frances Dee"
+      ],
+      "plot": "Cooper and Raft save lives during a sea tragedy in this story about slave trade on the high seas in 1842.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BNDM5OWQ3MjUtMWJhOC00YTRiLTllYTEtYmU1NTY2MTMwNDQ2XkEyXkFqcGc@._V1_QL75_UX380_CR0,7,380,562_.jpg",
+      "posterId": "tt0029593",
+      "imdbID": "tt0029593",
+      "imdbRating": 6.8,
+      "imdbVotes": 1008,
+      "runtime": "92 min",
+      "rated": "Approved",
+      "country": "United States",
+      "language": "English",
+      "awards": "Nominated for 3 Oscars. 3 wins & 3 nominations total",
+      "omdbType": "movie",
+      "tags": [
+        "action"
+      ],
       "ph": false,
       "source": "auto_candidates",
       "_fromOmdb": true
