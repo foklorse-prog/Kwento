@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-07T22:22:01.931Z",
+  "updatedAt": "2026-10-08T03:18:10.311Z",
   "items": [
     {
       "title": "Mid90s",
@@ -38896,6 +38896,43 @@
       "awards": "Nominated for 3 Oscars. 3 wins & 3 nominations total",
       "omdbType": "movie",
       "tags": [
+        "action"
+      ],
+      "ph": false,
+      "source": "auto_candidates",
+      "_fromOmdb": true
+    },
+    {
+      "title": "Asad",
+      "year": "2026",
+      "genre": "Action",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "director": "Mohamed Diab",
+      "actor": "Mohamad Ramadan",
+      "actors": [
+        "Mohamad Ramadan",
+        "Razane Jammal",
+        "Maged El-Kidwani"
+      ],
+      "plot": "A slave in 19th Century Egypt revolts against his masters for equal rights for slaves to live freely.",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMzRiZWMxYWItMmI3Zi00MjFjLThmOGUtMGIxYjk5MzRjMWZkXkEyXkFqcGc@._V1_QL75_UY562_CR21,0,380,562_.jpg",
+      "posterId": "tt38947228",
+      "imdbID": "tt38947228",
+      "imdbRating": 7.2,
+      "imdbVotes": 1516,
+      "runtime": "120 min",
+      "rated": null,
+      "country": "Egypt",
+      "language": "Arabic",
+      "awards": null,
+      "omdbType": "movie",
+      "tags": [
+        "dramatic",
+        "emotional",
         "action"
       ],
       "ph": false,
